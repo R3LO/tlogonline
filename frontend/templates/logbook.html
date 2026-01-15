@@ -23,6 +23,18 @@
             color: white;
             border-radius: 15px 15px 0 0;
             padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .logbook-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            pointer-events: none;
         }
         .filter-card {
             background: #f8f9fa;
@@ -31,7 +43,6 @@
             margin-bottom: 2rem;
         }
         .qso-row {
-            border-left: 4px solid #28a745;
             transition: all 0.3s ease;
             margin-bottom: 1rem;
         }
@@ -45,7 +56,7 @@
             padding: 6px 12px;
             border-radius: 15px;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .mode-badge {
@@ -59,10 +70,14 @@
         .band-badge {
             background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
             color: #212529;
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
             font-size: 0.75rem;
             font-weight: 500;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
         }
         .pagination {
             justify-content: center;
@@ -70,10 +85,15 @@
         .stats-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-radius: 10px;
-            padding: 1rem;
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
             margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
         }
         .stats-number {
             font-size: 2rem;
@@ -82,6 +102,16 @@
         }
         .navbar-brand {
             font-weight: bold;
+        }
+        .table th {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .table td {
+            font-weight: 400;
+        }
+        .pagination {
+            margin-bottom: 2rem;
         }
     </style>
 </head>
@@ -214,8 +244,8 @@
                 <!-- Список QSO -->
                 {% if qso_list %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
+                        <table class="table table-striped table-hover rounded overflow-hidden">
+                            <thead class="table-dark" style="background: linear-gradient(135deg, #343a40 0%, #495057 100%); border-radius: 0;">
                                 <tr>
                                     <th><i class="fas fa-calendar"></i> Дата</th>
                                     <th><i class="fas fa-clock"></i> Время</th>
