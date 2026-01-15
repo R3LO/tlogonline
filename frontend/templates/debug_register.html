@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест регистрации</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: inline-block; width: 150px; }
+        input, select { padding: 5px; width: 200px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #response { margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; white-space: pre-wrap; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Тест регистрации радиолюбителя</h1>
+
+    <form id="testForm">
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" value="test_debug" required>
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="debug@example.com" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" id="password" value="testpass123" required>
+        </div>
+        <div class="form-group">
+            <label>Подтвердить пароль:</label>
+            <input type="password" id="password_confirm" value="testpass123" required>
+        </div>
+        <div class="form-group">
+            <label>Имя:</label>
+            <input type="text" id="first_name" value="Тест">
+        </div>
+        <div class="form-group">
+            <label>Фамилия:</label>
+            <input type="text" id="last_name" value="Пользователь">
+        </div>
+        <div class="form-group">
+            <label>Позывной:</label>
+            <input type="text" id="callsign" value="UA9XYZ" required>
+        </div>
+        <div class="form-group">
+            <label>QTH локатор:</label>
+            <input type="text" id="qth_locator" value="KO85XX">
+        </div>
+        <div class="form-group">
+            <label>Город:</label>
+            <input type="text" id="city" value="Новосибирск">
+        </div>
+        <div class="form-group">
+            <label>Страна:</label>
+            <input type="text" id="country" value="Россия">
+        </div>
+        <div class="form-group">
+            <label>Класс лицензии:</label>
+            <select id="radio_license_class">
+                <option value="">Выберите класс</option>
+                <option value="1">1 категория</option>
+                <option value="2" selected>2 категория</option>
+                <option value="3">3 категория</option>
+                <option value="4">4 категория</option>
+                <option value="U">УКВ</option>
+                <option value="KD">КВ/ДВ</option>
+            </select>
+        </div>
+        <button type="submit">Зарегистрировать</button>
+    </form>
+
+    <div id="response"></div>
+
+    <script>
+        // Функция для получения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const data = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                password_confirm: document.getElementById('password_confirm').value,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                callsign: document.getElementById('callsign').value,
+                qth_locator: document.getElementById('qth_locator').value,
+                city: document.getElementById('city').value,
+                country: document.getElementById('country').value,
+                radio_license_class: document.getElementById('radio_license_class').value
+            };
+
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<strong>Отправляемые данные:</strong><br>' + JSON.stringify(data, null, 2) + '<br><br>';
+
+            try {
+                console.log('Отправляем данные:', data);
+
+                const csrfToken = getCookie('csrftoken');
+                console.log('CSRF токен:', csrfToken);
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                if (csrfToken) {
+                    headers['X-CSRFToken'] = csrfToken;
+                }
+
+                const response = await fetch('/api/register/', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+
+                console.log('Статус ответа:', response.status);
+                console.log('Заголовки ответа:', Object.fromEntries(response.headers.entries()));
+
+                const result = await response.json();
+                console.log('Полный ответ сервера:', result);
+
+                responseDiv.innerHTML += '<strong>Статус ответа:</strong> ' + response.status + '<br>';
+                responseDiv.innerHTML += '<strong>Заголовки:</strong><br>' + JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2) + '<br><br>';
+                responseDiv.innerHTML += '<strong>Ответ сервера:</strong><br>' + JSON.stringify(result, null, 2);
+
+                if (response.ok) {
+                    responseDiv.innerHTML += '<br><br><span class="success">✅ Регистрация успешна!</span>';
+                } else {
+                    responseDiv.innerHTML += '<br><br><span class="error">❌ Ошибка регистрации</span>';
+                }
+
+            } catch (error) {
+                console.error('Ошибка сети:', error);
+                responseDiv.innerHTML += '<br><br><span class="error">❌ Ошибка сети: ' + error.message + '</span>';
+            }
+        });
+    </script>
+</body>
+</html>
