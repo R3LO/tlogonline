@@ -346,6 +346,113 @@ def dashboard(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
 
+    # Обработка формы ручного ввода QSO
+    if request.method == 'POST' and request.POST.get('action') == 'add_qso':
+        try:
+            from .models import QSO, RadioProfile, ADIFUpload
+            from datetime import date, time
+            from django.db.utils import IntegrityError
+
+            # Получаем данные из формы
+            my_callsign = request.POST.get('my_callsign', '').strip()
+            callsign = request.POST.get('callsign', '').strip()
+            date_str = request.POST.get('date', '').strip()
+            time_str = request.POST.get('time', '').strip()
+            band = request.POST.get('band', '').strip()
+            mode = request.POST.get('mode', '').strip()
+            rst_rcvd = request.POST.get('rst_rcvd', '').strip()
+            rst_sent = request.POST.get('rst_sent', '').strip()
+            his_gridsquare = request.POST.get('his_gridsquare', '').strip()
+            his_qth = request.POST.get('his_qth', '').strip()
+
+            # Валидация обязательных полей
+            if not all([my_callsign, callsign, date_str, time_str, band, mode]):
+                messages.error(request, 'Все обязательные поля должны быть заполнены')
+                return redirect('dashboard')
+
+            # Валидация форматов
+            if len(my_callsign) > 20 or len(callsign) > 20:
+                messages.error(request, 'Позывной не должен превышать 20 символов')
+                return redirect('dashboard')
+
+            if len(his_gridsquare) > 8:
+                messages.error(request, 'QTH локатор не должен превышать 8 символов')
+                return redirect('dashboard')
+
+            # Парсинг даты и времени
+            try:
+                qso_date = date.fromisoformat(date_str)
+                qso_time = time.fromisoformat(time_str)
+            except ValueError:
+                messages.error(request, 'Неверный формат даты или времени')
+                return redirect('dashboard')
+
+            # Проверка на дубликат
+            duplicate_exists = QSO.objects.filter(
+                user=request.user,
+                my_callsign=my_callsign,
+                callsign=callsign,
+                date=qso_date,
+                time=qso_time,
+                band=band,
+                mode=mode
+            ).exists()
+
+            if duplicate_exists:
+                messages.warning(request, 'QSO с такими данными уже существует в логе')
+                return redirect('dashboard')
+
+            # Определение частоты по диапазону (упрощенное сопоставление)
+            band_frequencies = {
+                '160m': 1.9,
+                '80m': 3.7,
+                '40m': 7.1,
+                '30m': 10.15,
+                '20m': 14.2,
+                '17m': 18.12,
+                '15m': 21.3,
+                '12m': 24.95,
+                '10m': 28.5,
+                '6m': 52.0,
+                '2m': 144.0,
+                '70cm': 435.0,
+                '23cm': 1290.0,
+                '13cm': 2400.0,
+                '3cm': 10000.0
+            }
+
+            frequency = band_frequencies.get(band, 0.0)
+
+            # Создание записи QSO
+            try:
+                qso_record = QSO.objects.create(
+                    user=request.user,
+                    my_callsign=my_callsign,
+                    callsign=callsign,
+                    date=qso_date,
+                    time=qso_time,
+                    frequency=frequency,
+                    band=band,
+                    mode=mode,
+                    rst_rcvd=rst_rcvd if rst_rcvd else None,
+                    rst_sent=rst_sent if rst_sent else None,
+                    his_gridsquare=his_gridsquare if his_gridsquare else None,
+                    his_qth=his_qth if his_qth else None,
+                    lotw_qsl='N',
+                    paper_qsl='N'
+                )
+
+                messages.success(request, f'QSO с {callsign} успешно добавлено в лог')
+                return redirect('dashboard')
+
+            except IntegrityError as e:
+                messages.error(request, f'Ошибка при сохранении QSO: {str(e)}')
+                return redirect('dashboard')
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при обработке формы: {str(e)}')
+            return redirect('dashboard')
+
     # Получаем профиль радиолюбителя
     from .models import QSO, RadioProfile, ADIFUpload
 
@@ -598,7 +705,7 @@ def process_adif_file(file_path, user):
                             band = qso_data.get('band', '').strip()[:10]
                             mode = qso_data.get('mode', 'SSB')
                             rst_sent = qso_data.get('rst_sent', '').strip()[:10]
-                            rst_received = qso_data.get('rst_received', '').strip()[:10]
+                            rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
                             my_gridsquare = qso_data.get('my_gridsquare', '').strip()[:10]
                             his_gridsquare = qso_data.get('his_gridsquare', '').strip()[:10]
 
@@ -618,9 +725,11 @@ def process_adif_file(file_path, user):
                                 band=band,
                                 mode=mode,
                                 rst_sent=rst_sent,
-                                rst_received=rst_received,
+                                rst_rcvd=rst_rcvd,
                                 my_gridsquare=my_gridsquare,
-                                his_gridsquare=his_gridsquare
+                                his_gridsquare=his_gridsquare,
+                                lotw_qsl='N',
+                                paper_qsl='N'
                             )
 
                             # Проверяем валидность объекта (только критические поля)
@@ -677,7 +786,6 @@ def parse_adif_record(record):
         'qso_date_off': r'<qso_date_off:(\d+)>(\d{8})',
         'time_off': r'<time_off:(\d+)>(\d{4,6})',
         'rst_sent': r'<rst_sent:(\d+)>([^<]+)',
-        'rst_received': r'<rst_received:(\d+)>([^<]+)',
         'rst_rcvd': r'<rst_rcvd:(\d+)>([^<]+)',  # WSJT-X использует сокращенную форму
         'signal_report': r'<signal_report:(\d+)>([^<]+)',
         'notes': r'<notes:(\d+)>([^<]+)',
@@ -791,10 +899,8 @@ def parse_adif_record(record):
     if 'my_gridsquare' in data:
         data['my_gridsquare'] = data['my_gridsquare']
 
-    # Обработка RST - поддержка как rst_received, так и rst_rcvd (WSJT-X формат)
-    if 'rst_rcvd' in data:
-        data['rst_received'] = data['rst_rcvd']
-        del data['rst_rcvd']  # Удаляем временное поле
+    # Обработка RST - используем rst_rcvd (новое имя поля)
+    # rst_rcvd уже извлекается паттерном выше
 
     return data
 

@@ -161,10 +161,10 @@
                                         <td><span class="mode-badge">{{ qso.mode }}</span></td>
                                         <td>
                                             <small>
-                                                {% if qso.rst_received and qso.rst_sent %}
-                                                    {{ qso.rst_received }}/{{ qso.rst_sent }}
-                                                {% elif qso.rst_received %}
-                                                    {{ qso.rst_received }}
+                                                {% if qso.rst_rcvd and qso.rst_sent %}
+                                                    {{ qso.rst_rcvd }}/{{ qso.rst_sent }}
+                                                {% elif qso.rst_rcvd %}
+                                                    {{ qso.rst_rcvd }}
                                                 {% elif qso.rst_sent %}
                                                     {{ qso.rst_sent }}
                                                 {% else %}
@@ -187,6 +187,138 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- Форма ручного ввода QSO -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-gradient d-flex justify-content-between align-items-center py-2">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-plus-circle text-success"></i>
+                            <span class="ms-2">Добавить QSO вручную</span>
+                        </h5>
+                        <button class="btn btn-sm qso-toggle-btn" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#qsoForm"
+                                aria-expanded="false" aria-controls="qsoForm">
+                            <i class="fas fa-chevron-down me-1" id="qsoFormToggle"></i>
+                            <span class="d-none d-sm-inline">Развернуть</span>
+                        </button>
+                    </div>
+
+                    <div class="collapse" id="qsoForm">
+                        <div class="card-body p-3">
+                            <form method="post" action="{% url 'dashboard' %}" id="qsoInputForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_qso">
+
+                                <!-- Основные данные -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted">Мой позывной <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" name="my_callsign" required
+                                               placeholder="UA1ABC" maxlength="10">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted">Позывной <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" name="callsign" required
+                                               placeholder="DL1XYZ" maxlength="10">
+                                    </div>
+                                </div>
+
+                                <!-- Дата, время, диапазон -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">Дата <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control form-control-sm" name="date" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">Время <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control form-control-sm" name="time" required>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">Диапазон <span class="text-danger">*</span></label>
+                                        <select class="form-select form-select-sm" name="band" required>
+                                            <option value="">Выберите</option>
+                                            <option value="160m">160m</option>
+                                            <option value="80m">80m</option>
+                                            <option value="40m">40m</option>
+                                            <option value="30m">30m</option>
+                                            <option value="20m">20m</option>
+                                            <option value="17m">17m</option>
+                                            <option value="15m">15m</option>
+                                            <option value="12m">12m</option>
+                                            <option value="10m">10m</option>
+                                            <option value="6m">6m</option>
+                                            <option value="2m">2m</option>
+                                            <option value="70cm">70cm</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Вид связи и RST -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">Вид связи <span class="text-danger">*</span></label>
+                                        <select class="form-select form-select-sm" name="mode" required>
+                                            <option value="">Выберите</option>
+                                            <option value="CW">CW</option>
+                                            <option value="SSB">SSB</option>
+                                            <option value="FM">FM</option>
+                                            <option value="RTTY">RTTY</option>
+                                            <option value="PSK31">PSK31</option>
+                                            <option value="FT8">FT8</option>
+                                            <option value="FT4">FT4</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">RST пришел</label>
+                                        <input type="text" class="form-control form-control-sm" name="rst_rcvd"
+                                               placeholder="59" maxlength="3">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label small fw-bold text-muted">RST отправил</label>
+                                        <input type="text" class="form-control form-control-sm" name="rst_sent"
+                                               placeholder="59" maxlength="3">
+                                    </div>
+                                </div>
+
+                                <!-- QTH данные -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted">QTH локатор</label>
+                                        <input type="text" class="form-control form-control-sm" name="his_gridsquare"
+                                               placeholder="KO85UU" maxlength="8">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted">QTH</label>
+                                        <input type="text" class="form-control form-control-sm" name="his_qth"
+                                               placeholder="Город, страна">
+                                    </div>
+                                </div>
+
+                                <!-- Кнопки -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success btn-sm px-3">
+                                        <i class="fas fa-save me-1"></i>Сохранить
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary btn-sm px-3">
+                                        <i class="fas fa-undo me-1"></i>Очистить
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Информационная панель -->
+                        <div class="card-footer bg-light border-0 p-2">
+                            <div class="alert alert-info alert-sm mb-0 py-2 px-3">
+                                <small class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span>QSO будет добавлено с проверкой на дубликаты</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
 
                 <!-- Форма загрузки ADIF -->
                 <div class="upload-form">
@@ -360,5 +492,70 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .qso-toggle-btn {
+            border-color: #6c757d !important;
+            background-color: #6c757d !important;
+            color: white !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        }
+        .qso-toggle-btn:hover {
+            background-color: #5a6268 !important;
+            border-color: #545b62 !important;
+            color: white !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+        .qso-toggle-btn i {
+            color: white !important;
+        }
+        .qso-toggle-btn:hover i {
+            color: white !important;
+        }
+    </style>
+    <script>
+        // Управление иконкой сворачивания/разворачивания формы QSO
+        document.addEventListener('DOMContentLoaded', function() {
+            const qsoForm = document.getElementById('qsoForm');
+            const toggleBtns = document.querySelectorAll('[data-bs-target="#qsoForm"]');
+            const toggleIcon = document.getElementById('qsoFormToggle');
+
+            if (qsoForm && toggleBtn && toggleIcon) {
+                qsoForm.addEventListener('show.bs.collapse', function() {
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                });
+
+                qsoForm.addEventListener('hide.bs.collapse', function() {
+                    toggleIcon.classList.remove('fa-chevron-up');
+                    toggleIcon.classList.add('fa-chevron-down');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                });
+            }
+
+            // Автоматическая установка текущей даты и времени
+            const dateInput = document.querySelector('input[name="date"]');
+            const timeInput = document.querySelector('input[name="time"]');
+
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+
+            if (timeInput && !timeInput.value) {
+                const now = new Date();
+                const timeString = now.getHours().toString().padStart(2, '0') + ':' +
+                                 now.getMinutes().toString().padStart(2, '0');
+                timeInput.value = timeString;
+            }
+
+            // Валидация позывных в реальном времени
+            const callsignInputs = document.querySelectorAll('input[name="my_callsign"], input[name="callsign"]');
+            callsignInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -47,12 +47,19 @@ class QSO(models.Model):
     )
 
     # RST сигналы
-    rst_sent = models.CharField(max_length=10, help_text="RST переданный", blank=True)
-    rst_received = models.CharField(max_length=10, help_text="RST принятый", blank=True)
+    rst_sent = models.CharField(max_length=10, help_text="RST переданный", blank=True, null=True)
+    rst_rcvd = models.CharField(max_length=10, help_text="RST принятый", blank=True, null=True)
 
     # QTH локаторы
-    my_gridsquare = models.CharField(max_length=10, help_text="Мой QTH локатор", blank=True)
-    his_gridsquare = models.CharField(max_length=10, help_text="QTH локатор корреспондента", blank=True)
+    my_gridsquare = models.CharField(max_length=10, help_text="Мой QTH локатор", blank=True, null=True)
+    his_gridsquare = models.CharField(max_length=10, help_text="QTH локатор корреспондента", blank=True, null=True)
+
+    # Дополнительные поля
+    his_qth = models.CharField(max_length=100, help_text="QTH корреспондента", blank=True, null=True)
+
+    # Подтверждения QSL
+    lotw_qsl = models.CharField(max_length=1, help_text="Подтверждение LoTW", default='N', blank=True)
+    paper_qsl = models.CharField(max_length=1, help_text="Бумажная QSL", default='N', blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
