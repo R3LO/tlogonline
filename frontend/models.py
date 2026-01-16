@@ -101,15 +101,6 @@ class RadioProfile(models.Model):
     callsign = models.CharField(max_length=20, blank=True)
     full_name = models.CharField(max_length=100, blank=True, help_text="Полное имя")
     qth = models.CharField(max_length=100, blank=True, help_text="QTH")
-    license_class = models.CharField(max_length=10, blank=True, help_text="Класс лицензии")
-
-    # Антенна
-    antenna_type = models.CharField(max_length=100, blank=True)
-    antenna_height = models.CharField(max_length=50, blank=True)
-
-    # Радиостанция
-    radio_model = models.CharField(max_length=100, blank=True)
-    power_output = models.CharField(max_length=20, blank=True)
 
     # Мой QTH локатор
     my_gridsquare = models.CharField(max_length=10, help_text="Мой QTH локатор", blank=True)

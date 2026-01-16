@@ -86,7 +86,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">📡 Радиолюбители</a>
+            <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-light me-3" href="/dashboard/">
                     <i class="fas fa-tachometer-alt"></i> Панель
@@ -110,8 +110,8 @@
                 <p class="mb-0">Полный журнал радиосвязей</p>
                 <p class="mb-0">
                     <small>
-                        Всего QSO: <strong>{{ total_count }}</strong> | 
-                        Уникальные позывные: <strong>{{ filtered_stats.unique_callsigns }}</strong> | 
+                        Всего QSO: <strong>{{ total_count }}</strong> |
+                        Уникальные позывные: <strong>{{ filtered_stats.unique_callsigns }}</strong> |
                         Уникальные QTH: <strong>{{ filtered_stats.unique_qth }}</strong>
                     </small>
                 </p>
@@ -125,17 +125,17 @@
                     <form method="GET" class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Поиск</label>
-                            <input type="text" class="form-control" name="search" 
+                            <input type="text" class="form-control" name="search"
                                    value="{{ search_query }}" placeholder="Позывной, QTH, заметки">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Позывной</label>
-                            <input type="text" class="form-control" name="callsign" 
+                            <input type="text" class="form-control" name="callsign"
                                    value="{{ callsign_filter }}" placeholder="UA1ABC">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">QTH локатор</label>
-                            <input type="text" class="form-control" name="qth" 
+                            <input type="text" class="form-control" name="qth"
                                    value="{{ qth_filter }}" placeholder="KO85UU">
                         </div>
                         <div class="col-md-2">
@@ -283,5 +283,14 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-center">
+            <p class="mb-0 text-muted small">
+                <strong>Автор:</strong> R3LO Владимир Павленко
+            </p>
+        </div>
+    </footer>
 </body>
 </html>

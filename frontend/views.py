@@ -466,6 +466,7 @@ def dashboard(request):
 
     # Подсчитываем статистику
     total_qso = user_qso.count()
+    unique_callsigns = user_qso.values('callsign').distinct().count()
 
     # Статистика по видам модуляции
     mode_stats = {}
@@ -475,38 +476,19 @@ def dashboard(request):
         if count > 0:
             mode_stats[mode] = count
 
-    # Статистика по диапазонам
-    band_stats = {}
-    bands = [
-        ('160m', 1.8, 2.0),
-        ('80m', 3.5, 4.0),
-        ('40m', 7.0, 7.3),
-        ('20m', 14.0, 14.35),
-        ('15m', 21.0, 21.45),
-        ('10m', 28.0, 29.7),
-        ('6m', 50.0, 54.0),
-        ('2m', 144.0, 148.0),
-        ('70cm', 420.0, 450.0),
-    ]
-
-    for band_name, min_freq, max_freq in bands:
-        count = user_qso.filter(frequency__gte=min_freq, frequency__lte=max_freq).count()
-        if count > 0:
-            band_stats[band_name] = count
-
-    # Последние QSO (последние 20) - обновленный запрос для новых полей date/time
+    # Последние QSO (последние 20)
     recent_qso = user_qso.order_by('-date', '-time')[:20]
 
     # Получаем загруженные ADIF файлы
-    adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:10]
+    adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:5]
 
     context = {
         'user': request.user,
         'profile': profile,
         'total_qso': total_qso,
+        'unique_callsigns': unique_callsigns,
         'recent_qso': recent_qso,
         'mode_statistics': mode_stats,
-        'band_statistics': band_stats,
         'adif_uploads': adif_uploads,
     }
 
@@ -912,6 +894,38 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('home')
+
+
+def profile_update(request):
+    """
+    Обновление профиля радиолюбителя
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    if request.method == 'POST':
+        try:
+            from .models import RadioProfile
+
+            # Получаем или создаем профиль
+            profile, created = RadioProfile.objects.get_or_create(
+                user=request.user,
+                defaults={}
+            )
+
+            # Обновляем поля профиля
+            profile.callsign = request.POST.get('callsign', '').strip()
+            profile.full_name = request.POST.get('full_name', '').strip()
+            profile.qth = request.POST.get('qth', '').strip()
+            profile.my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
+
+            profile.save()
+
+            messages.success(request, 'Профиль успешно обновлён')
+        except Exception as e:
+            messages.error(request, f'Ошибка при обновлении профиля: {str(e)}')
+
+    return redirect('dashboard')
 
 
 def clear_logbook(request):
