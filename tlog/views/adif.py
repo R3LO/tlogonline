@@ -63,9 +63,22 @@ def adif_upload(request):
             # Сохраняем файл
             saved_path = default_storage.save(file_path, ContentFile(uploaded_file.read()))
 
+            # Получаем дополнительные параметры из формы
+            add_extra_tags = request.POST.get('add_extra_tags') == 'on'
+            my_callsign_default = request.POST.get('my_callsign', '').strip()[:20] if add_extra_tags and request.POST.get('override_my_callsign') == 'on' else None
+            my_gridsquare_default = request.POST.get('my_gridsquare', '').strip()[:10] if add_extra_tags and request.POST.get('override_my_gridsquare') == 'on' else None
+            prop_mode_default = request.POST.get('prop_mode', 'SAT').strip()[:50] if add_extra_tags and request.POST.get('override_prop_mode') == 'on' else None
+            sat_name_default = request.POST.get('sat_name', 'QO-100').strip()[:50] if add_extra_tags and request.POST.get('override_sat_name') == 'on' else None
+
             # Запускаем обработку файла
             try:
-                qso_count = process_adif_file(saved_path, request.user, adif_upload.id)
+                qso_count = process_adif_file(
+                    saved_path, request.user, adif_upload.id,
+                    my_callsign_default=my_callsign_default,
+                    my_gridsquare_default=my_gridsquare_default,
+                    prop_mode_default=prop_mode_default,
+                    sat_name_default=sat_name_default
+                )
 
                 adif_upload.processed = True
                 adif_upload.qso_count = qso_count
@@ -86,7 +99,7 @@ def adif_upload(request):
     return redirect('dashboard')
 
 
-def process_adif_file(file_path, user, adif_upload_id=None):
+def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=None, my_gridsquare_default=None, prop_mode_default=None, sat_name_default=None):
     """
     Обрабатывает ADIF файл и создает записи QSO
 
@@ -94,6 +107,10 @@ def process_adif_file(file_path, user, adif_upload_id=None):
         file_path: Путь к файлу
         user: Пользователь
         adif_upload_id: ID записи ADIFUpload для связи с QSO
+        my_callsign_default: Значение MY_CALLSIGN по умолчанию из формы
+        my_gridsquare_default: Значение MY_GRIDSQUARE по умолчанию из формы
+        prop_mode_default: Значение PROP_MODE по умолчанию из формы
+        sat_name_default: Значение SAT_NAME по умолчанию из формы
     """
     # Получаем путь к базе r150s (файл находится в папке tlog)
     tlog_dir = os.path.dirname(os.path.dirname(__file__))
@@ -152,13 +169,16 @@ def process_adif_file(file_path, user, adif_upload_id=None):
         if full_record.strip():
             qso_records.append(full_record.strip())
 
-    # Получаем позывной пользователя из профиля
-    try:
-        user_callsign = user.radio_profile.callsign
-        if not user_callsign:
+    # Получаем позывной пользователя из профиля (если не переопределен из формы)
+    if not my_callsign_default:
+        try:
+            user_callsign = user.radio_profile.callsign
+            if not user_callsign:
+                user_callsign = user.username
+        except:
             user_callsign = user.username
-    except:
-        user_callsign = user.username
+    else:
+        user_callsign = my_callsign_default
 
     # Пакетная обработка
     batch_size = 100
@@ -199,10 +219,38 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                         mode = mode_qso
                         rst_sent = qso_data.get('rst_sent', '').strip()[:10]
                         rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
-                        my_gridsquare = qso_data.get('my_gridsquare', '').strip()[:10]
+
+                        # MY_CALLSIGN - приоритет: OPERATOR > MY_CALLSIGN > форма > профиль
+                        my_callsign_adif = qso_data.get('my_callsign', '').strip()[:20]
+                        operator_adif = qso_data.get('operator', '').strip()[:20]
+
+                        # Если есть OPERATOR в ADIF, используем его
+                        if operator_adif:
+                            my_callsign = operator_adif
+                        # Иначе если есть MY_CALLSIGN в ADIF, используем его
+                        elif my_callsign_adif:
+                            my_callsign = my_callsign_adif
+                        # Иначе если установлена галочка, используем из формы
+                        elif my_callsign_default:
+                            my_callsign = my_callsign_default
+                        # Иначе будет использоваться user_callsign из профиля
+                        else:
+                            my_callsign = None
+
+                        # MY_GRIDSQUARE - используем значение из формы если галочка установлена
+                        my_gridsquare_adif = qso_data.get('my_gridsquare', '').strip()[:10]
+                        my_gridsquare = my_gridsquare_default if my_gridsquare_default else my_gridsquare_adif
+
                         gridsquare = qso_data.get('gridsquare', '').strip()[:10]
-                        prop_mode = qso_data.get('prop_mode', '').strip()[:50]
-                        sat_name = qso_data.get('sat_name', '').strip()[:50]
+
+                        # PROP_MODE - если поле есть в ADIF используем его, иначе из формы
+                        prop_mode_adif = qso_data.get('prop_mode', '').strip()[:50]
+                        prop_mode = prop_mode_adif if prop_mode_adif else prop_mode_default
+
+                        # SAT_NAME - если поле есть в ADIF используем его, иначе из формы
+                        sat_name_adif = qso_data.get('sat_name', '').strip()[:50]
+                        sat_name = sat_name_adif if sat_name_adif else sat_name_default
+
                         cqz = qso_data.get('cqz')
                         ituz = qso_data.get('ituz')
                         continent = qso_data.get('cont', '').strip()[:2]
@@ -236,7 +284,7 @@ def process_adif_file(file_path, user, adif_upload_id=None):
 
                         qso_obj = QSO(
                             user=user,
-                            my_callsign=my_callsign,
+                            my_callsign=my_callsign if my_callsign else user_callsign,
                             callsign=callsign,
                             date=date_qso,
                             time=time_qso,
@@ -245,8 +293,8 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                             mode=mode,
                             rst_sent=rst_sent,
                             rst_rcvd=rst_rcvd,
-                            my_gridsquare=my_gridsquare,
-                            gridsquare=gridsquare,
+                            my_gridsquare=my_gridsquare if my_gridsquare else None,
+                            gridsquare=gridsquare if gridsquare else None,
                             prop_mode=prop_mode if prop_mode else None,
                             sat_name=sat_name if sat_name else None,
                             r150s=r150s_country if r150s_country else None,

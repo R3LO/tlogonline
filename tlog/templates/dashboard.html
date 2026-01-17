@@ -328,6 +328,56 @@
                                 <button type="submit" class="btn btn-primary w-100">Загрузить и обработать</button>
                             </div>
                         </div>
+                        <div class="row mt-3" id="adif-options" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой позывной (MY_CALLSIGN)</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="override_my_callsign" name="override_my_callsign">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_callsign" id="my_callsign_input" placeholder="Например: R3LO">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Мой QTH Loc (MY_GRIDSQUARE)</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="override_my_gridsquare" name="override_my_gridsquare">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_gridsquare" id="my_gridsquare_input" placeholder="Например: KO85UU">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2" id="adif-options-sat" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Режим распространения (PROP_MODE)</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="override_prop_mode" name="override_prop_mode">
+                                    </div>
+                                    <input type="text" class="form-control" name="prop_mode" id="prop_mode_input" value="SAT">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Название спутника (SAT_NAME)</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="override_sat_name" name="override_sat_name">
+                                    </div>
+                                    <input type="text" class="form-control" name="sat_name" id="sat_name_input" value="QO-100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-auto">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="add_extra_tags" name="add_extra_tags">
+                                    <label class="form-check-label" for="add_extra_tags">
+                                        Добавить дополнительные теги
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                     <div class="alert alert-info mt-3">
                         <small>
@@ -337,6 +387,123 @@
                         </small>
                     </div>
                 </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const checkbox = document.getElementById('add_extra_tags');
+                    const optionsDiv = document.getElementById('adif-options');
+                    const optionsSatDiv = document.getElementById('adif-options-sat');
+                    const propModeInput = document.getElementById('prop_mode_input');
+                    const satNameInput = document.getElementById('sat_name_input');
+                    const myCallsignInput = document.getElementById('my_callsign_input');
+                    const myGridsquareInput = document.getElementById('my_gridsquare_input');
+                    const overrideMyCallsign = document.getElementById('override_my_callsign');
+                    const overrideMyGridsquare = document.getElementById('override_my_gridsquare');
+                    const overridePropMode = document.getElementById('override_prop_mode');
+                    const overrideSatName = document.getElementById('override_sat_name');
+
+                    // Проверяем cookie для состояния галочки
+                    const savedState = getCookie('adif_add_extra_tags');
+                    if (savedState === 'true') {
+                        checkbox.checked = true;
+                        optionsDiv.style.display = 'flex';
+                        optionsSatDiv.style.display = 'flex';
+                    }
+
+                    // Загружаем сохраненные значения
+                    const savedMyCallsign = getCookie('adif_my_callsign');
+                    if (savedMyCallsign) {
+                        myCallsignInput.value = savedMyCallsign;
+                    }
+                    const savedMyGridsquare = getCookie('adif_my_gridsquare');
+                    if (savedMyGridsquare) {
+                        myGridsquareInput.value = savedMyGridsquare;
+                    }
+                    const savedPropMode = getCookie('adif_prop_mode');
+                    if (savedPropMode) {
+                        propModeInput.value = savedPropMode;
+                    }
+                    const savedSatName = getCookie('adif_sat_name');
+                    if (savedSatName) {
+                        satNameInput.value = savedSatName;
+                    }
+
+                    // Загружаем состояния галочек переопределения
+                    const savedOverrideMyCallsign = getCookie('adif_override_my_callsign');
+                    if (savedOverrideMyCallsign === 'true') {
+                        overrideMyCallsign.checked = true;
+                    }
+                    const savedOverrideMyGridsquare = getCookie('adif_override_my_gridsquare');
+                    if (savedOverrideMyGridsquare === 'true') {
+                        overrideMyGridsquare.checked = true;
+                    }
+                    const savedOverridePropMode = getCookie('adif_override_prop_mode');
+                    if (savedOverridePropMode === 'true') {
+                        overridePropMode.checked = true;
+                    }
+                    const savedOverrideSatName = getCookie('adif_override_sat_name');
+                    if (savedOverrideSatName === 'true') {
+                        overrideSatName.checked = true;
+                    }
+
+                    // Обработчик изменения галочки
+                    checkbox.addEventListener('change', function() {
+                        optionsDiv.style.display = this.checked ? 'flex' : 'none';
+                        optionsSatDiv.style.display = this.checked ? 'flex' : 'none';
+                        setCookie('adif_add_extra_tags', this.checked, 365);
+                    });
+
+                    // Сохраняем значения при изменении
+                    myCallsignInput.addEventListener('change', function() {
+                        setCookie('adif_my_callsign', this.value, 365);
+                    });
+                    myGridsquareInput.addEventListener('change', function() {
+                        setCookie('adif_my_gridsquare', this.value, 365);
+                    });
+                    propModeInput.addEventListener('change', function() {
+                        setCookie('adif_prop_mode', this.value, 365);
+                    });
+                    satNameInput.addEventListener('change', function() {
+                        setCookie('adif_sat_name', this.value, 365);
+                    });
+
+                    // Сохраняем состояния галочек переопределения
+                    overrideMyCallsign.addEventListener('change', function() {
+                        setCookie('adif_override_my_callsign', this.checked, 365);
+                    });
+                    overrideMyGridsquare.addEventListener('change', function() {
+                        setCookie('adif_override_my_gridsquare', this.checked, 365);
+                    });
+                    overridePropMode.addEventListener('change', function() {
+                        setCookie('adif_override_prop_mode', this.checked, 365);
+                    });
+                    overrideSatName.addEventListener('change', function() {
+                        setCookie('adif_override_sat_name', this.checked, 365);
+                    });
+
+                    // Функции для работы с cookie
+                    function setCookie(name, value, days) {
+                        let expires = '';
+                        if (days) {
+                            const date = new Date();
+                            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                            expires = '; expires=' + date.toUTCString();
+                        }
+                        document.cookie = name + '=' + (value || '') + expires + '; path=/';
+                    }
+
+                    function getCookie(name) {
+                        const nameEQ = name + '=';
+                        const ca = document.cookie.split(';');
+                        for(let i = 0; i < ca.length; i++) {
+                            let c = ca[i];
+                            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                        }
+                        return null;
+                    }
+                });
+                </script>
             </div>
 
             <!-- Боковая панель -->
