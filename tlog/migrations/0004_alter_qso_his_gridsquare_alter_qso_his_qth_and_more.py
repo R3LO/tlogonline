@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend', '0003_qso_his_qth_qso_notes'),
+        ('tlog', '0003_qso_his_qth_qso_notes'),
     ]
 
     operations = [

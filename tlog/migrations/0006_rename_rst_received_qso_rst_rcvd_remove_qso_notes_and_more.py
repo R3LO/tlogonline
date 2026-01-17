@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend', '0005_alter_qso_rst_received_alter_qso_rst_sent'),
+        ('tlog', '0005_alter_qso_rst_received_alter_qso_rst_sent'),
     ]
 
     operations = [

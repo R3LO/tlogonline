@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend', '0002_alter_adifupload_file_size_alter_adifupload_id_and_more'),
+        ('tlog', '0002_alter_adifupload_file_size_alter_adifupload_id_and_more'),
     ]
 
     operations = [

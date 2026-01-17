@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 django.setup()
 
 from django.contrib.auth.models import User
-from frontend.models import QSO, RadioProfile
+from tlog.models import QSO, RadioProfile
 from datetime import datetime
 import random
 

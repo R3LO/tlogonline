@@ -12,7 +12,7 @@ sys.path.append('/')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 django.setup()
 
-from frontend.models import QSO
+from tlog.models import QSO
 
 def remove_satellite_info():
     """Убираем информацию о спутниках из примечаний"""

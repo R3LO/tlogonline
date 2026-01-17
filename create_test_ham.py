@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 django.setup()
 
 from django.contrib.auth.models import User
-from frontend.models import RadioProfile
+from tlog.models import RadioProfile
 
 # Создаем тестового радиолюбителя
 username = 'test_ham'

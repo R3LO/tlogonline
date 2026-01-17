@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend', '0004_alter_qso_his_gridsquare_alter_qso_his_qth_and_more'),
+        ('tlog', '0004_alter_qso_his_gridsquare_alter_qso_his_qth_and_more'),
     ]
 
     operations = [
