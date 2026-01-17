@@ -2,6 +2,7 @@
 Представления для фронтенда (веб-страницы)
 """
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.db.models import Q
@@ -912,7 +913,7 @@ def profile_update(request):
 
 def clear_logbook(request):
     """
-    Удаляет все записи QSO пользователя
+    Удаляет все записи QSO и загруженные ADIF файлы пользователя
     """
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
@@ -921,19 +922,26 @@ def clear_logbook(request):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
     try:
+        from .models import ADIFUpload
+
         # Подсчитываем количество записей для статистики
         qso_count = QSO.objects.filter(user=request.user).count()
         unique_callsigns = QSO.objects.filter(user=request.user).values('callsign').distinct().count()
         unique_qth = QSO.objects.filter(user=request.user).filter(his_gridsquare__isnull=False).exclude(his_gridsquare='').values('his_gridsquare').distinct().count()
+        adif_uploads_count = ADIFUpload.objects.filter(user=request.user).count()
 
-        # Удаляем все записи пользователя
-        deleted_count, _ = QSO.objects.filter(user=request.user).delete()
+        # Удаляем все записи QSO пользователя
+        deleted_qso_count, _ = QSO.objects.filter(user=request.user).delete()
+
+        # Удаляем все загруженные ADIF файлы пользователя
+        deleted_adif_count, _ = ADIFUpload.objects.filter(user=request.user).delete()
 
         return JsonResponse({
             'success': True,
-            'message': f'Удалено {deleted_count} записей QSO',
+            'message': f'Удалено {deleted_qso_count} записей QSO и {deleted_adif_count} записей о загруженных файлах',
             'stats': {
-                'deleted_qso': deleted_count,
+                'deleted_qso': deleted_qso_count,
+                'deleted_adif_uploads': deleted_adif_count,
                 'unique_callsigns': unique_callsigns,
                 'unique_qth': unique_qth
             }
