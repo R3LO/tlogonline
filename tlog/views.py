@@ -26,65 +26,74 @@ def register_page(request):
     Страница регистрации
     """
     if request.method == 'POST':
+        import json
         from django.contrib.auth.models import User
         from .models import RadioProfile
 
-        username = request.POST.get('username', '').strip()
+        # Действующий позывной используется как логин
+        callsign = request.POST.get('callsign', '').strip().upper()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
         password_confirm = request.POST.get('password_confirm', '').strip()
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
-        callsign = request.POST.get('callsign', '').strip().upper()
+        qth = request.POST.get('qth', '').strip()
         qth_locator = request.POST.get('qth_locator', '').strip().upper()
 
+        # Получаем список дополнительных позывных
+        my_callsigns_list = request.POST.getlist('my_callsigns')
+        # Фильтруем и очищаем
+        my_callsigns = [c.strip().upper() for c in my_callsigns_list if c.strip()]
+
         # Валидация
-        if not all([username, email, password, password_confirm, callsign]):
+        if not all([callsign, email, password, password_confirm]):
             messages.error(request, 'Все обязательные поля должны быть заполнены')
-            return render(request, 'register.html')
+            return render(request, 'register_new.html')
 
         if password != password_confirm:
             messages.error(request, 'Пароли не совпадают')
-            return render(request, 'register.html')
+            return render(request, 'register_new.html')
 
         if len(password) < 8:
             messages.error(request, 'Пароль должен содержать минимум 8 символов')
-            return render(request, 'register.html')
+            return render(request, 'register_new.html')
 
-        # Проверяем уникальность
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Пользователь с таким именем уже существует')
-            return render(request, 'register.html')
+        # Проверяем уникальность позывного (как username)
+        if User.objects.filter(username=callsign).exists():
+            messages.error(request, 'Пользователь с таким позывным уже существует')
+            return render(request, 'register_new.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Пользователь с таким email уже существует')
-            return render(request, 'register.html')
+            return render(request, 'register_new.html')
 
-        # Создаем пользователя
+        # Создаем пользователя (позывной = username)
         try:
             user = User.objects.create_user(
-                username=username,
+                username=callsign,
                 email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name
+                password=password
             )
 
             # Создаем профиль радиолюбителя
             RadioProfile.objects.create(
                 user=user,
                 callsign=callsign,
-                my_gridsquare=qth_locator
+                first_name=first_name,
+                last_name=last_name,
+                qth=qth,
+                my_gridsquare=qth_locator,
+                my_callsigns=my_callsigns  # JSON список
             )
 
-            messages.success(request, 'Регистрация успешна! Теперь вы можете войти в систему.')
+            messages.success(request, 'Регистрация успешна! Теперь вы можете войти.')
             return redirect('login_page')
 
         except Exception as e:
             messages.error(request, f'Ошибка при регистрации: {str(e)}')
-            return render(request, 'register.html')
+            return render(request, 'register_new.html')
 
-    return render(request, 'register.html')
+    return render(request, 'register_new.html')
 
 
 def login_page(request):

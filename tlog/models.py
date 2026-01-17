@@ -99,14 +99,26 @@ class RadioProfile(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='radio_profile')
     callsign = models.CharField(max_length=20, blank=True)
-    full_name = models.CharField(max_length=100, blank=True, help_text="Полное имя")
+
+    # Имя и фамилия (отдельно)
+    first_name = models.CharField(max_length=100, blank=True, help_text="Имя")
+    last_name = models.CharField(max_length=100, blank=True, help_text="Фамилия")
+
+    # QTH
     qth = models.CharField(max_length=100, blank=True, help_text="QTH")
 
     # Мой QTH локатор
     my_gridsquare = models.CharField(max_length=10, help_text="Мой QTH локатор", blank=True)
 
+    # Позывные (бывшие, действующие, спецпозывные, с дробями) - храним как JSON
+    my_callsigns = models.JSONField(default=list, blank=True, help_text="Мои позывные в формате JSON")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Регистрация пользователей'
+        verbose_name_plural = 'Регистрация пользователей'
 
     def __str__(self):
         return f"Profile - {self.user.username} ({self.callsign})"
