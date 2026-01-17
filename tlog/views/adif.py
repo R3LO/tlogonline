@@ -77,14 +77,22 @@ def adif_upload(request):
                     my_callsign_default=my_callsign_default,
                     my_gridsquare_default=my_gridsquare_default,
                     prop_mode_default=prop_mode_default,
-                    sat_name_default=sat_name_default
+                    sat_name_default=sat_name_default,
+                    add_extra_tags=add_extra_tags
                 )
 
-                adif_upload.processed = True
-                adif_upload.qso_count = qso_count
-                adif_upload.save()
-
-                messages.success(request, f'Файл "{uploaded_file.name}" успешно загружен и обработан. Добавлено {qso_count} записей QSO.')
+                # Если добавлено 0 записей, удаляем запись о загрузке и файл
+                if qso_count == 0:
+                    adif_upload.delete()
+                    # Удаляем файл
+                    if default_storage.exists(saved_path):
+                        default_storage.delete(saved_path)
+                    messages.warning(request, f'Файл "{uploaded_file.name}" не содержит новых записей (все записи являются дубликатами).')
+                else:
+                    adif_upload.processed = True
+                    adif_upload.qso_count = qso_count
+                    adif_upload.save()
+                    messages.success(request, f'Файл "{uploaded_file.name}" успешно загружен и обработан. Добавлено {qso_count} записей QSO.')
 
             except Exception as process_error:
                 adif_upload.processed = True
@@ -99,7 +107,7 @@ def adif_upload(request):
     return redirect('dashboard')
 
 
-def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=None, my_gridsquare_default=None, prop_mode_default=None, sat_name_default=None):
+def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=None, my_gridsquare_default=None, prop_mode_default=None, sat_name_default=None, add_extra_tags=False):
     """
     Обрабатывает ADIF файл и создает записи QSO
 
@@ -220,36 +228,45 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                         rst_sent = qso_data.get('rst_sent', '').strip()[:10]
                         rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
 
-                        # MY_CALLSIGN - приоритет: OPERATOR > MY_CALLSIGN > форма > профиль
+                        # MY_CALLSIGN - приоритет: форма(если галочка) > OPERATOR > MY_CALLSIGN > профиль
                         my_callsign_adif = qso_data.get('my_callsign', '').strip()[:20]
                         operator_adif = qso_data.get('operator', '').strip()[:20]
 
-                        # Если есть OPERATOR в ADIF, используем его
-                        if operator_adif:
+                        # Если add_extra_tags И override_my_callsign, используем ТОЛЬКО из формы
+                        if add_extra_tags and my_callsign_default:
+                            my_callsign = my_callsign_default
+                        # Иначе если есть OPERATOR в ADIF, используем его
+                        elif operator_adif:
                             my_callsign = operator_adif
                         # Иначе если есть MY_CALLSIGN в ADIF, используем его
                         elif my_callsign_adif:
                             my_callsign = my_callsign_adif
-                        # Иначе если установлена галочка, используем из формы
-                        elif my_callsign_default:
-                            my_callsign = my_callsign_default
                         # Иначе будет использоваться user_callsign из профиля
                         else:
                             my_callsign = None
 
-                        # MY_GRIDSQUARE - используем значение из формы если галочка установлена
+                        # MY_GRIDSQUARE - если add_extra_tags И override_my_gridsquare, берём из формы
                         my_gridsquare_adif = qso_data.get('my_gridsquare', '').strip()[:10]
-                        my_gridsquare = my_gridsquare_default if my_gridsquare_default else my_gridsquare_adif
+                        if add_extra_tags and my_gridsquare_default:
+                            my_gridsquare = my_gridsquare_default
+                        else:
+                            my_gridsquare = my_gridsquare_adif
 
                         gridsquare = qso_data.get('gridsquare', '').strip()[:10]
 
-                        # PROP_MODE - если поле есть в ADIF используем его, иначе из формы
+                        # PROP_MODE - если add_extra_tags И override_prop_mode, берём из формы
                         prop_mode_adif = qso_data.get('prop_mode', '').strip()[:50]
-                        prop_mode = prop_mode_adif if prop_mode_adif else prop_mode_default
+                        if add_extra_tags and prop_mode_default:
+                            prop_mode = prop_mode_default
+                        else:
+                            prop_mode = prop_mode_adif
 
-                        # SAT_NAME - если поле есть в ADIF используем его, иначе из формы
+                        # SAT_NAME - если add_extra_tags И override_sat_name, берём из формы
                         sat_name_adif = qso_data.get('sat_name', '').strip()[:50]
-                        sat_name = sat_name_adif if sat_name_adif else sat_name_default
+                        if add_extra_tags and sat_name_default:
+                            sat_name = sat_name_default
+                        else:
+                            sat_name = sat_name_adif
 
                         cqz = qso_data.get('cqz')
                         ituz = qso_data.get('ituz')

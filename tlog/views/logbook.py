@@ -332,3 +332,41 @@ def delete_qso(request, qso_id):
         return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def get_qso(request, qso_id):
+    """
+    Получение данных одной записи QSO в формате JSON
+    """
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
+
+    try:
+        qso = QSO.objects.get(id=qso_id, user=request.user)
+        return JsonResponse({
+            'success': True,
+            'qso': {
+                'id': str(qso.id),
+                'date': qso.date.isoformat() if qso.date else None,
+                'time': qso.time.isoformat() if qso.time else None,
+                'my_callsign': qso.my_callsign or '',
+                'callsign': qso.callsign or '',
+                'band': qso.band or '',
+                'mode': qso.mode or 'SSB',
+                'frequency': qso.frequency,
+                'rst_rcvd': qso.rst_rcvd or '',
+                'rst_sent': qso.rst_sent or '',
+                'my_gridsquare': qso.my_gridsquare or '',
+                'gridsquare': qso.gridsquare or '',
+                'sat_name': qso.sat_name or '',
+                'prop_mode': qso.prop_mode or '',
+                'cqz': qso.cqz,
+                'ituz': qso.ituz,
+                'lotw': qso.lotw or 'N',
+            }
+        })
+    except (QSO.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -1,4 +1,4 @@
-п<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -313,14 +313,13 @@
                                     <th><i class="fas fa-calendar"></i> Дата</th>
                                     <th><i class="fas fa-clock"></i> Время</th>
                                     <th><i class="fas fa-user"></i> Мой позывной</th>
-                                    <th><i class="fas fa-radio"></i> Позывной корреспондента</th>
+                                    <th><i class="fas fa-radio"></i> Позывной</th>
                                     <th><i class="fas fa-broadcast-tower"></i> Диапазон</th>
-                                    <th><i class="fas fa-signal"></i> Вид связи</th>
-                                    <th><i class="fas fa-broadcast-tower"></i> RST принятый</th>
-                                    <th><i class="fas fa-broadcast-tower"></i> RST переданный</th>
-                                    <th><i class="fas fa-map-marker-alt"></i> QTH локатор корреспондента</th>
-                                    <th><i class="fas fa-map-marker-alt"></i> Мой QTH локатор</th>
-                                    <th class="action-column"><i class="fas fa-cogs"></i> Действия</th>
+                                    <th><i class="fas fa-signal"></i> Mode</th>
+                                    <th>RST</th>
+                                    <th><i class="fas fa-map-marker-alt"></i> QTH</th>
+                                    <th>Prop/SAT</th>
+                                    <th class="action-column"><i class="fas fa-cogs"></i></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -333,7 +332,7 @@
                                         <small>{{ qso.time|date:"H:i" }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-primary">{{ user_callsign }}</span>
+                                        <span class="badge bg-primary">{{ qso.my_callsign|default:"-" }}</span>
                                     </td>
                                     <td>
                                         <span class="callsign-badge">{{ qso.callsign }}</span>
@@ -347,38 +346,31 @@
                                                 <br><small class="text-muted">{{ qso.frequency }} МГц</small>
                                             {% endwith %}
                                         {% else %}
-                                            <span class="text-muted">Не указано</span>
+                                            <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <span class="mode-badge">{{ qso.mode }}</span>
                                     </td>
                                     <td>
-                                        {% if qso.rst_rcvd %}
-                                            <small>{{ qso.rst_rcvd }}</small>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if qso.rst_sent %}
-                                            <small>{{ qso.rst_sent }}</small>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
+                                        <small>{{ qso.rst_rcvd|default:"-" }}/{{ qso.rst_sent|default:"-" }}</small>
                                     </td>
                                     <td>
                                         {% if qso.gridsquare %}
                                             <small>{{ qso.gridsquare }}</small>
                                         {% else %}
-                                            <small class="text-muted">Не указан</small>
+                                            <small class="text-muted">-</small>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if qso.my_gridsquare %}
-                                            <small>{{ qso.my_gridsquare }}</small>
+                                        {% if qso.prop_mode or qso.sat_name %}
+                                            <small>
+                                                {% if qso.prop_mode %}{{ qso.prop_mode }}{% endif %}
+                                                {% if qso.prop_mode and qso.sat_name %} / {% endif %}
+                                                {% if qso.sat_name %}{{ qso.sat_name }}{% endif %}
+                                            </small>
                                         {% else %}
-                                            <small class="text-muted">Не указан</small>
+                                            <small class="text-muted">-</small>
                                         {% endif %}
                                     </td>
                                     <td class="action-column">
@@ -744,45 +736,55 @@
         document.querySelectorAll('.btn-edit').forEach(button => {
             button.addEventListener('click', function() {
                 const qsoId = this.dataset.id;
-                const row = document.querySelector(`.qso-row[data-qso-id="${qsoId}"]`);
 
-                // Заполняем форму данными из строки
-                document.getElementById('edit_id').value = qsoId;
+                // Загружаем данные QSO из базы данных
+                fetch(`/logbook/get/${qsoId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const qso = data.qso;
 
-                // Дата и время
-                const dateCell = row.querySelector('td:nth-child(1) small');
-                const timeCell = row.querySelector('td:nth-child(2) small');
-                if (dateCell) document.getElementById('edit_date').value = dateCell.textContent.split('.').reverse().join('-');
-                if (timeCell) document.getElementById('edit_time').value = timeCell.textContent + ':00';
+                        // Заполняем форму данными из базы
+                        document.getElementById('edit_id').value = qso.id;
+                        document.getElementById('edit_date').value = qso.date || '';
+                        document.getElementById('edit_time').value = qso.time ? qso.time.substring(0, 5) : '';
+                        document.getElementById('edit_callsign').value = qso.callsign || '';
+                        document.getElementById('edit_band').value = qso.band || '';
+                        document.getElementById('edit_mode').value = qso.mode || 'SSB';
+                        document.getElementById('edit_frequency').value = qso.frequency || '';
+                        document.getElementById('edit_rst_rcvd').value = qso.rst_rcvd || '';
+                        document.getElementById('edit_rst_sent').value = qso.rst_sent || '';
+                        document.getElementById('edit_my_gridsquare').value = qso.my_gridsquare || '';
+                        document.getElementById('edit_gridsquare').value = qso.gridsquare || '';
+                        document.getElementById('edit_sat_name').value = qso.sat_name || '';
+                        document.getElementById('edit_prop_mode').value = qso.prop_mode || '';
+                        document.getElementById('edit_cqz').value = qso.cqz || '';
+                        document.getElementById('edit_ituz').value = qso.ituz || '';
+                        document.getElementById('edit_lotw').value = qso.lotw || 'N';
 
-                // Позывной
-                document.getElementById('edit_callsign').value = row.querySelector('td:nth-child(4) .callsign-badge').textContent;
-
-                // Диапазон
-                const bandCell = row.querySelector('td:nth-child(5) .band-badge');
-                document.getElementById('edit_band').value = bandCell ? bandCell.textContent : '';
-
-                // Вид связи
-                const modeCell = row.querySelector('td:nth-child(6) .mode-badge');
-                document.getElementById('edit_mode').value = modeCell ? modeCell.textContent : 'SSB';
-
-                // RST
-                const rstRcvdCell = row.querySelector('td:nth-child(7) small');
-                document.getElementById('edit_rst_rcvd').value = (rstRcvdCell && rstRcvdCell.textContent !== '-') ? rstRcvdCell.textContent : '';
-
-                const rstSentCell = row.querySelector('td:nth-child(8) small');
-                document.getElementById('edit_rst_sent').value = (rstSentCell && rstSentCell.textContent !== '-') ? rstSentCell.textContent : '';
-
-                // QTH локаторы
-                const gridsquareCell = row.querySelector('td:nth-child(9) small');
-                document.getElementById('edit_gridsquare').value = (gridsquareCell && gridsquareCell.textContent !== 'Не указан') ? gridsquareCell.textContent : '';
-
-                const myGridsquareCell = row.querySelector('td:nth-child(10) small');
-                document.getElementById('edit_my_gridsquare').value = (myGridsquareCell && myGridsquareCell.textContent !== 'Не указан') ? myGridsquareCell.textContent : '';
-
-                // Открываем модальное окно
-                const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
-                modal.show();
+                        // Открываем модальное окно
+                        const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
+                        modal.show();
+                    } else {
+                        throw new Error(data.error || 'Ошибка при загрузке данных');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
+                });
             });
         });
 
