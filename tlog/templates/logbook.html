@@ -145,7 +145,8 @@
                     <small>
                         Всего QSO: <strong>{{ total_count }}</strong> |
                         Уникальные позывные: <strong>{{ filtered_stats.unique_callsigns }}</strong> |
-                        Уникальные QTH: <strong>{{ filtered_stats.unique_qth }}</strong>
+                        Стран DXCC: <strong>{{ filtered_stats.unique_dxcc }}</strong> |
+                        Стран Р-150-С: <strong>{{ filtered_stats.unique_r150s }}</strong>
                     </small>
                 </p>
             </div>
@@ -164,27 +165,27 @@
 
                 <!-- Фильтры -->
                 <div class="filter-card">
-                    <h5 class="mb-3"><i class="fas fa-filter"></i> Поиск и фильтрация</h5>
-                    <form method="GET" class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Поиск</label>
-                            <input type="text" class="form-control" name="search"
-                                   value="{{ search_query }}" placeholder="Позывной, QTH, заметки">
+                    <h6 class="mb-2"><i class="fas fa-filter"></i> Фильтрация</h6>
+                    <form method="GET" class="row g-2">
+                        <div class="col-auto">
+                            <input type="date" class="form-control form-control-sm" name="date_from"
+                                   value="{{ date_from }}" style="width: 140px;" title="Дата начиная с">
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Позывной</label>
-                            <input type="text" class="form-control" name="callsign"
-                                   value="{{ callsign_filter }}" placeholder="UA1ABC">
+                        <div class="col-auto">
+                            <input type="date" class="form-control form-control-sm" name="date_to"
+                                   value="{{ date_to }}" style="width: 140px;" title="Дата до">
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">QTH локатор</label>
-                            <input type="text" class="form-control" name="qth"
-                                   value="{{ qth_filter }}" placeholder="KO85UU">
+                        <div class="col-auto">
+                            <input type="text" class="form-control form-control-sm" name="search_callsign"
+                                   value="{{ search_callsign }}" placeholder="Позывной" style="width: 100px;">
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Вид связи</label>
-                            <select class="form-select" name="mode">
-                                <option value="">Все виды</option>
+                        <div class="col-auto">
+                            <input type="text" class="form-control form-control-sm" name="search_qth"
+                                   value="{{ search_qth }}" placeholder="QTH локатор" style="width: 100px;">
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="mode" style="width: 110px;">
+                                <option value="">Вид связи</option>
                                 {% for mode in available_modes %}
                                     <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>
                                         {{ mode }}
@@ -192,10 +193,9 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Диапазон</label>
-                            <select class="form-select" name="band">
-                                <option value="">Все диапазоны</option>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="band" style="width: 100px;">
+                                <option value="">Диапазон</option>
                                 {% for band in available_bands %}
                                     <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>
                                         {{ band }}
@@ -203,10 +203,32 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-1 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="sat_name" style="width: 120px;">
+                                <option value="">Все записи</option>
+                                {% for sat in available_sat_names %}
+                                    <option value="{{ sat }}" {% if sat == sat_name_filter %}selected{% endif %}>
+                                        {{ sat }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="lotw" style="width: 100px;">
+                                <option value="">LoTW</option>
+                                <option value="Y" {% if lotw_filter == 'Y' %}selected{% endif %}>Да</option>
+                                <option value="N" {% if lotw_filter == 'N' %}selected{% endif %}>Нет</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="fas fa-search"></i>
                             </button>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'logbook' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-times"></i>
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -228,14 +250,14 @@
                     </div>
                     <div class="col-md-3">
                         <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.unique_qth }}</div>
-                            <div>Уникальные QTH</div>
+                            <div class="stats-number">{{ filtered_stats.unique_dxcc }}</div>
+                            <div>Стран DXCC</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.unique_modes }}</div>
-                            <div>Видов связи</div>
+                            <div class="stats-number">{{ filtered_stats.unique_r150s }}</div>
+                            <div>Стран Р-150-С</div>
                         </div>
                     </div>
                 </div>
@@ -330,7 +352,7 @@
                         <ul class="pagination">
                             {% if current_page > 1 %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if callsign_filter %}callsign={{ callsign_filter }}&{% endif %}{% if qth_filter %}qth={{ qth_filter }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}page={{ current_page|add:'-1' }}">Предыдущая</a>
+                                    <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ current_page|add:'-1' }}">Предыдущая</a>
                                 </li>
                             {% endif %}
 
@@ -341,14 +363,14 @@
                                     </li>
                                 {% else %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if callsign_filter %}callsign={{ callsign_filter }}&{% endif %}{% if qth_filter %}qth={{ qth_filter }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                                        <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ forloop.counter }}">{{ forloop.counter }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}
 
                             {% if current_page < total_pages %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if callsign_filter %}callsign={{ callsign_filter }}&{% endif %}{% if qth_filter %}qth={{ qth_filter }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}page={{ current_page|add:'1' }}">Следующая</a>
+                                    <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ current_page|add:'1' }}">Следующая</a>
                                 </li>
                             {% endif %}
                         </ul>
@@ -392,7 +414,8 @@
                     <ul>
                         <li>Всего QSO: <strong>{{ total_count }}</strong></li>
                         <li>Уникальные позывные: <strong>{{ filtered_stats.unique_callsigns }}</strong></li>
-                        <li>Уникальные QTH: <strong>{{ filtered_stats.unique_qth }}</strong></li>
+                        <li>Стран DXCC: <strong>{{ filtered_stats.unique_dxcc }}</strong></li>
+                        <li>Стран Р-150-С: <strong>{{ filtered_stats.unique_r150s }}</strong></li>
                     </ul>
                     <p class="text-muted mb-0">
                         <small>
@@ -492,18 +515,5 @@
             }, 5000);
         }
     </script>
-
-    <!-- Footer -->
-    <footer class="footer mt-auto py-3 bg-dark">
-        <div class="container text-center">
-            <p class="mb-1">TLog - твой персональный журнал радиолюбителя</p>
-            <p class="mb-0 text-muted small">
-                Учёт радиосвязей, хранение логов, экспорт и импорт ADIF файлов
-            </p>
-            <p class="mb-0 text-muted small mt-2">
-                <strong>Автор:</strong> R3LO Владимир Павленко
-            </p>
-        </div>
-    </footer>
 </body>
 </html>

@@ -166,11 +166,6 @@ def process_adif_file(file_path, user, adif_upload_id=None):
     skipped_count = 0
     error_count = 0
 
-    # Отладочный вывод
-    print(f"DEBUG: Всего записей в ADIF: {len(qso_records)}")
-    print(f"DEBUG: user_callsign: '{user_callsign}'")
-    print(f"DEBUG: user: {user.username}")
-
     for i in range(0, len(qso_records), batch_size):
         batch = qso_records[i:i + batch_size]
         qso_objects = []
@@ -185,16 +180,12 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                     band_qso = qso_data.get('band', '')
                     mode_qso = qso_data.get('mode', 'SSB')
 
-                    print(f"DEBUG: Проверка дубликата - callsign={callsign_qso}, date={date_qso}, time={time_qso}, band={band_qso}, mode={mode_qso}")
-
                     duplicate_check = QSO.objects.filter(
                         user=user,
                         callsign=callsign_qso,
                         date=date_qso,
                         time=time_qso
                     ).exists()
-
-                    print(f"DEBUG: Дубликат найден: {duplicate_check}")
 
                     if not duplicate_check:
                         # Валидация и очистка данных
@@ -237,7 +228,7 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                         state = None
                         if not state:
                             cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
-                            state = r150s.get_cty_primary_prefix(callsign, cty_path)  # Ограничиваем длину
+                            state = r150s.get_cty_primary_prefix(callsign, cty_path)
 
                         if not callsign:
                             skipped_count += 1
@@ -276,8 +267,7 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                         skipped_count += 1
                 else:
                     skipped_count += 1
-            except Exception as e:
-                print(f"DEBUG ERROR: {str(e)}")
+            except Exception:
                 error_count += 1
                 continue
 

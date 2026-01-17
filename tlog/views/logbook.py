@@ -36,43 +36,50 @@ def logbook(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
 
-    # Получаем параметры поиска и фильтрации
-    search_query = request.GET.get('search', '').strip()
-    callsign_filter = request.GET.get('callsign', '').strip()
-    qth_filter = request.GET.get('qth', '').strip()
+    # Получаем параметры фильтрации
+    search_callsign = request.GET.get('search_callsign', '').strip()
+    search_qth = request.GET.get('search_qth', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
     mode_filter = request.GET.get('mode', '').strip()
     band_filter = request.GET.get('band', '').strip()
+    sat_name_filter = request.GET.get('sat_name', '').strip()
+    lotw_filter = request.GET.get('lotw', '').strip()
 
     # Базовый QuerySet для QSO пользователя
     qso_queryset = QSO.objects.filter(user=request.user)
 
-    # Применяем поиск
-    if search_query:
-        qso_queryset = qso_queryset.filter(
-            Q(callsign__icontains=search_query) | Q(gridsquare__icontains=search_query)
-        )
+    # Применяем поиск по части позывного
+    if search_callsign:
+        qso_queryset = qso_queryset.filter(callsign__icontains=search_callsign)
+
+    # Применяем поиск по части QTH локатора
+    if search_qth:
+        qso_queryset = qso_queryset.filter(gridsquare__icontains=search_qth)
+
+    # Фильтр по дате "с"
+    if date_from:
+        qso_queryset = qso_queryset.filter(date__gte=date_from)
+
+    # Фильтр по дате "до"
+    if date_to:
+        qso_queryset = qso_queryset.filter(date__lte=date_to)
 
     # Применяем фильтры
-    if callsign_filter:
-        qso_queryset = qso_queryset.filter(callsign__icontains=callsign_filter)
-
-    if qth_filter:
-        qso_queryset = qso_queryset.filter(gridsquare__icontains=qth_filter)
-
     if mode_filter:
         qso_queryset = qso_queryset.filter(mode=mode_filter)
 
+    # Фильтр по диапазону - напрямую по полю band
     if band_filter:
-        band_ranges = {
-            '160m': (1.8, 2.0), '80m': (3.5, 4.0), '40m': (7.0, 7.3), '30m': (10.1, 10.15),
-            '20m': (14.0, 14.35), '17m': (18.068, 18.168), '15m': (21.0, 21.45),
-            '12m': (24.89, 24.99), '10m': (28.0, 29.7), '6m': (50.0, 54.0),
-            '4m': (70.0, 70.5), '2m': (144.0, 148.0), '70cm': (420.0, 450.0),
-            '23cm': (1240.0, 1300.0), '13cm': (2400.0, 2500.0),
-        }
-        if band_filter in band_ranges:
-            min_freq, max_freq = band_ranges[band_filter]
-            qso_queryset = qso_queryset.filter(frequency__gte=min_freq, frequency__lte=max_freq)
+        qso_queryset = qso_queryset.filter(band=band_filter)
+
+    # Фильтр по SAT NAME
+    if sat_name_filter:
+        qso_queryset = qso_queryset.filter(sat_name=sat_name_filter)
+
+    # Фильтр по LoTW
+    if lotw_filter:
+        qso_queryset = qso_queryset.filter(lotw=lotw_filter)
 
     # Сортируем по дате (новые сверху)
     qso_queryset = qso_queryset.order_by('-date', '-time')
@@ -89,13 +96,15 @@ def logbook(request):
 
     # Уникальные значения для фильтров
     unique_modes = qso_queryset.values_list('mode', flat=True).distinct().order_by('mode')
+    unique_bands = qso_queryset.values_list('band', flat=True).distinct().exclude(band__isnull=True).exclude(band='').order_by('band')
+    unique_sat_names = qso_queryset.values_list('sat_name', flat=True).distinct().exclude(sat_name__isnull=True).exclude(sat_name='').order_by('sat_name')
 
     # Статистика для выбранных фильтров
     filtered_stats = {
         'total_qso': total_count,
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
-        'unique_qth': qso_queryset.filter(gridsquare__isnull=False).exclude(gridsquare='').values('gridsquare').distinct().count(),
-        'unique_modes': len(unique_modes),
+        'unique_dxcc': qso_queryset.filter(state__isnull=False).exclude(state='').values('state').distinct().count(),
+        'unique_r150s': qso_queryset.filter(r150s__isnull=False).exclude(r150s='').values('r150s').distinct().count(),
     }
 
     # Статистика по диапазонам
@@ -130,13 +139,17 @@ def logbook(request):
         'current_page': page,
         'total_pages': total_pages,
         'page_size': page_size,
-        'search_query': search_query,
-        'callsign_filter': callsign_filter,
-        'qth_filter': qth_filter,
+        'search_callsign': search_callsign,
+        'search_qth': search_qth,
+        'date_from': date_from,
+        'date_to': date_to,
         'mode_filter': mode_filter,
         'band_filter': band_filter,
+        'sat_name_filter': sat_name_filter,
+        'lotw_filter': lotw_filter,
         'available_modes': unique_modes,
-        'available_bands': list(band_stats.keys()),
+        'available_bands': unique_bands,
+        'available_sat_names': unique_sat_names,
         'filtered_stats': filtered_stats,
         'band_stats': band_stats,
         'get_band_from_frequency': get_band_from_frequency,
@@ -212,9 +225,12 @@ def clear_logbook(request):
         # Подсчитываем количество записей для статистики
         qso_count = QSO.objects.filter(user=request.user).count()
         unique_callsigns = QSO.objects.filter(user=request.user).values('callsign').distinct().count()
-        unique_qth = QSO.objects.filter(user=request.user).filter(
-            gridsquare__isnull=False
-        ).exclude(gridsquare='').values('gridsquare').distinct().count()
+        unique_dxcc = QSO.objects.filter(user=request.user).filter(
+            state__isnull=False
+        ).exclude(state='').values('state').distinct().count()
+        unique_r150s = QSO.objects.filter(user=request.user).filter(
+            r150s__isnull=False
+        ).exclude(r150s='').values('r150s').distinct().count()
         adif_uploads_count = ADIFUpload.objects.filter(user=request.user).count()
 
         # Удаляем все записи QSO пользователя
@@ -230,7 +246,8 @@ def clear_logbook(request):
                 'deleted_qso': deleted_qso_count,
                 'deleted_adif_uploads': deleted_adif_count,
                 'unique_callsigns': unique_callsigns,
-                'unique_qth': unique_qth
+                'unique_dxcc': unique_dxcc,
+                'unique_r150s': unique_r150s
             }
         })
 
