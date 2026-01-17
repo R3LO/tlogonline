@@ -4,14 +4,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-import json
 import os
 import uuid
 from datetime import datetime
@@ -29,6 +25,65 @@ def register_page(request):
     """
     Страница регистрации
     """
+    if request.method == 'POST':
+        from django.contrib.auth.models import User
+        from .models import RadioProfile
+
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        callsign = request.POST.get('callsign', '').strip().upper()
+        qth_locator = request.POST.get('qth_locator', '').strip().upper()
+
+        # Валидация
+        if not all([username, email, password, password_confirm, callsign]):
+            messages.error(request, 'Все обязательные поля должны быть заполнены')
+            return render(request, 'register.html')
+
+        if password != password_confirm:
+            messages.error(request, 'Пароли не совпадают')
+            return render(request, 'register.html')
+
+        if len(password) < 8:
+            messages.error(request, 'Пароль должен содержать минимум 8 символов')
+            return render(request, 'register.html')
+
+        # Проверяем уникальность
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Пользователь с таким именем уже существует')
+            return render(request, 'register.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Пользователь с таким email уже существует')
+            return render(request, 'register.html')
+
+        # Создаем пользователя
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            # Создаем профиль радиолюбителя
+            RadioProfile.objects.create(
+                user=user,
+                callsign=callsign,
+                my_gridsquare=qth_locator
+            )
+
+            messages.success(request, 'Регистрация успешна! Теперь вы можете войти в систему.')
+            return redirect('login_page')
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при регистрации: {str(e)}')
+            return render(request, 'register.html')
+
     return render(request, 'register.html')
 
 
@@ -36,120 +91,38 @@ def login_page(request):
     """
     Страница входа
     """
-    return render(request, 'login.html')
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def register_api(request):
-    """
-    API для регистрации через веб-интерфейс
-    """
-    try:
-        data = json.loads(request.body)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember_me = request.POST.get('rememberMe')
 
         # Проверяем обязательные поля
-        required_fields = ['username', 'email', 'password', 'password_confirm']
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return JsonResponse({
-                    'success': False,
-                    'error': f'Поле {field} обязательно для заполнения'
-                }, status=400)
+        if not username or not password:
+            messages.error(request, 'Имя пользователя и пароль обязательны')
+            return render(request, 'login.html')
 
-        # Проверяем совпадение паролей
-        if data['password'] != data['password_confirm']:
-            return JsonResponse({
-                'success': False,
-                'error': 'Пароли не совпадают'
-            }, status=400)
+        # Аутентификация
+        user = authenticate(request, username=username, password=password)
 
-        # Проверяем уникальность username
-        from django.contrib.auth.models import User
-        if User.objects.filter(username=data['username']).exists():
-            return JsonResponse({
-                'success': False,
-                'error': 'Пользователь с таким именем уже существует'
-            }, status=400)
+        if user is not None:
+            login(request, user)
 
-        # Проверяем уникальность email
-        if User.objects.filter(email=data['email']).exists():
-            return JsonResponse({
-                'success': False,
-                'error': 'Пользователь с таким email уже существует'
-            }, status=400)
-
-        # Создаем пользователя
-        user = User.objects.create_user(
-            username=data['username'],
-            email=data['email'],
-            password=data['password'],
-            first_name=data.get('first_name', ''),
-            last_name=data.get('last_name', '')
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Регистрация успешна! Теперь вы можете войти в систему.',
-            'redirect_url': '/login/'
-        })
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Некорректные данные'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f'Ошибка сервера: {str(e)}'
-        }, status=500)
-
-
-def login_api(request):
-    """
-    API для входа через веб-интерфейс
-    """
-    if request.method == 'POST':
-        try:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            remember_me = request.POST.get('rememberMe')
-
-            # Проверяем обязательные поля
-            if not username or not password:
-                messages.error(request, 'Имя пользователя и пароль обязательны')
-                return redirect('login_page')
-
-            # Аутентификация
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-
-                # Если отмечен "Запомнить меня", сохраняем данные в cookies
-                if remember_me:
-                    # Сохраняем в cookies на 30 дней
-                    response = redirect('dashboard')
-                    response.set_cookie('remembered_username', username, 30*24*60*60)
-                    response.set_cookie('remembered_password', password, 30*24*60*60)
-                    return response
-                else:
-                    # Удаляем cookies если не отмечен "Запомнить меня"
-                    response = redirect('dashboard')
-                    response.delete_cookie('remembered_username')
-                    response.delete_cookie('remembered_password')
-                    return response
+            # Если отмечен "Запомнить меня", сохраняем данные в cookies
+            if remember_me:
+                response = redirect('dashboard')
+                response.set_cookie('remembered_username', username, 30*24*60*60)
+                response.set_cookie('remembered_password', password, 30*24*60*60)
+                return response
             else:
-                messages.error(request, 'Неверные учетные данные')
-                return redirect('login_page')
+                response = redirect('dashboard')
+                response.delete_cookie('remembered_username')
+                response.delete_cookie('remembered_password')
+                return response
+        else:
+            messages.error(request, 'Неверные учетные данные')
+            return render(request, 'login.html')
 
-        except Exception as e:
-            messages.error(request, f'Ошибка сервера: {str(e)}')
-            return redirect('login_page')
-
-    # Если GET запрос, перенаправляем на страницу логина
-    return redirect('login_page')
+    return render(request, 'login.html')
 
 
 def get_band_from_frequency(frequency):
@@ -962,3 +935,102 @@ def clear_logbook(request):
             'success': False,
             'error': f'Ошибка при удалении записей: {str(e)}'
         }, status=500)
+
+
+def logbook_search(request, callsign):
+    """
+    Поиск по логам пользователя по позывному.
+    Доступен по адресу /<callsign>/
+    """
+    from .models import QSO, RadioProfile
+
+    # Нормализуем позывной (верхний регистр, без пробелов)
+    callsign = callsign.strip().upper()
+
+    # Проверяем, есть ли записи с таким my_callsign
+    has_logs = QSO.objects.filter(my_callsign=callsign).exists()
+
+    if not has_logs:
+        # Если записей с таким позывным нет, показываем сообщение
+        context = {
+            'callsign': callsign,
+            'has_logs': False,
+            'error_message': f'Лог с позывным "{callsign}" не найден в базе данных.',
+        }
+        return render(request, 'logbook_search.html', context)
+
+    # Получаем параметр поиска из формы
+    search_callsign = request.GET.get('callsign', '').strip()
+
+    context = {
+        'callsign': callsign,
+        'has_logs': True,
+        'search_callsign': search_callsign,
+        'qso_list': None,
+    }
+
+    # Если введен позывной для поиска - выполняем поиск
+    if search_callsign:
+        # Получаем QSO для этого позывного с фильтром по callsign корреспондента
+        qso_queryset = QSO.objects.filter(
+            my_callsign=callsign,
+            callsign__icontains=search_callsign
+        ).order_by('-date', '-time')
+
+        # Подсчитываем статистику
+        total_qso = qso_queryset.count()
+        unique_callsigns = qso_queryset.values('callsign').distinct().count()
+
+        # Статистика по диапазонам
+        band_stats = {}
+        bands = ['160m', '80m', '40m', '20m', '15m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
+        band_ranges = {
+            '160m': (1.8, 2.0),
+            '80m': (3.5, 4.0),
+            '40m': (7.0, 7.3),
+            '30m': (10.1, 10.15),
+            '20m': (14.0, 14.35),
+            '17m': (18.068, 18.168),
+            '15m': (21.0, 21.45),
+            '12m': (24.89, 24.99),
+            '10m': (28.0, 29.7),
+            '6m': (50.0, 54.0),
+            '4m': (70.0, 70.5),
+            '2m': (144.0, 148.0),
+            '70cm': (420.0, 450.0),
+            '23cm': (1240.0, 1300.0),
+            '13cm': (2400.0, 2500.0),
+        }
+
+        for band in bands:
+            if band in band_ranges:
+                min_freq, max_freq = band_ranges[band]
+                count = qso_queryset.filter(
+                    frequency__gte=min_freq,
+                    frequency__lte=max_freq
+                ).count()
+                if count > 0:
+                    band_stats[band] = count
+
+        # Пагинация
+        page_size = 50
+        page = int(request.GET.get('page', 1))
+        start = (page - 1) * page_size
+        end = start + page_size
+
+        qso_list = qso_queryset[start:end]
+        total_pages = (total_qso + page_size - 1) // page_size
+
+        # Получаем уникальные режимы для фильтрации
+        unique_modes = qso_queryset.values_list('mode', flat=True).distinct().order_by('mode')
+
+        context.update({
+            'qso_list': qso_list,
+            'current_page': page,
+            'total_pages': total_pages,
+            'page_size': page_size,
+            'band_stats': band_stats,
+            'get_band_from_frequency': get_band_from_frequency,
+        })
+
+    return render(request, 'logbook_search.html', context)

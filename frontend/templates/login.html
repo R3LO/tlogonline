@@ -44,7 +44,7 @@
             <p class="text-muted">Войдите в свой аккаунт</p>
         </div>
 
-        <form id="loginForm" method="POST" action="{% url 'login_api' %}">
+        <form id="loginForm" method="POST" action="{% url 'login_page' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="username" class="form-label">Имя пользователя</label>

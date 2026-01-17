@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск по логам - {{ callsign }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .logbook-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .logbook-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            pointer-events: none;
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .qso-row {
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .qso-row:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background-color: #f8f9fa;
+        }
+        .callsign-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .mode-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .band-badge {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #212529;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .pagination {
+            justify-content: center;
+        }
+        .error-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .search-form-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light" href="/">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if not has_logs %}
+            <!-- Сообщение об отсутствии лога -->
+            <div class="error-container">
+                <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                <h2 class="text-muted mb-3">Лог не найден</h2>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>{{ error_message }}</strong>
+                </div>
+                <p class="text-muted mb-4">Убедитесь, что позывной введён правильно и попробуйте снова.</p>
+
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+            </div>
+        {% else %}
+            <!-- Страница с логом -->
+            <div class="main-container">
+                <!-- Header -->
+                <div class="logbook-header text-center">
+                    <h2><i class="fas fa-search"></i> Поиск по логу {{ callsign }}</h2>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4 mb-5">
+                    <!-- Форма поиска по позывному корреспондента -->
+                    <div class="search-form-container">
+                        <h5 class="mb-3"><i class="fas fa-filter"></i> Поиск по позывному корреспондента</h5>
+                        <form method="GET" class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Позывной корреспондента</label>
+                                <input type="text" class="form-control" name="callsign"
+                                       value="{{ search_callsign }}" placeholder="Например: UA1ABC">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100 me-2">
+                                    <i class="fas fa-search"></i> Найти
+                                </button>
+                                {% if search_callsign %}
+                                    <a href="/{{ callsign }}/" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Статистика по диапазонам -->
+                    {% if band_stats %}
+                    <div class="row mb-4">
+                        {% for band, count in band_stats.items %}
+                        <div class="col-md-2 col-sm-4 col-6">
+                            <div class="stats-card" style="padding: 1rem;">
+                                <div class="stats-number" style="font-size: 1.5rem;">{{ count }}</div>
+                                <div style="font-size: 0.85rem;">{{ band }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Список QSO -->
+                    {% if qso_list %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover rounded overflow-hidden">
+                                <thead class="table-dark" style="background: linear-gradient(135deg, #343a40 0%, #495057 100%); border-radius: 0;">
+                                    <tr>
+                                        <th><i class="fas fa-calendar"></i> Дата</th>
+                                        <th><i class="fas fa-radio"></i> Позывной</th>
+                                        <th><i class="fas fa-broadcast-tower"></i> Диапазон</th>
+                                        <th><i class="fas fa-signal"></i> Вид</th>
+                                        <th><i class="fas fa-broadcast-tower"></i> RST</th>
+                                        <th><i class="fas fa-map-marker-alt"></i> QTH</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for qso in qso_list %}
+                                    <tr class="qso-row">
+                                        <td><small>{{ qso.date|date:"d.m.Y" }}</small></td>
+                                        <td><span class="callsign-badge">{{ qso.callsign }}</span></td>
+                                        <td>
+                                            {% if qso.band %}
+                                                <span class="band-badge">{{ qso.band }}</span>
+                                            {% elif qso.frequency %}
+                                                {% with band=get_band_from_frequency %}
+                                                    <span class="band-badge">{{ band }}</span>
+                                                {% endwith %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="mode-badge">{{ qso.mode }}</span></td>
+                                        <td>{% if qso.rst_rcvd %}{{ qso.rst_rcvd }}{% else %}-{% endif %}</td>
+                                        <td>{% if qso.his_gridsquare %}{{ qso.his_gridsquare }}{% else %}<small class="text-muted">-</small>{% endif %}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Пагинация -->
+                        {% if total_pages > 1 %}
+                        <nav aria-label="Навигация по страницам" class="mt-4">
+                            <ul class="pagination">
+                                {% if current_page > 1 %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?callsign={{ search_callsign }}&page={{ current_page|add:'-1' }}">Предыдущая</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for page_num in "x"|rjust:total_pages %}
+                                    {% if forloop.counter == current_page %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ forloop.counter }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?callsign={{ search_callsign }}&page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if current_page < total_pages %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?callsign={{ search_callsign }}&page={{ current_page|add:'1' }}">Следующая</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Введите позывной для поиска</h4>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

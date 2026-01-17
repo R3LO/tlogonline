@@ -62,7 +62,8 @@
             <p class="text-muted">Присоединяйтесь к сообществу радиолюбителей</p>
         </div>
 
-        <form id="registerForm">
+        <form id="registerForm" method="POST" action="{% url 'register_page' %}">
+            {% csrf_token %}
             <!-- Основная информация -->
             <div class="form-section">
                 <h6 class="section-title">Основная информация</h6>
@@ -124,32 +125,6 @@
                         Квадрат локатора (например: KO85UU, LO91AA) - необязательно
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="city" class="form-label">Город</label>
-                        <input type="text" class="form-control" id="city" name="city"
-                               placeholder="Москва">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="country" class="form-label">Страна</label>
-                        <input type="text" class="form-control" id="country" name="country"
-                               placeholder="Россия">
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="radio_license_class" class="form-label">Класс лицензии</label>
-                    <select class="form-select" id="radio_license_class" name="radio_license_class">
-                        <option value="">Выберите класс лицензии</option>
-                        <option value="1">1 категория</option>
-                        <option value="2">2 категория</option>
-                        <option value="3">3 категория</option>
-                        <option value="4">4 категория</option>
-                        <option value="U">УКВ</option>
-                        <option value="KD">КВ/ДВ</option>
-                    </select>
-                </div>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
@@ -180,104 +155,6 @@
                 e.target.setCustomValidity('Неверный формат QTH локатора (например: KO85UU)');
             } else {
                 e.target.setCustomValidity('');
-            }
-        });
-
-        // Функция для получения CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-
-            const messageDiv = document.getElementById('message');
-
-            try {
-                console.log('Отправляем данные:', data);
-
-                const csrfToken = getCookie('csrftoken');
-                console.log('CSRF токен:', csrfToken);
-
-                const headers = {
-                    'Content-Type': 'application/json',
-                };
-
-                if (csrfToken) {
-                    headers['X-CSRFToken'] = csrfToken;
-                }
-
-                const response = await fetch('/api/register/', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(data)
-                });
-
-                console.log('Статус ответа:', response.status);
-                console.log('Заголовки ответа:', Object.fromEntries(response.headers.entries()));
-
-                const result = await response.json();
-                console.log('Полный ответ сервера:', result);
-
-                if (response.ok) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = 'Регистрация успешна! Теперь вы можете войти в систему.';
-                    messageDiv.classList.remove('d-none');
-                    this.reset();
-
-                    // Перенаправляем на страницу входа через 2 секунды
-                    setTimeout(() => {
-                        window.location.href = '/login/';
-                    }, 2000);
-                } else {
-                    let errorMessage = 'Ошибка регистрации:\n';
-
-                    // Добавляем отладочную информацию
-                    console.log('Содержимое result:', result);
-                    console.log('result.errors:', result.errors);
-                    console.log('result.error:', result.error);
-
-                    // Обрабатываем ошибки от сервера
-                    if (result.errors) {
-                        // Ошибки валидации сериализатора
-                        for (const [field, errors] of Object.entries(result.errors)) {
-                            if (Array.isArray(errors)) {
-                                errorMessage += `${field}: ${errors.join(', ')}\n`;
-                            } else {
-                                errorMessage += `${field}: ${errors}\n`;
-                            }
-                        }
-                    } else if (result.error) {
-                        // Простая ошибка
-                        errorMessage += result.error;
-                    } else {
-                        // Если нет понятных ошибок, показываем весь ответ
-                        errorMessage += JSON.stringify(result, null, 2);
-                    }
-
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.textContent = errorMessage;
-                    messageDiv.classList.remove('d-none');
-                }
-            } catch (error) {
-                console.error('Ошибка сети:', error);
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = 'Ошибка сети: ' + error.message + '. Проверьте подключение к интернету.';
-                messageDiv.classList.remove('d-none');
             }
         });
     </script>
