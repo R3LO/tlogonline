@@ -3,6 +3,23 @@ from django.contrib.auth.models import User
 import uuid
 
 
+class ADIFUpload(models.Model):
+    """
+    Загруженные ADIF файлы
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='adif_uploads')
+    file_name = models.CharField(max_length=255)
+    file_size = models.BigIntegerField()
+    upload_date = models.DateTimeField(auto_now_add=True)
+    processed = models.BooleanField(default=False)
+    qso_count = models.IntegerField(default=0)
+    error_message = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.file_name} - {self.user.username}"
+
+
 class QSO(models.Model):
     """
     Модель для хранения записей радиосвязей
@@ -61,6 +78,16 @@ class QSO(models.Model):
     lotw_qsl = models.CharField(max_length=1, help_text="Подтверждение LoTW", default='N', blank=True)
     paper_qsl = models.CharField(max_length=1, help_text="Бумажная QSL", default='N', blank=True)
 
+    # Ссылка на загруженный ADIF файл
+    adif_upload = models.ForeignKey(
+        ADIFUpload,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='qso_records',
+        help_text="Связанная загрузка ADIF файла"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -114,7 +141,7 @@ class RadioProfile(models.Model):
     my_callsigns = models.JSONField(default=list, blank=True, help_text="Мои позывные в формате JSON")
 
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Регистрация пользователей'
@@ -122,20 +149,3 @@ class RadioProfile(models.Model):
 
     def __str__(self):
         return f"Profile - {self.user.username} ({self.callsign})"
-
-
-class ADIFUpload(models.Model):
-    """
-    Загруженные ADIF файлы
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='adif_uploads')
-    file_name = models.CharField(max_length=255)
-    file_size = models.BigIntegerField()
-    upload_date = models.DateTimeField(auto_now_add=True)
-    processed = models.BooleanField(default=False)
-    qso_count = models.IntegerField(default=0)
-    error_message = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.file_name} - {self.user.username}"

@@ -450,7 +450,7 @@
 
                 <!-- Загруженные ADIF файлы -->
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">📁 Мои последние загрузки</h6>
                     </div>
                     <div class="card-body p-2">
@@ -459,10 +459,19 @@
                                 {% for upload in adif_uploads %}
                                     <div class="list-group-item px-2 py-2">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
-                                            <small class="text-truncate fw-bold" style="max-width: 140px;">{{ upload.file_name }}</small>
-                                            <span class="badge {% if upload.processed %}bg-success{% else %}bg-warning{% endif %} py-1">
-                                                {{ upload.qso_count|default:0 }} QSO
-                                            </span>
+                                            <small class="text-truncate fw-bold" style="max-width: 120px;">{{ upload.file_name }}</small>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <span class="badge {% if upload.processed %}bg-success{% else %}bg-warning{% endif %} py-1">
+                                                    {{ upload.qso_count|default:0 }} QSO
+                                                </span>
+                                                <button type="button"
+                                                        class="btn btn-outline-danger btn-sm p-1"
+                                                        title="Удалить связанные QSO"
+                                                        onclick="deleteAdifUpload('{{ upload.id }}', '{{ upload.file_name }}')"
+                                                        {% if upload.qso_count|default:0 == 0 %}disabled{% endif %}>
+                                                    <i class="fas fa-trash-alt" style="font-size: 0.75rem;"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <small class="text-muted d-block">{{ upload.upload_date|date:"d.m.Y H:i" }}</small>
                                         {% if upload.error_message %}
@@ -475,6 +484,33 @@
                             <p class="text-muted small mb-0">Нет загруженных файлов</p>
                         {% endif %}
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить все QSO, связанные с файлом:</p>
+                    <p class="fw-bold" id="deleteFileName"></p>
+                    <p class="text-danger mb-0">
+                        <small><i class="fas fa-info-circle me-1"></i>Это действие нельзя отменить!</small>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Удалить
+                    </button>
                 </div>
             </div>
         </div>
@@ -551,6 +587,101 @@
                 });
             });
         });
+
+        // Удаление ADIF загрузки
+        function deleteAdifUpload(uploadId, fileName) {
+            document.getElementById('deleteFileName').textContent = fileName;
+            const deleteModalEl = document.getElementById('deleteConfirmModal');
+            const deleteModal = bootstrap.Modal.getOrCreateInstance(deleteModalEl);
+            deleteModal.show();
+
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+            // Очищаем предыдущие обработчики
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.onclick = function() {
+                newConfirmBtn.disabled = true;
+                newConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Удаление...';
+
+                fetch('/dashboard/adif-delete/' + uploadId + '/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Скрываем модальное окно
+                    deleteModal.hide();
+
+                    if (data.success) {
+                        // Показываем временное сообщение и перезагружаем
+                        showTempAlert('success', data.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        showTempAlert('danger', 'Ошибка: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    deleteModal.hide();
+                    showTempAlert('danger', 'Произошла ошибка при удалении');
+                    console.error('Error:', error);
+                });
+            };
+
+            // Закрываем модальное при нажатии "Отмена"
+            deleteModalEl.querySelector('.btn-secondary').onclick = function() {
+                deleteModal.hide();
+            };
+        }
+
+        // Получение CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Показать временное сообщение (исчезает через 3 сек)
+        function showTempAlert(type, message) {
+            // Удаляем старые alert
+            document.querySelectorAll('.alert-dynamic').forEach(el => el.remove());
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show alert-dynamic';
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+            document.body.appendChild(alertDiv);
+
+            // Удаляем через 3 секунды
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                    if (bsAlert) bsAlert.close();
+                }
+            }, 3000);
+        }
     </script>
 
     <!-- Footer -->

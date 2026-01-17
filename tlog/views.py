@@ -28,4 +28,5 @@ from .views.adif import (
     adif_upload,
     process_adif_file,
     parse_adif_record,
+    delete_adif_uploads,
 )

@@ -5,7 +5,7 @@ from django.urls import path, re_path
 from .views import (
     home, register_page, login_page, dashboard, logbook,
     logout_view, adif_upload, clear_logbook,
-    profile_update, logbook_search
+    profile_update, logbook_search, delete_adif_uploads
 )
 
 urlpatterns = [
@@ -17,6 +17,7 @@ urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
     path('dashboard/profile/', profile_update, name='profile_update'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),
+    path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),
     path('logout/', logout_view, name='logout'),

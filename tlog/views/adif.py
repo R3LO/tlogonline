@@ -2,10 +2,11 @@
 Представления для загрузки и обработки ADIF файлов
 """
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.contrib import messages
-from ..models import QSO
+from ..models import QSO, ADIFUpload
 import os
 import uuid
 import re
@@ -63,7 +64,7 @@ def adif_upload(request):
 
             # Запускаем обработку файла
             try:
-                qso_count = process_adif_file(saved_path, request.user)
+                qso_count = process_adif_file(saved_path, request.user, adif_upload.id)
 
                 adif_upload.processed = True
                 adif_upload.qso_count = qso_count
@@ -84,9 +85,14 @@ def adif_upload(request):
     return redirect('dashboard')
 
 
-def process_adif_file(file_path, user):
+def process_adif_file(file_path, user, adif_upload_id=None):
     """
     Обрабатывает ADIF файл и создает записи QSO
+
+    Args:
+        file_path: Путь к файлу
+        user: Пользователь
+        adif_upload_id: ID записи ADIFUpload для связи с QSO
     """
     # Получаем полный путь к файлу
     media_root = default_storage.location
@@ -201,7 +207,8 @@ def process_adif_file(file_path, user):
                             my_gridsquare=my_gridsquare,
                             his_gridsquare=his_gridsquare,
                             lotw_qsl='N',
-                            paper_qsl='N'
+                            paper_qsl='N',
+                            adif_upload_id=adif_upload_id
                         )
 
                         if not qso_obj.callsign or not qso_obj.date or not qso_obj.time:
@@ -348,3 +355,49 @@ def parse_adif_record(record):
         data['my_gridsquare'] = data['my_gridsquare']
 
     return data
+
+
+def delete_adif_uploads(request, upload_id):
+    """
+    Удаляет записи QSO, связанные с загруженным ADIF файлом,
+    и удаляет запись о загрузке файла
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        # Получаем запись о загрузке
+        try:
+            adif_upload = ADIFUpload.objects.get(id=upload_id, user=request.user)
+        except ADIFUpload.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Загрузка файла не найдена'
+            }, status=404)
+
+        # Подсчитываем количество связанных QSO
+        qso_count = QSO.objects.filter(adif_upload=adif_upload).count()
+
+        # Удаляем связанные записи QSO
+        deleted_qso_count, _ = QSO.objects.filter(adif_upload=adif_upload).delete()
+
+        # Удаляем запись о загрузке
+        adif_upload.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Удалено {deleted_qso_count} записей QSO из файла "{adif_upload.file_name}"',
+            'stats': {
+                'deleted_qso': deleted_qso_count,
+                'file_name': adif_upload.file_name
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка при удалении: {str(e)}'
+        }, status=500)
