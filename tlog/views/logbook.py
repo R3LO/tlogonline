@@ -49,7 +49,7 @@ def logbook(request):
     # Применяем поиск
     if search_query:
         qso_queryset = qso_queryset.filter(
-            Q(callsign__icontains=search_query) | Q(his_gridsquare__icontains=search_query)
+            Q(callsign__icontains=search_query) | Q(gridsquare__icontains=search_query)
         )
 
     # Применяем фильтры
@@ -57,7 +57,7 @@ def logbook(request):
         qso_queryset = qso_queryset.filter(callsign__icontains=callsign_filter)
 
     if qth_filter:
-        qso_queryset = qso_queryset.filter(his_gridsquare__icontains=qth_filter)
+        qso_queryset = qso_queryset.filter(gridsquare__icontains=qth_filter)
 
     if mode_filter:
         qso_queryset = qso_queryset.filter(mode=mode_filter)
@@ -94,7 +94,7 @@ def logbook(request):
     filtered_stats = {
         'total_qso': total_count,
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
-        'unique_qth': qso_queryset.filter(his_gridsquare__isnull=False).exclude(his_gridsquare='').values('his_gridsquare').distinct().count(),
+        'unique_qth': qso_queryset.filter(gridsquare__isnull=False).exclude(gridsquare='').values('gridsquare').distinct().count(),
         'unique_modes': len(unique_modes),
     }
 
@@ -213,8 +213,8 @@ def clear_logbook(request):
         qso_count = QSO.objects.filter(user=request.user).count()
         unique_callsigns = QSO.objects.filter(user=request.user).values('callsign').distinct().count()
         unique_qth = QSO.objects.filter(user=request.user).filter(
-            his_gridsquare__isnull=False
-        ).exclude(his_gridsquare='').values('his_gridsquare').distinct().count()
+            gridsquare__isnull=False
+        ).exclude(gridsquare='').values('gridsquare').distinct().count()
         adif_uploads_count = ADIFUpload.objects.filter(user=request.user).count()
 
         # Удаляем все записи QSO пользователя

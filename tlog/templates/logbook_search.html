@@ -218,7 +218,7 @@
                                         </td>
                                         <td><span class="mode-badge">{{ qso.mode }}</span></td>
                                         <td>{% if qso.rst_rcvd %}{{ qso.rst_rcvd }}{% else %}-{% endif %}</td>
-                                        <td>{% if qso.his_gridsquare %}{{ qso.his_gridsquare }}{% else %}<small class="text-muted">-</small>{% endif %}</td>
+                                        <td>{% if qso.gridsquare %}{{ qso.gridsquare }}{% else %}<small class="text-muted">-</small>{% endif %}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

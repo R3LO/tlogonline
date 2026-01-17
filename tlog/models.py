@@ -69,13 +69,22 @@ class QSO(models.Model):
 
     # QTH локаторы
     my_gridsquare = models.CharField(max_length=10, help_text="Мой QTH локатор", blank=True, null=True)
-    his_gridsquare = models.CharField(max_length=10, help_text="QTH локатор корреспондента", blank=True, null=True)
+    gridsquare = models.CharField(max_length=10, help_text="QTH локатор корреспондента", blank=True, null=True)
+    continent = models.CharField(max_length=2, help_text="Континент", blank=True, null=True)
 
     # Дополнительные поля
     his_qth = models.CharField(max_length=100, help_text="QTH корреспондента", blank=True, null=True)
 
+    # Дополнительные поля для спутниковой связи и соревнований
+    prop_mode = models.CharField(max_length=50, help_text="Режим распространения", blank=True, null=True)
+    sat_name = models.CharField(max_length=50, help_text="Название спутника", blank=True, null=True)
+    r150s = models.CharField(max_length=100, help_text="R150S", blank=True, null=True)
+    state = models.CharField(max_length=10, help_text="Штат/регион", blank=True, null=True)
+    cqz = models.IntegerField(help_text="CQ зона", null=True, blank=True)
+    ituz = models.IntegerField(help_text="ITU зона", null=True, blank=True)
+
     # Подтверждения QSL
-    lotw_qsl = models.CharField(max_length=1, help_text="Подтверждение LoTW", default='N', blank=True)
+    lotw = models.CharField(max_length=1, help_text="Подтверждение LoTW", default='N', blank=True)
     paper_qsl = models.CharField(max_length=1, help_text="Бумажная QSL", default='N', blank=True)
 
     # Ссылка на загруженный ADIF файл

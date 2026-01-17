@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.contrib import messages
 from ..models import QSO, ADIFUpload
+from .. import r150s
 import os
 import uuid
 import re
@@ -94,6 +95,15 @@ def process_adif_file(file_path, user, adif_upload_id=None):
         user: Пользователь
         adif_upload_id: ID записи ADIFUpload для связи с QSO
     """
+    # Получаем путь к базе r150s (файл находится в папке tlog)
+    tlog_dir = os.path.dirname(os.path.dirname(__file__))
+    db_path = os.path.join(tlog_dir, 'r150cty.dat')
+    cty_path = os.path.join(tlog_dir, 'cty.dat')
+
+    # Инициализируем базы данных
+    r150s.init_database(db_path)
+    r150s.init_cty_database(cty_path)
+
     # Получаем полный путь к файлу
     media_root = default_storage.location
     clean_path = file_path.replace('media/', '').replace('media\\', '')
@@ -156,6 +166,11 @@ def process_adif_file(file_path, user, adif_upload_id=None):
     skipped_count = 0
     error_count = 0
 
+    # Отладочный вывод
+    print(f"DEBUG: Всего записей в ADIF: {len(qso_records)}")
+    print(f"DEBUG: user_callsign: '{user_callsign}'")
+    print(f"DEBUG: user: {user.username}")
+
     for i in range(0, len(qso_records), batch_size):
         batch = qso_records[i:i + batch_size]
         qso_objects = []
@@ -164,15 +179,22 @@ def process_adif_file(file_path, user, adif_upload_id=None):
             try:
                 qso_data = parse_adif_record(record)
                 if qso_data:
+                    callsign_qso = qso_data.get('callsign', '')
+                    date_qso = qso_data.get('date')
+                    time_qso = qso_data.get('time')
+                    band_qso = qso_data.get('band', '')
+                    mode_qso = qso_data.get('mode', 'SSB')
+
+                    print(f"DEBUG: Проверка дубликата - callsign={callsign_qso}, date={date_qso}, time={time_qso}, band={band_qso}, mode={mode_qso}")
+
                     duplicate_check = QSO.objects.filter(
                         user=user,
-                        my_callsign=user_callsign,
-                        callsign=qso_data.get('callsign', ''),
-                        date=qso_data.get('date'),
-                        time=qso_data.get('time'),
-                        band=qso_data.get('band', ''),
-                        mode=qso_data.get('mode', 'SSB')
+                        callsign=callsign_qso,
+                        date=date_qso,
+                        time=time_qso
                     ).exists()
+
+                    print(f"DEBUG: Дубликат найден: {duplicate_check}")
 
                     if not duplicate_check:
                         # Валидация и очистка данных
@@ -180,14 +202,42 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                         if not isinstance(frequency, (int, float)) or frequency < 0:
                             frequency = 0.0
 
-                        callsign = qso_data.get('callsign', '').strip()[:20]
+                        callsign = callsign_qso.strip()[:20]
                         my_callsign = user_callsign.strip()[:20]
-                        band = qso_data.get('band', '').strip()[:10]
-                        mode = qso_data.get('mode', 'SSB')
+                        band = band_qso.strip()[:10]
+                        mode = mode_qso
                         rst_sent = qso_data.get('rst_sent', '').strip()[:10]
                         rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
                         my_gridsquare = qso_data.get('my_gridsquare', '').strip()[:10]
-                        his_gridsquare = qso_data.get('his_gridsquare', '').strip()[:10]
+                        gridsquare = qso_data.get('gridsquare', '').strip()[:10]
+                        prop_mode = qso_data.get('prop_mode', '').strip()[:50]
+                        sat_name = qso_data.get('sat_name', '').strip()[:50]
+                        cqz = qso_data.get('cqz')
+                        ituz = qso_data.get('ituz')
+                        continent = qso_data.get('cont', '').strip()[:2]
+
+                        # Если поля отсутствуют в ADIF, получаем из базы r150cty.dat
+                        dxcc_info = r150s.get_dxcc_info(callsign, db_path)
+                        if dxcc_info:
+                            if not cqz:
+                                cqz = dxcc_info.get('cq_zone')
+                            if not ituz:
+                                ituz = dxcc_info.get('itu_zone')
+                            if not continent:
+                                continent = dxcc_info.get('continent')
+
+                        # Заполняем r150s данными country из r150cty.dat
+                        r150s_country = None
+                        if dxcc_info:
+                            r150s_country = dxcc_info.get('country')
+                            if r150s_country:
+                                r150s_country = r150s_country.strip()[:100]
+
+                        # Получаем state (primary_prefix) из cty.dat
+                        state = None
+                        if not state:
+                            cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
+                            state = r150s.get_cty_primary_prefix(callsign, cty_path)  # Ограничиваем длину
 
                         if not callsign:
                             skipped_count += 1
@@ -197,16 +247,23 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                             user=user,
                             my_callsign=my_callsign,
                             callsign=callsign,
-                            date=qso_data.get('date'),
-                            time=qso_data.get('time'),
+                            date=date_qso,
+                            time=time_qso,
                             frequency=frequency,
                             band=band,
                             mode=mode,
                             rst_sent=rst_sent,
                             rst_rcvd=rst_rcvd,
                             my_gridsquare=my_gridsquare,
-                            his_gridsquare=his_gridsquare,
-                            lotw_qsl='N',
+                            gridsquare=gridsquare,
+                            prop_mode=prop_mode if prop_mode else None,
+                            sat_name=sat_name if sat_name else None,
+                            r150s=r150s_country if r150s_country else None,
+                            state=state if state else None,
+                            cqz=cqz,
+                            ituz=ituz,
+                            continent=continent if continent else None,
+                            lotw='N',
                             paper_qsl='N',
                             adif_upload_id=adif_upload_id
                         )
@@ -219,7 +276,8 @@ def process_adif_file(file_path, user, adif_upload_id=None):
                         skipped_count += 1
                 else:
                     skipped_count += 1
-            except Exception:
+            except Exception as e:
+                print(f"DEBUG ERROR: {str(e)}")
                 error_count += 1
                 continue
 
@@ -350,7 +408,7 @@ def parse_adif_record(record):
 
     # Обработка локаторов
     if 'gridsquare' in data:
-        data['his_gridsquare'] = data['gridsquare']
+        data['gridsquare'] = data['gridsquare']
     if 'my_gridsquare' in data:
         data['my_gridsquare'] = data['my_gridsquare']
 

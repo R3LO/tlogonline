@@ -36,7 +36,7 @@ def dashboard(request):
             mode = request.POST.get('mode', '').strip()
             rst_rcvd = request.POST.get('rst_rcvd', '').strip()
             rst_sent = request.POST.get('rst_sent', '').strip()
-            his_gridsquare = request.POST.get('his_gridsquare', '').strip()
+            gridsquare = request.POST.get('gridsquare', '').strip()
             his_qth = request.POST.get('his_qth', '').strip()
 
             # Валидация обязательных полей
@@ -49,7 +49,7 @@ def dashboard(request):
                 messages.error(request, 'Позывной не должен превышать 20 символов')
                 return redirect('dashboard')
 
-            if len(his_gridsquare) > 8:
+            if len(gridsquare) > 8:
                 messages.error(request, 'QTH локатор не должен превышать 8 символов')
                 return redirect('dashboard')
 
@@ -98,9 +98,9 @@ def dashboard(request):
                     mode=mode,
                     rst_rcvd=rst_rcvd if rst_rcvd else None,
                     rst_sent=rst_sent if rst_sent else None,
-                    his_gridsquare=his_gridsquare if his_gridsquare else None,
+                    gridsquare=gridsquare if gridsquare else None,
                     his_qth=his_qth if his_qth else None,
-                    lotw_qsl='N',
+                    lotw='N',
                     paper_qsl='N'
                 )
 
