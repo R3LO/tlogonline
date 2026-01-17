@@ -5,7 +5,8 @@ from django.urls import path, re_path
 from .views import (
     home, register_page, login_page, dashboard, logbook,
     logout_view, adif_upload, clear_logbook,
-    profile_update, logbook_search, delete_adif_uploads
+    profile_update, logbook_search, delete_adif_uploads,
+    edit_qso, delete_qso
 )
 
 urlpatterns = [
@@ -20,6 +21,8 @@ urlpatterns = [
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),
+    path('logbook/edit/<uuid:qso_id>/', edit_qso, name='edit_qso'),
+    path('logbook/delete/<uuid:qso_id>/', delete_qso, name='delete_qso'),
     path('logout/', logout_view, name='logout'),
 
     # Поиск по логам - динамический маршрут для позывных (должен быть последним)

@@ -4,6 +4,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 from ..models import QSO, RadioProfile, ADIFUpload
 
 
@@ -256,3 +257,78 @@ def clear_logbook(request):
             'success': False,
             'error': f'Ошибка при удалении записей: {str(e)}'
         }, status=500)
+
+
+@login_required
+def edit_qso(request, qso_id):
+    """
+    Редактирование одной записи QSO
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
+
+    try:
+        qso = QSO.objects.get(id=qso_id, user=request.user)
+    except (QSO.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
+
+    try:
+        import json
+        data = json.loads(request.body)
+
+        # Обновляем поля записи
+        qso.date = data.get('date')
+        qso.time = data.get('time')
+        qso.callsign = data.get('callsign', '')[:20]
+        qso.band = data.get('band', '')[:10] or None
+        qso.mode = data.get('mode') or 'SSB'
+
+        frequency = data.get('frequency')
+        if frequency:
+            try:
+                qso.frequency = float(frequency)
+            except (ValueError, TypeError):
+                qso.frequency = None
+        else:
+            qso.frequency = None
+
+        qso.rst_rcvd = data.get('rst_rcvd', '')[:10] or None
+        qso.rst_sent = data.get('rst_sent', '')[:10] or None
+        qso.my_gridsquare = data.get('my_gridsquare', '')[:10] or None
+        qso.gridsquare = data.get('gridsquare', '')[:10] or None
+        qso.sat_name = data.get('sat_name', '')[:50] or None
+        qso.prop_mode = data.get('prop_mode', '')[:50] or None
+
+        cqz = data.get('cqz')
+        qso.cqz = int(cqz) if cqz else None
+
+        ituz = data.get('ituz')
+        qso.ituz = int(ituz) if ituz else None
+
+        qso.lotw = data.get('lotw', 'N')
+
+        qso.save()
+
+        return JsonResponse({'success': True, 'message': 'Запись успешно обновлена'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def delete_qso(request, qso_id):
+    """
+    Удаление одной записи QSO
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
+
+    try:
+        qso = QSO.objects.get(id=qso_id, user=request.user)
+        qso.delete()
+        return JsonResponse({'success': True, 'message': 'Запись успешно удалена'})
+    except (QSO.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

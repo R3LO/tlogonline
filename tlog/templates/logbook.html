@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+п<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -112,6 +112,47 @@
         }
         .pagination {
             margin-bottom: 2rem;
+        }
+        /* Стили для колонки действий */
+        .action-column {
+            width: 80px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .action-buttons .btn {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.7rem;
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: #fff;
+        }
+        .action-buttons .btn:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .action-buttons .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .action-buttons .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .modal-header .btn-close {
+            margin: 0;
+        }
+        .modal-body .form-select,
+        .modal-body .form-control {
+            margin-bottom: 10px;
+        }
+        .modal-body label {
+            font-weight: 500;
+            margin-bottom: 3px;
         }
     </style>
 </head>
@@ -279,11 +320,12 @@
                                     <th><i class="fas fa-broadcast-tower"></i> RST переданный</th>
                                     <th><i class="fas fa-map-marker-alt"></i> QTH локатор корреспондента</th>
                                     <th><i class="fas fa-map-marker-alt"></i> Мой QTH локатор</th>
+                                    <th class="action-column"><i class="fas fa-cogs"></i> Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for qso in qso_list %}
-                                <tr class="qso-row">
+                                <tr class="qso-row" data-qso-id="{{ qso.id }}">
                                     <td>
                                         <small>{{ qso.date|date:"d.m.Y" }}</small>
                                     </td>
@@ -338,6 +380,16 @@
                                         {% else %}
                                             <small class="text-muted">Не указан</small>
                                         {% endif %}
+                                    </td>
+                                    <td class="action-column">
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn btn-sm btn-primary btn-edit" data-id="{{ qso.id }}" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{ qso.id }}" data-callsign="{{ qso.callsign }}" title="Удалить">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
 
@@ -394,7 +446,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Модальное окно подтверждения удаления лога -->
-    {% if total_count > 0 %}
     <div class="modal fade" id="clearLogModal" tabindex="-1" aria-labelledby="clearLogModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -435,7 +486,181 @@
             </div>
         </div>
     </div>
-    {% endif %}
+
+    <!-- Модальное окно редактирования QSO -->
+    <div class="modal fade" id="editQSOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i> Редактирование QSO
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editQSOForm">
+                        <input type="hidden" id="edit_id" name="id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Дата</label>
+                                <input type="date" class="form-control" id="edit_date" name="date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Время</label>
+                                <input type="time" class="form-control" id="edit_time" name="time" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Позывной корреспондента</label>
+                                <input type="text" class="form-control" id="edit_callsign" name="callsign" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Диапазон</label>
+                                <select class="form-select" id="edit_band" name="band">
+                                    <option value="">Не указано</option>
+                                    <option value="160m">160m</option>
+                                    <option value="80m">80m</option>
+                                    <option value="40m">40m</option>
+                                    <option value="30m">30m</option>
+                                    <option value="20m">20m</option>
+                                    <option value="17m">17m</option>
+                                    <option value="15m">15m</option>
+                                    <option value="12m">12m</option>
+                                    <option value="10m">10m</option>
+                                    <option value="6m">6m</option>
+                                    <option value="4m">4m</option>
+                                    <option value="2m">2m</option>
+                                    <option value="70cm">70cm</option>
+                                    <option value="23cm">23cm</option>
+                                    <option value="13cm">13cm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Вид связи</label>
+                                <select class="form-select" id="edit_mode" name="mode">
+                                    <option value="SSB">SSB</option>
+                                    <option value="CW">CW</option>
+                                    <option value="FT8">FT8</option>
+                                    <option value="FT4">FT4</option>
+                                    <option value="JS8">JS8</option>
+                                    <option value="RTTY">RTTY</option>
+                                    <option value="PSK31">PSK31</option>
+                                    <option value="PSK63">PSK63</option>
+                                    <option value="SSTV">SSTV</option>
+                                    <option value="MFSK">MFSK</option>
+                                    <option value="JT65">JT65</option>
+                                    <option value="JT9">JT9</option>
+                                    <option value="WSPR">WSPR</option>
+                                    <option value="ATV">ATV</option>
+                                    <option value="DMR">DMR</option>
+                                    <option value="DSTAR">DSTAR</option>
+                                    <option value="C4FM">C4FM</option>
+                                    <option value="AM">AM</option>
+                                    <option value="FM">FM</option>
+                                    <option value="DIGITAL">DIGITAL</option>
+                                    <option value="OTHER">OTHER</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Частота (МГц)</label>
+                                <input type="number" step="0.001" class="form-control" id="edit_frequency" name="frequency">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">RST принятый</label>
+                                <input type="text" class="form-control" id="edit_rst_rcvd" name="rst_rcvd" placeholder="Например: 59">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RST переданный</label>
+                                <input type="text" class="form-control" id="edit_rst_sent" name="rst_sent" placeholder="Например: 59">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой QTH локатор</label>
+                                <input type="text" class="form-control" id="edit_my_gridsquare" name="my_gridsquare" placeholder="Например: KO85UU">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">QTH локатор корреспондента</label>
+                                <input type="text" class="form-control" id="edit_gridsquare" name="gridsquare" placeholder="Например: KO85UU">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">SAT NAME</label>
+                                <input type="text" class="form-control" id="edit_sat_name" name="sat_name" placeholder="Например: AO-91">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Режим распространения</label>
+                                <input type="text" class="form-control" id="edit_prop_mode" name="prop_mode" placeholder="Например: SAT">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">CQ зона</label>
+                                <input type="number" class="form-control" id="edit_cqz" name="cqz">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ITU зона</label>
+                                <input type="number" class="form-control" id="edit_ituz" name="ituz">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">LoTW</label>
+                                <select class="form-select" id="edit_lotw" name="lotw">
+                                    <option value="N">Нет</option>
+                                    <option value="Y">Да</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveEditQSO">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления одной записи -->
+    <div class="modal fade" id="deleteQSOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trash-alt"></i> Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Внимание!</strong> Вы действительно хотите удалить эту запись?
+                    </div>
+                    <p>Позывной: <strong id="delete_callsign"></strong></p>
+                    <p>Дата: <strong id="delete_date"></strong></p>
+                    <p>Время: <strong id="delete_time"></strong></p>
+                    <input type="hidden" id="delete_id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteQSO">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Обработка удаления лога
@@ -514,6 +739,175 @@
                 }
             }, 5000);
         }
+
+        // Обработка кнопок редактирования
+        document.querySelectorAll('.btn-edit').forEach(button => {
+            button.addEventListener('click', function() {
+                const qsoId = this.dataset.id;
+                const row = document.querySelector(`.qso-row[data-qso-id="${qsoId}"]`);
+
+                // Заполняем форму данными из строки
+                document.getElementById('edit_id').value = qsoId;
+
+                // Дата и время
+                const dateCell = row.querySelector('td:nth-child(1) small');
+                const timeCell = row.querySelector('td:nth-child(2) small');
+                if (dateCell) document.getElementById('edit_date').value = dateCell.textContent.split('.').reverse().join('-');
+                if (timeCell) document.getElementById('edit_time').value = timeCell.textContent + ':00';
+
+                // Позывной
+                document.getElementById('edit_callsign').value = row.querySelector('td:nth-child(4) .callsign-badge').textContent;
+
+                // Диапазон
+                const bandCell = row.querySelector('td:nth-child(5) .band-badge');
+                document.getElementById('edit_band').value = bandCell ? bandCell.textContent : '';
+
+                // Вид связи
+                const modeCell = row.querySelector('td:nth-child(6) .mode-badge');
+                document.getElementById('edit_mode').value = modeCell ? modeCell.textContent : 'SSB';
+
+                // RST
+                const rstRcvdCell = row.querySelector('td:nth-child(7) small');
+                document.getElementById('edit_rst_rcvd').value = (rstRcvdCell && rstRcvdCell.textContent !== '-') ? rstRcvdCell.textContent : '';
+
+                const rstSentCell = row.querySelector('td:nth-child(8) small');
+                document.getElementById('edit_rst_sent').value = (rstSentCell && rstSentCell.textContent !== '-') ? rstSentCell.textContent : '';
+
+                // QTH локаторы
+                const gridsquareCell = row.querySelector('td:nth-child(9) small');
+                document.getElementById('edit_gridsquare').value = (gridsquareCell && gridsquareCell.textContent !== 'Не указан') ? gridsquareCell.textContent : '';
+
+                const myGridsquareCell = row.querySelector('td:nth-child(10) small');
+                document.getElementById('edit_my_gridsquare').value = (myGridsquareCell && myGridsquareCell.textContent !== 'Не указан') ? myGridsquareCell.textContent : '';
+
+                // Открываем модальное окно
+                const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
+                modal.show();
+            });
+        });
+
+        // Сохранение редактирования
+        document.getElementById('saveEditQSO').addEventListener('click', function() {
+            const form = document.getElementById('editQSOForm');
+            const formData = new FormData(form);
+            const qsoId = formData.get('id');
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+
+            fetch(`/logbook/edit/${qsoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData)),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+
+                if (data.success) {
+                    // Закрываем модальное окно
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editQSOModal'));
+                    modal.hide();
+
+                    // Показываем уведомление
+                    showAlert('success', 'Запись успешно обновлена');
+
+                    // Перезагружаем страницу через 1 секунду
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Неизвестная ошибка');
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+                console.error('Error:', error);
+                showAlert('danger', 'Ошибка при сохранении: ' + error.message);
+            });
+        });
+
+        // Обработка кнопок удаления
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function() {
+                const qsoId = this.dataset.id;
+                const callsign = this.dataset.callsign;
+                const row = document.querySelector(`.qso-row[data-qso-id="${qsoId}"]`);
+
+                // Заполняем информацию
+                document.getElementById('delete_id').value = qsoId;
+                document.getElementById('delete_callsign').textContent = callsign;
+
+                const dateCell = row.querySelector('td:nth-child(1) small');
+                const timeCell = row.querySelector('td:nth-child(2) small');
+                document.getElementById('delete_date').textContent = dateCell ? dateCell.textContent : '';
+                document.getElementById('delete_time').textContent = timeCell ? timeCell.textContent : '';
+
+                // Открываем модальное окно
+                const modal = new bootstrap.Modal(document.getElementById('deleteQSOModal'));
+                modal.show();
+            });
+        });
+
+        // Подтверждение удаления одной записи
+        document.getElementById('confirmDeleteQSO').addEventListener('click', function() {
+            const qsoId = document.getElementById('delete_id').value;
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+
+            fetch(`/logbook/delete/${qsoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-trash-alt"></i> Удалить';
+
+                if (data.success) {
+                    // Закрываем модальное окно
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteQSOModal'));
+                    modal.hide();
+
+                    // Показываем уведомление
+                    showAlert('success', 'Запись успешно удалена');
+
+                    // Перезагружаем страницу через 1 секунду
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Неизвестная ошибка');
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-trash-alt"></i> Удалить';
+                console.error('Error:', error);
+                showAlert('danger', 'Ошибка при удалении: ' + error.message);
+            });
+        });
     </script>
 </body>
 </html>
