@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from ..models import QSO, RadioProfile, ADIFUpload
+from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment
 
 
 def get_band_from_frequency(frequency):
@@ -175,39 +175,66 @@ def logbook_search(request, callsign):
         })
 
     search_callsign = request.GET.get('callsign', '').strip()
-    context = {'callsign': callsign, 'has_logs': True, 'search_callsign': search_callsign, 'qso_list': None}
 
+    # Получаем комментарии для этого лога (новые сверху)
+    comments = LogbookComment.objects.filter(callsign=callsign)[:20]
+
+    # Базовый queryset для всех QSO этого лога
+    base_queryset = QSO.objects.filter(my_callsign=callsign)
+
+    # Диапазоны и моды для матрицы
+    bands = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
+    modes = ['CW', 'SSB', 'FT8', 'FT4', 'RTTY', 'SSTV', 'MFSK', 'JT65', 'JT9', 'PSK31', 'AM', 'FM', 'DIG']
+
+    band_ranges = {
+        '160m': (1.8, 2.0), '80m': (3.5, 4.0), '40m': (7.0, 7.3), '30m': (10.1, 10.15),
+        '20m': (14.0, 14.35), '17m': (18.068, 18.168), '15m': (21.0, 21.45),
+        '12m': (24.89, 24.99), '10m': (28.0, 29.7), '6m': (50.0, 54.0),
+        '2m': (144.0, 148.0), '70cm': (420.0, 450.0), '23cm': (1240.0, 1300.0),
+        '13cm': (2300.0, 2450.0),  # Расширенный диапазон для 13cm
+    }
+
+    # Фильтруем по позывному корреспондента если задан
     if search_callsign:
-        qso_queryset = QSO.objects.filter(
-            my_callsign=callsign,
-            callsign__icontains=search_callsign
-        ).order_by('-date', '-time')
+        qso_queryset = base_queryset.filter(callsign__icontains=search_callsign).order_by('-date', '-time')
+    else:
+        qso_queryset = base_queryset.order_by('-date', '-time')
 
-        total_qso = qso_queryset.count()
-        unique_callsigns = qso_queryset.values('callsign').distinct().count()
+    total_qso = qso_queryset.count()
 
-        # Статистика по диапазонам
-        band_stats = {}
-        bands = ['160m', '80m', '40m', '20m', '15m', '10m', '6m', '2m', '70cm']
-        band_ranges = {
-            '160m': (1.8, 2.0), '80m': (3.5, 4.0), '40m': (7.0, 7.3), '20m': (14.0, 14.35),
-            '15m': (21.0, 21.45), '10m': (28.0, 29.7), '6m': (50.0, 54.0),
-            '2m': (144.0, 148.0), '70cm': (420.0, 450.0),
-        }
-
+    # Формируем матрицу mode x band - используем поле band из базы
+    # Формат: [[mode, band1_has, band2_has, ...], ...]
+    matrix = []
+    for mode in modes:
+        row = [mode]
         for band in bands:
-            if band in band_ranges:
-                min_freq, max_freq = band_ranges[band]
-                count = qso_queryset.filter(frequency__gte=min_freq, frequency__lte=max_freq).count()
-                if count > 0:
-                    band_stats[band] = count
+            count = qso_queryset.filter(
+                Q(mode__iexact=mode) &
+                (Q(band=band) | Q(frequency__gte=band_ranges[band][0], frequency__lte=band_ranges[band][1]))
+            ).count()
+            row.append(count > 0)
+        matrix.append(row)
 
-        context.update({
-            'qso_list': qso_queryset,
-            'total_qso': total_qso,
-            'unique_callsigns': unique_callsigns,
-            'band_stats': band_stats,
-        })
+    # Пагинация для детальной таблицы
+    page = int(request.GET.get('page', 1))
+    page_size = 50
+    start = (page - 1) * page_size
+    end = start + page_size
+    total_pages = (total_qso + page_size - 1) // page_size if total_qso > 0 else 1
+
+    context = {
+        'callsign': callsign,
+        'has_logs': True,
+        'search_callsign': search_callsign,
+        'qso_list': qso_queryset[start:end],
+        'comments': comments,
+        'total_qso': total_qso,
+        'matrix': matrix,
+        'bands': bands,
+        'modes': modes,
+        'current_page': page,
+        'total_pages': total_pages,
+    }
 
     return render(request, 'logbook_search.html', context)
 
@@ -316,6 +343,34 @@ def edit_qso(request, qso_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+def generate_captcha(request):
+    """
+    Генерация простой математической капчи
+    """
+    import random
+    import uuid
+
+    # Генерируем два случайных числа от 1 до 10
+    a = random.randint(1, 10)
+    b = random.randint(1, 10)
+    answer = a + b
+
+    # Создаём уникальный токен
+    token = str(uuid.uuid4())
+
+    # Сохраняем ответ в сессии
+    if 'captcha_token' not in request.session:
+        request.session['captcha_token'] = {}
+    request.session['captcha_token'][token] = answer
+    request.session.modified = True
+
+    return JsonResponse({
+        'success': True,
+        'token': token,
+        'question': f'{a} + {b} = ?'
+    })
+
+
 @login_required
 def delete_qso(request, qso_id):
     """
@@ -368,5 +423,68 @@ def get_qso(request, qso_id):
         })
     except (QSO.DoesNotExist, ValueError):
         return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def add_logbook_comment(request, callsign):
+    """
+    Добавление комментария к логу (logbook_search)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
+
+    try:
+        import json
+        data = json.loads(request.body)
+
+        author_callsign = data.get('author_callsign', '').strip().upper()
+        message = data.get('message', '').strip()
+        captcha_answer = data.get('captcha_answer', '').strip()
+        captcha_token = data.get('captcha_token', '').strip()
+
+        if not author_callsign:
+            return JsonResponse({'success': False, 'error': 'Введите позывной'}, status=400)
+
+        if not message:
+            return JsonResponse({'success': False, 'error': 'Введите сообщение'}, status=400)
+
+        # Проверка капчи
+        if not captcha_token or not captcha_answer:
+            return JsonResponse({'success': False, 'error': 'Пройдите проверку капчи'}, status=400)
+
+        # Проверяем токен капчи в сессии
+        session_captcha = request.session.get('captcha_token', {})
+        expected_answer = session_captcha.get(captcha_token, '')
+
+        if str(captcha_answer) != str(expected_answer):
+            return JsonResponse({'success': False, 'error': 'Неверный ответ на капчу'}, status=400)
+
+        # Удаляем использованный токен
+        if captcha_token in session_captcha:
+            del session_captcha[captcha_token]
+            request.session['captcha_token'] = session_captcha
+
+        # Создаём комментарий, привязанный к конкретному позывному лога
+        comment = LogbookComment.objects.create(
+            callsign=callsign.upper(),
+            author_callsign=author_callsign,
+            message=message
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Комментарий добавлен',
+            'comment': {
+                'id': str(comment.id),
+                'callsign': comment.callsign,
+                'author_callsign': comment.author_callsign,
+                'message': comment.message,
+                'created_at': comment.created_at.strftime('%d.%m.%Y %H:%M')
+            }
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
