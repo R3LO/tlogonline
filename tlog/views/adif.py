@@ -361,6 +361,7 @@ def parse_adif_record(record):
         'qth': r'<qth:(\d+)>([^<]+)',
         'location': r'<location:(\d+)>([^<]+)',
         'mode': r'<mode:(\d+)>([^<]+)',
+        'submode': r'<submode:(\d+)>([^<]+)',
         'band': r'<band:(\d+)>([^<]+)',
         'freq': r'<freq:(\d+)>([^<]+)',
         'freq_rx': r'<freq_rx:(\d+)>([^<]+)',
@@ -458,6 +459,12 @@ def parse_adif_record(record):
     # Значения по умолчанию
     if 'mode' not in data:
         data['mode'] = 'SSB'
+
+    # Если MODE = MFSK, используем SUBMODE (если есть), иначе оставляем MFSK
+    if data.get('mode', '').upper() == 'MFSK':
+        if 'submode' in data and data['submode']:
+            data['mode'] = data['submode'].strip().upper()
+
     if 'frequency' not in data:
         data['frequency'] = 0.0
 
