@@ -201,15 +201,25 @@
                 {% if total_count > 0 %}
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="mb-0"><i class="fas fa-list"></i> Записи QSO</h4>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#clearLogModal">
-                        <i class="fas fa-trash-alt"></i> Удалить весь лог
-                    </button>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'export_adif' %}?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}{% endif %}"
+                           class="btn btn-success"
+                           title="Экспорт лога в ADIF файл по фильтру">
+                            <i class="fas fa-file-export"></i> Экспорт ADIF
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#clearLogModal">
+                            <i class="fas fa-trash-alt"></i> Удалить весь лог
+                        </button>
+                    </div>
                 </div>
                 {% endif %}
 
                 <!-- Фильтры -->
                 <div class="filter-card">
                     <h6 class="mb-2"><i class="fas fa-filter"></i> Фильтрация</h6>
+                    <p class="mb-2 text-muted small fst-italic">
+                        <i class="fas fa-lightbulb"></i> При экспорте в ADIF файл и просмотре учитываются настройки этого фильтра
+                    </p>
                     <form method="GET" class="row g-2">
                         <div class="col-auto">
                             <input type="date" class="form-control form-control-sm" name="date_from"

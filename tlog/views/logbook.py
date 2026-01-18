@@ -2,9 +2,10 @@
 Представления для работы с журналом QSO
 """
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, LogbookComment
 
 
@@ -495,3 +496,155 @@ def privacy(request):
     Страница политики конфиденциальности
     """
     return render(request, 'privacy.html')
+
+
+@login_required
+def export_adif(request):
+    """
+    Экспорт лога в ADIF файл с учётом фильтров
+    """
+    # Получаем параметры фильтрации (те же что в logbook view)
+    search_callsign = request.GET.get('search_callsign', '').strip()
+    search_qth = request.GET.get('search_qth', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    mode_filter = request.GET.get('mode', '').strip()
+    band_filter = request.GET.get('band', '').strip()
+    sat_name_filter = request.GET.get('sat_name', '').strip()
+    lotw_filter = request.GET.get('lotw', '').strip()
+
+    # Базовый QuerySet для QSO пользователя
+    qso_queryset = QSO.objects.filter(user=request.user)
+
+    # Применяем поиск по части позывного
+    if search_callsign:
+        qso_queryset = qso_queryset.filter(callsign__icontains=search_callsign)
+
+    # Применяем поиск по части QTH локатора
+    if search_qth:
+        qso_queryset = qso_queryset.filter(gridsquare__icontains=search_qth)
+
+    # Фильтр по дате "с"
+    if date_from:
+        qso_queryset = qso_queryset.filter(date__gte=date_from)
+
+    # Фильтр по дате "до"
+    if date_to:
+        qso_queryset = qso_queryset.filter(date__lte=date_to)
+
+    # Применяем фильтры
+    if mode_filter:
+        qso_queryset = qso_queryset.filter(mode=mode_filter)
+
+    # Фильтр по диапазону
+    if band_filter:
+        qso_queryset = qso_queryset.filter(band=band_filter)
+
+    # Фильтр по SAT NAME
+    if sat_name_filter:
+        qso_queryset = qso_queryset.filter(sat_name=sat_name_filter)
+
+    # Фильтр по LoTW
+    if lotw_filter:
+        qso_queryset = qso_queryset.filter(lotw=lotw_filter)
+
+    # Сортируем по дате
+    qso_queryset = qso_queryset.order_by('-date', '-time')
+
+    # Формируем ADIF файл
+    adif_content = generate_adif_content(qso_queryset)
+
+    # Получаем позывной пользователя для имени файла
+    try:
+        user_callsign = request.user.radio_profile.callsign or request.user.username
+    except:
+        user_callsign = request.user.username
+
+    # Формируем имя файла
+    filename = f"{user_callsign}_log.adi"
+
+    response = HttpResponse(adif_content, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def generate_adif_content(qso_queryset):
+    """
+    Генерирует содержимое ADIF файла из набора записей QSO
+    """
+    lines = []
+
+    # Заголовок ADIF
+    lines.append('ADIF_VER:5 3.1.0')
+    lines.append(f'PROGRAMID: TLog tlogonline.ru 2026')
+    lines.append(f'CREATED_TIMESTAMP:{datetime.now().strftime("%Y%m%d %H%M%S")}')
+    lines.append('<EOH>')
+
+    # Записи QSO
+    for qso in qso_queryset:
+        record_parts = []
+
+        # Обязательные поля
+        if qso.callsign:
+            record_parts.append(f'<CALL:{len(qso.callsign)}>{qso.callsign}')
+
+        if qso.date:
+            date_str = qso.date.strftime('%Y%m%d')
+            record_parts.append(f'<QSO_DATE:8>{date_str}')
+
+        if qso.time:
+            time_str = qso.time.strftime('%H%M%S')
+            record_parts.append(f'<TIME_ON:6>{time_str}')
+
+        if qso.my_callsign:
+            record_parts.append(f'<STATION_CALLSIGN:{len(qso.my_callsign)}>{qso.my_callsign}')
+            record_parts.append(f'<MY_CALLSIGN:{len(qso.my_callsign)}>{qso.my_callsign}')
+
+        if qso.mode:
+            record_parts.append(f'<MODE:{len(qso.mode)}>{qso.mode}')
+
+        if qso.band:
+            record_parts.append(f'<BAND:{len(qso.band)}>{qso.band}')
+
+        if qso.frequency and qso.frequency > 0:
+            freq_str = f"{qso.frequency:.6f}".rstrip('0').rstrip('.')
+            record_parts.append(f'<FREQ:{len(freq_str)}>{freq_str}')
+
+        if qso.rst_sent:
+            record_parts.append(f'<RST_SENT:{len(qso.rst_sent)}>{qso.rst_sent}')
+
+        if qso.rst_rcvd:
+            record_parts.append(f'<RST_RCVD:{len(qso.rst_rcvd)}>{qso.rst_rcvd}')
+
+        if qso.gridsquare:
+            record_parts.append(f'<GRIDSQUARE:{len(qso.gridsquare)}>{qso.gridsquare}')
+
+        if qso.my_gridsquare:
+            record_parts.append(f'<MY_GRIDSQUARE:{len(qso.my_gridsquare)}>{qso.my_gridsquare}')
+
+        if qso.sat_name:
+            record_parts.append(f'<SAT_NAME:{len(qso.sat_name)}>{qso.sat_name}')
+
+        if qso.prop_mode:
+            record_parts.append(f'<PROP_MODE:{len(qso.prop_mode)}>{qso.prop_mode}')
+
+        if qso.cqz:
+            record_parts.append(f'<CQZ:{len(str(qso.cqz))}>{qso.cqz}')
+
+        if qso.ituz:
+            record_parts.append(f'<ITUZ:{len(str(qso.ituz))}>{qso.ituz}')
+
+        if qso.continent:
+            record_parts.append(f'<CONT:{len(qso.continent)}>{qso.continent}')
+
+        if qso.r150s:
+            record_parts.append(f'<COUNTRY:{len(qso.r150s)}>{qso.r150s}')
+
+        if qso.lotw:
+            record_parts.append(f'<LOTW_RX:{len(qso.lotw)}>{qso.lotw}')
+
+        # Добавляем запись
+        if record_parts:
+            lines.append(' '.join(record_parts) + ' <EOR>')
+
+    return '\n'.join(lines)
