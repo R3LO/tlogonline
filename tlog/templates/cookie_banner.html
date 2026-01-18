@@ -1,0 +1,115 @@
+<style>
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(33, 37, 41, 0.95);
+    color: white;
+    padding: 15px 20px;
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.cookie-banner.show {
+    display: block;
+    animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+.cookie-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.cookie-text {
+    flex: 1;
+    min-width: 280px;
+}
+.cookie-text p {
+    margin: 0;
+    font-size: 14px;
+}
+.cookie-text a {
+    color: #667eea;
+    text-decoration: none;
+}
+.cookie-text a:hover {
+    text-decoration: underline;
+}
+.cookie-buttons {
+    display: flex;
+    gap: 10px;
+}
+.cookie-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cookie-btn-accept {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+.cookie-btn-accept:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+.cookie-btn-decline {
+    background: transparent;
+    color: #adb5bd;
+    border: 1px solid #495057;
+}
+.cookie-btn-decline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+</style>
+
+<div id="cookieBanner" class="cookie-banner">
+    <div class="cookie-content">
+        <div class="cookie-text">
+            <p>
+                Мы используем файлы cookie для улучшения работы сайта.
+                Продолжая использовать сайт, вы соглашаетесь с нашей
+                <a href="/privacy/">политикой конфиденциальности</a>.
+            </p>
+        </div>
+        <div class="cookie-buttons">
+            <button class="cookie-btn cookie-btn-decline" onclick="declineCookies()">Отклонить</button>
+            <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">Принять</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function checkCookieConsent() {
+    const consent = localStorage.getItem('cookie_consent');
+    if (!consent) {
+        document.getElementById('cookieBanner').classList.add('show');
+    }
+}
+
+function acceptCookies() {
+    localStorage.setItem('cookie_consent', 'accepted');
+    document.getElementById('cookieBanner').classList.remove('show');
+}
+
+function declineCookies() {
+    localStorage.setItem('cookie_consent', 'declined');
+    document.getElementById('cookieBanner').classList.remove('show');
+}
+
+// Проверить при загрузке страницы
+document.addEventListener('DOMContentLoaded', checkCookieConsent);
+</script>

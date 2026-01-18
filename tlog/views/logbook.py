@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment
+from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, LogbookComment
 
 
 def get_band_from_frequency(frequency):
@@ -488,3 +488,10 @@ def add_logbook_comment(request, callsign):
         return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def privacy(request):
+    """
+    Страница политики конфиденциальности
+    """
+    return render(request, 'privacy.html')
