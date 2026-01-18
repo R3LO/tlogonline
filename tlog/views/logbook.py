@@ -3,7 +3,7 @@
 """
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, LogbookComment
@@ -496,6 +496,230 @@ def privacy(request):
     Страница политики конфиденциальности
     """
     return render(request, 'privacy.html')
+
+
+def qth_map(request):
+    """
+    Карта QTH локаторов пользователя
+    """
+    from ..models import QSO
+
+    # Получаем все уникальные QTH локаторы из связей пользователя
+    qso_list = QSO.objects.filter(user=request.user, gridsquare__isnull=False).exclude(gridsquare='')
+
+    # Группируем по локаторам с подсчетом количества связей
+    grid_stats = {}
+    for qso in qso_list:
+        grid = qso.gridsquare.upper().strip()
+        if grid:
+            if grid not in grid_stats:
+                grid_stats[grid] = {
+                    'count': 0,
+                    'callsigns': set(),
+                    'first_date': None,
+                    'last_date': None
+                }
+            grid_stats[grid]['count'] += 1
+            grid_stats[grid]['callsigns'].add(qso.callsign)
+            if not grid_stats[grid]['first_date'] or qso.date < grid_stats[grid]['first_date']:
+                grid_stats[grid]['first_date'] = qso.date
+            if not grid_stats[grid]['last_date'] or qso.date > grid_stats[grid]['last_date']:
+                grid_stats[grid]['last_date'] = qso.date
+
+    # Преобразуем в список для сортировки
+    grid_data = []
+    for grid, stats in grid_stats.items():
+        grid_data.append({
+            'grid': grid,
+            'count': stats['count'],
+            'unique_callsigns': len(stats['callsigns']),
+            'first_date': stats['first_date'],
+            'last_date': stats['last_date'],
+            'lat': None,  # Здесь можно добавить вычисление координат
+            'lon': None
+        })
+
+    # Сортируем по количеству связей
+    grid_data.sort(key=lambda x: x['count'], reverse=True)
+
+    # Статистика
+    total_grids = len(grid_data)
+    total_qso_with_grid = sum(g['count'] for g in grid_data)
+    unique_callsigns = len(set(qso.callsign for qso in qso_list))
+
+    return render(request, 'qth_map.html', {
+        'grid_data': grid_data,
+        'total_grids': total_grids,
+        'total_qso_with_grid': total_qso_with_grid,
+        'unique_callsigns': unique_callsigns,
+    })
+
+
+def achievements(request):
+    """
+    Мои достижения - статистика и награды
+    """
+    from ..models import QSO, ADIFUpload
+    from django.utils import timezone
+    from datetime import timedelta
+
+    user = request.user
+
+    # Основная статистика
+    total_qso = QSO.objects.filter(user=user).count()
+
+    # Статистика по диапазонам
+    bands = {}
+    band_order = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
+    band_ranges = {
+        '160m': (1.8, 2.0), '80m': (3.5, 4.0), '40m': (7.0, 7.3), '30m': (10.1, 10.15),
+        '20m': (14.0, 14.35), '17m': (18.068, 18.168), '15m': (21.0, 21.45),
+        '12m': (24.89, 24.99), '10m': (28.0, 29.7), '6m': (50.0, 54.0),
+        '2m': (144.0, 148.0), '70cm': (420.0, 450.0), '23cm': (1240.0, 1300.0),
+        '13cm': (2300.0, 2450.0),
+    }
+
+    for band in band_order:
+        count = QSO.objects.filter(user=user, band=band).count()
+        if count > 0:
+            bands[band] = count
+
+    # Статистика по модуляциям
+    modes = {}
+    mode_list = QSO.objects.filter(user=user).values_list('mode', flat=True).distinct()
+    for mode in mode_list:
+        count = QSO.objects.filter(user=user, mode=mode).count()
+        if count > 0:
+            modes[mode] = count
+
+    # Уникальные позывные
+    unique_callsigns = QSO.objects.filter(user=user).values('callsign').distinct().count()
+
+    # Страны Р-150-С
+    r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+    # QTH локаторы
+    grids_count = QSO.objects.filter(user=user).exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
+
+    # LoTW подтверждения
+    lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
+
+    # Сегодняшние связи
+    today = timezone.now().date()
+    today_qso = QSO.objects.filter(user=user, date=today).count()
+
+    # Связи за последнюю неделю
+    week_ago = today - timedelta(days=7)
+    week_qso = QSO.objects.filter(user=user, date__gte=week_ago).count()
+
+    # Связи за последний месяц
+    month_ago = today - timedelta(days=30)
+    month_qso = QSO.objects.filter(user=user, date__gte=month_ago).count()
+
+    # Самая активная дата
+    most_active_date = QSO.objects.filter(user=user).values('date').annotate(
+        count=Count('id')
+    ).order_by('-count').first()
+
+    # Достижения (awards)
+    achievements = []
+
+    # 100 QSO
+    if total_qso >= 100:
+        achievements.append({
+            'title': 'Новичок',
+            'description': 'Зарегистрировано 100+ QSO',
+            'icon': '🎯',
+            'unlocked': True
+        })
+
+    # 500 QSO
+    if total_qso >= 500:
+        achievements.append({
+            'title': 'Опытный',
+            'description': 'Зарегистрировано 500+ QSO',
+            'icon': '⭐',
+            'unlocked': True
+        })
+
+    # 1000 QSO
+    if total_qso >= 1000:
+        achievements.append({
+            'title': 'Мастер',
+            'description': 'Зарегистрировано 1000+ QSO',
+            'icon': '🏆',
+            'unlocked': True
+        })
+
+    # 10 диапазонов
+    if len(bands) >= 10:
+        achievements.append({
+            'title': 'Разведчик',
+            'description': 'Связи на 10+ диапазонах',
+            'icon': '📡',
+            'unlocked': True
+        })
+
+    # 5 видов модуляции
+    if len(modes) >= 5:
+        achievements.append({
+            'title': 'Универсал',
+            'description': 'Связи на 5+ видах модуляции',
+            'icon': '🎛️',
+            'unlocked': True
+        })
+
+    # 50 стран Р-150-С
+    if r150s_count >= 50:
+        achievements.append({
+            'title': 'Охотник за DX',
+            'description': 'Связи с 50+ странами Р-150-С',
+            'icon': '🌍',
+            'unlocked': True
+        })
+
+    # 100 стран Р-150-С
+    if r150s_count >= 100:
+        achievements.append({
+            'title': 'Патриот',
+            'description': 'Связи со 100+ странами Р-150-С',
+            'icon': '🎖️',
+            'unlocked': True
+        })
+
+    # LoTW подтверждения
+    if lotw_count >= 10:
+        achievements.append({
+            'title': 'Цифровой оператор',
+            'description': '10+ подтверждений LoTW',
+            'icon': '💻',
+            'unlocked': True
+        })
+
+    # Активность за неделю
+    if week_qso >= 50:
+        achievements.append({
+            'title': 'В эфире',
+            'description': '50+ связей за неделю',
+            'icon': '📻',
+            'unlocked': True
+        })
+
+    return render(request, 'achievements.html', {
+        'total_qso': total_qso,
+        'bands': bands,
+        'band_order': band_order,
+        'modes': modes,
+        'unique_callsigns': unique_callsigns,
+        'r150s_count': r150s_count,
+        'grids_count': grids_count,
+        'lotw_count': lotw_count,
+        'today_qso': today_qso,
+        'week_qso': week_qso,
+        'month_qso': month_qso,
+        'most_active_date': most_active_date,
+        'achievements': achievements,
+    })
 
 
 @login_required

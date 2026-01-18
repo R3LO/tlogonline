@@ -7,7 +7,7 @@ from .views import (
     logout_view, adif_upload, clear_logbook,
     profile_update, logbook_search, delete_adif_uploads,
     edit_qso, delete_qso, get_qso, add_logbook_comment,
-    generate_captcha, privacy, export_adif
+    generate_captcha, privacy, export_adif, qth_map, achievements
 )
 
 urlpatterns = [
@@ -32,6 +32,8 @@ urlpatterns = [
     path('logbook/<str:callsign>/comment/', add_logbook_comment, name='add_logbook_comment'),
     path('captcha/', generate_captcha, name='generate_captcha'),
     path('privacy/', privacy, name='privacy'),
+    path('qth-map/', qth_map, name='qth_map'),
+    path('achievements/', achievements, name='achievements'),
 
     # Поиск по логам - динамический маршрут для позывных (должен быть последним)
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
