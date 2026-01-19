@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from datetime import datetime, time
 from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, check_user_blocked
 
 
@@ -893,3 +893,173 @@ def generate_adif_content(qso_queryset):
             lines.append(' '.join(record_parts) + ' <EOR>')
 
     return '\n'.join(lines)
+
+
+@login_required
+def add_qso(request):
+    """
+    Добавление новой записи QSO
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return JsonResponse({'error': 'Ваш аккаунт заблокирован'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        import json
+        from .. import r150s
+        import os
+        from django.conf import settings
+        from django.db.models import Q
+
+        data = json.loads(request.body)
+
+        # Получаем данные из формы
+        date_str = data.get('date')
+        time_str = data.get('time')
+        my_callsign = data.get('my_callsign', '').strip().upper()[:20] or request.user.username
+        callsign = data.get('callsign', '').strip().upper()[:20]
+        band = data.get('band', '')[:10] or None
+        mode = data.get('mode') or 'SSB'
+
+        # Проверка на дубликат (мой позывной, позывной корреспондента, дата, время - только часы и минуты, вид связи, диапазон)
+        # Нормализуем данные для сравнения
+        my_callsign_normalized = my_callsign.upper()
+        callsign_normalized = callsign.upper()
+        mode_normalized = mode.upper() if mode else 'SSB'
+        band_normalized = band.upper() if band else None
+
+        # Получаем время из запроса (формат HH:MM или HH:MM:SS)
+        time_parts = time_str.split(':')
+        hour = int(time_parts[0])
+        minute = int(time_parts[1]) if len(time_parts) > 1 else 0
+
+        # Создаем базовый запрос - сравниваем только часы и минуты (без секунд)
+        duplicate_query = Q(
+            user=request.user,
+            my_callsign__iexact=my_callsign_normalized,
+            callsign__iexact=callsign_normalized,
+            date=date_str,
+            mode__iexact=mode_normalized,
+            time__hour=hour,
+            time__minute=minute
+        )
+
+        # Добавляем диапазон если он указан
+        if band_normalized:
+            duplicate_query &= Q(band__iexact=band_normalized)
+        else:
+            duplicate_query &= Q(band__isnull=True) | Q(band='')
+
+        duplicate_exists = QSO.objects.filter(duplicate_query).exists()
+
+        if duplicate_exists:
+            return JsonResponse({
+                'error': f'QSO с {callsign_normalized} на {date_str} {hour:02d}:{minute:02d} {mode_normalized}/{band_normalized or "N/A"} уже существует'
+            }, status=400)
+
+        # Проверяем обязательные поля
+        if not all([date_str, time_str, callsign]):
+            return JsonResponse({
+                'error': 'Заполните обязательные поля: дата, время, позывной'
+            }, status=400)
+
+        # Валидация форматов
+        if len(callsign) > 20:
+            return JsonResponse({
+                'error': 'Позывной не должен превышать 20 символов'
+            }, status=400)
+
+        frequency = data.get('frequency')
+        rst_rcvd = data.get('rst_rcvd', '')[:10] or None
+        rst_sent = data.get('rst_sent', '')[:10] or None
+        my_gridsquare = data.get('my_gridsquare', '')[:10] or None
+        gridsquare = data.get('gridsquare', '')[:10] or None
+        sat_qso = data.get('sat_qso', 'N')
+        lotw = data.get('lotw', 'N')
+
+        # Инициализируем базы данных CTY и R150
+        tlog_dir = os.path.join(settings.BASE_DIR, 'tlog')
+        db_path = os.path.join(tlog_dir, 'r150cty.dat')
+        cty_path = os.path.join(tlog_dir, 'cty.dat')
+
+        r150s.init_database(db_path)
+        r150s.init_cty_database(cty_path)
+
+        # Поля SAT - только если Sat QSO отмечен
+        if sat_qso == 'Y':
+            sat_name = data.get('sat_name', '')[:50] or None
+            sat_prop_mode = data.get('sat_prop_mode', '')[:50] or None
+            prop_mode = sat_prop_mode
+        else:
+            sat_name = None
+            prop_mode = None
+
+        # Если cqz и ituz не переданы из формы, получаем из баз данных CTY
+        cqz = data.get('cqz')
+        ituz = data.get('ituz')
+        continent = None
+
+        # Получаем информацию о позывном из баз данных
+        if callsign:
+            dxcc_info = r150s.get_dxcc_info(callsign, db_path)
+            if dxcc_info:
+                # Заполняем cqz, ituz и continent если не указаны в форме
+                if not cqz:
+                    cqz = dxcc_info.get('cq_zone')
+                if not ituz:
+                    ituz = dxcc_info.get('itu_zone')
+                continent = dxcc_info.get('continent')
+
+                # Получаем country из r150cty.dat
+                r150s_country = dxcc_info.get('country')
+
+                # Получаем state (primary_prefix) из cty.dat
+                state = r150s.get_cty_primary_prefix(callsign, cty_path)
+            else:
+                r150s_country = None
+                state = None
+        else:
+            r150s_country = None
+            state = None
+
+        # Создаем QSO
+        qso = QSO.objects.create(
+            user=request.user,
+            my_callsign=my_callsign,
+            callsign=callsign,
+            date=date_str,
+            time=time_str,
+            band=band,
+            mode=mode,
+            frequency=float(frequency) if frequency else None,
+            rst_rcvd=rst_rcvd,
+            rst_sent=rst_sent,
+            my_gridsquare=my_gridsquare,
+            gridsquare=gridsquare,
+            sat_name=sat_name,
+            prop_mode=prop_mode,
+            cqz=int(cqz) if cqz else None,
+            ituz=int(ituz) if ituz else None,
+            lotw=lotw,
+            r150s=r150s_country if r150s_country else None,
+            state=state if state else None,
+            continent=continent if continent else None
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'QSO успешно добавлено',
+            'qso_id': str(qso.id)
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

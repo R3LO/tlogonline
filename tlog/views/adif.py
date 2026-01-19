@@ -27,7 +27,7 @@ def adif_upload(request):
             # Проверяем наличие файла
             if 'file' not in request.FILES:
                 messages.error(request, 'Файл не выбран')
-                return redirect('dashboard')
+                return redirect('logbook')
 
             from ..models import ADIFUpload
 
@@ -36,12 +36,12 @@ def adif_upload(request):
             # Проверяем расширение файла
             if not uploaded_file.name.lower().endswith(('.adi', '.adif')):
                 messages.error(request, 'Неподдерживаемый формат файла. Разрешены только .adi и .adif файлы')
-                return redirect('dashboard')
+                return redirect('logbook')
 
             # Проверяем размер файла (максимум 10MB)
             if uploaded_file.size > 10 * 1024 * 1024:
                 messages.error(request, 'Размер файла превышает 10MB')
-                return redirect('dashboard')
+                return redirect('logbook')
 
             # Создаем запись в базе данных
             adif_upload = ADIFUpload.objects.create(
@@ -104,7 +104,7 @@ def adif_upload(request):
         except Exception as e:
             messages.error(request, f'Ошибка при загрузке файла: {str(e)}')
 
-    return redirect('dashboard')
+    return redirect('logbook')
 
 
 def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=None, my_gridsquare_default=None, prop_mode_default=None, sat_name_default=None, add_extra_tags=False):
@@ -208,14 +208,45 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                     band_qso = qso_data.get('band', '')
                     mode_qso = qso_data.get('mode', 'SSB')
 
-                    duplicate_check = QSO.objects.filter(
-                        user=user,
-                        callsign=callsign_qso,
-                        date=date_qso,
-                        time=time_qso
-                    ).exists()
+                    # Проверка на дубликат
+                    # Сравниваем: мой позывной, позывной корреспондента, дата, время (только часы и минуты), вид связи, диапазон
+                    if band_qso:
+                        duplicate_query = QSO.objects.filter(
+                            user=user,
+                            my_callsign__iexact=user_callsign,
+                            callsign=callsign_qso,
+                            date=date_qso,
+                            mode__iexact=mode_qso,
+                            band__iexact=band_qso
+                        )
+                    else:
+                        duplicate_query = QSO.objects.filter(
+                            user=user,
+                            my_callsign__iexact=user_callsign,
+                            callsign=callsign_qso,
+                            date=date_qso,
+                            mode__iexact=mode_qso
+                        ).filter(Q(band__isnull=True) | Q(band=''))
 
-                    if not duplicate_check:
+                    # Проверяем время - только часы и минуты (игнорируем секунды)
+                    if time_qso:
+                        if isinstance(time_qso, time):
+                            duplicate_query = duplicate_query.filter(
+                                time__hour=time_qso.hour,
+                                time__minute=time_qso.minute
+                            )
+                        else:
+                            time_parts = str(time_qso).split(':')
+                            hour = int(time_parts[0])
+                            minute = int(time_parts[1]) if len(time_parts) > 1 else 0
+                            duplicate_query = duplicate_query.filter(
+                                time__hour=hour,
+                                time__minute=minute
+                            )
+
+                    duplicate_exists = duplicate_query.exists()
+
+                    if not duplicate_exists:
                         # Валидация и очистка данных
                         frequency = qso_data.get('frequency', 0.0)
                         if not isinstance(frequency, (int, float)) or frequency < 0:

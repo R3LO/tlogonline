@@ -203,11 +203,17 @@
 
             <!-- Content -->
             <div class="p-4">
-                <!-- Управление логом -->
-                {% if total_count > 0 %}
+                <!-- Заголовок и кнопки управления -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="mb-0"><i class="fas fa-list"></i> Записи QSO</h4>
                     <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQSOModal">
+                            <i class="fas fa-plus"></i> Добавить QSO
+                        </button>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adifUploadModal">
+                            <i class="fas fa-upload"></i> Загрузить ADIF
+                        </button>
+                        {% if total_count > 0 %}
                         <a href="{% url 'export_adif' %}?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}{% endif %}"
                            class="btn btn-success"
                            title="Экспорт лога в ADIF файл по фильтру">
@@ -216,7 +222,19 @@
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#clearLogModal">
                             <i class="fas fa-trash-alt"></i> Удалить весь лог
                         </button>
+                        {% endif %}
                     </div>
+                </div>
+
+                <!-- Сообщения Django -->
+                {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        <i class="fas fa-info-circle"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
 
@@ -444,10 +462,7 @@
                     <div class="text-center py-5">
                         <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
                         <h4 class="text-muted">QSO не найдены</h4>
-                        <p class="text-muted">Попробуйте изменить параметры поиска или фильтрации</p>
-                        <a href="/dashboard/" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Добавить QSO
-                        </a>
+                        <p class="text-muted">Добавьте свою первую радиосвязь, нажав кнопку "Добавить QSO" выше</p>
                     </div>
                 {% endif %}
             </div>
@@ -455,6 +470,199 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Модальное окно подтверждения добавления следующего QSO -->
+    <div class="modal fade" id="addAnotherQSOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle"></i> QSO добавлено
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p class="mb-0">QSO успешно добавлено!</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="addAnotherQSO">
+                        <i class="fas fa-plus"></i> Добавить еще QSO
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Завершить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления QSO -->
+    <div class="modal fade" id="addQSOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus"></i> Добавление QSO
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addQSOForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Дата *</label>
+                                <input type="date" class="form-control" id="add_date" name="date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Время *</label>
+                                <input type="time" class="form-control" id="add_time" name="time" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой позывной</label>
+                                <input type="text" class="form-control" id="add_my_callsign" name="my_callsign" value="{{ user_callsign }}" placeholder="Например: UA1ABC">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Позывной корреспондента *</label>
+                                <input type="text" class="form-control" id="add_callsign" name="callsign" required placeholder="Например: UA3XYZ">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Диапазон</label>
+                                <select class="form-select" id="add_band" name="band">
+                                    <option value="">Не указано</option>
+                                    <option value="160m">160m</option>
+                                    <option value="80m">80m</option>
+                                    <option value="40m">40m</option>
+                                    <option value="30m">30m</option>
+                                    <option value="20m">20m</option>
+                                    <option value="17m">17m</option>
+                                    <option value="15m">15m</option>
+                                    <option value="12m">12m</option>
+                                    <option value="10m">10m</option>
+                                    <option value="6m">6m</option>
+                                    <option value="4m">4m</option>
+                                    <option value="2m">2m</option>
+                                    <option value="70cm">70cm</option>
+                                    <option value="23cm">23cm</option>
+                                    <option value="13cm">13cm</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Вид связи</label>
+                                <select class="form-select" id="add_mode" name="mode">
+                                    <option value="SSB">SSB</option>
+                                    <option value="CW">CW</option>
+                                    <option value="FT8">FT8</option>
+                                    <option value="FT4">FT4</option>
+                                    <option value="JS8">JS8</option>
+                                    <option value="RTTY">RTTY</option>
+                                    <option value="PSK31">PSK31</option>
+                                    <option value="PSK63">PSK63</option>
+                                    <option value="SSTV">SSTV</option>
+                                    <option value="MFSK">MFSK</option>
+                                    <option value="JT65">JT65</option>
+                                    <option value="JT9">JT9</option>
+                                    <option value="WSPR">WSPR</option>
+                                    <option value="ATV">ATV</option>
+                                    <option value="DMR">DMR</option>
+                                    <option value="DSTAR">DSTAR</option>
+                                    <option value="C4FM">C4FM</option>
+                                    <option value="AM">AM</option>
+                                    <option value="FM">FM</option>
+                                    <option value="DIGITAL">DIGITAL</option>
+                                    <option value="OTHER">OTHER</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Частота (МГц)</label>
+                                <input type="number" step="0.001" class="form-control" id="add_frequency" name="frequency" placeholder="Например: 14.200">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RST принятый</label>
+                                <input type="text" class="form-control" id="add_rst_rcvd" name="rst_rcvd" placeholder="Например: 59">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">RST переданный</label>
+                                <input type="text" class="form-control" id="add_rst_sent" name="rst_sent" placeholder="Например: 59">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LoTW</label>
+                                <select class="form-select" id="add_lotw" name="lotw">
+                                    <option value="N">Нет</option>
+                                    <option value="Y">Да</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой QTH локатор</label>
+                                <input type="text" class="form-control" id="add_my_gridsquare" name="my_gridsquare" placeholder="Например: KO85UU">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">QTH локатор корреспондента</label>
+                                <input type="text" class="form-control" id="add_gridsquare" name="gridsquare" placeholder="Например: KO85UU">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">CQ зона</label>
+                                <input type="number" class="form-control" id="add_cqz" name="cqz" placeholder="Например: 15">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ITU зона</label>
+                                <input type="number" class="form-control" id="add_ituz" name="ituz" placeholder="Например: 54">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="add_sat_qso" name="sat_qso">
+                                    <label class="form-check-label" for="add_sat_qso">
+                                        <strong>Sat QSO</strong> - спутниковая связь
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" id="sat_fields" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Режим распространения (PROP_MODE)</label>
+                                <select class="form-select" id="add_sat_prop_mode" name="sat_prop_mode">
+                                    <option value="">Не указано</option>
+                                    <option value="SAT">SAT - Спутник</option>
+                                    <option value="AUR">AUR - Аврора</option>
+                                    <option value="EME">EME - Луна</option>
+                                    <option value="F2">F2 - Распространение F2</option>
+                                    <option value="BS">BS - Рассеяние на метеорах</option>
+                                    <option value="AIR">AIR - Авиационная связь</option>
+                                    <option value="TROPO">TROPO - Тропосферное прохождение</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Название спутника (SAT_NAME)</label>
+                                <input type="text" class="form-control" id="add_sat_name" name="sat_name" placeholder="Например: AO-91, FO-29, SO-50">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Завершить
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveAddQSO">
+                        <i class="fas fa-plus"></i> Добавить QSO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Модальное окно подтверждения удаления лога -->
     <div class="modal fade" id="clearLogModal" tabindex="-1" aria-labelledby="clearLogModalLabel" aria-hidden="true">
@@ -930,6 +1138,191 @@
             });
         });
     </script>
+    <script src="{% static 'js/add_qso.js' %}"></script>
+    <script>
+        // Инициализация функций добавления QSO при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initAddQSO === 'function') {
+                initAddQSO();
+            }
+        });
+    </script>
 {% include 'cookie_banner.html' %}
+
+    <!-- Модальное окно загрузки ADIF файла -->
+    <div class="modal fade" id="adifUploadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-upload"></i> Загрузить ADIF файл
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'adif_upload' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Выберите файл</label>
+                            <input type="file" class="form-control" name="file" accept=".adi,.adif" required>
+                            <div class="form-text">Поддерживаемые форматы: .adi, .adif</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="adif_add_extra_tags" name="add_extra_tags">
+                                <label class="form-check-label" for="adif_add_extra_tags">
+                                    Добавить дополнительные теги
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row" id="adif-options" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Мой позывной (MY_CALLSIGN)</label>
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="adif_override_my_callsign" name="override_my_callsign">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_callsign" id="adif_my_callsign" placeholder="Например: R3LO">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Мой QTH Loc (MY_GRIDSQUARE)</label>
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="adif_override_my_gridsquare" name="override_my_gridsquare">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_gridsquare" id="adif_my_gridsquare" placeholder="Например: KO85UU">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="adif-options-sat" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Режим распространения (PROP_MODE)</label>
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="adif_override_prop_mode" name="override_prop_mode">
+                                    </div>
+                                    <input type="text" class="form-control" name="prop_mode" id="adif_prop_mode" value="SAT">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Название спутника (SAT_NAME)</label>
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" id="adif_override_sat_name" name="override_sat_name">
+                                    </div>
+                                    <input type="text" class="form-control" name="sat_name" id="adif_sat_name" value="QO-100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Оптимизированная загрузка:</strong> данные загружаются пакетами по 100 записей с автоматической проверкой дубликатов.
+                                Дубликаты определяются по совпадению: мой позывной, позывной корреспондента, дата, время, диапазон и вид связи.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-upload"></i> Загрузить и обработать
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация модального окна загрузки ADIF
+        document.addEventListener('DOMContentLoaded', function() {
+            const adifUploadModal = document.getElementById('adifUploadModal');
+            const addExtraTagsCheckbox = document.getElementById('adif_add_extra_tags');
+            const adifOptions = document.getElementById('adif-options');
+            const adifOptionsSat = document.getElementById('adif-options-sat');
+
+            // Загружаем сохраненные настройки из cookies
+            const savedState = getCookie('adif_add_extra_tags');
+            if (savedState === 'true') {
+                addExtraTagsCheckbox.checked = true;
+                adifOptions.style.display = 'flex';
+                adifOptionsSat.style.display = 'flex';
+            }
+
+            // Загружаем сохраненные значения
+            const savedMyCallsign = getCookie('adif_my_callsign');
+            if (savedMyCallsign) {
+                document.getElementById('adif_my_callsign').value = savedMyCallsign;
+            }
+            const savedMyGridsquare = getCookie('adif_my_gridsquare');
+            if (savedMyGridsquare) {
+                document.getElementById('adif_my_gridsquare').value = savedMyGridsquare;
+            }
+            const savedPropMode = getCookie('adif_prop_mode');
+            if (savedPropMode) {
+                document.getElementById('adif_prop_mode').value = savedPropMode;
+            }
+            const savedSatName = getCookie('adif_sat_name');
+            if (savedSatName) {
+                document.getElementById('adif_sat_name').value = savedSatName;
+            }
+
+            // Загружаем состояния галочек переопределения
+            const savedOverrideMyCallsign = getCookie('adif_override_my_callsign');
+            if (savedOverrideMyCallsign === 'true') {
+                document.getElementById('adif_override_my_callsign').checked = true;
+            }
+            const savedOverrideMyGridsquare = getCookie('adif_override_my_gridsquare');
+            if (savedOverrideMyGridsquare === 'true') {
+                document.getElementById('adif_override_my_gridsquare').checked = true;
+            }
+            const savedOverridePropMode = getCookie('adif_override_prop_mode');
+            if (savedOverridePropMode === 'true') {
+                document.getElementById('adif_override_prop_mode').checked = true;
+            }
+            const savedOverrideSatName = getCookie('adif_override_sat_name');
+            if (savedOverrideSatName === 'true') {
+                document.getElementById('adif_override_sat_name').checked = true;
+            }
+
+            // Обработчик изменения галочки "Добавить дополнительные теги"
+            addExtraTagsCheckbox.addEventListener('change', function() {
+                adifOptions.style.display = this.checked ? 'flex' : 'none';
+                adifOptionsSat.style.display = this.checked ? 'flex' : 'none';
+                setCookie('adif_add_extra_tags', this.checked, 365);
+            });
+
+            // Сохраняем значения при изменении
+            document.getElementById('adif_my_callsign').addEventListener('change', function() {
+                setCookie('adif_my_callsign', this.value, 365);
+            });
+            document.getElementById('adif_my_gridsquare').addEventListener('change', function() {
+                setCookie('adif_my_gridsquare', this.value, 365);
+            });
+            document.getElementById('adif_prop_mode').addEventListener('change', function() {
+                setCookie('adif_prop_mode', this.value, 365);
+            });
+            document.getElementById('adif_sat_name').addEventListener('change', function() {
+                setCookie('adif_sat_name', this.value, 365);
+            });
+
+            // Сохраняем состояния галочек переопределения
+            document.getElementById('adif_override_my_callsign').addEventListener('change', function() {
+                setCookie('adif_override_my_callsign', this.checked, 365);
+            });
+            document.getElementById('adif_override_my_gridsquare').addEventListener('change', function() {
+                setCookie('adif_override_my_gridsquare', this.checked, 365);
+            });
+            document.getElementById('adif_override_prop_mode').addEventListener('change', function() {
+                setCookie('adif_override_prop_mode', this.checked, 365);
+            });
+            document.getElementById('adif_override_sat_name').addEventListener('change', function() {
+                setCookie('adif_override_sat_name', this.checked, 365);
+            });
+        });
+    </script>
 </body>
 </html>

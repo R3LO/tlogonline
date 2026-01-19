@@ -1,0 +1,251 @@
+// ========== Функции для добавления QSO ==========
+
+// Функции для работы с cookies (общие с logbook.js)
+function setCookie(name, value, days) {
+    let expires = '';
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + (encodeURIComponent(value) || '') + expires + '; path=/';
+}
+
+// getCookie и showAlert определены в logbook.js и доступны глобально
+
+// Загрузка настроек из cookies при открытии модального окна
+function initAddQSOModal() {
+    document.getElementById('addQSOModal').addEventListener('show.bs.modal', function() {
+        // Устанавливаем текущую дату и время
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().slice(0, 5);
+
+        // Только если поля пустые, устанавливаем текущие дату и время
+        if (!document.getElementById('add_date').value) {
+            document.getElementById('add_date').value = dateStr;
+        }
+        if (!document.getElementById('add_time').value) {
+            document.getElementById('add_time').value = timeStr;
+        }
+
+        // Загружаем сохраненные настройки из cookies
+        const savedSatQSO = getCookie('add_qso_sat_qso');
+        const savedSatPropMode = getCookie('add_qso_sat_prop_mode');
+        const savedSatName = getCookie('add_qso_sat_name');
+        const savedBand = getCookie('add_qso_band');
+        const savedMode = getCookie('add_qso_mode');
+        const savedLotw = getCookie('add_qso_lotw');
+        const savedMyCallsign = getCookie('add_qso_my_callsign');
+
+        // Показываем/скрываем поля SAT в зависимости от чекбокса
+        const satFields = document.getElementById('sat_fields');
+        if (savedSatQSO === 'true') {
+            document.getElementById('add_sat_qso').checked = true;
+            satFields.style.display = 'flex';
+        } else {
+            document.getElementById('add_sat_qso').checked = false;
+            satFields.style.display = 'none';
+            // Очищаем SAT поля если Sat QSO не отмечен
+            document.getElementById('add_sat_prop_mode').value = '';
+            document.getElementById('add_sat_name').value = '';
+        }
+
+        if (savedSatPropMode && savedSatQSO === 'true') document.getElementById('add_sat_prop_mode').value = savedSatPropMode;
+        if (savedSatName && savedSatQSO === 'true') document.getElementById('add_sat_name').value = savedSatName;
+        if (savedBand) document.getElementById('add_band').value = savedBand;
+        if (savedMode) document.getElementById('add_mode').value = savedMode;
+        if (savedLotw) document.getElementById('add_lotw').value = savedLotw;
+        if (savedMyCallsign) document.getElementById('add_my_callsign').value = savedMyCallsign;
+    });
+}
+
+// Показ/скрытие полей спутниковой связи
+function initSatQSOCheckbox() {
+    document.getElementById('add_sat_qso').addEventListener('change', function() {
+        const satFields = document.getElementById('sat_fields');
+        satFields.style.display = this.checked ? 'flex' : 'none';
+    });
+}
+
+// Сохранение настроек в cookies при отправке формы
+function saveQSOsettings() {
+    setCookie('add_qso_sat_qso', document.getElementById('add_sat_qso').checked, 365);
+
+    // Сохраняем SAT настройки только если Sat QSO включен
+    if (document.getElementById('add_sat_qso').checked) {
+        setCookie('add_qso_sat_prop_mode', document.getElementById('add_sat_prop_mode').value, 365);
+        setCookie('add_qso_sat_name', document.getElementById('add_sat_name').value, 365);
+    } else {
+        // Если Sat QSO не включен, очищаем SAT настройки
+        setCookie('add_qso_sat_prop_mode', '', 365);
+        setCookie('add_qso_sat_name', '', 365);
+    }
+
+    setCookie('add_qso_band', document.getElementById('add_band').value, 365);
+    setCookie('add_qso_mode', document.getElementById('add_mode').value, 365);
+    setCookie('add_qso_lotw', document.getElementById('add_lotw').value, 365);
+    setCookie('add_qso_my_callsign', document.getElementById('add_my_callsign').value, 365);
+}
+
+// Сброс формы
+function resetAddQSOForm() {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().slice(0, 5);
+
+    document.getElementById('add_date').value = dateStr;
+    document.getElementById('add_time').value = timeStr;
+    document.getElementById('add_callsign').value = '';
+    document.getElementById('add_frequency').value = '';
+    document.getElementById('add_rst_rcvd').value = '';
+    document.getElementById('add_rst_sent').value = '';
+    document.getElementById('add_gridsquare').value = '';
+    document.getElementById('add_cqz').value = '';
+    document.getElementById('add_ituz').value = '';
+
+    // Сбрасываем чекбокс Sat QSO но оставляем сохраненные настройки
+    const satQSO = getCookie('add_qso_sat_qso') === 'true';
+    document.getElementById('add_sat_qso').checked = satQSO;
+    document.getElementById('sat_fields').style.display = satQSO ? 'flex' : 'none';
+
+    // Очищаем SAT поля
+    if (satQSO) {
+        const savedSatPropMode = getCookie('add_qso_sat_prop_mode');
+        const savedSatName = getCookie('add_qso_sat_name');
+        document.getElementById('add_sat_prop_mode').value = savedSatPropMode || '';
+        document.getElementById('add_sat_name').value = savedSatName || '';
+    } else {
+        document.getElementById('add_sat_prop_mode').value = '';
+        document.getElementById('add_sat_name').value = '';
+    }
+}
+
+// Добавление QSO
+function initSaveAddQSO() {
+    document.getElementById('saveAddQSO').addEventListener('click', function() {
+        // Проверяем обязательные поля
+        const date = document.getElementById('add_date').value;
+        const time = document.getElementById('add_time').value;
+        const callsign = document.getElementById('add_callsign').value.trim();
+
+        if (!date || !time || !callsign) {
+            showAlert('danger', 'Заполните обязательные поля: дата, время, позывной');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+
+        // Проверяем, включен ли Sat QSO
+        const satQSO = document.getElementById('add_sat_qso').checked;
+
+        // Собираем данные формы вручную
+        const data = {
+            date: date,
+            time: time,
+            my_callsign: document.getElementById('add_my_callsign').value.trim().toUpperCase(),
+            callsign: callsign.toUpperCase(),
+            band: document.getElementById('add_band').value.trim().toUpperCase() || null,
+            mode: document.getElementById('add_mode').value.trim().toUpperCase(),
+            frequency: document.getElementById('add_frequency').value,
+            rst_rcvd: document.getElementById('add_rst_rcvd').value,
+            rst_sent: document.getElementById('add_rst_sent').value,
+            my_gridsquare: document.getElementById('add_my_gridsquare').value,
+            gridsquare: document.getElementById('add_gridsquare').value,
+            cqz: document.getElementById('add_cqz').value,
+            ituz: document.getElementById('add_ituz').value,
+            lotw: document.getElementById('add_lotw').value,
+            sat_qso: satQSO ? 'Y' : 'N'
+        };
+
+        // Логируем данные для отладки
+        console.log('Отправляемые данные QSO:', data);
+
+        // Добавляем SAT поля только если Sat QSO включен
+        if (satQSO) {
+            data.sat_prop_mode = document.getElementById('add_sat_prop_mode').value;
+            data.sat_name = document.getElementById('add_sat_name').value;
+        }
+
+        fetch('/logbook/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || 'Ошибка при добавлении QSO');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-plus"></i> Добавить QSO';
+
+            if (data.success) {
+                // Сохраняем настройки в cookies
+                saveQSOsettings();
+
+                // Показываем уведомление
+                showAlert('success', 'QSO успешно добавлено');
+
+                // Спрашиваем про добавление еще одного QSO
+                setTimeout(() => {
+                    // Сначала закрываем модальное окно добавления QSO
+                    const addQsoModalEl = document.getElementById('addQSOModal');
+                    const addQsoModal = bootstrap.Modal.getInstance(addQsoModalEl);
+                    if (addQsoModal) {
+                        addQsoModal.hide();
+                    }
+
+                    // Ждём немного чтобы первое модальное окно закрылось
+                    setTimeout(() => {
+                        // Показываем модальное окно подтверждения
+                        const addAnotherModalEl = document.getElementById('addAnotherQSOModal');
+                        const addAnotherModal = new bootstrap.Modal(addAnotherModalEl);
+                        addAnotherModal.show();
+
+                        // Обработчик кнопки "Добавить еще QSO"
+                        document.getElementById('addAnotherQSO').onclick = function() {
+                            addAnotherModal.hide();
+                            // Открываем окно добавления QSO заново
+                            const modal = new bootstrap.Modal(addQsoModalEl);
+                            modal.show();
+                            // Сбрасываем форму
+                            resetAddQSOForm();
+                            document.getElementById('add_callsign').focus();
+                        };
+
+                        // Обработчик кнопки "Отмена" - перезагружаем страницу
+                        document.querySelector('#addAnotherQSOModal .btn-secondary').onclick = function() {
+                            addAnotherModal.hide();
+                            window.location.reload();
+                        };
+                    }, 300);
+                }, 500);
+            } else {
+                throw new Error(data.error || 'Неизвестная ошибка');
+            }
+        })
+        .catch(error => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-plus"></i> Добавить QSO';
+            console.error('Error:', error);
+            showAlert('danger', 'Ошибка при добавлении QSO: ' + error.message);
+        });
+    });
+}
+
+// Инициализация всех функций добавления QSO
+function initAddQSO() {
+    initAddQSOModal();
+    initSatQSOCheckbox();
+    initSaveAddQSO();
+}
