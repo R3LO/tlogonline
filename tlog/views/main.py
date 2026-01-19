@@ -4,7 +4,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
-from ..models import QSO, RadioProfile, ADIFUpload
+from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
 
 
 def home(request):
@@ -20,6 +20,11 @@ def dashboard(request):
     """
     if not request.user.is_authenticated:
         return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
 
     # Обработка формы ручного ввода QSO
     if request.method == 'POST' and request.POST.get('action') == 'add_qso':
@@ -161,6 +166,11 @@ def profile_update(request):
     """
     if not request.user.is_authenticated:
         return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
 
     if request.method == 'POST':
         try:

@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
+from ..models import check_user_blocked
 
 
 def register_page(request):
@@ -98,6 +99,12 @@ def login_page(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            # Проверяем, не заблокирован ли пользователь
+            is_blocked, reason = check_user_blocked(user)
+            if is_blocked:
+                messages.error(request, f'Ваш аккаунт заблокирован. Причина: {reason}')
+                return render(request, 'login.html')
+
             login(request, user)
 
             # Если отмечен "Запомнить меня", сохраняем данные в cookies

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 import uuid
 
 
@@ -173,6 +174,11 @@ class RadioProfile(models.Model):
     # Позывные (бывшие, действующие, спецпозывные, с дробями) - храним как JSON
     my_callsigns = models.JSONField(default=list, blank=True, help_text="Мои позывные в формате JSON")
 
+    # Блокировка пользователя
+    is_blocked = models.BooleanField(default=False, help_text="Заблокировать доступ к личному кабинету")
+    blocked_reason = models.TextField(blank=True, help_text="Причина блокировки", default='')
+    blocked_at = models.DateTimeField(null=True, blank=True, help_text="Дата блокировки")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
@@ -182,3 +188,43 @@ class RadioProfile(models.Model):
 
     def __str__(self):
         return f"Profile - {self.user.username} ({self.callsign})"
+
+    def block(self, reason=''):
+        """
+        Блокирует пользователя
+        """
+        self.is_blocked = True
+        self.blocked_reason = reason
+        self.blocked_at = timezone.now()
+        self.save()
+
+    def unblock(self):
+        """
+        Разблокирует пользователя
+        """
+        self.is_blocked = False
+        self.blocked_reason = ''
+        self.blocked_at = None
+        self.save()
+
+    @property
+    def is_user_blocked(self):
+        """
+        Возвращает True если пользователь заблокирован
+        """
+        return self.is_blocked
+
+
+def check_user_blocked(user):
+    """
+    Проверяет, заблокирован ли пользователь.
+    Возвращает (is_blocked, reason) кортеж.
+    """
+    if not user.is_authenticated:
+        return False, ''
+
+    try:
+        profile = user.radio_profile
+        return profile.is_blocked, profile.blocked_reason or ''
+    except RadioProfile.DoesNotExist:
+        return False, ''

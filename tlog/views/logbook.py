@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
-from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, LogbookComment
+from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, check_user_blocked
 
 
 def get_band_from_frequency(frequency):
@@ -37,6 +37,11 @@ def logbook(request):
     """
     if not request.user.is_authenticated:
         return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
 
     # Получаем параметры фильтрации
     search_callsign = request.GET.get('search_callsign', '').strip()
@@ -164,6 +169,12 @@ def logbook_search(request, callsign):
     """
     Поиск по логам пользователя по позывному.
     """
+    # Проверяем, не заблокирован ли пользователь (если авторизован)
+    if request.user.is_authenticated:
+        is_blocked, reason = check_user_blocked(request.user)
+        if is_blocked:
+            return render(request, 'blocked.html', {'reason': reason})
+
     # Нормализуем позывной
     callsign = callsign.strip().upper()
     has_logs = QSO.objects.filter(my_callsign=callsign).exists()
@@ -247,6 +258,11 @@ def clear_logbook(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
 
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return JsonResponse({'error': 'Ваш аккаунт заблокирован'}, status=403)
+
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -292,6 +308,11 @@ def edit_qso(request, qso_id):
     """
     Редактирование одной записи QSO
     """
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return JsonResponse({'success': False, 'error': 'Ваш аккаунт заблокирован'}, status=403)
+
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
 
