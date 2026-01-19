@@ -42,7 +42,7 @@ def dashboard(request):
             rst_rcvd = request.POST.get('rst_rcvd', '').strip()
             rst_sent = request.POST.get('rst_sent', '').strip()
             gridsquare = request.POST.get('gridsquare', '').strip()
-            his_qth = request.POST.get('his_qth', '').strip()
+            ru_region = request.POST.get('ru_region', '').strip()
 
             # Валидация обязательных полей
             if not all([my_callsign, callsign, date_str, time_str, band, mode]):
@@ -104,7 +104,7 @@ def dashboard(request):
                     rst_rcvd=rst_rcvd if rst_rcvd else None,
                     rst_sent=rst_sent if rst_sent else None,
                     gridsquare=gridsquare if gridsquare else None,
-                    his_qth=his_qth if his_qth else None,
+                    ru_region=ru_region if ru_region else None,
                     lotw='N',
                     paper_qsl='N'
                 )

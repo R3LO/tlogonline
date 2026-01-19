@@ -320,11 +320,11 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             if r150s_country:
                                 r150s_country = r150s_country.strip()[:100]
 
-                        # Получаем state (primary_prefix) из cty.dat
-                        state = None
-                        if not state:
+                        # Получаем dxcc (primary_prefix) из cty.dat
+                        dxcc = None
+                        if not dxcc:
                             cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
-                            state = r150s.get_cty_primary_prefix(callsign, cty_path)
+                            dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
 
                         if not callsign:
                             skipped_count += 1
@@ -346,7 +346,7 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             prop_mode=prop_mode if prop_mode else None,
                             sat_name=sat_name if sat_name else None,
                             r150s=r150s_country if r150s_country else None,
-                            state=state if state else None,
+                            dxcc=dxcc if dxcc else None,
                             cqz=cqz,
                             ituz=ituz,
                             continent=continent if continent else None,

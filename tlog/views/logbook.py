@@ -110,7 +110,7 @@ def logbook(request):
     filtered_stats = {
         'total_qso': total_count,
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
-        'unique_dxcc': qso_queryset.filter(state__isnull=False).exclude(state='').values('state').distinct().count(),
+        'unique_dxcc': qso_queryset.filter(dxcc__isnull=False).exclude(dxcc='').values('dxcc').distinct().count(),
         'unique_r150s': qso_queryset.filter(r150s__isnull=False).exclude(r150s='').values('r150s').distinct().count(),
     }
 
@@ -271,8 +271,8 @@ def clear_logbook(request):
         qso_count = QSO.objects.filter(user=request.user).count()
         unique_callsigns = QSO.objects.filter(user=request.user).values('callsign').distinct().count()
         unique_dxcc = QSO.objects.filter(user=request.user).filter(
-            state__isnull=False
-        ).exclude(state='').values('state').distinct().count()
+            dxcc__isnull=False
+        ).exclude(dxcc='').values('dxcc').distinct().count()
         unique_r150s = QSO.objects.filter(user=request.user).filter(
             r150s__isnull=False
         ).exclude(r150s='').values('r150s').distinct().count()
@@ -355,6 +355,11 @@ def edit_qso(request, qso_id):
         qso.ituz = int(ituz) if ituz else None
 
         qso.lotw = data.get('lotw', 'N')
+        qso.paper_qsl = data.get('paper_qsl', 'N')
+        qso.continent = data.get('continent', '')[:2] or None
+        qso.r150s = data.get('r150s', '')[:100] or None
+        qso.dxcc = data.get('dxcc', '')[:10] or None
+        qso.ru_region = data.get('ru_region', '')[:100] or None
 
         qso.save()
 
@@ -441,6 +446,11 @@ def get_qso(request, qso_id):
                 'cqz': qso.cqz,
                 'ituz': qso.ituz,
                 'lotw': qso.lotw or 'N',
+                'continent': qso.continent or '',
+                'r150s': qso.r150s or '',
+                'dxcc': qso.dxcc or '',
+                'ru_region': qso.ru_region or '',
+                'paper_qsl': qso.paper_qsl or 'N',
             }
         })
     except (QSO.DoesNotExist, ValueError):
@@ -1020,14 +1030,14 @@ def add_qso(request):
                 # Получаем country из r150cty.dat
                 r150s_country = dxcc_info.get('country')
 
-                # Получаем state (primary_prefix) из cty.dat
-                state = r150s.get_cty_primary_prefix(callsign, cty_path)
+                # Получаем dxcc (primary_prefix) из cty.dat
+                dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
             else:
                 r150s_country = None
-                state = None
+                dxcc = None
         else:
             r150s_country = None
-            state = None
+            dxcc = None
 
         # Создаем QSO
         qso = QSO.objects.create(
@@ -1049,7 +1059,7 @@ def add_qso(request):
             ituz=int(ituz) if ituz else None,
             lotw=lotw,
             r150s=r150s_country if r150s_country else None,
-            state=state if state else None,
+            dxcc=dxcc if dxcc else None,
             continent=continent if continent else None
         )
 

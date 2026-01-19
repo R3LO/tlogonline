@@ -78,6 +78,10 @@ function initEditButtons() {
                     document.getElementById('edit_cqz').value = qso.cqz || '';
                     document.getElementById('edit_ituz').value = qso.ituz || '';
                     document.getElementById('edit_lotw').value = qso.lotw || 'N';
+                    document.getElementById('edit_continent').value = qso.continent || '';
+                    document.getElementById('edit_r150s').value = qso.r150s || '';
+                    document.getElementById('edit_dxcc').value = qso.dxcc || '';
+                    document.getElementById('edit_paper_qsl').value = qso.paper_qsl || 'N';
 
                     // Открываем модальное окно
                     const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
