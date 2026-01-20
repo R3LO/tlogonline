@@ -167,28 +167,6 @@
                     </div>
                 </div>
 
-                <!-- Активность -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                            <div class="stats-number">{{ today_qso }}</div>
-                            <div>Сегодня</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6610f2 100%);">
-                            <div class="stats-number">{{ week_qso }}</div>
-                            <div>За неделю</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);">
-                            <div class="stats-number">{{ month_qso }}</div>
-                            <div>За месяц</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Диапазоны -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -214,34 +192,6 @@
                             {% endfor %}
                         </div>
                         <p class="mt-2 text-muted small">Всего: {{ modes|length }} видов</p>
-                    </div>
-                </div>
-
-                <!-- Дополнительная статистика -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
-                            <div class="stats-number">{{ grids_count }}</div>
-                            <div>QTH локаторов</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
-                            <div class="stats-number">{{ lotw_count }}</div>
-                            <div>LoTW</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #e83e8c 0%, #c71585 100%);">
-                            <div class="stats-number">{{ most_active_date.count|default:0 }}</div>
-                            <div>Рекорд за день</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card" style="background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);">
-                            <div class="stats-number">{{ most_active_date.date|default:"-" }}</div>
-                            <div>Дата рекорда</div>
-                        </div>
                     </div>
                 </div>
 

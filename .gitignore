@@ -10,6 +10,7 @@ __pycache__/
 *.log
 *.log.[0-9]*
 local_settings.py
+myproject/settings.py
 settings/*local*.py
 settings/*dev*.py
 db.sqlite3

@@ -735,8 +735,10 @@ def generate_adif_content(qso_queryset):
     lines = []
 
     # Заголовок ADIF
+    lines.append('ADIF Export from TLog')
+    lines.append('Copyright 2025-2026 by Vladimir Pavlenko R3LO')
     lines.append('ADIF_VER:5 3.1.0')
-    lines.append(f'PROGRAMID: TLog tlogonline.ru 2026')
+    lines.append(f'PROGRAMID: TLog')
     lines.append(f'CREATED_TIMESTAMP:{datetime.now().strftime("%Y%m%d %H%M%S")}')
     lines.append('<EOH>')
 
