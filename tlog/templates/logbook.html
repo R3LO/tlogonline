@@ -157,6 +157,26 @@
             font-weight: 500;
             margin-bottom: 3px;
         }
+        /* Компактные чекбоксы в input-group для ADIF загрузки */
+        .adif-options .input-group-text,
+        .adif-options-sat .input-group-text {
+            padding: 0.25rem 0.5rem !important;
+            min-width: auto !important;
+            width: auto !important;
+            height: auto !important;
+            line-height: 1 !important;
+        }
+        .adif-options .input-group-text input[type="checkbox"],
+        .adif-options-sat .input-group-text input[type="checkbox"] {
+            margin: 0 !important;
+            width: 1.2em !important;
+            height: 1.2em !important;
+            min-height: unset !important;
+        }
+        .adif-options .input-group,
+        .adif-options-sat .input-group {
+            min-height: unset !important;
+        }
     </style>
 </head>
 <body>
@@ -1213,41 +1233,41 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="row" id="adif-options" style="display: none;">
+                        <div class="row adif-options" id="adif-options" style="display: none;">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Мой позывной (MY_CALLSIGN)</label>
-                                <div class="input-group">
-                                    <div class="input-group-text">
-                                        <input type="checkbox" id="adif_override_my_callsign" name="override_my_callsign">
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_my_callsign" name="override_my_callsign">
                                     </div>
                                     <input type="text" class="form-control" name="my_callsign" id="adif_my_callsign" placeholder="Например: R3LO">
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Мой QTH Loc (MY_GRIDSQUARE)</label>
-                                <div class="input-group">
-                                    <div class="input-group-text">
-                                        <input type="checkbox" id="adif_override_my_gridsquare" name="override_my_gridsquare">
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_my_gridsquare" name="override_my_gridsquare">
                                     </div>
                                     <input type="text" class="form-control" name="my_gridsquare" id="adif_my_gridsquare" placeholder="Например: KO85UU">
                                 </div>
                             </div>
                         </div>
-                        <div class="row" id="adif-options-sat" style="display: none;">
+                        <div class="row adif-options-sat" id="adif-options-sat" style="display: none;">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Режим распространения (PROP_MODE)</label>
-                                <div class="input-group">
-                                    <div class="input-group-text">
-                                        <input type="checkbox" id="adif_override_prop_mode" name="override_prop_mode">
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_prop_mode" name="override_prop_mode">
                                     </div>
                                     <input type="text" class="form-control" name="prop_mode" id="adif_prop_mode" value="SAT">
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Название спутника (SAT_NAME)</label>
-                                <div class="input-group">
-                                    <div class="input-group-text">
-                                        <input type="checkbox" id="adif_override_sat_name" name="override_sat_name">
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_sat_name" name="override_sat_name">
                                     </div>
                                     <input type="text" class="form-control" name="sat_name" id="adif_sat_name" value="QO-100">
                                 </div>
