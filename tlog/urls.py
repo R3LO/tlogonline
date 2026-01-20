@@ -2,6 +2,7 @@
 URLs для фронтенда
 """
 from django.urls import path, re_path
+from django.views.generic import RedirectView
 from .views import (
     home, register_page, login_page, dashboard, logbook,
     logout_view, adif_upload, clear_logbook,
@@ -31,6 +32,7 @@ urlpatterns = [
     path('privacy/', privacy, name='privacy'),
     path('search-callsigns/', get_callsigns_list, name='get_callsigns_list'),
     path('qth-map/', qth_map, name='qth_map'),
+    path('qth-loc.html', RedirectView.as_view(url='/static/qth-loc.html', permanent=False), name='qth_loc'),
     path('achievements/', achievements, name='achievements'),
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
 ]
