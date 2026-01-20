@@ -507,6 +507,7 @@ def achievements(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            my_callsign_filter = data.get('my_callsign', '').strip()
             band_filter = data.get('band', '').strip()
             mode_filter = data.get('mode', '').strip()
             prop_mode_filter = data.get('prop_mode', '').strip()
@@ -516,6 +517,8 @@ def achievements(request):
             qso_queryset = QSO.objects.filter(user=user)
 
             # Применяем фильтры
+            if my_callsign_filter:
+                qso_queryset = qso_queryset.filter(my_callsign__iexact=my_callsign_filter)
             if band_filter:
                 qso_queryset = qso_queryset.filter(band=band_filter)
             if mode_filter:
@@ -549,6 +552,21 @@ def achievements(request):
 
             # Страны Р-150-С
             r150s_count = qso_queryset.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+            # Уникальные DXCC
+            dxcc_count = qso_queryset.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
+
+            # Уникальные регионы России
+            ru_region_count = qso_queryset.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+
+            # Уникальные CQ Zone
+            cqz_count = qso_queryset.exclude(cqz__isnull=True).values('cqz').distinct().count()
+
+            # Уникальные ITU Zone
+            ituz_count = qso_queryset.exclude(ituz__isnull=True).values('ituz').distinct().count()
+
+            # QTH локаторы (уникальные - первые 4 знака)
+            grids_count = qso_queryset.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
 
             # Достижения (awards)
             achievements = []
@@ -651,7 +669,12 @@ def achievements(request):
                 'bands': bands,
                 'modes': modes,
                 'unique_callsigns': unique_callsigns,
+                'dxcc_count': dxcc_count,
                 'r150s_count': r150s_count,
+                'ru_region_count': ru_region_count,
+                'cqz_count': cqz_count,
+                'ituz_count': ituz_count,
+                'grids_count': grids_count,
                 'achievements': achievements,
                 'achievements_html': achievements_html,
                 'message': message
@@ -682,6 +705,9 @@ def achievements(request):
         if count > 0:
             bands[band] = count
 
+    # Уникальные диапазоны для фильтров
+    available_bands = QSO.objects.filter(user=user).values_list('band', flat=True).distinct().exclude(band__isnull=True).exclude(band='').order_by('band')
+
     # Статистика по модуляциям
     modes = {}
     mode_list = QSO.objects.filter(user=user).values_list('mode', flat=True).distinct()
@@ -695,6 +721,21 @@ def achievements(request):
 
     # Страны Р-150-С
     r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+    # Уникальные DXCC
+    dxcc_count = QSO.objects.filter(user=user).exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
+
+    # Уникальные регионы России
+    ru_region_count = QSO.objects.filter(user=user).exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+
+    # Уникальные CQ Zone
+    cqz_count = QSO.objects.filter(user=user).exclude(cqz__isnull=True).values('cqz').distinct().count()
+
+    # Уникальные ITU Zone
+    ituz_count = QSO.objects.filter(user=user).exclude(ituz__isnull=True).values('ituz').distinct().count()
+
+    # Уникальные мои позывные
+    my_callsigns = QSO.objects.filter(user=user).exclude(my_callsign__isnull=True).exclude(my_callsign='').values_list('my_callsign', flat=True).distinct().order_by('my_callsign')
 
     # QTH локаторы
     grids_count = QSO.objects.filter(user=user).exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
@@ -806,10 +847,15 @@ def achievements(request):
     return render(request, 'achievements.html', {
         'total_qso': total_qso,
         'bands': bands,
+        'available_bands': list(available_bands),
         'band_order': band_order,
         'modes': modes,
         'unique_callsigns': unique_callsigns,
         'r150s_count': r150s_count,
+        'dxcc_count': dxcc_count,
+        'ru_region_count': ru_region_count,
+        'cqz_count': cqz_count,
+        'ituz_count': ituz_count,
         'grids_count': grids_count,
         'lotw_count': lotw_count,
         'today_qso': today_qso,
@@ -817,6 +863,7 @@ def achievements(request):
         'month_qso': month_qso,
         'most_active_date': most_active_date,
         'achievements': achievements,
+        'my_callsigns': list(my_callsigns),
     })
 
 
