@@ -12,10 +12,10 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-# Создаем суперпользователя
-username = 'admin'
-email = 'admin@example.com'
-password = 'admin123'
+# Создаем суперпользователя из переменных окружения
+username = os.getenv('ADMIN_USERNAME')
+email = os.getenv('ADMIN_EMAIL')
+password = os.getenv('ADMIN_PASSWORD')
 
 try:
     # Проверяем, существует ли пользователь
