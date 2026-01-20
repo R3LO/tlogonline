@@ -1,66 +1,25 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyd
+*.pyo
 
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff
+# Django
 *.log
+*.log.[0-9]*
 local_settings.py
+settings/*local*.py
+settings/*dev*.py
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3-wal
+db.sqlite3-shm
 
-# Flask / Scrapy / Sphinx / PyBuilder / Jupyter / IPython / pyenv / pipenv / PEP 582 / Celery / SageMath
-# (секции опущены для краткости, см. исходный список)
-
-# Environments — здесь явно перечислены все варианты виртуальных окружений
+# Виртуальные окружения
 .env
-.venv
+.env.*
 venv/
 env/
 ENV/
@@ -68,26 +27,42 @@ env.bak/
 venv.bak/
 .pythonenv/
 
-# macOS / Windows / IDE / Editor
+# Статика и медиа
+staticfiles/  # собранная статика
+media/
+
+# Исходные статические файлы (не игнорируем!):
+# static/  ← УБЕРИТЕ ЭТОТ ПУНКТ, ЕСЛИ НУЖНО СОХРАНИТЬ ИСХОДНИКИ
+
+# БД и кэш
+/tmp/
+/cache/
+dump.rdb
+
+# IDE и ОС
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-workspace
 .DS_Store
 Thumbs.db
-.vscode/
-*.code-workspace
-.idea/
-*.sublime-workspace
+*.iml
+.editorconfig
+.fleet/
+*~
+*.bak
+
+# Фронтенд (если есть)
+node_modules/
+dist/
+build/
+*.map
+
+# Прочее
+*.so
+*.manifest
+*.spec
+*.mo
+*.pot
 *.swp
-*.swo
-
-# Local settings
-local_settings.py
-settings/local.py
-
-# Media and static files
-media/
-staticfiles/
-
-# mypy / Pyre
-.mypy_cache/
-.dmypy.json
-dmypy.json
-.pyre/
+.*.un~
