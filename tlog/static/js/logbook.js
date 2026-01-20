@@ -108,7 +108,7 @@ function initSaveEditQSO() {
         const qsoId = formData.get('id');
 
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+        this.innerHTML = '<span>⏳</span> Сохранение...';
 
         fetch(`/logbook/edit/${qsoId}/`, {
             method: 'POST',
@@ -127,7 +127,7 @@ function initSaveEditQSO() {
         })
         .then(data => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+            this.innerHTML = '<span>💾</span> Сохранить';
 
             if (data.success) {
                 // Закрываем модальное окно
@@ -147,7 +147,7 @@ function initSaveEditQSO() {
         })
         .catch(error => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+            this.innerHTML = '<span>💾</span> Сохранить';
             console.error('Error:', error);
             showAlert('danger', 'Ошибка при сохранении: ' + error.message);
         });
@@ -184,7 +184,7 @@ function initConfirmDeleteQSO() {
         const qsoId = document.getElementById('delete_id').value;
 
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+        this.innerHTML = '<span>⏳</span> Удаление...';
 
         fetch(`/logbook/delete/${qsoId}/`, {
             method: 'POST',
@@ -202,7 +202,7 @@ function initConfirmDeleteQSO() {
         })
         .then(data => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-trash-alt"></i> Удалить';
+            this.innerHTML = '<span>🗑️</span> Удалить';
 
             if (data.success) {
                 // Закрываем модальное окно
@@ -222,7 +222,7 @@ function initConfirmDeleteQSO() {
         })
         .catch(error => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-trash-alt"></i> Удалить';
+            this.innerHTML = '<span>🗑️</span> Удалить';
             console.error('Error:', error);
             showAlert('danger', 'Ошибка при удалении: ' + error.message);
         });
@@ -233,7 +233,7 @@ function initConfirmDeleteQSO() {
 function initClearLog() {
     document.getElementById('confirmClearLog')?.addEventListener('click', function() {
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+        this.innerHTML = '<span>⏳</span> Удаление...';
 
         fetch('/logbook/clear/', {
             method: 'POST',
@@ -267,7 +267,7 @@ function initClearLog() {
 
             // Восстанавливаем кнопку
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-trash-alt"></i> Удалить весь лог';
+            this.innerHTML = '<span>🗑️</span> Удалить весь лог';
         });
     });
 }

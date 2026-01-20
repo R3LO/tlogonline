@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои достижения - TLog</title>
+    <title>Достижения - TLog</title>
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -16,6 +15,7 @@
         }
         .main-container {
             background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
@@ -24,6 +24,24 @@
             color: white;
             border-radius: 15px 15px 0 0;
             padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .logbook-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            pointer-events: none;
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         .stats-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -33,10 +51,15 @@
             text-align: center;
             margin-bottom: 1rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
         }
         .stats-number {
             font-size: 2rem;
             font-weight: bold;
+            margin-bottom: 0.5rem;
         }
         .achievement-card {
             background: #f8f9fa;
@@ -45,6 +68,7 @@
             text-align: center;
             transition: all 0.3s;
             border: 2px solid #e9ecef;
+            height: 100%;
         }
         .achievement-card.unlocked {
             border-color: #667eea;
@@ -71,19 +95,6 @@
             font-size: 0.85rem;
             color: #6c757d;
         }
-        .progress-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-        }
-        .section-title {
-            color: #667eea;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e9ecef;
-        }
         .band-badge {
             background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
             color: #212529;
@@ -102,6 +113,19 @@
             margin: 2px;
             display: inline-block;
         }
+        .section-title {
+            color: #667eea;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .table th {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .table td {
+            font-weight: 400;
+        }
     </style>
 </head>
 <body>
@@ -111,16 +135,16 @@
             <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-light me-3" href="/dashboard/">
-                    <i class="fas fa-tachometer-alt"></i> Панель
+                    <span>📊</span> Панель
                 </a>
                 <a class="nav-link text-light me-3" href="/logbook/">
-                    <i class="fas fa-book"></i> Logbook
+                    <span>📓</span> Logbook
                 </a>
                 <a class="nav-link text-light me-3" href="/qth-loc.html" target="_blank">
-                    <i class="fas fa-map-marked-alt"></i> Grid map
+                    <span>🗺️</span> Grid map
                 </a>
                 <a class="nav-link active text-light me-3" href="/achievements/">
-                    <i class="fas fa-trophy"></i> Достижения
+                    <span>🏆</span> Достижения
                 </a>
                 <span class="navbar-text me-3">
                     {{ user.first_name|default:user.username }}
@@ -134,7 +158,7 @@
         <div class="main-container">
             <!-- Header -->
             <div class="logbook-header text-center">
-                <h2><i class="fas fa-trophy"></i> Мои достижения</h2>
+                <h2><span>🏆</span> Мои достижения</h2>
                 <p class="mb-0">Ваша статистика и награды</p>
             </div>
 
@@ -155,8 +179,8 @@
                     </div>
                     <div class="col-md-3">
                         <div class="stats-card">
-                            <div class="stats-number">{{ r150s_count }}</div>
-                            <div>Стран Р-150-С</div>
+                            <div class="stats-number">{{ dxcc_count|default:"0" }}</div>
+                            <div>Стран DXCC</div>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -168,9 +192,8 @@
                 </div>
 
                 <!-- Фильтры -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-filter"></i> Фильтры</h5>
+                <div class="filter-card">
+                    <h5 class="section-title"><span>🔍</span> Фильтры</h5>
                         <div class="d-flex gap-2 flex-wrap align-items-end w-100">
                             <div style="min-width: 150px; flex: 1;">
                                 <label class="form-label small mb-1">Мой позывной</label>
@@ -228,20 +251,19 @@
                             </div>
                             <div>
                                 <button type="button" class="btn btn-secondary me-1" id="reset_filters" title="Сбросить">
-                                    <i class="fas fa-undo"></i>
+                                    <span>🔄</span>
                                 </button>
                                 <button type="button" class="btn btn-primary" id="apply_filters" title="Применить">
-                                    <i class="fas fa-filter"></i>
+                                    <span>🔍</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
                 </div>
 
                 <!-- Статистика по фильтрам -->
                 <div id="filtered_stats" class="mb-4" style="display: none;">
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
+                        <span>ℹ️</span>
                         <span id="filtered_message">Отфильтровано</span>
                         <button type="button" class="btn-close float-end" id="close_filtered_stats"></button>
                     </div>
@@ -250,7 +272,7 @@
                 <!-- Статистическая таблица -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-table"></i> Статистика</h5>
+                        <h5 class="section-title"><span>📊</span> Статистика</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead class="table-light">
@@ -283,7 +305,7 @@
                 </div>
 
                 <!-- Достижения -->
-                <h5 class="section-title"><i class="fas fa-star"></i> Награды</h5>
+                <h5 class="section-title"><span>⭐</span> Награды</h5>
                 {% if achievements %}
                 <div class="row">
                     {% for achievement in achievements %}
@@ -298,7 +320,7 @@
                 </div>
                 {% else %}
                 <div class="text-center py-4 text-muted">
-                    <i class="fas fa-trophy fa-3x mb-3"></i>
+                    <span style="font-size: 3rem;">🏆</span>
                     <p>Начните вести журнал, чтобы получать достижения!</p>
                 </div>
                 {% endif %}
@@ -333,7 +355,7 @@
 
                 // Показываем индикатор загрузки
                 applyBtn.disabled = true;
-                applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
+                applyBtn.innerHTML = '<span>⏳</span> Загрузка...';
 
                 // Отправляем запрос на сервер
                 fetch('/achievements/', {
@@ -348,7 +370,7 @@
                 .then(response => response.json())
                 .then(data => {
                     applyBtn.disabled = false;
-                    applyBtn.innerHTML = '<i class="fas fa-filter"></i> Применить';
+                    applyBtn.innerHTML = '<span>🔍</span> Применить';
 
                     if (data.success) {
                         // Обновляем статистику
@@ -363,7 +385,7 @@
                 })
                 .catch(error => {
                     applyBtn.disabled = false;
-                    applyBtn.innerHTML = '<i class="fas fa-filter"></i> Применить';
+                    applyBtn.innerHTML = '<span>🔍</span> Применить';
                     alert('Ошибка при применении фильтров: ' + error.message);
                 });
             }

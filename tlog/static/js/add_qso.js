@@ -135,7 +135,7 @@ function initSaveAddQSO() {
         }
 
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+        this.innerHTML = '<span>⏳</span> Сохранение...';
 
         // Проверяем, включен ли Sat QSO
         const satQSO = document.getElementById('add_sat_qso').checked;
@@ -187,7 +187,7 @@ function initSaveAddQSO() {
         })
         .then(data => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-plus"></i> Добавить QSO';
+            this.innerHTML = '<span>➕</span> Добавить QSO';
 
             if (data.success) {
                 // Сохраняем настройки в cookies
@@ -236,7 +236,7 @@ function initSaveAddQSO() {
         })
         .catch(error => {
             this.disabled = false;
-            this.innerHTML = '<i class="fas fa-plus"></i> Добавить QSO';
+            this.innerHTML = '<span>➕</span> Добавить QSO';
             console.error('Error:', error);
             showAlert('danger', 'Ошибка при добавлении QSO: ' + error.message);
         });
