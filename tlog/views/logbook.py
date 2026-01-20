@@ -219,7 +219,7 @@ def logbook_search(request, callsign):
         for band in bands:
             count = qso_queryset.filter(
                 Q(mode__iexact=mode) &
-                (Q(band=band) | Q(frequency__gte=band_ranges[band][0], frequency__lte=band_ranges[band][1]))
+                (Q(band__iexact=band) | Q(frequency__gte=band_ranges[band][0], frequency__lte=band_ranges[band][1]))
             ).count()
             row.append(count > 0)
         matrix.append(row)
