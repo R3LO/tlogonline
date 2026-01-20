@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 {% load static %}
+{% load custom_filters %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -457,14 +458,19 @@
                                 </li>
                             {% endif %}
 
-                            {% for page_num in "x"|rjust:total_pages %}
-                                {% if forloop.counter == current_page %}
+                            {% paginate_numbers current_page total_pages 3 as page_numbers %}
+                            {% for page_num in page_numbers %}
+                                {% if page_num == '...' %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% elif page_num == current_page %}
                                     <li class="page-item active">
-                                        <span class="page-link">{{ forloop.counter }}</span>
+                                        <span class="page-link">{{ page_num }}</span>
                                     </li>
                                 {% else %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                                        <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ page_num }}">{{ page_num }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}

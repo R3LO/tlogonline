@@ -300,14 +300,19 @@
                                     </li>
                                 {% endif %}
 
-                                {% for page_num in "x"|rjust:total_pages %}
-                                    {% if forloop.counter == current_page %}
+                                {% paginate_numbers current_page total_pages 3 as page_numbers %}
+                                {% for page_num in page_numbers %}
+                                    {% if page_num == '...' %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    {% elif page_num == current_page %}
                                         <li class="page-item active">
-                                            <span class="page-link">{{ forloop.counter }}</span>
+                                            <span class="page-link">{{ page_num }}</span>
                                         </li>
                                     {% else %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?callsign={{ search_callsign }}&page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                                            <a class="page-link" href="?callsign={{ search_callsign }}&page={{ page_num }}">{{ page_num }}</a>
                                         </li>
                                     {% endif %}
                                 {% endfor %}

@@ -107,6 +107,7 @@ class QSO(models.Model):
             # Основные индексы для производительности
             models.Index(fields=['user', '-date', '-time'], name='qso_user_date_time_idx'),
             models.Index(fields=['callsign'], name='qso_callsign_idx'),
+            models.Index(fields=['my_callsign'], name='qso_my_callsign_idx'),
             models.Index(fields=['mode'], name='qso_mode_idx'),
             models.Index(fields=['band'], name='qso_band_idx'),
             models.Index(fields=['date', 'time'], name='qso_date_time_idx'),
