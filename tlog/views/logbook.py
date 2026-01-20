@@ -831,6 +831,7 @@ def add_qso(request):
     try:
         import json
         from .. import r150s
+        from ..region_ru import RussianRegionFinder
         import os
         from django.conf import settings
         from django.db.models import Q
@@ -946,6 +947,14 @@ def add_qso(request):
             r150s_country = None
             dxcc = None
 
+        # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+        ru_region = None
+        if callsign and dxcc:
+            if dxcc.upper() in ('UA', 'UA9', 'UA2'):
+                exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
+                region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
+                ru_region = region_finder.get_region_code(callsign)
+
         # Создаем QSO
         qso = QSO.objects.create(
             user=request.user,
@@ -967,7 +976,8 @@ def add_qso(request):
             lotw=lotw,
             r150s=r150s_country if r150s_country else None,
             dxcc=dxcc if dxcc else None,
-            continent=continent if continent else None
+            continent=continent if continent else None,
+            ru_region=ru_region
         )
 
         return JsonResponse({

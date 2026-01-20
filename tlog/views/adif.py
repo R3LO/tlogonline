@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.contrib import messages
 from ..models import QSO, ADIFUpload
 from .. import r150s
+from ..region_ru import RussianRegionFinder
 import os
 import uuid
 import re
@@ -128,6 +129,10 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
     # Инициализируем базы данных
     r150s.init_database(db_path)
     r150s.init_cty_database(cty_path)
+
+    # Инициализируем определитель регионов России
+    exceptions_path = os.path.join(tlog_dir, 'exceptions.dat')
+    region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
 
     # Получаем полный путь к файлу
     media_root = default_storage.location
@@ -318,6 +323,11 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             skipped_count += 1
                             continue
 
+                        # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+                        ru_region = None
+                        if dxcc and dxcc.upper() in ('UA', 'UA9', 'UA2'):
+                            ru_region = region_finder.get_region_code(callsign)
+
                         qso_obj = QSO(
                             user=user,
                             my_callsign=my_callsign if my_callsign else user_callsign,
@@ -340,7 +350,8 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             continent=continent if continent else None,
                             lotw='N',
                             paper_qsl='N',
-                            adif_upload_id=adif_upload_id
+                            adif_upload_id=adif_upload_id,
+                            ru_region=ru_region
                         )
 
                         if not qso_obj.callsign or not qso_obj.date or not qso_obj.time:
