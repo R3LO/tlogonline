@@ -495,12 +495,174 @@ def achievements(request):
     """
     Мои достижения - статистика и награды
     """
+    import json
     from ..models import QSO, ADIFUpload
     from django.utils import timezone
+    from django.template.loader import render_to_string
     from datetime import timedelta
 
     user = request.user
 
+    # Обработка POST запроса с фильтрами
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            band_filter = data.get('band', '').strip()
+            mode_filter = data.get('mode', '').strip()
+            prop_mode_filter = data.get('prop_mode', '').strip()
+            sat_name_filter = data.get('sat_name', '').strip()
+
+            # Базовый QuerySet
+            qso_queryset = QSO.objects.filter(user=user)
+
+            # Применяем фильтры
+            if band_filter:
+                qso_queryset = qso_queryset.filter(band=band_filter)
+            if mode_filter:
+                qso_queryset = qso_queryset.filter(mode=mode_filter)
+            if prop_mode_filter:
+                qso_queryset = qso_queryset.filter(prop_mode=prop_mode_filter)
+            if sat_name_filter:
+                qso_queryset = qso_queryset.filter(sat_name=sat_name_filter)
+
+            # Основная статистика с фильтрами
+            total_qso = qso_queryset.count()
+
+            # Статистика по диапазонам
+            bands = {}
+            band_order = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
+            for band in band_order:
+                count = qso_queryset.filter(band=band).count()
+                if count > 0:
+                    bands[band] = count
+
+            # Статистика по модуляциям
+            modes = {}
+            mode_list = qso_queryset.values_list('mode', flat=True).distinct()
+            for mode in mode_list:
+                count = qso_queryset.filter(mode=mode).count()
+                if count > 0:
+                    modes[mode] = count
+
+            # Уникальные позывные
+            unique_callsigns = qso_queryset.values('callsign').distinct().count()
+
+            # Страны Р-150-С
+            r150s_count = qso_queryset.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+            # Достижения (awards)
+            achievements = []
+
+            # 100 QSO
+            if total_qso >= 100:
+                achievements.append({
+                    'title': 'Новичок',
+                    'description': 'Зарегистрировано 100+ QSO',
+                    'icon': '🎯',
+                    'unlocked': True
+                })
+
+            # 500 QSO
+            if total_qso >= 500:
+                achievements.append({
+                    'title': 'Опытный',
+                    'description': 'Зарегистрировано 500+ QSO',
+                    'icon': '⭐',
+                    'unlocked': True
+                })
+
+            # 1000 QSO
+            if total_qso >= 1000:
+                achievements.append({
+                    'title': 'Мастер',
+                    'description': 'Зарегистрировано 1000+ QSO',
+                    'icon': '🏆',
+                    'unlocked': True
+                })
+
+            # 10 диапазонов
+            if len(bands) >= 10:
+                achievements.append({
+                    'title': 'Разведчик',
+                    'description': 'Связи на 10+ диапазонах',
+                    'icon': '📡',
+                    'unlocked': True
+                })
+
+            # 5 видов модуляции
+            if len(modes) >= 5:
+                achievements.append({
+                    'title': 'Универсал',
+                    'description': 'Связи на 5+ видах модуляции',
+                    'icon': '🎛️',
+                    'unlocked': True
+                })
+
+            # 50 стран Р-150-С
+            if r150s_count >= 50:
+                achievements.append({
+                    'title': 'Охотник за DX',
+                    'description': 'Связи с 50+ странами Р-150-С',
+                    'icon': '🌍',
+                    'unlocked': True
+                })
+
+            # 100 стран Р-150-С
+            if r150s_count >= 100:
+                achievements.append({
+                    'title': 'Патриот',
+                    'description': 'Связи со 100+ странами Р-150-С',
+                    'icon': '🎖️',
+                    'unlocked': True
+                })
+
+            # Формируем HTML достижений
+            achievements_html = ''
+            for achievement in achievements:
+                achievements_html += f'''
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">{achievement['icon']}</div>
+                        <div class="achievement-title">{achievement['title']}</div>
+                        <div class="achievement-description">{achievement['description']}</div>
+                    </div>
+                </div>
+                '''
+
+            # Формируем сообщение о применённых фильтрах
+            filter_parts = []
+            if band_filter:
+                filter_parts.append(f'диапазон {band_filter}')
+            if mode_filter:
+                filter_parts.append(f'вид связи {mode_filter}')
+            if prop_mode_filter:
+                filter_parts.append(f'prop_mode {prop_mode_filter}')
+            if sat_name_filter:
+                filter_parts.append(f'спутник {sat_name_filter}')
+
+            if filter_parts:
+                message = f'Отфильтровано по: {", ".join(filter_parts)}. Найдено {total_qso} QSO'
+            else:
+                message = f'Найдено {total_qso} QSO'
+
+            return JsonResponse({
+                'success': True,
+                'total_qso': total_qso,
+                'bands': bands,
+                'modes': modes,
+                'unique_callsigns': unique_callsigns,
+                'r150s_count': r150s_count,
+                'achievements': achievements,
+                'achievements_html': achievements_html,
+                'message': message
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    # GET запрос - обычная загрузка страницы
     # Основная статистика
     total_qso = QSO.objects.filter(user=user).count()
 

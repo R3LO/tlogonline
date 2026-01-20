@@ -81,6 +81,8 @@ function initEditButtons() {
                     document.getElementById('edit_continent').value = qso.continent || '';
                     document.getElementById('edit_r150s').value = qso.r150s || '';
                     document.getElementById('edit_dxcc').value = qso.dxcc || '';
+                    document.getElementById('edit_ru_region').value = qso.ru_region || '';
+
                     document.getElementById('edit_paper_qsl').value = qso.paper_qsl || 'N';
 
                     // Открываем модальное окно
