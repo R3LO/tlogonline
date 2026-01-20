@@ -4,6 +4,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 from django.contrib.auth.models import User
 from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
 
@@ -19,6 +20,22 @@ def home(request):
         'total_users': total_users,
         'total_qso': total_qso,
     })
+
+
+def get_callsigns_list(request):
+    """
+    Получение списка уникальных позывных пользователей для автодополнения
+    """
+    query = request.GET.get('q', '').upper()
+    if len(query) < 1:
+        return JsonResponse({'callsigns': []})
+
+    # Получаем уникальные позывные из QSO (убираем дубликаты через set)
+    callsigns = list(set(QSO.objects.filter(
+        my_callsign__icontains=query
+    ).values_list('my_callsign', flat=True).distinct()[:10]))
+
+    return JsonResponse({'callsigns': callsigns})
 
 
 def dashboard(request):

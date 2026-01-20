@@ -7,7 +7,8 @@ from .views import (
     logout_view, adif_upload, clear_logbook,
     profile_update, logbook_search, delete_adif_uploads,
     edit_qso, delete_qso, get_qso,
-    privacy, export_adif, qth_map, achievements, add_qso
+    privacy, export_adif, qth_map, achievements, add_qso,
+    get_callsigns_list
 )
 
 urlpatterns = [
@@ -28,6 +29,7 @@ urlpatterns = [
     path('logbook/get/<uuid:qso_id>/', get_qso, name='get_qso'),
     path('logout/', logout_view, name='logout'),
     path('privacy/', privacy, name='privacy'),
+    path('search-callsigns/', get_callsigns_list, name='get_callsigns_list'),
     path('qth-map/', qth_map, name='qth_map'),
     path('achievements/', achievements, name='achievements'),
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
