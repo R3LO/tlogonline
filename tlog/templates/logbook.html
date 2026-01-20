@@ -273,25 +273,25 @@
                     <p class="mb-2 text-muted small fst-italic">
                         <i class="fas fa-lightbulb"></i> При экспорте в ADIF файл и просмотре учитываются настройки этого фильтра
                     </p>
-                    <form method="GET" class="row g-2">
-                        <div class="col-auto">
+                    <form method="GET" class="d-flex gap-2 flex-wrap w-100">
+                        <div style="min-width: 140px; flex: 1;">
                             <input type="date" class="form-control form-control-sm" name="date_from"
-                                   value="{{ date_from }}" style="width: 140px;" title="Дата начиная с">
+                                   value="{{ date_from }}" title="Дата начиная с" placeholder="С даты">
                         </div>
-                        <div class="col-auto">
+                        <div style="min-width: 140px; flex: 1;">
                             <input type="date" class="form-control form-control-sm" name="date_to"
-                                   value="{{ date_to }}" style="width: 140px;" title="Дата до">
+                                   value="{{ date_to }}" title="Дата до" placeholder="По дату">
                         </div>
-                        <div class="col-auto">
+                        <div style="min-width: 100px; flex: 1;">
                             <input type="text" class="form-control form-control-sm" name="search_callsign"
-                                   value="{{ search_callsign }}" placeholder="Позывной" style="width: 100px;">
+                                   value="{{ search_callsign }}" placeholder="Позывной">
                         </div>
-                        <div class="col-auto">
+                        <div style="min-width: 100px; flex: 1;">
                             <input type="text" class="form-control form-control-sm" name="search_qth"
-                                   value="{{ search_qth }}" placeholder="QTH локатор" style="width: 100px;">
+                                   value="{{ search_qth }}" placeholder="QTH локатор">
                         </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" name="mode" style="width: 110px;">
+                        <div style="min-width: 110px; flex: 1;">
+                            <select class="form-select form-select-sm" name="mode">
                                 <option value="">Вид связи</option>
                                 {% for mode in available_modes %}
                                     <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>
@@ -300,8 +300,8 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" name="band" style="width: 100px;">
+                        <div style="min-width: 100px; flex: 1;">
+                            <select class="form-select form-select-sm" name="band">
                                 <option value="">Диапазон</option>
                                 {% for band in available_bands %}
                                     <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>
@@ -310,8 +310,8 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" name="sat_name" style="width: 120px;">
+                        <div style="min-width: 120px; flex: 1;">
+                            <select class="form-select form-select-sm" name="sat_name">
                                 <option value="">Все записи</option>
                                 {% for sat in available_sat_names %}
                                     <option value="{{ sat }}" {% if sat == sat_name_filter %}selected{% endif %}>
@@ -320,19 +320,19 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" name="lotw" style="width: 100px;">
+                        <div style="min-width: 100px; flex: 1;">
+                            <select class="form-select form-select-sm" name="lotw">
                                 <option value="">LoTW</option>
                                 <option value="Y" {% if lotw_filter == 'Y' %}selected{% endif %}>Да</option>
                                 <option value="N" {% if lotw_filter == 'N' %}selected{% endif %}>Нет</option>
                             </select>
                         </div>
-                        <div class="col-auto">
+                        <div>
                             <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
-                        <div class="col-auto">
+                        <div>
                             <a href="{% url 'logbook' %}" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-times"></i>
                             </a>
