@@ -188,11 +188,28 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
     else:
         user_callsign = my_callsign_default
 
-    # Пакетная обработка
-    batch_size = 100
+    # Пакетная обработка - оптимизированная версия
+    batch_size = 500  # Увеличиваем размер batch
     qso_count = 0
     skipped_count = 0
     error_count = 0
+
+    # Предварительная загрузка существующих QSO пользователя для проверки дубликатов
+    existing_qsos = set()
+    try:
+        existing_db = QSO.objects.filter(user=user).values_list(
+            'my_callsign', 'callsign', 'date', 'mode', 'band'
+        )
+        for item in existing_db:
+            existing_qsos.add((
+                str(item[0]).upper() if item[0] else '',
+                str(item[1]).upper() if item[1] else '',
+                item[2],
+                str(item[3]).upper() if item[3] else '',
+                str(item[4]).upper() if item[4] else ''
+            ))
+    except Exception:
+        pass  # Если ошибка, продолжаем без кэша
 
     for i in range(0, len(qso_records), batch_size):
         batch = qso_records[i:i + batch_size]
@@ -202,59 +219,30 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
             try:
                 qso_data = parse_adif_record(record)
                 if qso_data:
-                    callsign_qso = qso_data.get('callsign', '')
+                    callsign_qso = qso_data.get('callsign', '').strip().upper()[:20]
                     date_qso = qso_data.get('date')
                     time_qso = qso_data.get('time')
-                    band_qso = qso_data.get('band', '')
-                    mode_qso = qso_data.get('mode', 'SSB')
+                    band_qso = qso_data.get('band', '').strip().upper()[:10]
+                    mode_qso = qso_data.get('mode', 'SSB').upper()
 
-                    # Проверка на дубликат
-                    # Сравниваем: мой позывной, позывной корреспондента, дата, время (только часы и минуты), вид связи, диапазон
-                    if band_qso:
-                        duplicate_query = QSO.objects.filter(
-                            user=user,
-                            my_callsign__iexact=user_callsign,
-                            callsign=callsign_qso,
-                            date=date_qso,
-                            mode__iexact=mode_qso,
-                            band__iexact=band_qso
-                        )
-                    else:
-                        duplicate_query = QSO.objects.filter(
-                            user=user,
-                            my_callsign__iexact=user_callsign,
-                            callsign=callsign_qso,
-                            date=date_qso,
-                            mode__iexact=mode_qso
-                        ).filter(Q(band__isnull=True) | Q(band=''))
+                    # Быстрая проверка дубликатов через кэш
+                    dup_key = (
+                        user_callsign.upper() if user_callsign else '',
+                        callsign_qso,
+                        date_qso,
+                        mode_qso,
+                        band_qso
+                    )
 
-                    # Проверяем время - только часы и минуты (игнорируем секунды)
-                    if time_qso:
-                        if isinstance(time_qso, time):
-                            duplicate_query = duplicate_query.filter(
-                                time__hour=time_qso.hour,
-                                time__minute=time_qso.minute
-                            )
-                        else:
-                            time_parts = str(time_qso).split(':')
-                            hour = int(time_parts[0])
-                            minute = int(time_parts[1]) if len(time_parts) > 1 else 0
-                            duplicate_query = duplicate_query.filter(
-                                time__hour=hour,
-                                time__minute=minute
-                            )
-
-                    duplicate_exists = duplicate_query.exists()
-
-                    if not duplicate_exists:
+                    if dup_key not in existing_qsos:
                         # Валидация и очистка данных
                         frequency = qso_data.get('frequency', 0.0)
                         if not isinstance(frequency, (int, float)) or frequency < 0:
                             frequency = 0.0
 
-                        callsign = callsign_qso.strip()[:20]
-                        my_callsign = user_callsign.strip()[:20]
-                        band = band_qso.strip()[:10]
+                        callsign = callsign_qso
+                        my_callsign = user_callsign.strip()[:20] if user_callsign else None
+                        band = band_qso
                         mode = mode_qso
                         rst_sent = qso_data.get('rst_sent', '').strip()[:10]
                         rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
@@ -367,11 +355,11 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                 error_count += 1
                 continue
 
-        # Пакетная вставка
+        # Пакетная вставка с ignore_conflicts
         if qso_objects:
             try:
                 with transaction.atomic():
-                    QSO.objects.bulk_create(qso_objects, batch_size=50)
+                    QSO.objects.bulk_create(qso_objects, batch_size=100, ignore_conflicts=True)
                     qso_count += len(qso_objects)
             except Exception:
                 error_count += len(qso_objects)
