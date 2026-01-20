@@ -4,6 +4,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
+from django.contrib.auth.models import User
 from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
 
 
@@ -11,7 +12,13 @@ def home(request):
     """
     Главная страница
     """
-    return render(request, 'index.html')
+    total_users = User.objects.count()
+    total_qso = QSO.objects.count()
+
+    return render(request, 'index.html', {
+        'total_users': total_users,
+        'total_qso': total_qso,
+    })
 
 
 def dashboard(request):

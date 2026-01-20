@@ -130,30 +130,6 @@ class QSO(models.Model):
         return f"{self.my_callsign} -> {self.callsign} ({self.band}) - {date_str} {time_str}"
 
 
-class LogbookComment(models.Model):
-    """
-    Комментарии к логам (logbook_search)
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # Позывной лога, к которому относится комментарий
-    callsign = models.CharField(max_length=20, help_text="Позывной лога")
-    # Позывной автора комментария
-    author_callsign = models.CharField(max_length=20, help_text="Позывной автора")
-    # Текст комментария
-    message = models.TextField(help_text="Сообщение")
-    # Время создания
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['callsign', '-created_at'], name='logbook_comment_callsign_idx'),
-        ]
-
-    def __str__(self):
-        return f"Comment by {self.author_callsign} on {self.callsign}"
-
-
 class RadioProfile(models.Model):
     """
     Профиль радиолюбителя

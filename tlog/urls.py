@@ -6,12 +6,11 @@ from .views import (
     home, register_page, login_page, dashboard, logbook,
     logout_view, adif_upload, clear_logbook,
     profile_update, logbook_search, delete_adif_uploads,
-    edit_qso, delete_qso, get_qso, add_logbook_comment,
-    generate_captcha, privacy, export_adif, qth_map, achievements, add_qso
+    edit_qso, delete_qso, get_qso,
+    privacy, export_adif, qth_map, achievements, add_qso
 )
 
 urlpatterns = [
-    # Веб-страницы
     path('', home, name='home'),
     path('register/', register_page, name='register_page'),
     path('debug-register/', register_page, name='debug_register'),
@@ -28,14 +27,8 @@ urlpatterns = [
     path('logbook/delete/<uuid:qso_id>/', delete_qso, name='delete_qso'),
     path('logbook/get/<uuid:qso_id>/', get_qso, name='get_qso'),
     path('logout/', logout_view, name='logout'),
-
-    # Комментарии к логам
-    path('logbook/<str:callsign>/comment/', add_logbook_comment, name='add_logbook_comment'),
-    path('captcha/', generate_captcha, name='generate_captcha'),
     path('privacy/', privacy, name='privacy'),
     path('qth-map/', qth_map, name='qth_map'),
     path('achievements/', achievements, name='achievements'),
-
-    # Поиск по логам - динамический маршрут для позывных (должен быть последним)
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
 ]

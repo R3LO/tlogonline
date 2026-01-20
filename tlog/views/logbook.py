@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, time
-from ..models import QSO, RadioProfile, ADIFUpload, LogbookComment, check_user_blocked
+from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
 
 
 def get_band_from_frequency(frequency):
@@ -188,9 +188,6 @@ def logbook_search(request, callsign):
 
     search_callsign = request.GET.get('callsign', '').strip()
 
-    # Получаем комментарии для этого лога (новые сверху)
-    comments = LogbookComment.objects.filter(callsign=callsign)[:20]
-
     # Базовый queryset для всех QSO этого лога
     base_queryset = QSO.objects.filter(my_callsign=callsign)
 
@@ -239,7 +236,6 @@ def logbook_search(request, callsign):
         'has_logs': True,
         'search_callsign': search_callsign,
         'qso_list': qso_queryset[start:end],
-        'comments': comments,
         'total_qso': total_qso,
         'matrix': matrix,
         'bands': bands,
@@ -370,34 +366,6 @@ def edit_qso(request, qso_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-def generate_captcha(request):
-    """
-    Генерация простой математической капчи
-    """
-    import random
-    import uuid
-
-    # Генерируем два случайных числа от 1 до 10
-    a = random.randint(1, 10)
-    b = random.randint(1, 10)
-    answer = a + b
-
-    # Создаём уникальный токен
-    token = str(uuid.uuid4())
-
-    # Сохраняем ответ в сессии
-    if 'captcha_token' not in request.session:
-        request.session['captcha_token'] = {}
-    request.session['captcha_token'][token] = answer
-    request.session.modified = True
-
-    return JsonResponse({
-        'success': True,
-        'token': token,
-        'question': f'{a} + {b} = ?'
-    })
-
-
 @login_required
 def delete_qso(request, qso_id):
     """
@@ -455,69 +423,6 @@ def get_qso(request, qso_id):
         })
     except (QSO.DoesNotExist, ValueError):
         return JsonResponse({'success': False, 'error': 'Запись не найдена'}, status=404)
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-
-def add_logbook_comment(request, callsign):
-    """
-    Добавление комментария к логу (logbook_search)
-    """
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Метод не разрешён'}, status=405)
-
-    try:
-        import json
-        data = json.loads(request.body)
-
-        author_callsign = data.get('author_callsign', '').strip().upper()
-        message = data.get('message', '').strip()
-        captcha_answer = data.get('captcha_answer', '').strip()
-        captcha_token = data.get('captcha_token', '').strip()
-
-        if not author_callsign:
-            return JsonResponse({'success': False, 'error': 'Введите позывной'}, status=400)
-
-        if not message:
-            return JsonResponse({'success': False, 'error': 'Введите сообщение'}, status=400)
-
-        # Проверка капчи
-        if not captcha_token or not captcha_answer:
-            return JsonResponse({'success': False, 'error': 'Пройдите проверку капчи'}, status=400)
-
-        # Проверяем токен капчи в сессии
-        session_captcha = request.session.get('captcha_token', {})
-        expected_answer = session_captcha.get(captcha_token, '')
-
-        if str(captcha_answer) != str(expected_answer):
-            return JsonResponse({'success': False, 'error': 'Неверный ответ на капчу'}, status=400)
-
-        # Удаляем использованный токен
-        if captcha_token in session_captcha:
-            del session_captcha[captcha_token]
-            request.session['captcha_token'] = session_captcha
-
-        # Создаём комментарий, привязанный к конкретному позывному лога
-        comment = LogbookComment.objects.create(
-            callsign=callsign.upper(),
-            author_callsign=author_callsign,
-            message=message
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Комментарий добавлен',
-            'comment': {
-                'id': str(comment.id),
-                'callsign': comment.callsign,
-                'author_callsign': comment.author_callsign,
-                'message': comment.message,
-                'created_at': comment.created_at.strftime('%d.%m.%Y %H:%M')
-            }
-        })
-
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
