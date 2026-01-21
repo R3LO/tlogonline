@@ -6,7 +6,9 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
+from django.utils import timezone
+from datetime import timedelta
+from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked, ChatMessage
 
 
 def home(request):
@@ -165,8 +167,8 @@ def dashboard(request):
         if count > 0:
             mode_stats[mode] = count
 
-    # Последние QSO (последние 20)
-    recent_qso = user_qso.order_by('-date', '-time')[:20]
+    # Последние QSO (последние 10)
+    recent_qso = user_qso.order_by('-date', '-time')[:10]
 
     # Получаем загруженные ADIF файлы
     adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:5]
@@ -217,3 +219,79 @@ def profile_update(request):
             messages.error(request, f'Ошибка при обновлении профиля: {str(e)}')
 
     return redirect('dashboard')
+
+
+def chat_list(request):
+    """
+    Получение списка последних сообщений чата (для AJAX)
+    """
+    # Получаем последние 100 сообщений
+    messages = ChatMessage.objects.all()[:100]
+
+    messages_data = []
+    for msg in messages:
+        messages_data.append({
+            'id': str(msg.id),
+            'username': msg.username,
+            'message': msg.message,
+            'created_at': msg.created_at.strftime('%H:%M'),
+        })
+
+    return JsonResponse({'messages': messages_data})
+
+
+def chat_send(request):
+    """
+    Отправка нового сообщения в чат
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Вы должны быть авторизованы'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        import json
+        data = json.loads(request.body)
+        message_text = data.get('message', '').strip()
+
+        if not message_text:
+            return JsonResponse({'error': 'Сообщение не может быть пустым'}, status=400)
+
+        if len(message_text) > 500:
+            return JsonResponse({'error': 'Сообщение слишком длинное (максимум 500 символов)'}, status=400)
+
+        # Получаем callsign пользователя
+        try:
+            profile = request.user.radio_profile
+            username = profile.callsign or request.user.username
+        except RadioProfile.DoesNotExist:
+            username = request.user.username
+
+        # Создаем сообщение
+        chat_message = ChatMessage.objects.create(
+            user=request.user,
+            username=username,
+            message=message_text
+        )
+
+        # Удаляем старые сообщения, оставляем только последние 100
+        # Получаем ID последних 100 сообщений
+        keep_ids = list(ChatMessage.objects.order_by('-created_at')[:100].values_list('id', flat=True))
+        # Удаляем все остальные
+        ChatMessage.objects.exclude(id__in=keep_ids).delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': {
+                'id': str(chat_message.id),
+                'username': chat_message.username,
+                'message': chat_message.message,
+                'created_at': chat_message.created_at.strftime('%H:%M'),
+            }
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

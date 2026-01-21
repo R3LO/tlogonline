@@ -9,7 +9,7 @@ from .views import (
     profile_update, logbook_search, delete_adif_uploads,
     edit_qso, delete_qso, get_qso,
     privacy, export_adif, qth_map, achievements, add_qso,
-    get_callsigns_list
+    get_callsigns_list, chat_list, chat_send
 )
 
 urlpatterns = [
@@ -21,6 +21,8 @@ urlpatterns = [
     path('dashboard/profile/', profile_update, name='profile_update'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
+    path('dashboard/chat/list/', chat_list, name='chat_list'),
+    path('dashboard/chat/send/', chat_send, name='chat_send'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),

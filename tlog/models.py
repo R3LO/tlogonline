@@ -205,3 +205,22 @@ def check_user_blocked(user):
         return profile.is_blocked, profile.blocked_reason or ''
     except RadioProfile.DoesNotExist:
         return False, ''
+
+
+class ChatMessage(models.Model):
+    """
+    Сообщения локального чата между пользователями
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_messages')
+    username = models.CharField(max_length=150, help_text="Имя пользователя (callsign)")
+    message = models.TextField(help_text="Текст сообщения")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Сообщение чата'
+        verbose_name_plural = 'Сообщения чата'
+
+    def __str__(self):
+        return f"{self.username}: {self.message[:50]}..."
