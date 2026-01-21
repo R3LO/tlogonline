@@ -589,7 +589,18 @@
                     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
                     border: none;
                     border-radius: 8px;
-                    overflow: hidden;
+                    overflow: visible;
+                    position: relative;
+                    pointer-events: none; /* Чат не перехватывает клики */
+                    z-index: 1;
+                }
+                .chat-card .card-header,
+                .chat-card .card-body,
+                .chat-card .card-footer,
+                .chat-card .card-header *,
+                .chat-card .card-body *,
+                .chat-card .card-footer * {
+                    pointer-events: auto; /* Но элементы внутри чата реагируют на клики */
                 }
                 .chat-body {
                     max-height: 200px;
@@ -599,6 +610,7 @@
                     padding: 8px;
                     min-height: 60px;
                     font-size: 0.85rem;
+                    pointer-events: none; /* Сообщения не перехватывают клики */
                 }
                 .chat-message {
                     margin-bottom: 4px;
@@ -606,6 +618,7 @@
                     border-radius: 6px;
                     background: rgba(255, 255, 255, 0.08);
                     animation: fadeIn 0.3s ease;
+                    pointer-events: auto; /* Но сообщения реагируют на клики */
                 }
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(5px); }
@@ -749,7 +762,7 @@
                 <div class="card mb-3">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">👤 Профиль</h6>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#profileModal">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-backdrop="false" data-bs-target="#profileModal">
                             <span>✏️</span> Редактировать
                         </button>
                     </div>
@@ -772,47 +785,6 @@
                         <p><strong>Пользователь:</strong><br>{{ user.username }}</p>
                         <p><strong>Email:</strong><br>{{ user.email }}</p>
                         <p><strong>Дата регистрации:</strong><br>{{ user.date_joined|date:"d.m.Y" }}</p>
-                    </div>
-                </div>
-
-                <!-- Модальное окно редактирования профиля -->
-                <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Редактирование профиля</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form method="post" action="{% url 'profile_update' %}">
-                                {% csrf_token %}
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Позывной</label>
-                                        <input type="text" class="form-control" name="callsign"
-                                               value="{{ profile.callsign|default:'' }}" maxlength="20">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Полное имя</label>
-                                        <input type="text" class="form-control" name="full_name"
-                                               value="{{ profile.full_name|default:'' }}" maxlength="100">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">QTH (город, страна)</label>
-                                        <input type="text" class="form-control" name="qth"
-                                               value="{{ profile.qth|default:'' }}" maxlength="100">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Мой QTH локатор</label>
-                                        <input type="text" class="form-control" name="my_gridsquare"
-                                               value="{{ profile.my_gridsquare|default:'' }}" maxlength="10" placeholder="KO85UU">
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                 </div>
 
@@ -871,6 +843,8 @@
                                                 <button type="button"
                                                         class="btn btn-outline-danger btn-sm p-1"
                                                         title="Удалить связанные QSO"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-backdrop="false"
                                                         onclick="deleteAdifUpload('{{ upload.id }}', '{{ upload.file_name }}')"
                                                         {% if upload.qso_count|default:0 == 0 %}disabled{% endif %}>
                                                     <span style="font-size: 0.75rem;">🗑️</span>
@@ -888,33 +862,6 @@
                             <p class="text-muted small mb-0">Нет загруженных файлов</p>
                         {% endif %}
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно подтверждения удаления -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <span class="me-2">⚠️</span>Подтверждение удаления
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Вы уверены, что хотите удалить все QSO, связанные с файлом:</p>
-                    <p class="fw-bold" id="deleteFileName"></p>
-                    <p class="text-danger mb-0">
-                        <small><span class="me-1">ℹ️</span>Это действие нельзя отменить!</small>
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                        <span class="me-1">🗑️</span>Удалить
-                    </button>
                 </div>
             </div>
         </div>
@@ -948,6 +895,36 @@
         }
     </style>
     <script>
+        // Принудительно сбрасываем строки overflow и padding-right при открытии модальных окон
+        document.addEventListener('DOMContentLoaded', function() {
+            // Сбрасываем стили при загрузке
+            document.body.style.overflow = 'visible';
+            document.body.style.paddingRight = '0';
+
+            // Находим все кнопки открытия модальных окон и добавляем обработчики
+            document.querySelectorAll('[data-bs-toggle="modal"]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    setTimeout(function() {
+                        document.body.style.overflow = 'visible';
+                        document.body.style.paddingRight = '0';
+                    }, 50);
+                });
+            });
+
+            // Находим все модальные окна и добавляем обработчики
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    document.body.style.overflow = 'visible';
+                    document.body.style.paddingRight = '0';
+                });
+                modal.addEventListener('shown.bs.modal', function() {
+                    document.body.style.overflow = 'visible';
+                    document.body.style.paddingRight = '0';
+                });
+            });
+        });
+
         // Управление иконкой сворачивания/разворачивания формы QSO
         document.addEventListener('DOMContentLoaded', function() {
             const qsoForm = document.getElementById('qsoForm');
@@ -994,7 +971,7 @@
         function deleteAdifUpload(uploadId, fileName) {
             document.getElementById('deleteFileName').textContent = fileName;
             const deleteModalEl = document.getElementById('deleteConfirmModal');
-            const deleteModal = bootstrap.Modal.getOrCreateInstance(deleteModalEl);
+            const deleteModal = new bootstrap.Modal(deleteModalEl, { backdrop: false });
             deleteModal.show();
 
             const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -1085,6 +1062,105 @@
             }, 3000);
         }
     </script>
+
+    <style>
+    /* Убираем backdrop и поднимаем модальные окна */
+    .modal-backdrop {
+        display: none !important;
+    }
+    .modal {
+        z-index: 99999 !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+    .modal .modal-dialog {
+        z-index: 100000 !important;
+        position: relative;
+        overflow: visible !important;
+    }
+    /* Убираем проблемы с overflow от Bootstrap */
+    html body {
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+    html body.modal-open {
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+    /* Чат не должен перехватывать клики когда открыто модальное окно */
+    body.modal-open .chat-card {
+        display: none !important;
+    }
+    </style>
+
+    <!-- Модальное окно редактирования профиля -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактирование профиля</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'profile_update' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Позывной</label>
+                            <input type="text" class="form-control" name="callsign"
+                                   value="{{ profile.callsign|default:'' }}" maxlength="20">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Полное имя</label>
+                            <input type="text" class="form-control" name="full_name"
+                                   value="{{ profile.full_name|default:'' }}" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">QTH (город, страна)</label>
+                            <input type="text" class="form-control" name="qth"
+                                   value="{{ profile.qth|default:'' }}" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Мой QTH локатор</label>
+                            <input type="text" class="form-control" name="my_gridsquare"
+                                   value="{{ profile.my_gridsquare|default:'' }}" maxlength="10" placeholder="KO85UU">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <span class="me-2">⚠️</span>Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить все QSO, связанные с файлом:</p>
+                    <p class="fw-bold" id="deleteFileName"></p>
+                    <p class="text-danger mb-0">
+                        <small><span class="me-1">ℹ️</span>Это действие нельзя отменить!</small>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <span class="me-1">🗑️</span>Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% include 'cookie_banner.html' %}
 </body>
