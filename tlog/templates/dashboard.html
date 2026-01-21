@@ -57,6 +57,11 @@
         .stats-card:hover {
             transform: translateY(-2px);
         }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
         .qso-item {
             border-left: 4px solid #667eea;
             transition: all 0.3s ease;
@@ -131,20 +136,28 @@
             <div class="p-4">
 
         <!-- Статистика -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="stats-card text-center">
-                    <h3>{{ total_qso }}</h3>
-                    <p class="mb-0">Всего QSO</p>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ total_qso }}</div>
+                        <div>Всего QSO</div>
+                    </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ unique_callsigns }}</div>
+                        <div>Позывных</div>
+                    </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ dxcc_count|default:"0" }}</div>
+                        <div>Стран DXCC</div>
+                    </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ r150s_count }}</div>
+                        <div>Стран Р-150-С</div>
+                    </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ ru_region_count|default:"0" }}</div>
+                        <div>Регионов РФ</div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="stats-card text-center">
-                    <h3>{{ unique_callsigns }}</h3>
-                    <p class="mb-0">Уникальных позывных</p>
-                </div>
-            </div>
-        </div>
 
         <div class="row">
             <!-- Основной контент -->
@@ -768,8 +781,8 @@
                             {% if profile.my_gridsquare %}
                                 <p><strong>Мой QTH локатор:</strong><br>{{ profile.my_gridsquare }}</p>
                             {% endif %}
-                            {% if profile.full_name %}
-                                <p><strong>Полное имя:</strong><br>{{ profile.full_name }}</p>
+                            {% if profile.first_name or profile.last_name %}
+                                <p><strong>Имя:</strong><br>{{ profile.first_name|default:'' }} {{ profile.last_name|default:'' }}</p>
                             {% endif %}
                             {% if profile.qth %}
                                 <p><strong>QTH:</strong><br>{{ profile.qth }}</p>
@@ -781,25 +794,6 @@
                         <p><strong>Пользователь:</strong><br>{{ user.username }}</p>
                         <p><strong>Email:</strong><br>{{ user.email }}</p>
                         <p><strong>Дата регистрации:</strong><br>{{ user.date_joined|date:"d.m.Y" }}</p>
-                    </div>
-                </div>
-
-                <!-- Статистика по видам связи -->
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">📻 Статистика по видам связи</h6>
-                    </div>
-                    <div class="card-body">
-                        {% if mode_statistics %}
-                            {% for mode, count in mode_statistics.items %}
-                                <div class="d-flex justify-content-between">
-                                    <span><span class="mode-badge">{{ mode }}</span></span>
-                                    <span class="badge bg-secondary">{{ count }}</span>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted">Нет данных</p>
-                        {% endif %}
                     </div>
                 </div>
 

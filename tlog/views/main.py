@@ -159,6 +159,15 @@ def dashboard(request):
     total_qso = user_qso.count()
     unique_callsigns = user_qso.values('callsign').distinct().count()
 
+    # Статистика по DXCC (страны)
+    dxcc_count = user_qso.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
+
+    # Статистика по Р-150-С (регионы России)
+    r150s_count = user_qso.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+    # Статистика по регионам России (ru_region)
+    ru_region_count = user_qso.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+
     # Статистика по видам модуляции
     mode_stats = {}
     mode_choices = dict(QSO._meta.get_field('mode').choices)
@@ -178,6 +187,9 @@ def dashboard(request):
         'profile': profile,
         'total_qso': total_qso,
         'unique_callsigns': unique_callsigns,
+        'dxcc_count': dxcc_count,
+        'r150s_count': r150s_count,
+        'ru_region_count': ru_region_count,
         'recent_qso': recent_qso,
         'mode_statistics': mode_stats,
         'adif_uploads': adif_uploads,
