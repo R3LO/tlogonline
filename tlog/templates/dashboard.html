@@ -1111,9 +1111,14 @@
                                    value="{{ profile.callsign|default:'' }}" maxlength="20">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Полное имя</label>
-                            <input type="text" class="form-control" name="full_name"
-                                   value="{{ profile.full_name|default:'' }}" maxlength="100">
+                            <label class="form-label">Имя</label>
+                            <input type="text" class="form-control" name="first_name"
+                                   value="{{ profile.first_name|default:'' }}" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" name="last_name"
+                                   value="{{ profile.last_name|default:'' }}" maxlength="100">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">QTH (город, страна)</label>

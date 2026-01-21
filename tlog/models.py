@@ -138,7 +138,7 @@ class RadioProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='radio_profile')
     callsign = models.CharField(max_length=20, blank=True)
 
-    # Имя и фамилия (отдельно)
+    # Имя и фамилия (отдельно) - для Django 5.2
     first_name = models.CharField(max_length=100, blank=True, help_text="Имя")
     last_name = models.CharField(max_length=100, blank=True, help_text="Фамилия")
 
@@ -190,6 +190,19 @@ class RadioProfile(models.Model):
         Возвращает True если пользователь заблокирован
         """
         return self.is_blocked
+
+    def save(self, *args, **kwargs):
+        """
+        Переопределяем save для синхронизации first_name/last_name с User
+        """
+        # Синхронизируем имя пользователя с полями профиля
+        if self.first_name:
+            self.user.first_name = self.first_name
+        if self.last_name:
+            self.user.last_name = self.last_name
+        if self.first_name or self.last_name:
+            self.user.save(update_fields=['first_name', 'last_name'])
+        super().save(*args, **kwargs)
 
 
 def check_user_blocked(user):

@@ -1,0 +1,1 @@
+# Tests package for Django 5.2

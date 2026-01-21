@@ -188,7 +188,7 @@ def dashboard(request):
 
 def profile_update(request):
     """
-    Обновление профиля радиолюбителя
+    Обновление профиля радиолюбителя (Django 5.2)
     """
     if not request.user.is_authenticated:
         return redirect('login_page')
@@ -206,11 +206,17 @@ def profile_update(request):
                 defaults={}
             )
 
-            # Обновляем поля профиля
+            # Обновляем поля профиля (Django 5.2 использует first_name и last_name)
             profile.callsign = request.POST.get('callsign', '').strip()
-            profile.full_name = request.POST.get('full_name', '').strip()
+            profile.first_name = request.POST.get('first_name', '').strip()
+            profile.last_name = request.POST.get('last_name', '').strip()
             profile.qth = request.POST.get('qth', '').strip()
             profile.my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
+
+            # Также обновляем User модель
+            request.user.first_name = profile.first_name
+            request.user.last_name = profile.last_name
+            request.user.save(update_fields=['first_name', 'last_name'])
 
             profile.save()
 

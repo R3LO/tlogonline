@@ -98,7 +98,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     BASE_DIR / 'tlog' / 'static',
@@ -111,8 +110,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ADIF files storage
 ADIF_UPLOAD_PATH = 'adif/'
 
-# Default primary key field type
+# Default primary key field type (Django 5.2+)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security settings for Django 5.2
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Session settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
 
 
 

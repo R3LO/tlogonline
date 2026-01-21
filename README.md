@@ -1,10 +1,10 @@
-# Ham Radio Website - Django 5
+# Ham Radio Website - Django 5.2
 
 Modern platform for ham radio operators with callsign registration, QTH locators, QSO logging and ADIF file upload.
 
 ## Features
 
-- Django 5.0.4 + DRF
+- Django 5.2 + DRF
 - Callsign registration (mandatory)
 - QTH locator support (e.g., KO85UU)
 - QSO logging with full details
@@ -14,14 +14,35 @@ Modern platform for ham radio operators with callsign registration, QTH locators
 - REST API
 - Admin panel
 
-## Quick Start
+## Requirements
+
+- Python 3.10+
+- PostgreSQL 14+
+- Django 5.2
+
+## Installation
 
 ```bash
-pip install -r requirements_minimal.txt
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+.\venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
 python manage.py makemigrations
-python manage.py migrate --run-syncdb
+python manage.py migrate
+
+# Create superuser
 python manage.py createsuperuser
+
+# Create test data (optional)
 python create_test_data_ham.py
+
+# Run development server
 python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -76,7 +97,7 @@ curl -X POST http://localhost:8000/api/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "new_ham",
-    "email": "ham@example.com", 
+    "email": "ham@example.com",
     "password": "password123",
     "password_confirm": "password123",
     "callsign": "RA3DEF",
@@ -137,8 +158,15 @@ curl -X POST http://localhost:8000/api/adif-uploads/ \
 
 After running test data creation:
 - Total users: 3
-- Total ham profiles: 3  
+- Total ham profiles: 3
 - Total QSO records: 764+
+
+## Django 5.2 Changes
+
+- Uses `first_name` and `last_name` instead of `full_name` in RadioProfile
+- Default auto field: `BigAutoField`
+- Enhanced security settings
+- ASGI support included
 
 ## Website Status
 
