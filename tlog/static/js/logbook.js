@@ -65,7 +65,9 @@ function initEditButtons() {
                     document.getElementById('edit_id').value = qso.id;
                     document.getElementById('edit_date').value = qso.date || '';
                     document.getElementById('edit_time').value = qso.time ? qso.time.substring(0, 5) : '';
+                    document.getElementById('edit_my_callsign').value = qso.my_callsign || '';
                     document.getElementById('edit_callsign').value = qso.callsign || '';
+
                     document.getElementById('edit_band').value = qso.band || '';
                     document.getElementById('edit_mode').value = qso.mode || 'SSB';
                     document.getElementById('edit_frequency').value = qso.frequency || '';
@@ -82,8 +84,13 @@ function initEditButtons() {
                     document.getElementById('edit_r150s').value = qso.r150s || '';
                     document.getElementById('edit_dxcc').value = qso.dxcc || '';
                     document.getElementById('edit_ru_region').value = qso.ru_region || '';
-
                     document.getElementById('edit_paper_qsl').value = qso.paper_qsl || 'N';
+
+                    // ОТЛАДКА: проверяем что записалось в поля
+                    console.group('=== Значения полей формы после заполнения ===');
+                    console.log('edit_my_callsign.value:', document.getElementById('edit_my_callsign').value);
+                    console.log('edit_callsign.value:', document.getElementById('edit_callsign').value);
+                    console.groupEnd();
 
                     // Открываем модальное окно
                     const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));

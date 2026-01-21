@@ -324,7 +324,8 @@ def edit_qso(request, qso_id):
         # Обновляем поля записи
         qso.date = data.get('date')
         qso.time = data.get('time')
-        qso.callsign = data.get('callsign', '')[:20]
+        qso.my_callsign = data.get('my_callsign', '').upper()[:20]
+        qso.callsign = data.get('callsign', '').upper()[:20]
         qso.band = data.get('band', '')[:10] or None
         qso.mode = data.get('mode') or 'SSB'
 
@@ -1052,13 +1053,17 @@ def add_qso(request):
         time_str = data.get('time')
         my_callsign = data.get('my_callsign', '').strip().upper()[:20] or request.user.username
         callsign = data.get('callsign', '').strip().upper()[:20]
-        band = data.get('band', '')[:10] or None
+        band = data.get('band') or None
+        if band is not None:
+            band = band[:10]
         mode = data.get('mode') or 'SSB'
 
         # Проверка на дубликат (мой позывной, позывной корреспондента, дата, время - только часы и минуты, вид связи, диапазон)
         # Нормализуем данные для сравнения
         my_callsign_normalized = my_callsign.upper()
         callsign_normalized = callsign.upper()
+        my_callsign_normalized = my_callsign.upper() if my_callsign else ''
+        callsign_normalized = callsign.upper() if callsign else ''
         mode_normalized = mode.upper() if mode else 'SSB'
         band_normalized = band.upper() if band else None
 
@@ -1088,13 +1093,13 @@ def add_qso(request):
 
         if duplicate_exists:
             return JsonResponse({
-                'error': f'QSO с {callsign_normalized} на {date_str} {hour:02d}:{minute:02d} {mode_normalized}/{band_normalized or "N/A"} уже существует'
+                'error': f'QSO с {callsign_normalized} на {date_str} {hour:02d}:{minute:02d} {mode_normalized}/{band_normalized or "не указан"} уже существует'
             }, status=400)
 
         # Проверяем обязательные поля
-        if not all([date_str, time_str, callsign]):
+        if not all([date_str, time_str, callsign, band]):
             return JsonResponse({
-                'error': 'Заполните обязательные поля: дата, время, позывной'
+                'error': 'Заполните обязательные поля: дата, время, позывной, диапазон'
             }, status=400)
 
         # Валидация форматов
