@@ -6,6 +6,9 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from tlog.views.main import custom_404_view
+
+handler404 = custom_404_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),

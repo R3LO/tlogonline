@@ -301,3 +301,12 @@ def chat_send(request):
         return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def custom_404_view(request, exception):
+    """
+    Обработчик ошибки 404 - страница не найдена
+    """
+    return render(request, '404.html', {
+        'request_path': request.path,
+    }, status=404)
