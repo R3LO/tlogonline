@@ -550,11 +550,10 @@
 
                 <!-- Локальный чат -->
                 <div class="card chat-card mt-3">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+                    <div class="card-header bg-primary text-white py-2">
                         <h6 class="mb-0">
                             <span class="me-1">💬</span>Чат
                         </h6>
-                        <span class="badge bg-light text-primary" id="chat-online-count">0</span>
                     </div>
                     <div class="card-body chat-body p-0">
                         <div id="chat-messages" class="chat-messages">
@@ -666,7 +665,6 @@
                 const chatForm = document.getElementById('chat-form');
                 const chatInput = document.getElementById('chat-input');
                 const chatSendBtn = document.getElementById('chat-send-btn');
-                const chatOnlineCount = document.getElementById('chat-online-count');
                 let lastMessageId = null;
 
                 // Загрузка сообщений чата
@@ -684,8 +682,6 @@
                             } else {
                                 chatMessages.innerHTML = '<div class="text-center text-muted py-2">Нет сообщений</div>';
                             }
-                            const uniqueUsers = new Set(data.messages.map(m => m.username));
-                            chatOnlineCount.textContent = uniqueUsers.size;
                         })
                         .catch(error => {
                             console.error('Ошибка загрузки чата:', error);
@@ -697,7 +693,7 @@
                     chatMessages.innerHTML = messages.map(msg => `
                         <div class="chat-message">
                             <div class="d-flex justify-content-between">
-                                <span class="username">${escapeHtml(msg.username)}</span>
+                                <span class="username">${escapeHtml(msg.username)} (id=${msg.user_id})</span>
                                 <span class="time">${msg.created_at}</span>
                             </div>
                             <div class="text">${escapeHtml(msg.message)}</div>

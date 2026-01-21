@@ -238,6 +238,7 @@ def chat_list(request):
     for msg in messages:
         messages_data.append({
             'id': str(msg.id),
+            'user_id': msg.user.id,
             'username': msg.username,
             'message': msg.message,
             'created_at': msg.created_at.strftime('%H:%M'),
