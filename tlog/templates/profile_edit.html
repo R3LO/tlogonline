@@ -124,7 +124,8 @@
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>
                                     <input type="email" class="form-control" name="email"
-                                           value="{{ user.email }}" placeholder="email@example.com" required>
+                                           value="{{ user.email }}" placeholder="email@example.com" required
+                                           autocomplete="off">
                                     <div class="invalid-feedback" id="email-error"></div>
                                 </div>
 
@@ -143,12 +144,14 @@
                                     <div class="mb-3">
                                         <label class="form-label">Новый пароль</label>
                                         <input type="password" class="form-control" id="new_password1"
-                                               placeholder="Введите новый пароль" maxlength="128">
+                                               placeholder="Введите новый пароль" maxlength="128"
+                                               autocomplete="new-password">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Подтверждение пароля</label>
                                         <input type="password" class="form-control" id="new_password2"
-                                               placeholder="Повторите новый пароль" maxlength="128">
+                                               placeholder="Повторите новый пароль" maxlength="128"
+                                               autocomplete="new-password">
                                         <div class="invalid-feedback" id="password-error"></div>
                                     </div>
                                     <div class="d-flex gap-2">
@@ -182,14 +185,16 @@
                                             <label class="form-label">Логин (позывной)</label>
                                             <input type="text" class="form-control" name="lotw_user"
                                                    value="{{ profile.lotw_user|default:'' }}"
-                                                   placeholder="UA1ABC" maxlength="50">
+                                                   placeholder="UA1ABC" maxlength="50"
+                                                   autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Пароль LoTW (должен быть проверен, иначе не сохранится!)</label>
                                             <input type="password" class="form-control" name="lotw_password"
                                                    value="{{ profile.lotw_password|default:'' }}"
-                                                   placeholder="Пароль от LoTW" maxlength="100">
+                                                   placeholder="Пароль от LoTW" maxlength="100"
+                                                   autocomplete="new-password">
                                         </div>
 
                                         <div class="mb-2" id="lotw_status">
@@ -221,7 +226,8 @@
                                     <label class="form-label">Позывной</label>
                                     <input type="text" class="form-control" name="callsign"
                                            value="{{ profile.callsign|default:'' }}"
-                                           placeholder="UA1ABC" maxlength="20">
+                                           placeholder="UA1ABC" maxlength="20"
+                                           autocomplete="off">
                                 </div>
 
                                 <div class="row">
@@ -229,13 +235,15 @@
                                         <label class="form-label">Имя</label>
                                         <input type="text" class="form-control" name="first_name"
                                                value="{{ profile.first_name|default:user.first_name }}"
-                                               placeholder="Иван" maxlength="100">
+                                               placeholder="Иван" maxlength="100"
+                                               autocomplete="off">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Фамилия</label>
                                         <input type="text" class="form-control" name="last_name"
                                                value="{{ profile.last_name|default:user.last_name }}"
-                                               placeholder="Петров" maxlength="100">
+                                               placeholder="Петров" maxlength="100"
+                                               autocomplete="off">
                                     </div>
                                 </div>
 
@@ -243,14 +251,16 @@
                                     <label class="form-label">QTH (место расположения)</label>
                                     <input type="text" class="form-control" name="qth"
                                            value="{{ profile.qth|default:'' }}"
-                                           placeholder="г. Москва, Россия" maxlength="100">
+                                           placeholder="г. Москва, Россия" maxlength="100"
+                                           autocomplete="off">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Мой QTH локатор</label>
                                     <input type="text" class="form-control" name="my_gridsquare"
                                            value="{{ profile.my_gridsquare|default:'' }}"
-                                           placeholder="KO85UU" maxlength="10">
+                                           placeholder="KO85UU" maxlength="10"
+                                           autocomplete="off">
                                     <div class="form-text">Например: KO85UU для Москвы</div>
                                 </div>
                             </div>
@@ -268,20 +278,24 @@
                                                     <input type="text" class="form-control name-input"
                                                            name="my_callsigns_names[]"
                                                            value="{{ callsign_item.name }}"
-                                                           placeholder="Позывной">
+                                                           placeholder="Позывной"
+                                                           autocomplete="off">
                                                     <input type="text" class="form-control name-input"
                                                            name="my_callsigns_types[]"
                                                            value="{{ callsign_item.type|default:'' }}"
-                                                           placeholder="Тип (необязательно)">
+                                                           placeholder="Тип (необязательно)"
+                                                           autocomplete="off">
                                                 {% else %}
                                                     <input type="text" class="form-control name-input"
                                                            name="my_callsigns_names[]"
                                                            value="{{ callsign_item }}"
-                                                           placeholder="Позывной">
+                                                           placeholder="Позывной"
+                                                           autocomplete="off">
                                                     <input type="text" class="form-control name-input"
                                                            name="my_callsigns_types[]"
                                                            value=""
-                                                           placeholder="Тип (необязательно)">
+                                                           placeholder="Тип (необязательно)"
+                                                           autocomplete="off">
                                                 {% endif %}
                                                 <button type="button" class="btn btn-outline-danger btn-sm"
                                                         onclick="removeCallsign(this)">
@@ -336,10 +350,12 @@
             item.innerHTML = `
                 <input type="text" class="form-control name-input"
                        name="my_callsigns_names[]"
-                       placeholder="Позывной">
+                       placeholder="Позывной"
+                       autocomplete="off">
                 <input type="text" class="form-control name-input"
                        name="my_callsigns_types[]"
-                       placeholder="Тип (необязательно)">
+                       placeholder="Тип (необязательно)"
+                       autocomplete="off">
                 <button type="button" class="btn btn-outline-danger btn-sm"
                         onclick="removeCallsign(this)">
                     ✕
