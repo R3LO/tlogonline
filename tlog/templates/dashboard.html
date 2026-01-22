@@ -113,13 +113,9 @@
                 <a class="nav-link text-light me-3" href="/achievements/">
                     <span>🏆</span> Достижения
                 </a>
-                <span class="navbar-text me-3">
-                    {% if profile %}
-                        {{ profile.callsign }} ({{ user.first_name|default:user.username }})
-                    {% else %}
-                        {{ user.first_name|default:user.username }}
-                    {% endif %}
-                </span>
+                <a class="nav-link text-light me-3" href="/dashboard/profile/">
+                    <span>👤</span> {{ user.username }}
+                </a>
                 <a class="btn btn-outline-light btn-sm" href="/logout/">Выйти</a>
             </div>
         </div>
@@ -767,36 +763,6 @@
 
             <!-- Боковая панель -->
             <div class="col-lg-4">
-                <!-- Профиль радиолюбителя -->
-                <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">👤 Профиль</h6>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-backdrop="false" data-bs-target="#profileModal">
-                            <span>✏️</span> Редактировать
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        {% if profile %}
-                            <p><strong>Позывной:</strong><br><span class="callsign-badge">{{ profile.callsign }}</span></p>
-                            {% if profile.my_gridsquare %}
-                                <p><strong>Мой QTH локатор:</strong><br>{{ profile.my_gridsquare }}</p>
-                            {% endif %}
-                            {% if profile.first_name or profile.last_name %}
-                                <p><strong>Имя:</strong><br>{{ profile.first_name|default:'' }} {{ profile.last_name|default:'' }}</p>
-                            {% endif %}
-                            {% if profile.qth %}
-                                <p><strong>QTH:</strong><br>{{ profile.qth }}</p>
-                            {% endif %}
-                        {% else %}
-                            <p class="text-muted">Профиль радиолюбителя не заполнен</p>
-                        {% endif %}
-                        <hr>
-                        <p><strong>Пользователь:</strong><br>{{ user.username }}</p>
-                        <p><strong>Email:</strong><br>{{ user.email }}</p>
-                        <p><strong>Дата регистрации:</strong><br>{{ user.date_joined|date:"d.m.Y" }}</p>
-                    </div>
-                </div>
-
                 <!-- Утилиты -->
                 <div class="card mb-3">
                     <div class="card-header">

@@ -151,6 +151,11 @@ class RadioProfile(models.Model):
     # Позывные (бывшие, действующие, спецпозывные, с дробями) - храним как JSON
     my_callsigns = models.JSONField(default=list, blank=True, help_text="Мои позывные в формате JSON")
 
+    # LoTW credentials
+    lotw_user = models.CharField(max_length=50, blank=True, help_text="Логин от LoTW")
+    lotw_password = models.CharField(max_length=100, blank=True, help_text="Пароль от LoTW")
+    lotw_chk_pass = models.BooleanField(default=False, help_text="Проверен ли логин и пароль от LoTW")
+
     # Блокировка пользователя
     is_blocked = models.BooleanField(default=False, help_text="Заблокировать доступ к личному кабинету")
     blocked_reason = models.TextField(blank=True, help_text="Причина блокировки", default='')

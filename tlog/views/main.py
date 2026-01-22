@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+import json
 from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked, ChatMessage
 
 
@@ -210,20 +211,30 @@ def profile_update(request):
     if is_blocked:
         return render(request, 'blocked.html', {'reason': reason})
 
+    # Получаем или создаем профиль
+    try:
+        profile = RadioProfile.objects.get(user=request.user)
+    except RadioProfile.DoesNotExist:
+        profile = RadioProfile.objects.create(user=request.user)
+
     if request.method == 'POST':
         try:
-            # Получаем или создаем профиль
-            profile, created = RadioProfile.objects.get_or_create(
-                user=request.user,
-                defaults={}
-            )
-
-            # Обновляем поля профиля (Django 5.2 использует first_name и last_name)
+            # Обновляем поля профиля
             profile.callsign = request.POST.get('callsign', '').strip()
             profile.first_name = request.POST.get('first_name', '').strip()
             profile.last_name = request.POST.get('last_name', '').strip()
             profile.qth = request.POST.get('qth', '').strip()
             profile.my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
+            profile.lotw_user = request.POST.get('lotw_user', '').strip()
+            profile.lotw_password = request.POST.get('lotw_password', '').strip()
+            profile.lotw_chk_pass = 'lotw_chk_pass' in request.POST
+
+            # Обрабатываем my_callsigns из JSON
+            my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
+            try:
+                profile.my_callsigns = json.loads(my_callsigns_json)
+            except json.JSONDecodeError:
+                profile.my_callsigns = []
 
             # Также обновляем User модель
             request.user.first_name = profile.first_name
@@ -233,10 +244,14 @@ def profile_update(request):
             profile.save()
 
             messages.success(request, 'Профиль успешно обновлён')
+            return redirect('profile_update')
         except Exception as e:
             messages.error(request, f'Ошибка при обновлении профиля: {str(e)}')
 
-    return redirect('dashboard')
+    # Для GET запроса или после POST с ошибкой - показываем форму
+    return render(request, 'profile_edit.html', {
+        'profile': profile,
+    })
 
 
 def chat_list(request):
