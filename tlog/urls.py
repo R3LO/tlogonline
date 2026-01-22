@@ -9,7 +9,9 @@ from .views import (
     profile_update, logbook_search, delete_adif_uploads,
     edit_qso, delete_qso, get_qso,
     privacy, export_adif, qth_map, achievements, add_qso,
-    get_callsigns_list, chat_list, chat_send
+    get_callsigns_list, chat_list, chat_send,
+    verify_lotw_credentials, delete_lotw_credentials,
+    change_password
 )
 
 urlpatterns = [
@@ -19,6 +21,9 @@ urlpatterns = [
     path('login/', login_page, name='login_page'),
     path('dashboard/', dashboard, name='dashboard'),
     path('dashboard/profile/', profile_update, name='profile_update'),
+    path('dashboard/profile/verify-lotw/', verify_lotw_credentials, name='verify_lotw_credentials'),
+    path('dashboard/profile/delete-lotw/', delete_lotw_credentials, name='delete_lotw_credentials'),
+    path('dashboard/profile/change-password/', change_password, name='change_password'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('dashboard/chat/list/', chat_list, name='chat_list'),

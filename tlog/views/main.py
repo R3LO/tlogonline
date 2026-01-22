@@ -225,9 +225,33 @@ def profile_update(request):
             profile.last_name = request.POST.get('last_name', '').strip()
             profile.qth = request.POST.get('qth', '').strip()
             profile.my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
-            profile.lotw_user = request.POST.get('lotw_user', '').strip()
-            profile.lotw_password = request.POST.get('lotw_password', '').strip()
-            profile.lotw_chk_pass = 'lotw_chk_pass' in request.POST
+
+            # Обновляем email пользователя
+            new_email = request.POST.get('email', '').strip()
+            if new_email:
+                # Простая валидация email
+                import re
+                email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                if re.match(email_pattern, new_email):
+                    request.user.email = new_email
+                    request.user.save(update_fields=['email'])
+                else:
+                    messages.error(request, 'Введите корректный email адрес')
+                    return render(request, 'profile_edit.html', {
+                        'profile': profile,
+                    })
+
+            # Обработка настроек LoTW
+            use_lotw = 'use_lotw' in request.POST
+            if use_lotw:
+                profile.lotw_user = request.POST.get('lotw_user', '').strip()
+                profile.lotw_password = request.POST.get('lotw_password', '').strip()
+                # lotw_chk_pass сохраняется как есть (обновляется при проверке)
+            else:
+                # Очищаем данные LoTW если чекбокс не выбран
+                profile.lotw_user = ''
+                profile.lotw_password = ''
+                profile.lotw_chk_pass = False
 
             # Обрабатываем my_callsigns из JSON
             my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
@@ -235,6 +259,8 @@ def profile_update(request):
                 profile.my_callsigns = json.loads(my_callsigns_json)
             except json.JSONDecodeError:
                 profile.my_callsigns = []
+
+            profile.save()
 
             # Также обновляем User модель
             request.user.first_name = profile.first_name
@@ -252,6 +278,135 @@ def profile_update(request):
     return render(request, 'profile_edit.html', {
         'profile': profile,
     })
+
+
+def verify_lotw_credentials(request):
+    """
+    Проверка логина и пароля LoTW
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Вы должны быть авторизованы'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        import requests
+
+        # Получаем логин и пароль из POST данных
+        data = json.loads(request.body)
+        login = data.get('login', '').strip()
+        password = data.get('password', '').strip()
+
+        if not login or not password:
+            return JsonResponse({'error': 'Логин и пароль обязательны'}, status=400)
+
+        # Функция проверки
+        def check_lotw_pass(login, password):
+            params = {
+                'login': login,
+                'password': password,
+            }
+            response = requests.get(
+                "https://lotw.arrl.org/lotwuser/lotwreport.adi",
+                params=params,
+                timeout=15
+            )
+            if response.text.strip().startswith('ARRL Logbook of the World Status Report'):
+                return True
+            elif '<HTML>' in response.text.upper() or '<!DOCTYPE HTML' in response.text.upper():
+                return False
+            return False
+
+        # Выполняем проверку
+        is_valid = check_lotw_pass(login, password)
+
+        # Обновляем профиль пользователя
+        try:
+            profile = RadioProfile.objects.get(user=request.user)
+            profile.lotw_chk_pass = is_valid
+            if is_valid:
+                profile.lotw_user = login
+                profile.lotw_password = password
+            profile.save()
+        except RadioProfile.DoesNotExist:
+            pass
+
+        return JsonResponse({
+            'success': True,
+            'is_valid': is_valid,
+            'message': 'Логин и пароль верны' if is_valid else 'Логин или пароль неверны'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def delete_lotw_credentials(request):
+    """
+    Удаление логина и пароля LoTW
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Вы должны быть авторизованы'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        profile = RadioProfile.objects.get(user=request.user)
+        profile.lotw_user = ''
+        profile.lotw_password = ''
+        profile.lotw_chk_pass = False
+        profile.save()
+
+        return JsonResponse({'success': True})
+
+    except RadioProfile.DoesNotExist:
+        return JsonResponse({'error': 'Профиль не найден'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def change_password(request):
+    """
+    Смена пароля пользователя
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Вы должны быть авторизованы'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        new_password = data.get('password', '')
+
+        if not new_password:
+            return JsonResponse({'error': 'Пароль не может быть пустым'}, status=400)
+
+        if len(new_password) < 8:
+            return JsonResponse({'error': 'Пароль должен содержать минимум 8 символов'}, status=400)
+
+        # Устанавливаем новый пароль через set_password (Django автоматически хеширует)
+        request.user.set_password(new_password)
+        request.user.save()
+
+        # Разлогиниваем пользователя и перенаправляем на страницу логина
+        from django.contrib.auth import logout
+        logout(request)
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Пароль успешно изменён',
+            'redirect': '/login/'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 def chat_list(request):
