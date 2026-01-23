@@ -98,16 +98,16 @@ def dashboard(request):
             from django.db.utils import IntegrityError
 
             # Получаем данные из формы
-            my_callsign = request.POST.get('my_callsign', '').strip()
-            callsign = request.POST.get('callsign', '').strip()
+            my_callsign = request.POST.get('my_callsign', '').strip().upper()
+            callsign = request.POST.get('callsign', '').strip().upper()
             date_str = request.POST.get('date', '').strip()
             time_str = request.POST.get('time', '').strip()
-            band = request.POST.get('band', '').strip()
-            mode = request.POST.get('mode', '').strip()
-            rst_rcvd = request.POST.get('rst_rcvd', '').strip()
-            rst_sent = request.POST.get('rst_sent', '').strip()
-            gridsquare = request.POST.get('gridsquare', '').strip()
-            ru_region = request.POST.get('ru_region', '').strip()
+            band = request.POST.get('band', '').strip().upper()
+            mode = request.POST.get('mode', '').strip().upper()
+            rst_rcvd = request.POST.get('rst_rcvd', '').strip().upper()
+            rst_sent = request.POST.get('rst_sent', '').strip().upper()
+            gridsquare = request.POST.get('gridsquare', '').strip().upper()
+            ru_region = request.POST.get('ru_region', '').strip().upper()
 
             # Валидация обязательных полей
             if not all([my_callsign, callsign, date_str, time_str, band, mode]):

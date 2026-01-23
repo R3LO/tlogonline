@@ -325,13 +325,13 @@ def edit_qso(request, qso_id):
         import json
         data = json.loads(request.body)
 
-        # Обновляем поля записи
+        # Обновляем поля записи (все текстовые поля преобразуются в верхний регистр)
         qso.date = data.get('date')
         qso.time = data.get('time')
         qso.my_callsign = data.get('my_callsign', '').upper()[:20]
         qso.callsign = data.get('callsign', '').upper()[:20]
-        qso.band = data.get('band', '')[:10] or None
-        qso.mode = data.get('mode') or 'SSB'
+        qso.band = data.get('band', '').upper()[:10] or None
+        qso.mode = (data.get('mode') or 'SSB').upper()
 
         frequency = data.get('frequency')
         if frequency:
@@ -342,12 +342,12 @@ def edit_qso(request, qso_id):
         else:
             qso.frequency = None
 
-        qso.rst_rcvd = data.get('rst_rcvd', '')[:10] or None
-        qso.rst_sent = data.get('rst_sent', '')[:10] or None
-        qso.my_gridsquare = data.get('my_gridsquare', '')[:10] or None
-        qso.gridsquare = data.get('gridsquare', '')[:10] or None
-        qso.sat_name = data.get('sat_name', '')[:50] or None
-        qso.prop_mode = data.get('prop_mode', '')[:50] or None
+        qso.rst_rcvd = data.get('rst_rcvd', '').upper()[:10] or None
+        qso.rst_sent = data.get('rst_sent', '').upper()[:10] or None
+        qso.my_gridsquare = data.get('my_gridsquare', '').upper()[:10] or None
+        qso.gridsquare = data.get('gridsquare', '').upper()[:10] or None
+        qso.sat_name = data.get('sat_name', '').upper()[:50] or None
+        qso.prop_mode = data.get('prop_mode', '').upper()[:50] or None
 
         cqz = data.get('cqz')
         qso.cqz = int(cqz) if cqz else None
@@ -357,10 +357,10 @@ def edit_qso(request, qso_id):
 
         qso.lotw = data.get('lotw', 'N')
         qso.paper_qsl = data.get('paper_qsl', 'N')
-        qso.continent = data.get('continent', '')[:2] or None
-        qso.r150s = data.get('r150s', '')[:100] or None
-        qso.dxcc = data.get('dxcc', '')[:10] or None
-        qso.ru_region = data.get('ru_region', '')[:100] or None
+        qso.continent = data.get('continent', '').upper()[:2] or None
+        qso.r150s = data.get('r150s', '').upper()[:100] or None
+        qso.dxcc = data.get('dxcc', '').upper()[:10] or None
+        qso.ru_region = data.get('ru_region', '').upper()[:100] or None
 
         qso.save()
 
@@ -1052,15 +1052,13 @@ def add_qso(request):
 
         data = json.loads(request.body)
 
-        # Получаем данные из формы
+        # Получаем данные из формы (все текстовые поля преобразуются в верхний регистр)
         date_str = data.get('date')
         time_str = data.get('time')
-        my_callsign = data.get('my_callsign', '').strip().upper()[:20] or request.user.username
+        my_callsign = data.get('my_callsign', '').strip().upper()[:20] or request.user.username.upper()
         callsign = data.get('callsign', '').strip().upper()[:20]
-        band = data.get('band') or None
-        if band is not None:
-            band = band[:10]
-        mode = data.get('mode') or 'SSB'
+        band = data.get('band', '').strip().upper()[:10] or None
+        mode = (data.get('mode') or 'SSB').upper()
 
         # Проверка на дубликат (мой позывной, позывной корреспондента, дата, время - только часы и минуты, вид связи, диапазон)
         # Нормализуем данные для сравнения
@@ -1113,10 +1111,10 @@ def add_qso(request):
             }, status=400)
 
         frequency = data.get('frequency')
-        rst_rcvd = data.get('rst_rcvd', '')[:10] or None
-        rst_sent = data.get('rst_sent', '')[:10] or None
-        my_gridsquare = data.get('my_gridsquare', '')[:10] or None
-        gridsquare = data.get('gridsquare', '')[:10] or None
+        rst_rcvd = data.get('rst_rcvd', '').upper()[:10] or None
+        rst_sent = data.get('rst_sent', '').upper()[:10] or None
+        my_gridsquare = data.get('my_gridsquare', '').upper()[:10] or None
+        gridsquare = data.get('gridsquare', '').upper()[:10] or None
         sat_qso = data.get('sat_qso', 'N')
         lotw = data.get('lotw', 'N')
 
@@ -1130,8 +1128,8 @@ def add_qso(request):
 
         # Поля SAT - только если Sat QSO отмечен
         if sat_qso == 'Y':
-            sat_name = data.get('sat_name', '')[:50] or None
-            sat_prop_mode = data.get('sat_prop_mode', '')[:50] or None
+            sat_name = data.get('sat_name', '').upper()[:50] or None
+            sat_prop_mode = data.get('sat_prop_mode', '').upper()[:50] or None
             prop_mode = sat_prop_mode
         else:
             sat_name = None
@@ -1153,11 +1151,15 @@ def add_qso(request):
                     ituz = dxcc_info.get('itu_zone')
                 continent = dxcc_info.get('continent')
 
-                # Получаем country из r150cty.dat
+                # Получаем country из r150cty.dat (преобразуем в верхний регистр)
                 r150s_country = dxcc_info.get('country')
+                if r150s_country:
+                    r150s_country = r150s_country.upper()[:100]
 
                 # Получаем dxcc (primary_prefix) из cty.dat
                 dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
+                if dxcc:
+                    dxcc = dxcc.upper()[:10]
             else:
                 r150s_country = None
                 dxcc = None

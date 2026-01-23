@@ -246,19 +246,19 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             frequency = 0.0
 
                         callsign = callsign_qso
-                        my_callsign = user_callsign.strip()[:20] if user_callsign else None
+                        my_callsign = user_callsign.strip().upper()[:20] if user_callsign else None
                         band = band_qso
                         mode = mode_qso
-                        rst_sent = qso_data.get('rst_sent', '').strip()[:10]
-                        rst_rcvd = qso_data.get('rst_rcvd', '').strip()[:10]
+                        rst_sent = qso_data.get('rst_sent', '').strip().upper()[:10]
+                        rst_rcvd = qso_data.get('rst_rcvd', '').strip().upper()[:10]
 
                         # MY_CALLSIGN - приоритет: форма(если галочка) > OPERATOR > MY_CALLSIGN > профиль
-                        my_callsign_adif = qso_data.get('my_callsign', '').strip()[:20]
-                        operator_adif = qso_data.get('operator', '').strip()[:20]
+                        my_callsign_adif = qso_data.get('my_callsign', '').strip().upper()[:20]
+                        operator_adif = qso_data.get('operator', '').strip().upper()[:20]
 
                         # Если add_extra_tags И override_my_callsign, используем ТОЛЬКО из формы
                         if add_extra_tags and my_callsign_default:
-                            my_callsign = my_callsign_default
+                            my_callsign = my_callsign_default.upper()[:20]
                         # Иначе если есть OPERATOR в ADIF, используем его
                         elif operator_adif:
                             my_callsign = operator_adif
@@ -270,31 +270,31 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             my_callsign = None
 
                         # MY_GRIDSQUARE - если add_extra_tags И override_my_gridsquare, берём из формы
-                        my_gridsquare_adif = qso_data.get('my_gridsquare', '').strip()[:10]
+                        my_gridsquare_adif = qso_data.get('my_gridsquare', '').strip().upper()[:10]
                         if add_extra_tags and my_gridsquare_default:
-                            my_gridsquare = my_gridsquare_default
+                            my_gridsquare = my_gridsquare_default.upper()[:10]
                         else:
                             my_gridsquare = my_gridsquare_adif
 
-                        gridsquare = qso_data.get('gridsquare', '').strip()[:10]
+                        gridsquare = qso_data.get('gridsquare', '').strip().upper()[:10]
 
                         # PROP_MODE - если add_extra_tags И override_prop_mode, берём из формы
-                        prop_mode_adif = qso_data.get('prop_mode', '').strip()[:50]
+                        prop_mode_adif = qso_data.get('prop_mode', '').strip().upper()[:50]
                         if add_extra_tags and prop_mode_default:
-                            prop_mode = prop_mode_default
+                            prop_mode = prop_mode_default.upper()[:50]
                         else:
                             prop_mode = prop_mode_adif
 
                         # SAT_NAME - если add_extra_tags И override_sat_name, берём из формы
-                        sat_name_adif = qso_data.get('sat_name', '').strip()[:50]
+                        sat_name_adif = qso_data.get('sat_name', '').strip().upper()[:50]
                         if add_extra_tags and sat_name_default:
-                            sat_name = sat_name_default
+                            sat_name = sat_name_default.upper()[:50]
                         else:
                             sat_name = sat_name_adif
 
                         cqz = qso_data.get('cqz')
                         ituz = qso_data.get('ituz')
-                        continent = qso_data.get('cont', '').strip()[:2]
+                        continent = qso_data.get('cont', '').strip().upper()[:2]
 
                         # Если поля отсутствуют в ADIF, получаем из базы r150cty.dat
                         dxcc_info = r150s.get_dxcc_info(callsign, db_path)
@@ -311,13 +311,15 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                         if dxcc_info:
                             r150s_country = dxcc_info.get('country')
                             if r150s_country:
-                                r150s_country = r150s_country.strip()[:100]
+                                r150s_country = r150s_country.strip().upper()[:100]
 
                         # Получаем dxcc (primary_prefix) из cty.dat
                         dxcc = None
                         if not dxcc:
                             cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
                             dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
+                            if dxcc:
+                                dxcc = dxcc.upper()[:10]
 
                         if not callsign:
                             skipped_count += 1
@@ -469,7 +471,7 @@ def parse_adif_record(record):
                 data['mode'] = mode_mapping.get(mode_value, 'SSB')
 
             else:
-                data[field] = match.group(2).strip()
+                data[field] = match.group(2).strip().upper()
 
     # Устанавливаем дату и время
     if date_value:
