@@ -23,32 +23,27 @@ def register_page(request):
         qth = request.POST.get('qth', '').strip()
         qth_locator = request.POST.get('qth_locator', '').strip().upper()
 
-        # Получаем список дополнительных позывных
-        my_callsigns_list = request.POST.getlist('my_callsigns')
-        # Фильтруем и очищаем
-        my_callsigns = [c.strip().upper() for c in my_callsigns_list if c.strip()]
-
         # Валидация
         if not all([callsign, email, password, password_confirm]):
             messages.error(request, 'Все обязательные поля должны быть заполнены')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
         if password != password_confirm:
             messages.error(request, 'Пароли не совпадают')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
         if len(password) < 8:
             messages.error(request, 'Пароль должен содержать минимум 8 символов')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
         # Проверяем уникальность позывного (как username)
         if User.objects.filter(username=callsign).exists():
             messages.error(request, 'Пользователь с таким позывным уже существует')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Пользователь с таким email уже существует')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
         # Создаем пользователя (позывной = username)
         try:
@@ -67,8 +62,7 @@ def register_page(request):
                 first_name=first_name,
                 last_name=last_name,
                 qth=qth,
-                my_gridsquare=qth_locator,
-                my_callsigns=my_callsigns  # JSON список
+                my_gridsquare=qth_locator
             )
 
             messages.success(request, 'Регистрация успешна! Теперь вы можете войти.')
@@ -76,9 +70,9 @@ def register_page(request):
 
         except Exception as e:
             messages.error(request, f'Ошибка при регистрации: {str(e)}')
-            return render(request, 'register_new.html')
+            return render(request, 'register.html')
 
-    return render(request, 'register_new.html')
+    return render(request, 'register.html')
 
 
 def login_page(request):
@@ -86,7 +80,7 @@ def login_page(request):
     Страница входа
     """
     if request.method == 'POST':
-        username = request.POST.get('username')
+        username = request.POST.get('username', '').strip().upper()
         password = request.POST.get('password')
         remember_me = request.POST.get('rememberMe')
 

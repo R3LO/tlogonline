@@ -71,8 +71,9 @@
         <form id="loginForm" method="POST" action="{% url 'login_page' %}">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="username" class="form-label">👤 Имя пользователя</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <label for="username" class="form-label">📡 Позывной</label>
+                <input type="text" class="form-control" id="username" name="username" required
+                       placeholder="UA1ABC" style="text-transform: uppercase;">
             </div>
 
             <div class="mb-3">
@@ -135,6 +136,12 @@
                 messageDiv.classList.remove('d-none');
             {% endfor %}
         {% endif %}
+
+        // Преобразование позывного в верхний регистр при входе
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const usernameInput = document.getElementById('username');
+            usernameInput.value = usernameInput.value.toUpperCase();
+        });
     </script>
 
     <!-- Footer -->

@@ -115,10 +115,11 @@
                                 <h5 class="section-title"><span>🔐</span> Информация о пользователе</h5>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Username</label>
+                                    <label class="form-label">📡 Позывной (Username)</label>
                                     <input type="text" class="form-control" name="username"
-                                           value="{{ user.username }}" readonly>
-                                    <div class="form-text">Username нельзя изменить</div>
+                                           value="{{ user.username }}" readonly
+                                           style="background-color: #e9ecef;">
+                                    <div class="form-text">Позывной = Username, используется для входа</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -176,7 +177,7 @@
                                                name="use_lotw" {% if profile.lotw_user or profile.lotw_password %}checked{% endif %}
                                                onchange="toggleLotwSettings()">
                                         <label class="form-check-label" for="use_lotw">
-                                            Использовать LoTW
+                                            Даю свое согласие на использование моих персональных данных для автоматической синхронизации лога с LoTW
                                         </label>
                                     </div>
 
@@ -222,14 +223,6 @@
                             <div class="form-card mb-4">
                                 <h5 class="section-title"><span>👤</span> Основная информация</h5>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Позывной</label>
-                                    <input type="text" class="form-control" name="callsign"
-                                           value="{{ profile.callsign|default:'' }}"
-                                           placeholder="UA1ABC" maxlength="20"
-                                           autocomplete="off">
-                                </div>
-
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Имя</label>
@@ -268,7 +261,7 @@
                             <!-- Мои позывные в LoTW -->
                             <div class="form-card mb-4">
                                 <h5 class="section-title"><span>📡</span> Мои позывные в LoTW</h5>
-                                <p class="text-muted small">Добавьте свои позывные (действующие, бывшие, спецпозывные) для синхронизации с LoTW</p>
+                                <p class="text-muted small">Добавьте свои позывные (действующие, бывшие, спецпозывные) для синхронизации с LoTW. Позывной должен быть в вашем аккаунте LoTW. Указывайте только те позывные, которые вы хотите синхронизировать с LoTW.</p>
 
                                 <div id="callsigns-container">
                                     {% if profile.my_callsigns %}

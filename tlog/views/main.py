@@ -33,12 +33,50 @@ def get_callsigns_list(request):
     if len(query) < 1:
         return JsonResponse({'callsigns': []})
 
-    # Получаем уникальные позывные из QSO (убираем дубликаты через set)
-    callsigns = list(set(QSO.objects.filter(
-        my_callsign__icontains=query
-    ).values_list('my_callsign', flat=True).distinct()[:10]))
+    callsigns_set = set()
 
-    return JsonResponse({'callsigns': callsigns})
+    # 1. Ищем в поле callsign модели RadioProfile
+    profiles_with_callsign = RadioProfile.objects.filter(
+        callsign__icontains=query
+    ).exclude(callsign='').values_list('callsign', flat=True).distinct()
+    callsigns_set.update([c.upper() for c in profiles_with_callsign])
+
+    # 2. Ищем в поле my_callsigns (JSON) модели RadioProfile
+    profiles = RadioProfile.objects.filter(
+        my_callsigns__isnull=False
+    ).exclude(
+        my_callsigns=[]
+    ).exclude(
+        my_callsigns=''
+    )
+
+    import json
+    for profile in profiles:
+        try:
+            my_callsigns = json.loads(profile.my_callsigns) if isinstance(profile.my_callsigns, str) else profile.my_callsigns
+            if isinstance(my_callsigns, list):
+                for item in my_callsigns:
+                    if isinstance(item, dict) and 'name' in item:
+                        name = item['name'].upper()
+                        if query in name:
+                            callsigns_set.add(name)
+                    elif isinstance(item, str):
+                        name = item.upper()
+                        if query in name:
+                            callsigns_set.add(name)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    # 3. Также ищем в QSO (my_callsign)
+    qso_callsigns = QSO.objects.filter(
+        my_callsign__icontains=query
+    ).values_list('my_callsign', flat=True).distinct()
+    callsigns_set.update([c.upper() for c in qso_callsigns])
+
+    # Ограничиваем до 10 результатов и сортируем
+    callsigns_list = sorted(list(callsigns_set))[:10]
+
+    return JsonResponse({'callsigns': callsigns_list})
 
 
 def dashboard(request):
@@ -219,8 +257,8 @@ def profile_update(request):
 
     if request.method == 'POST':
         try:
-            # Обновляем поля профиля
-            profile.callsign = request.POST.get('callsign', '').strip()
+            # Обновляем поля профиля (callsign всегда равен username)
+            profile.callsign = request.user.username.upper()
             profile.first_name = request.POST.get('first_name', '').strip()
             profile.last_name = request.POST.get('last_name', '').strip()
             profile.qth = request.POST.get('qth', '').strip()

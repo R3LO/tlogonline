@@ -191,6 +191,9 @@ def logbook_search(request, callsign):
     # Базовый queryset для всех QSO этого лога
     base_queryset = QSO.objects.filter(my_callsign=callsign)
 
+    # Общее количество QSO в базе для этого позывного (без фильтров)
+    total_qso_in_db = base_queryset.count()
+
     # Диапазоны и моды для матрицы
     bands = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
     modes = ['CW', 'SSB', 'FT8', 'FT4', 'RTTY', 'SSTV', 'MFSK', 'JT65', 'JT9', 'PSK31', 'AM', 'FM', 'DIG']
@@ -237,6 +240,7 @@ def logbook_search(request, callsign):
         'search_callsign': search_callsign,
         'qso_list': qso_queryset[start:end],
         'total_qso': total_qso,
+        'total_qso_in_db': total_qso_in_db,
         'matrix': matrix,
         'bands': bands,
         'modes': modes,
