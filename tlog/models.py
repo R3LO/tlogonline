@@ -155,6 +155,7 @@ class RadioProfile(models.Model):
     lotw_user = models.CharField(max_length=50, blank=True, help_text="Логин от LoTW")
     lotw_password = models.CharField(max_length=100, blank=True, help_text="Пароль от LoTW")
     lotw_chk_pass = models.BooleanField(default=False, help_text="Проверен ли логин и пароль от LoTW")
+    lotw_lastsync = models.DateTimeField(null=True, blank=True, help_text="Время последней синхронизации с LoTW")
 
     # Блокировка пользователя
     is_blocked = models.BooleanField(default=False, help_text="Заблокировать доступ к личному кабинету")

@@ -432,6 +432,7 @@
                                     <th><span>📟</span> Mode</th>
                                     <th>RST</th>
                                     <th><span>📍</span> QTH</th>
+                                    <th>LoTW</th>
                                     <th>Prop/SAT</th>
                                     <th class="action-column"><span>⚙️</span></th>
                                 </tr>
@@ -474,6 +475,11 @@
                                             <small>{{ qso.gridsquare }}</small>
                                         {% else %}
                                             <small class="text-muted">-</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if qso.lotw == 'Y' %}
+                                            <span style="color: green;">✅</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -886,8 +892,8 @@
                                 <input type="text" class="form-control" id="edit_rst_sent" name="rst_sent" placeholder="Например: 59">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">LoTW</label>
-                                <select class="form-select" id="edit_lotw" name="lotw">
+                                <label class="form-label">Бумажная QSL</label>
+                                <select class="form-select" id="edit_paper_qsl" name="paper_qsl">
                                     <option value="N">Нет</option>
                                     <option value="Y">Да</option>
                                 </select>
@@ -930,24 +936,15 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <label class="form-label">Страна (R-150)</label>
-                                <input type="text" class="form-control" id="edit_r150s" name="r150s" placeholder="Например: RUSSIA">
+                                <input type="text" class="form-control" id="edit_r150s" name="r150s" placeholder="Например: RUSSIA" readonly>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">DXCC</label>
-                                <input type="text" class="form-control" id="edit_dxcc" name="dxcc" placeholder="Например: 279">
+                                <input type="text" class="form-control" id="edit_dxcc" name="dxcc" placeholder="Например: 279" readonly>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">RU область/регион</label>
-                                <input type="text" class="form-control" id="edit_ru_region" name="ru_region" placeholder="Двухбуквенный код региона" maxlength="2">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label class="form-label">Бумажная QSL</label>
-                                <select class="form-select" id="edit_paper_qsl" name="paper_qsl">
-                                    <option value="N">Нет</option>
-                                    <option value="Y">Да</option>
-                                </select>
+                                <input type="text" class="form-control" id="edit_ru_region" name="ru_region" placeholder="Двухбуквенный код региона" maxlength="2" readonly>
                             </div>
                         </div>
                     </form>
@@ -1138,6 +1135,12 @@
                         if (data.success) {
                             const qso = data.qso;
 
+                            // Проверяем, если LoTW подтверждение - показываем сообщение и не открываем форму
+                            if (qso.lotw === 'Y') {
+                                showAlert('warning', 'Подтверждения LoTW редактировать нельзя');
+                                return;
+                            }
+
                             // Заполняем форму данными из базы
                             document.getElementById('edit_id').value = qso.id;
                             document.getElementById('edit_date').value = qso.date || '';
@@ -1156,7 +1159,6 @@
                             document.getElementById('edit_prop_mode').value = qso.prop_mode || '';
                             document.getElementById('edit_cqz').value = qso.cqz || '';
                             document.getElementById('edit_ituz').value = qso.ituz || '';
-                            document.getElementById('edit_lotw').value = qso.lotw || 'N';
                             document.getElementById('edit_continent').value = qso.continent || '';
                             document.getElementById('edit_r150s').value = qso.r150s || '';
                             document.getElementById('edit_dxcc').value = qso.dxcc || '';
@@ -1240,18 +1242,44 @@
                     const callsign = this.dataset.callsign;
                     const row = document.querySelector(`.qso-row[data-qso-id="${qsoId}"]`);
 
-                    // Заполняем информацию
-                    document.getElementById('delete_id').value = qsoId;
-                    document.getElementById('delete_callsign').textContent = callsign;
+                    // Сначала проверяем LoTW статус через API
+                    fetch(`/logbook/get/${qsoId}/`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP error ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success && data.qso.lotw === 'Y') {
+                            showAlert('warning', 'Подтверждения LoTW удалить нельзя');
+                            return;
+                        }
 
-                    const dateCell = row.querySelector('td:nth-child(1) small');
-                    const timeCell = row.querySelector('td:nth-child(2) small');
-                    document.getElementById('delete_date').textContent = dateCell ? dateCell.textContent : '';
-                    document.getElementById('delete_time').textContent = timeCell ? timeCell.textContent : '';
+                        // Заполняем информацию
+                        document.getElementById('delete_id').value = qsoId;
+                        document.getElementById('delete_callsign').textContent = callsign;
 
-                    // Открываем модальное окно
-                    const modal = new bootstrap.Modal(document.getElementById('deleteQSOModal'));
-                    modal.show();
+                        const dateCell = row.querySelector('td:nth-child(1) small');
+                        const timeCell = row.querySelector('td:nth-child(2) small');
+                        document.getElementById('delete_date').textContent = dateCell ? dateCell.textContent : '';
+                        document.getElementById('delete_time').textContent = timeCell ? timeCell.textContent : '';
+
+                        // Открываем модальное окно
+                        const modal = new bootstrap.Modal(document.getElementById('deleteQSOModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Ошибка при проверке статуса LoTW');
+                    });
                 });
             });
         }

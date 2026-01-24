@@ -323,6 +323,11 @@ def edit_qso(request, qso_id):
 
     try:
         import json
+        from .. import r150s
+        from ..region_ru import RussianRegionFinder
+        import os
+        from django.conf import settings
+
         data = json.loads(request.body)
 
         # Обновляем поля записи (все текстовые поля преобразуются в верхний регистр)
@@ -349,18 +354,50 @@ def edit_qso(request, qso_id):
         qso.sat_name = data.get('sat_name', '').upper()[:50] or None
         qso.prop_mode = data.get('prop_mode', '').upper()[:50] or None
 
-        cqz = data.get('cqz')
-        qso.cqz = int(cqz) if cqz else None
-
-        ituz = data.get('ituz')
-        qso.ituz = int(ituz) if ituz else None
-
-        qso.lotw = data.get('lotw', 'N')
         qso.paper_qsl = data.get('paper_qsl', 'N')
-        qso.continent = data.get('continent', '').upper()[:2] or None
-        qso.r150s = data.get('r150s', '').upper()[:100] or None
-        qso.dxcc = data.get('dxcc', '').upper()[:10] or None
-        qso.ru_region = data.get('ru_region', '').upper()[:100] or None
+
+        # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному
+        callsign = qso.callsign
+        if callsign:
+            # Инициализируем базы данных CTY и R150
+            tlog_dir = os.path.join(settings.BASE_DIR, 'tlog')
+            db_path = os.path.join(tlog_dir, 'r150cty.dat')
+            cty_path = os.path.join(tlog_dir, 'cty.dat')
+
+            r150s.init_database(db_path)
+            r150s.init_cty_database(cty_path)
+
+            dxcc_info = r150s.get_dxcc_info(callsign, db_path)
+            if dxcc_info:
+                qso.cqz = dxcc_info.get('cq_zone')
+                qso.ituz = dxcc_info.get('itu_zone')
+                qso.continent = dxcc_info.get('continent')
+
+                r150s_country = dxcc_info.get('country')
+                if r150s_country:
+                    qso.r150s = r150s_country.upper()[:100]
+                else:
+                    qso.r150s = None
+
+                dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
+                if dxcc:
+                    qso.dxcc = dxcc.upper()[:10]
+                else:
+                    qso.dxcc = None
+            else:
+                qso.cqz = None
+                qso.ituz = None
+                qso.continent = None
+                qso.r150s = None
+                qso.dxcc = None
+
+            # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+            if qso.dxcc and qso.dxcc.upper() in ('UA', 'UA9', 'UA2'):
+                exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
+                region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
+                qso.ru_region = region_finder.get_region_code(callsign)
+            else:
+                qso.ru_region = None
 
         qso.save()
 
