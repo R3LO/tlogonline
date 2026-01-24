@@ -12,7 +12,8 @@ from .views import (
     get_callsigns_list, chat_list, chat_send,
     verify_lotw_credentials, delete_lotw_credentials,
     change_password, user_achievements,
-    qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns
+    qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
+    qo100_dxcc
 )
 
 urlpatterns = [
@@ -32,8 +33,10 @@ urlpatterns = [
     # QO-100 рейтинги
     path('dashboard/qo100/regions/', qo100_regions, name='qo100_regions'),
     path('dashboard/qo100/r150s/', qo100_r150s, name='qo100_r150s'),
+    path('dashboard/qo100/dxcc/', qo100_dxcc, name='qo100_dxcc'),
     path('dashboard/qo100/grids/', qo100_grids, name='qo100_grids'),
     path('dashboard/qo100/unique-callsigns/', qo100_unique_callsigns, name='qo100_unique_callsigns'),
+    path('dashboard/qo100/dxcc/', qo100_dxcc, name='qo100_dxcc'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),

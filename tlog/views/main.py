@@ -798,3 +798,68 @@ def qo100_unique_callsigns(request):
         'title': 'Уникальные позывные QO-100',
         'subtitle': 'уникальным позывным, подтвержденным в LoTW',
     })
+
+
+def qo100_dxcc(request):
+    """
+    Страница рейтинга QO-100 - страны DXCC
+    Показывает статистику по странам DXCC для всех QSO с lotw = 'Y'
+    """
+    from tlog.r150s import CTYDatabase
+    import os
+
+    # Загружаем базу данных CTY
+    cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
+    cty_db = CTYDatabase(cty_path)
+
+    # Создаем словарь код (primary_prefix) -> название страны
+    country_names = {}
+    for entry in cty_db.entries:
+        primary_prefix = entry.primary_prefix
+        if primary_prefix:
+            country_names[primary_prefix] = entry.name
+
+    # Получаем уникальные пары my_callsign + dxcc + callsign для QSO с lotw = 'Y'
+    qso_filtered = QSO.objects.filter(
+        lotw='Y',
+        dxcc__isnull=False
+    ).exclude(dxcc='').values('my_callsign', 'dxcc', 'callsign').distinct()
+
+    # Группируем по my_callsign, затем по стране DXCC
+    from collections import defaultdict
+    callsign_data = defaultdict(lambda: defaultdict(set))
+
+    for item in qso_filtered:
+        my_call = item['my_callsign']
+        dxcc_code = item['dxcc']
+        call = item['callsign']
+        callsign_data[my_call][dxcc_code].add(call)
+
+    # Формируем список с позывным, количеством и данными стран
+    ratings = []
+    for my_call, countries_dict in callsign_data.items():
+        countries_list = []
+        for country_code, callsigns in countries_dict.items():
+            country_name = country_names.get(country_code, country_code)
+            countries_list.append({
+                'code': country_code,
+                'name': country_name,
+                'callsigns': sorted(list(callsigns))
+            })
+        # Сортируем по названию страны
+        countries_list.sort(key=lambda x: x['name'])
+
+        ratings.append({
+            'callsign': my_call,
+            'count': len(countries_list),
+            'countries': countries_list
+        })
+
+    # Сортируем по количеству (убывание), затем по позывному
+    ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+    return render(request, 'qo100/dxcc.html', {
+        'ratings': ratings,
+        'title': 'Страны DXCC QO-100',
+        'subtitle': 'странам DXCC, подтвержденным в LoTW',
+    })

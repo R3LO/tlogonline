@@ -1,0 +1,82 @@
+{% extends 'qo100/base.html' %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 50px;">№</th>
+                <th>Позывной</th>
+                <th style="width: 150px; text-align: center;">Стран DXCC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in ratings %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><span class="callsign-badge">{{ item.callsign }}</span></td>
+                <td style="text-align: center;">
+                    <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal{{ forloop.counter }}">
+                        {{ item.count }}
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                    <span class="me-2">📭</span>Нет данных для отображения
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Модальные окна для каждого позывного -->
+{% for item in ratings %}
+<div class="modal fade" id="modal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="callsign-badge">{{ item.callsign }}</span> - Страны DXCC
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Всего стран: <strong>{{ item.count }}</strong></p>
+                <table class="table table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">№</th>
+                            <th style="width: 200px;">Страна</th>
+                            <th>Позывные</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for country in item.countries %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ country.name }}</td>
+                            <td>
+                                {% for call in country.callsigns %}
+                                <span class="badge bg-primary me-1">{{ call }}</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
