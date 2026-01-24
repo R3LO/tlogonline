@@ -1152,8 +1152,13 @@ def add_qso(request):
         rst_sent = data.get('rst_sent', '').upper()[:10] or None
         my_gridsquare = data.get('my_gridsquare', '').upper()[:10] or None
         gridsquare = data.get('gridsquare', '').upper()[:10] or None
+        my_qth = data.get('my_qth', '').upper()[:100] or None
+        his_qth = data.get('his_qth', '').upper()[:100] or None
         sat_qso = data.get('sat_qso', 'N')
+        prop_mode = data.get('prop_mode', '').upper()[:50] or None
+        sat_name = data.get('sat_name', '').upper()[:50] or None
         lotw = data.get('lotw', 'N')
+        paper_qsl = data.get('paper_qsl', 'N')
 
         # Инициализируем базы данных CTY и R150
         tlog_dir = os.path.join(settings.BASE_DIR, 'tlog')
@@ -1166,7 +1171,7 @@ def add_qso(request):
         # Поля SAT - только если Sat QSO отмечен
         if sat_qso == 'Y':
             sat_name = data.get('sat_name', '').upper()[:50] or None
-            sat_prop_mode = data.get('sat_prop_mode', '').upper()[:50] or None
+            sat_prop_mode = data.get('prop_mode', '').upper()[:50] or None
             prop_mode = sat_prop_mode
         else:
             sat_name = None
@@ -1226,11 +1231,14 @@ def add_qso(request):
             rst_sent=rst_sent,
             my_gridsquare=my_gridsquare,
             gridsquare=gridsquare,
+            my_qth=my_qth,
+            his_qth=his_qth,
             sat_name=sat_name,
             prop_mode=prop_mode,
             cqz=int(cqz) if cqz else None,
             ituz=int(ituz) if ituz else None,
             lotw=lotw,
+            paper_qsl=paper_qsl,
             r150s=r150s_country if r150s_country else None,
             dxcc=dxcc if dxcc else None,
             continent=continent if continent else None,
