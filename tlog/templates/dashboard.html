@@ -35,7 +35,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><Данные LoTWstoLoTW p offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
             pointer-events: none;
         }
         .filter-card {
@@ -184,7 +184,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover">
+                            <table class="table table-sm table-hover table-qso">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Дата</th>
@@ -193,6 +193,7 @@
                                         <th>Диапазон</th>
                                         <th>Вид</th>
                                         <th>RST</th>
+                                        <th>LoTW</th>
                                         <th>QTH</th>
                                     </tr>
                                 </thead>
@@ -222,6 +223,11 @@
                                                     <span class="text-muted">-</span>
                                                 {% endif %}
                                             </small>
+                                        </td>
+                                        <td>
+                                            {% if qso.lotw == 'Y' %}
+                                                <span style="color: green;">✅</span>
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {% if qso.gridsquare %}
@@ -785,6 +791,50 @@
                     </div>
                 </div>
 
+                <!-- Синхронизация LoTW -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">🔄 Синхронизация LoTW</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if not profile.lotw_user or not profile.lotw_password %}
+                            <p class="mb-0 text-warning">
+                                <span class="me-2">⚠️</span>
+                                Данные LoTW логин и пароль не добавлены
+                            </p>
+                        {% elif profile.lotw_chk_pass %}
+                            <p class="mb-0 text-success">
+                                <span class="me-2" style="color: green;">✅</span>
+                                Доступ к LoTW
+                            </p>
+                        {% endif %}
+
+                        {% if profile.lotw_lastsync %}
+                            <p class="mb-0 mt-2">
+                                <span class="me-2">📅</span>
+                                Последняя синхронизация:
+                                <small><strong>{{ profile.lotw_lastsync|date:"d.m.Y H:i" }}</strong></small>
+                            </p>
+                        {% else %}
+                            <p class="mb-0 text-muted mt-2">
+                                <span class="me-2">❌</span>
+                                Синхронизация с LoTW не проводилась
+                            </p>
+                        {% endif %}
+
+                        <p class="mb-0 mt-2">
+                            <span class="me-2">💡</span>
+                            <small>Синхронизация с LoTW проходит автоматически</small>
+                        </p>
+
+                        <div class="mt-3">
+                            <a href="/dashboard/profile/" class="btn btn-outline-primary btn-sm">
+                                <span>⚙️</span> Настройки LoTW
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Загруженные ADIF файлы -->
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -853,6 +903,13 @@
         }
         .footer a {
             color: #fff;
+        }
+        /* Таблица QSO без переноса строк */
+        .table-qso td, .table-qso th {
+            white-space: nowrap;
+        }
+        .table-qso td small {
+            white-space: nowrap;
         }
     </style>
     <script>

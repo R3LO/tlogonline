@@ -219,7 +219,7 @@ def dashboard(request):
     recent_qso = user_qso.order_by('-date', '-time')[:10]
 
     # Получаем загруженные ADIF файлы
-    adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:5]
+    adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:10]
 
     context = {
         'user': request.user,
