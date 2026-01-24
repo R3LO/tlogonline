@@ -294,18 +294,28 @@ def profile_update(request):
             # Обрабатываем my_callsigns из JSON
             my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
             try:
-                profile.my_callsigns = json.loads(my_callsigns_json)
+                new_my_callsigns = json.loads(my_callsigns_json)
             except json.JSONDecodeError:
-                profile.my_callsigns = []
+                new_my_callsigns = []
 
-            profile.save()
+            # Проверяем, изменились ли my_callsigns
+            old_my_callsigns = profile.my_callsigns if profile.my_callsigns else []
+            if isinstance(old_my_callsigns, str):
+                old_my_callsigns = json.loads(old_my_callsigns)
+
+            # Если изменились - очищаем lotw_lastsync
+            if old_my_callsigns != new_my_callsigns:
+                profile.lotw_lastsync = None
+                profile.my_callsigns = new_my_callsigns
+                profile.save(update_fields=['lotw_lastsync', 'my_callsigns'])
+            else:
+                profile.my_callsigns = new_my_callsigns
+                profile.save()
 
             # Также обновляем User модель
             request.user.first_name = profile.first_name
             request.user.last_name = profile.last_name
             request.user.save(update_fields=['first_name', 'last_name'])
-
-            profile.save()
 
             messages.success(request, 'Профиль успешно обновлён')
             return redirect('profile_update')

@@ -68,6 +68,9 @@
         <div class="container">
             <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
             <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light me-3" href="/dashboard/">
+                    <span>📊</span> Панель
+                </a>
                 <a class="nav-link text-light me-3" href="/logbook/">
                     <span>📓</span> Logbook
                 </a>
@@ -77,10 +80,12 @@
                 <a class="nav-link text-light me-3" href="/achievements/">
                     <span>🏆</span> Достижения
                 </a>
-                <a class="nav-link text-light me-3" href="/dashboard/">
+                <a class="nav-link text-light me-3" href="/dashboard/profile/">
                     <span>👤</span> {{ user.username }}
                 </a>
-                <a class="btn btn-outline-light btn-sm" href="/logout/">Выйти</a>
+                <a class="nav-link text-light" href="/logout/">
+                    <span>🚪</span> Выйти
+                </a>
             </div>
         </div>
     </nav>
@@ -277,7 +282,7 @@
                                         {% for callsign_item in profile.my_callsigns %}
                                             <div class="my-callsign-item">
                                                 {% if callsign_item.name %}
-                                                    <input type="text" class="form-control name-input"
+                                                    <input type="text" class="form-control name-input callsign-input"
                                                            name="my_callsigns_names[]"
                                                            value="{{ callsign_item.name }}"
                                                            placeholder="Позывной"
@@ -288,7 +293,7 @@
                                                            placeholder="Тип (необязательно)"
                                                            autocomplete="off">
                                                 {% else %}
-                                                    <input type="text" class="form-control name-input"
+                                                    <input type="text" class="form-control name-input callsign-input"
                                                            name="my_callsigns_names[]"
                                                            value="{{ callsign_item }}"
                                                            placeholder="Позывной"
@@ -350,7 +355,7 @@
             const item = document.createElement('div');
             item.className = 'my-callsign-item';
             item.innerHTML = `
-                <input type="text" class="form-control name-input"
+                <input type="text" class="form-control name-input callsign-input"
                        name="my_callsigns_names[]"
                        placeholder="Позывной"
                        autocomplete="off">
@@ -364,7 +369,27 @@
                 </button>
             `;
             container.appendChild(item);
+
+            // Добавляем обработчик для автоматического перевода в верхний регистр
+            const callsignInput = item.querySelector('.callsign-input');
+            callsignInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
         }
+
+        // Инициализация обработчиков для существующих полей ввода позывных
+        function initCallsignInputs() {
+            document.querySelectorAll('.callsign-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            });
+        }
+
+        // Вызываем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initCallsignInputs();
+        });
 
         // Удаление позывного
         function removeCallsign(button) {
@@ -389,13 +414,25 @@
                 const name = item.querySelector('input[name="my_callsigns_names[]"]').value.trim();
                 if (name) {
                     callsigns.push({
-                        name: name,
+                        name: name.toUpperCase(),
                         type: item.querySelector('input[name="my_callsigns_types[]"]').value.trim()
                     });
                 }
             });
 
             document.getElementById('my_callsigns_json').value = JSON.stringify(callsigns);
+        });
+
+        // Перезагрузка страницы после успешного сохранения профиля
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, есть ли сообщение об успехе
+            const alerts = document.querySelectorAll('.alert-success');
+            if (alerts.length > 0) {
+                // Показываем сообщение и перезагружаем страницу для обновления блока синхронизации
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            }
         });
 
         // Автоматическая установка QTH локатора в верхний регистр

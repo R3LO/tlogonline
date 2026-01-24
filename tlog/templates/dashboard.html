@@ -104,6 +104,9 @@
         <div class="container">
             <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
             <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light me-3" href="/dashboard/">
+                    <span>📊</span> Панель
+                </a>
                 <a class="nav-link text-light me-3" href="/logbook/">
                     <span>📓</span> Logbook
                 </a>
@@ -116,7 +119,9 @@
                 <a class="nav-link text-light me-3" href="/dashboard/profile/">
                     <span>👤</span> {{ user.username }}
                 </a>
-                <a class="btn btn-outline-light btn-sm" href="/logout/">Выйти</a>
+                <a class="nav-link text-light" href="/logout/">
+                    <span>🚪</span> Выйти
+                </a>
             </div>
         </div>
     </nav>

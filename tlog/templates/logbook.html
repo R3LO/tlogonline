@@ -246,10 +246,12 @@
                 <a class="nav-link text-light me-3" href="/achievements/">
                     <span>🏆</span> Достижения
                 </a>
-                <span class="navbar-text me-3">
-                    {{ user.first_name|default:user.username }}
-                </span>
-                <a class="btn btn-outline-light btn-sm" href="/logout/">Выйти</a>
+                <a class="nav-link text-light me-3" href="/dashboard/profile/">
+                    <span>👤</span> {{ user.username }}
+                </a>
+                <a class="nav-link text-light" href="/logout/">
+                    <span>🚪</span> Выйти
+                </a>
             </div>
         </div>
     </nav>
@@ -495,9 +497,15 @@
                                     </td>
                                     <td class="action-column">
                                         <div class="action-buttons">
+                                            {% if qso.lotw == 'Y' %}
+                                            <button type="button" class="btn btn-sm btn-info btn-view" data-id="{{ qso.id }}" title="Просмотр">
+                                                <span>👁️</span>
+                                            </button>
+                                            {% else %}
                                             <button type="button" class="btn btn-sm btn-primary btn-edit" data-id="{{ qso.id }}" title="Редактировать">
                                                 <span>✏️</span>
                                             </button>
+                                            {% endif %}
                                             <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{ qso.id }}" data-callsign="{{ qso.callsign }}" title="Удалить">
                                                 <span>🗑️</span>
                                             </button>
@@ -961,6 +969,128 @@
         </div>
     </div>
 
+    <!-- Модальное окно просмотра QSO (для LoTW подтверждённых записей) -->
+    <div class="modal fade" id="viewQSOModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <span>👁️</span> Просмотр QSO
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="viewQSOForm">
+                        <input type="hidden" id="view_id" name="id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Дата</label>
+                                <input type="date" class="form-control" id="view_date" name="date" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Время</label>
+                                <input type="time" class="form-control" id="view_time" name="time" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой позывной</label>
+                                <input type="text" class="form-control" id="view_my_callsign" name="my_callsign" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Позывной корреспондента</label>
+                                <input type="text" class="form-control" id="view_callsign" name="callsign" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Диапазон</label>
+                                <input type="text" class="form-control" id="view_band" name="band" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Вид связи</label>
+                                <input type="text" class="form-control" id="view_mode" name="mode" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Частота (МГц)</label>
+                                <input type="text" class="form-control" id="view_frequency" name="frequency" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RST принятый</label>
+                                <input type="text" class="form-control" id="view_rst_rcvd" name="rst_rcvd" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">RST переданный</label>
+                                <input type="text" class="form-control" id="view_rst_sent" name="rst_sent" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Бумажная QSL</label>
+                                <input type="text" class="form-control" id="view_paper_qsl" name="paper_qsl" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Мой QTH локатор</label>
+                                <input type="text" class="form-control" id="view_my_gridsquare" name="my_gridsquare" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">QTH локатор корреспондента</label>
+                                <input type="text" class="form-control" id="view_gridsquare" name="gridsquare" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">SAT NAME</label>
+                                <input type="text" class="form-control" id="view_sat_name" name="sat_name" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Режим распространения (PROP_MODE)</label>
+                                <input type="text" class="form-control" id="view_prop_mode" name="prop_mode" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">CQ зона</label>
+                                <input type="text" class="form-control" id="view_cqz" name="cqz" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ITU зона</label>
+                                <input type="text" class="form-control" id="view_ituz" name="ituz" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Континент</label>
+                                <input type="text" class="form-control" id="view_continent" name="continent" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Страна (R-150)</label>
+                                <input type="text" class="form-control" id="view_r150s" name="r150s" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">DXCC</label>
+                                <input type="text" class="form-control" id="view_dxcc" name="dxcc" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">RU область/регион</label>
+                                <input type="text" class="form-control" id="view_ru_region" name="ru_region" readonly>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span>✖</span> Закрыть
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно подтверждения удаления одной записи -->
     <div class="modal fade" id="deleteQSOModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -1135,12 +1265,6 @@
                         if (data.success) {
                             const qso = data.qso;
 
-                            // Проверяем, если LoTW подтверждение - показываем сообщение и не открываем форму
-                            if (qso.lotw === 'Y') {
-                                showAlert('warning', 'Подтверждения LoTW редактировать нельзя');
-                                return;
-                            }
-
                             // Заполняем форму данными из базы
                             document.getElementById('edit_id').value = qso.id;
                             document.getElementById('edit_date').value = qso.date || '';
@@ -1167,6 +1291,69 @@
 
                             // Открываем модальное окно
                             const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
+                            modal.show();
+                        } else {
+                            throw new Error(data.error || 'Ошибка при загрузке данных');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
+                    });
+                });
+            });
+        }
+
+        // Обработка кнопок просмотра (для LoTW подтверждённых записей)
+        function initViewButtons() {
+            document.querySelectorAll('.btn-view').forEach(button => {
+                button.addEventListener('click', function() {
+                    const qsoId = this.dataset.id;
+
+                    // Загружаем данные QSO из базы данных
+                    fetch(`/logbook/get/${qsoId}/`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP error ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            const qso = data.qso;
+
+                            // Заполняем форму просмотра данными из базы
+                            document.getElementById('view_id').value = qso.id || '';
+                            document.getElementById('view_date').value = qso.date || '';
+                            document.getElementById('view_time').value = qso.time ? qso.time.substring(0, 5) : '';
+                            document.getElementById('view_my_callsign').value = qso.my_callsign || '';
+                            document.getElementById('view_callsign').value = qso.callsign || '';
+                            document.getElementById('view_band').value = qso.band || '';
+                            document.getElementById('view_mode').value = qso.mode || 'SSB';
+                            document.getElementById('view_frequency').value = qso.frequency || '';
+                            document.getElementById('view_rst_rcvd').value = qso.rst_rcvd || '';
+                            document.getElementById('view_rst_sent').value = qso.rst_sent || '';
+                            document.getElementById('view_my_gridsquare').value = qso.my_gridsquare || '';
+                            document.getElementById('view_gridsquare').value = qso.gridsquare || '';
+                            document.getElementById('view_sat_name').value = qso.sat_name || '';
+                            document.getElementById('view_prop_mode').value = qso.prop_mode || '';
+                            document.getElementById('view_cqz').value = qso.cqz || '';
+                            document.getElementById('view_ituz').value = qso.ituz || '';
+                            document.getElementById('view_continent').value = qso.continent || '';
+                            document.getElementById('view_r150s').value = qso.r150s || '';
+                            document.getElementById('view_dxcc').value = qso.dxcc || '';
+                            document.getElementById('view_ru_region').value = qso.ru_region || '';
+                            document.getElementById('view_paper_qsl').value = qso.paper_qsl === 'Y' ? 'Да' : 'Нет';
+
+                            // Открываем модальное окно просмотра
+                            const modal = new bootstrap.Modal(document.getElementById('viewQSOModal'));
                             modal.show();
                         } else {
                             throw new Error(data.error || 'Ошибка при загрузке данных');
@@ -1382,6 +1569,7 @@
         function initLogbookPage() {
             initClearLog();
             initEditButtons();
+            initViewButtons();
             initSaveEditQSO();
             initDeleteButtons();
             initConfirmDeleteQSO();
@@ -1585,97 +1773,4 @@
             document.getElementById('adif_my_gridsquare').addEventListener('change', function() {
                 setCookie('adif_my_gridsquare', this.value, 365);
             });
-            document.getElementById('adif_prop_mode').addEventListener('change', function() {
-                setCookie('adif_prop_mode', this.value, 365);
-            });
-            document.getElementById('adif_sat_name').addEventListener('change', function() {
-                setCookie('adif_sat_name', this.value, 365);
-            });
-
-            // Сохраняем состояния галочек переопределения
-            document.getElementById('adif_override_my_callsign').addEventListener('change', function() {
-                setCookie('adif_override_my_callsign', this.checked, 365);
-            });
-            document.getElementById('adif_override_my_gridsquare').addEventListener('change', function() {
-                setCookie('adif_override_my_gridsquare', this.checked, 365);
-            });
-            document.getElementById('adif_override_prop_mode').addEventListener('change', function() {
-                setCookie('adif_override_prop_mode', this.checked, 365);
-            });
-            document.getElementById('adif_override_sat_name').addEventListener('change', function() {
-                setCookie('adif_override_sat_name', this.checked, 365);
-            });
-        });
-    </script>
-
-    <!-- Индикатор экспорта ADIF -->
-    <div id="exportAdifIndicator" class="export-overlay" style="display: none;">
-        <div class="export-content">
-            <div class="spinner-border text-primary" role="status"></div>
-            <h5 class="mt-3">Файл подготавливается...</h5>
-            <p class="text-muted">Пожалуйста, подождите</p>
-        </div>
-    </div>
-
-    <style>
-        .export-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999999;
-        }
-        .export-content {
-            background: white;
-            padding: 40px 60px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-        }
-    </style>
-
-    <script>
-        // Показать индикатор перед экспортом ADIF
-        function showExportAlert() {
-            const indicator = document.getElementById('exportAdifIndicator');
-            indicator.style.display = 'flex';
-
-            // Скрываем через 3 секунды
-            setTimeout(function() {
-                indicator.style.display = 'none';
-            }, 3000);
-        }
-
-        // Обработчик формы экспорта ADIF
-        document.getElementById('adifExportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Показываем индикатор
-            showExportAlert();
-
-            // Блокируем кнопку
-            document.getElementById('exportAdifBtn').disabled = true;
-
-            // Через небольшую паузу отправляем форму
-            setTimeout(function() {
-                // Создаём скрытый iframe для скачивания
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = window.location.origin + '/logbook/export/?' + new URLSearchParams(new FormData(document.getElementById('adifExportForm'))).toString();
-                document.body.appendChild(iframe);
-
-                // Разблокируем кнопку
-                setTimeout(function() {
-                    document.getElementById('exportAdifBtn').disabled = false;
-                    document.getElementById('exportAdifIndicator').style.display = 'none';
-                }, 2000);
-            }, 500);
-        });
-    </script>
-</body>
-</html>
+            document.getElementById('adif_prop_mode').addEventListener('c
