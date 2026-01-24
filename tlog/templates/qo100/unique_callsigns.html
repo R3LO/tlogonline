@@ -49,13 +49,22 @@
             </div>
             <div class="modal-body">
                 <p class="text-muted mb-3">Всего позывных: <strong>{{ item.count }}</strong></p>
-                <div class="row">
-                    {% for call in item.unique_callsigns %}
-                    <div class="col-md-3 col-sm-4 col-6 mb-2">
-                        <div class="badge bg-primary text-wrap" style="font-size: 0.85rem;">{{ forloop.parentloop.counter|add:forloop.parentloop.counter0|add:1 }}. {{ call }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
+                <table class="table table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">№</th>
+                            <th>Позывной</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for call in item.unique_callsigns %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><span class="badge bg-primary">{{ call }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>

@@ -49,13 +49,28 @@
             </div>
             <div class="modal-body">
                 <p class="text-muted mb-3">Всего стран: <strong>{{ item.count }}</strong></p>
-                <div class="row">
-                    {% for country in item.countries %}
-                    <div class="col-md-3 col-sm-4 col-6 mb-2">
-                        <div class="badge bg-primary text-wrap" style="font-size: 0.85rem;">{{ forloop.parentloop.counter|add:forloop.parentloop.counter0|add:1 }}. {{ country }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
+                <table class="table table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">№</th>
+                            <th style="width: 200px;">Страна</th>
+                            <th>Позывные</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for country in item.countries %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ country.name }}</td>
+                            <td>
+                                {% for call in country.callsigns %}
+                                <span class="badge bg-primary me-1">{{ call }}</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>

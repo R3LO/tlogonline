@@ -591,25 +591,44 @@ def qo100_regions(request):
     Страница рейтинга QO-100 - регионы России
     Показывает статистику по регионам РФ для всех QSO с lotw = 'Y'
     """
-    # Получаем уникальные пары my_callsign + регион для QSO с lotw = 'Y'
+    from tlog.region_ru import RussianRegionFinder
+
+    region_finder = RussianRegionFinder()
+
+    # Получаем уникальные пары my_callsign + регион + callsign для QSO с lotw = 'Y'
     qso_filtered = QSO.objects.filter(
         lotw='Y',
         ru_region__isnull=False
-    ).exclude(ru_region='').values('my_callsign', 'ru_region').distinct()
+    ).exclude(ru_region='').values('my_callsign', 'ru_region', 'callsign').distinct()
 
-    # Группируем по my_callsign и считаем регионы
+    # Группируем по my_callsign, затем по региону
     from collections import defaultdict
-    callsign_regions = defaultdict(set)
-    for item in qso_filtered:
-        callsign_regions[item['my_callsign']].add(item['ru_region'])
+    callsign_data = defaultdict(lambda: defaultdict(set))
 
-    # Формируем список с позывным и количеством регионов
+    for item in qso_filtered:
+        my_call = item['my_callsign']
+        region_code = item['ru_region']
+        call = item['callsign']
+        callsign_data[my_call][region_code].add(call)
+
+    # Формируем список с позывным, количеством и данными регионов
     ratings = []
-    for callsign, regions in callsign_regions.items():
+    for my_call, regions_dict in callsign_data.items():
+        regions_list = []
+        for region_code, callsigns in regions_dict.items():
+            region_name = region_finder.region_data.get(region_code, region_code)
+            regions_list.append({
+                'code': region_code,
+                'name': region_name,
+                'callsigns': sorted(list(callsigns))
+            })
+        # Сортируем по названию региона
+        regions_list.sort(key=lambda x: x['name'])
+
         ratings.append({
-            'callsign': callsign,
-            'count': len(regions),
-            'regions': sorted(list(regions))
+            'callsign': my_call,
+            'count': len(regions_list),
+            'regions': regions_list
         })
 
     # Сортируем по количеству (убывание), затем по позывному
@@ -618,7 +637,7 @@ def qo100_regions(request):
     return render(request, 'qo100/regions.html', {
         'ratings': ratings,
         'title': 'Регионы России QO-100',
-        'subtitle': 'регионам РФ',
+        'subtitle': 'регионам РФ, подтвержденным в LoTW',
     })
 
 
@@ -627,25 +646,57 @@ def qo100_r150s(request):
     Страница рейтинга QO-100 - страны Р-150-С
     Показывает статистику по странам для всех QSO с lotw = 'Y'
     """
+    from tlog.r150s import DXCCDatabase
+    import os
+
+    # Загружаем базу данных R150
+    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'r150cty.dat')
+    dxcc_db = DXCCDatabase(db_path)
+
+    # Создаем словарь код -> название страны
+    country_names = {}
+    for entry in dxcc_db.entries:
+        # Проверяем все префиксы, чтобы найти нужный код
+        for prefix in entry.prefixes:
+            # Код r150s может быть в формате "=P" или просто префикс
+            if '=' in prefix:
+                code = prefix.split('=')[1].strip()
+                country_names[code] = entry.name
+
     # Получаем уникальные пары my_callsign + r150s для QSO с lotw = 'Y'
     qso_filtered = QSO.objects.filter(
         lotw='Y',
         r150s__isnull=False
-    ).exclude(r150s='').values('my_callsign', 'r150s').distinct()
+    ).exclude(r150s='').values('my_callsign', 'r150s', 'callsign').distinct()
 
-    # Группируем по my_callsign и считаем страны
+    # Группируем по my_callsign, затем по стране
     from collections import defaultdict
-    callsign_countries = defaultdict(set)
-    for item in qso_filtered:
-        callsign_countries[item['my_callsign']].add(item['r150s'])
+    callsign_data = defaultdict(lambda: defaultdict(set))
 
-    # Формируем список с позывным и количеством стран
+    for item in qso_filtered:
+        my_call = item['my_callsign']
+        country_code = item['r150s']
+        call = item['callsign']
+        callsign_data[my_call][country_code].add(call)
+
+    # Формируем список с позывным, количеством и данными стран
     ratings = []
-    for callsign, countries in callsign_countries.items():
+    for my_call, countries_dict in callsign_data.items():
+        countries_list = []
+        for country_code, callsigns in countries_dict.items():
+            country_name = country_names.get(country_code, country_code)
+            countries_list.append({
+                'code': country_code,
+                'name': country_name,
+                'callsigns': sorted(list(callsigns))
+            })
+        # Сортируем по названию страны
+        countries_list.sort(key=lambda x: x['name'])
+
         ratings.append({
-            'callsign': callsign,
-            'count': len(countries),
-            'countries': sorted(list(countries))
+            'callsign': my_call,
+            'count': len(countries_list),
+            'countries': countries_list
         })
 
     # Сортируем по количеству (убывание), затем по позывному
@@ -654,7 +705,7 @@ def qo100_r150s(request):
     return render(request, 'qo100/r150s.html', {
         'ratings': ratings,
         'title': 'Страны Р-150-С QO-100',
-        'subtitle': 'странам Р-150-С',
+        'subtitle': 'странам Р-150-С, подтвержденным в LoTW',
     })
 
 
@@ -667,21 +718,36 @@ def qo100_grids(request):
     qso_filtered = QSO.objects.filter(
         lotw='Y',
         gridsquare__isnull=False
-    ).exclude(gridsquare='').values('my_callsign', 'gridsquare').distinct()
+    ).exclude(gridsquare='').values('my_callsign', 'gridsquare', 'callsign').distinct()
 
-    # Группируем по my_callsign и считаем локаторы
+    # Группируем по my_callsign, затем по локатору (первые 4 знака)
     from collections import defaultdict
-    callsign_grids = defaultdict(set)
-    for item in qso_filtered:
-        callsign_grids[item['my_callsign']].add(item['gridsquare'])
+    callsign_data = defaultdict(lambda: defaultdict(set))
 
-    # Формируем список с позывным и количеством локаторов
+    for item in qso_filtered:
+        my_call = item['my_callsign']
+        # Берем только первые 4 знака локатора
+        grid_full = item['gridsquare']
+        grid_short = grid_full[:4] if len(grid_full) >= 4 else grid_full
+        call = item['callsign']
+        callsign_data[my_call][grid_short].add(call)
+
+    # Формируем список с позывным, количеством и данными локаторов
     ratings = []
-    for callsign, grids in callsign_grids.items():
+    for my_call, grids_dict in callsign_data.items():
+        grids_list = []
+        for grid_code, callsigns in grids_dict.items():
+            grids_list.append({
+                'code': grid_code,
+                'callsigns': sorted(list(callsigns))
+            })
+        # Сортируем по коду локатора
+        grids_list.sort(key=lambda x: x['code'])
+
         ratings.append({
-            'callsign': callsign,
-            'count': len(grids),
-            'grids': sorted(list(grids))
+            'callsign': my_call,
+            'count': len(grids_list),
+            'grids': grids_list
         })
 
     # Сортируем по количеству (убывание), затем по позывному
@@ -690,7 +756,7 @@ def qo100_grids(request):
     return render(request, 'qo100/grids.html', {
         'ratings': ratings,
         'title': 'Локаторы QO-100',
-        'subtitle': 'локаторам',
+        'subtitle': 'локаторам, подтвержденным в LoTW',
     })
 
 
@@ -705,19 +771,23 @@ def qo100_unique_callsigns(request):
         callsign__isnull=False
     ).exclude(callsign='').values('my_callsign', 'callsign').distinct()
 
-    # Группируем по my_callsign и считаем уникальные позывные
+    # Группируем по my_callsign и собираем уникальные позывные
     from collections import defaultdict
-    callsign_unique = defaultdict(set)
-    for item in qso_filtered:
-        callsign_unique[item['my_callsign']].add(item['callsign'])
+    callsign_data = defaultdict(list)
 
-    # Формируем список с позывным и количеством уникальных корреспондентов
+    for item in qso_filtered:
+        my_call = item['my_callsign']
+        call = item['callsign']
+        if call not in callsign_data[my_call]:
+            callsign_data[my_call].append(call)
+
+    # Формируем список с позывным и списком уникальных корреспондентов
     ratings = []
-    for callsign, unique_callsigns in callsign_unique.items():
+    for my_call, callsigns in callsign_data.items():
         ratings.append({
-            'callsign': callsign,
-            'count': len(unique_callsigns),
-            'unique_callsigns': sorted(list(unique_callsigns))
+            'callsign': my_call,
+            'count': len(callsigns),
+            'unique_callsigns': sorted(callsigns)  # Сортировка по алфавиту
         })
 
     # Сортируем по количеству (убывание), затем по позывному
@@ -726,5 +796,5 @@ def qo100_unique_callsigns(request):
     return render(request, 'qo100/unique_callsigns.html', {
         'ratings': ratings,
         'title': 'Уникальные позывные QO-100',
-        'subtitle': 'уникальным позывным',
+        'subtitle': 'уникальным позывным, подтвержденным в LoTW',
     })
