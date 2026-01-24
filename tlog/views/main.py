@@ -863,3 +863,189 @@ def qo100_dxcc(request):
         'title': 'Страны DXCC QO-100',
         'subtitle': 'странам DXCC, подтвержденным в LoTW',
     })
+
+
+def qo100_converter(request):
+    """
+    Конвертер ADIF файлов для QO-100
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
+
+    preview = None
+    download_url = None
+    download_filename = None
+
+    if request.method == 'POST':
+        try:
+            import re
+            import uuid
+            import os
+            from django.conf import settings
+            from django.http import HttpResponse
+
+            adif_file = request.FILES.get('adif_file')
+            if not adif_file:
+                messages.error(request, 'Пожалуйста, выберите файл для загрузки')
+                return render(request, 'qo100/converter.html')
+
+            # Читаем содержимое файла
+            content = adif_file.read().decode('utf-8', errors='ignore')
+
+            # Переводим в верхний регистр для统一 обработки
+            content = content.upper()
+
+            # Проверяем наличие обязательного тега EOH
+            if '<EOH>' not in content:
+                messages.error(request, 'В файле отсутствует обязательный тег <EOH>')
+                return render(request, 'qo100/converter.html')
+
+            # Удаляем все что до <EOH> (включая старую шапку), но <EOH> оставляем
+            content = content.split('<EOH>', 1)[1]
+
+            # Шаблон для поиска тегов ADIF
+            # Формат: <TAG_NAME:LENGTH>VALUE
+            tag_pattern = re.compile(r'<([A-Z_]+):(\d+)>([^<]*)')
+
+            # Проверяем наличие обязательных тегов во всех записях
+            records = content.split('<EOR>')
+            missing_tags = []
+            valid_records = []
+
+            for i, record in enumerate(records):
+                record = record.strip()
+                if not record:
+                    continue
+
+                # Ищем теги в записи
+                tags = {}
+                for match in tag_pattern.finditer(record):
+                    tag_name = match.group(1)
+                    tag_length = int(match.group(2))
+                    tag_value = match.group(3)
+                    tags[tag_name] = tag_value
+
+                # Проверяем обязательные теги: QSO_DATE, TIME_OFF или TIME_ON, MODE
+                has_qso_date = 'QSO_DATE' in tags
+                has_time = 'TIME_OFF' in tags or 'TIME_ON' in tags
+                has_mode = 'MODE' in tags
+
+                if not (has_qso_date and has_time and has_mode):
+                    if i not in missing_tags:
+                        missing_tags.append(i + 1)
+                else:
+                    valid_records.append({
+                        'index': i + 1,
+                        'tags': tags,
+                        'original': record
+                    })
+
+            if not valid_records:
+                messages.error(request, 'В файле не найдено корректных записей QSO')
+                return render(request, 'qo100/converter.html')
+
+            if missing_tags:
+                messages.warning(request,
+                    f'В записях №{", ".join(map(str, missing_tags))} отсутствуют обязательные теги '
+                    '(QSO_DATE, TIME_OFF/TIME_ON или MODE). Эти записи будут пропущены.')
+
+            # Конвертируем записи
+            converted_records = []
+            for record_data in valid_records:
+                record = record_data['original']
+                tags = record_data['tags']
+
+                # Удаляем тег FREQ если есть (заменяем на пробел)
+                record = re.sub(r'\s*<FREQ:\d+>[^<]*', ' ', record)
+
+                # Удаляем старые PROP_MODE и SAT_NAME если есть (заменяем на пробел)
+                record = re.sub(r'\s*<PROP_MODE:\d+>[^<]*', ' ', record)
+                record = re.sub(r'\s*<SAT_NAME:\d+>[^<]*', ' ', record)
+
+                # Заменяем или добавляем тег BAND на <BAND:4>13CM (всегда один экземпляр, с пробелом)
+                record = re.sub(r'\s*<BAND:\d+>[^<]*', ' ', record)
+                new_band = '<BAND:4>13CM'
+
+                # Добавляем BAND, PROP_MODE и SAT_NAME перед EOR (с пробелами между тегами)
+                # Убираем лишние пробелы и добавляем пробел перед каждым тегом
+                record = re.sub(r'\s+', ' ', record).strip()
+                record = record + ' ' + new_band + ' <PROP_MODE:3>SAT <SAT_NAME:6>QO-100 <EOR>'
+
+                converted_records.append(record)
+
+            # Формируем итоговый файл с нашей шапкой
+            adif_header = "ADIF Converter from TLogOnline.com\nCopyright Vladimir R3LO\n<PROGRAMID:14>TlogOnline.com\n<EOH>\n"
+            converted_content = adif_header + '\n'.join(converted_records)
+
+            # Формируем имя файла с timestamp
+            from django.utils import timezone
+            timestamp = timezone.now().strftime('%Y%m%d_%H%M')
+            safe_username = request.user.username.replace(' ', '_')
+            temp_filename = f"{safe_username}_{timestamp}.adi"
+            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', temp_filename)
+
+            # Создаем директорию если не существует
+            os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                f.write(converted_content)
+
+            # URL для скачивания
+            download_url = f'/media/temp/{temp_filename}'
+            download_filename = temp_filename
+
+            # Превью - первые 5 записей
+            preview_lines = converted_content.split('\n')
+            preview = '\n'.join(preview_lines[:20])  # Показываем первые 20 строк
+
+            messages.success(request, f'Файл успешно конвертирован! Обработано записей: {len(converted_records)}')
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при обработке файла: {str(e)}')
+            return render(request, 'qo100/converter.html')
+
+    return render(request, 'qo100/converter.html', {
+        'preview': preview,
+        'download_url': download_url,
+        'download_filename': download_filename,
+    })
+
+
+def qo100_converter_download(request):
+    """
+    Скачивание конвертированного файла
+    """
+    import os
+    from django.conf import settings
+    from django.http import HttpResponse
+
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Получаем параметр filename из URL
+    filename = request.GET.get('filename', '')
+    if not filename:
+        messages.error(request, 'Файл не найден')
+        return redirect('qo100_converter')
+
+    # Проверяем безопасность пути
+    safe_filename = os.path.basename(filename)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'temp', safe_filename)
+
+    # Проверяем существование файла
+    if not os.path.exists(file_path):
+        messages.error(request, 'Файл не найден или срок хранения истёк')
+        return redirect('qo100_converter')
+
+    # Отдаем файл
+    with open(file_path, 'rb') as f:
+        content = f.read()
+
+    response = HttpResponse(content, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{safe_filename}"'
+    return response

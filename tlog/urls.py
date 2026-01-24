@@ -13,7 +13,7 @@ from .views import (
     verify_lotw_credentials, delete_lotw_credentials,
     change_password, user_achievements,
     qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
-    qo100_dxcc
+    qo100_dxcc, qo100_converter, qo100_converter_download
 )
 
 urlpatterns = [
@@ -37,6 +37,9 @@ urlpatterns = [
     path('dashboard/qo100/grids/', qo100_grids, name='qo100_grids'),
     path('dashboard/qo100/unique-callsigns/', qo100_unique_callsigns, name='qo100_unique_callsigns'),
     path('dashboard/qo100/dxcc/', qo100_dxcc, name='qo100_dxcc'),
+    # QO-100 конвертер
+    path('dashboard/qo100/converter/', qo100_converter, name='qo100_converter'),
+    path('dashboard/qo100/converter/download/', qo100_converter_download, name='qo100_converter_download'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),

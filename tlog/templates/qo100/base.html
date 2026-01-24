@@ -102,7 +102,7 @@
                     </ol>
                 </nav>
                 <h2><span>📡</span> {{ title }}</h2>
-                <p class="mb-0 opacity-75">Рейтинг QO-100 - статистика по {{ subtitle }}</p>
+                <p class="mb-0 opacity-75">{% if subtitle %}{{ subtitle }}{% else %}Конвертер ADIF файлов для спутника QO-100{% endif %}</p>
             </div>
 
             <div class="p-4">

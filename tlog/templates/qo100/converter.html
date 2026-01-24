@@ -1,0 +1,89 @@
+{% extends "qo100/base.html" %}
+{% load static %}
+
+{% block title %}Конвертер лога QO-100 - TLog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <span>🛰️</span> Конвертер лога QO-100
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <h6 class="alert-heading">📋 Описание сервиса</h6>
+                    <p class="mb-0">
+                        Если ваш лог не позволяет вести учёт связей для QO-100, этот сервис может сконвертировать
+                        ваш ADIF файл в правильный формат со всеми необходимыми тегами для QO-100.
+                    </p>
+                    <hr>
+                    <p class="mb-0">
+                        Полученный файл ADIF можно загружать в <strong>LoTW</strong>, <strong>eQSL</strong>,
+                        <strong>QRZ.com</strong>, <strong>Hamlog</strong> и другие сервисы.
+                    </p>
+                </div>
+
+                <div class="alert alert-warning mb-4">
+                    <h6 class="alert-heading">⚠️ Важно</h6>
+                    <p class="mb-0">
+                        Пожалуйста, конвертируйте только лог, который имеет отношение к QO-100.
+                        При конвертации все значения тега <code>BAND</code> будут изменены на диапазон <code>13CM</code>
+                        и будут добавлены дополнительные теги <code>SAT</code> и <code>QO-100</code>.
+                    </p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" action="{% url 'qo100_converter' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="adif_file" class="form-label fw-bold">📁 Загрузите ADIF файл который конвертировать</label>
+                        <input type="file" class="form-control" id="adif_file" name="adif_file"
+                               accept=".adi,.adif,.txt" required>
+                        <div class="form-text">
+                            Поддерживаются файлы с расширением .adi, .adif, .txt
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <span>🔄</span> Конвертировать
+                        </button>
+                        <a href="/dashboard/" class="btn btn-outline-secondary">
+                            <span>↩️</span> Назад
+                        </a>
+                    </div>
+                </form>
+
+                {% if preview %}
+                <div class="mt-4">
+                    <h6>📊 Результат конвертации</h6>
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Превью файла</span>
+                            <a href="/dashboard/qo100/converter/download/?filename={{ download_filename }}" class="btn btn-success btn-sm">
+                                <span>💾</span> Скачать конвертированный файл
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;">{{ preview }}</pre>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
