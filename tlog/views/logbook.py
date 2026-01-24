@@ -112,6 +112,7 @@ def logbook(request):
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
         'unique_dxcc': qso_queryset.filter(dxcc__isnull=False).exclude(dxcc='').values('dxcc').distinct().count(),
         'unique_r150s': qso_queryset.filter(r150s__isnull=False).exclude(r150s='').values('r150s').distinct().count(),
+        'unique_ru_regions': qso_queryset.filter(ru_region__isnull=False).exclude(ru_region='').values('ru_region').distinct().count(),
     }
 
     # Статистика по диапазонам

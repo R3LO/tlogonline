@@ -392,30 +392,26 @@
 
                 <!-- Статистика -->
                 {% if filtered_stats.total_qso > 0 %}
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.total_qso }}</div>
-                            <div>Всего QSO</div>
-                        </div>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ filtered_stats.total_qso }}</div>
+                        <div>Всего QSO</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.unique_callsigns }}</div>
-                            <div>Уникальные позывные</div>
-                        </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ filtered_stats.unique_callsigns }}</div>
+                        <div>Уникальные позывные</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.unique_dxcc }}</div>
-                            <div>Стран DXCC</div>
-                        </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ filtered_stats.unique_dxcc }}</div>
+                        <div>Стран DXCC</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <div class="stats-number">{{ filtered_stats.unique_r150s }}</div>
-                            <div>Стран Р-150-С</div>
-                        </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ filtered_stats.unique_r150s }}</div>
+                        <div>Стран Р-150-С</div>
+                    </div>
+                    <div class="stats-card flex-fill" style="min-width: 140px;">
+                        <div class="stats-number">{{ filtered_stats.unique_ru_regions|default:"0" }}</div>
+                        <div>Регионов РФ</div>
                     </div>
                 </div>
                 {% endif %}
@@ -1773,4 +1769,4 @@
             document.getElementById('adif_my_gridsquare').addEventListener('change', function() {
                 setCookie('adif_my_gridsquare', this.value, 365);
             });
-            document.getElementById('adif_prop_mode').addEventListener('c
+            document.get

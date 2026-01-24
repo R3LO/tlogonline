@@ -155,6 +155,42 @@ def dashboard(request):
 
             frequency = band_frequencies.get(band, 0.0)
 
+            # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному
+            cqz = None
+            ituz = None
+            continent = None
+            r150s_country = None
+            dxcc = None
+            ru_region_val = None
+
+            if callsign:
+                import os
+                from django.conf import settings
+                from tlog import r150s
+                from tlog.region_ru import RussianRegionFinder
+
+                db_path = os.path.join(settings.BASE_DIR, 'tlog', 'r150cty.dat')
+                cty_path = os.path.join(settings.BASE_DIR, 'tlog', 'cty.dat')
+
+                r150s.init_database(db_path)
+                r150s.init_cty_database(cty_path)
+
+                dxcc_info = r150s.get_dxcc_info(callsign, db_path)
+                if dxcc_info:
+                    cqz = dxcc_info.get('cq_zone')
+                    ituz = dxcc_info.get('itu_zone')
+                    continent = dxcc_info.get('continent')
+
+                    r150s_country = dxcc_info.get('country')
+
+                    dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
+
+                # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+                if dxcc and dxcc.upper() in ('UA', 'UA9', 'UA2'):
+                    exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
+                    region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
+                    ru_region_val = region_finder.get_region_code(callsign)
+
             # Создание записи QSO
             try:
                 QSO.objects.create(
@@ -169,7 +205,12 @@ def dashboard(request):
                     rst_rcvd=rst_rcvd if rst_rcvd else None,
                     rst_sent=rst_sent if rst_sent else None,
                     gridsquare=gridsquare if gridsquare else None,
-                    ru_region=ru_region if ru_region else None,
+                    ru_region=ru_region_val,
+                    cqz=cqz,
+                    ituz=ituz,
+                    continent=continent if continent else None,
+                    r150s=r150s_country if r150s_country else None,
+                    dxcc=dxcc if dxcc else None,
                     lotw='N',
                     paper_qsl='N'
                 )
