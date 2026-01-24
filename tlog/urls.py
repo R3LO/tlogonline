@@ -11,7 +11,8 @@ from .views import (
     privacy, export_adif, qth_map, achievements, add_qso,
     get_callsigns_list, chat_list, chat_send,
     verify_lotw_credentials, delete_lotw_credentials,
-    change_password, user_achievements
+    change_password, user_achievements,
+    qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns
 )
 
 urlpatterns = [
@@ -28,6 +29,11 @@ urlpatterns = [
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('dashboard/chat/list/', chat_list, name='chat_list'),
     path('dashboard/chat/send/', chat_send, name='chat_send'),
+    # QO-100 рейтинги
+    path('dashboard/qo100/regions/', qo100_regions, name='qo100_regions'),
+    path('dashboard/qo100/r150s/', qo100_r150s, name='qo100_r150s'),
+    path('dashboard/qo100/grids/', qo100_grids, name='qo100_grids'),
+    path('dashboard/qo100/unique-callsigns/', qo100_unique_callsigns, name='qo100_unique_callsigns'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),

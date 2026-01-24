@@ -1,6 +1,8 @@
-"""
-Основные представления (главная страница, личный кабинет, профиль)
-"""
+
+
+# Main views (home, dashboard, profile)
+
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
@@ -582,3 +584,147 @@ def custom_404_view(request, exception):
     return render(request, '404.html', {
         'request_path': request.path,
     }, status=404)
+
+
+def qo100_regions(request):
+    """
+    Страница рейтинга QO-100 - регионы России
+    Показывает статистику по регионам РФ для всех QSO с lotw = 'Y'
+    """
+    # Получаем уникальные пары my_callsign + регион для QSO с lotw = 'Y'
+    qso_filtered = QSO.objects.filter(
+        lotw='Y',
+        ru_region__isnull=False
+    ).exclude(ru_region='').values('my_callsign', 'ru_region').distinct()
+
+    # Группируем по my_callsign и считаем регионы
+    from collections import defaultdict
+    callsign_regions = defaultdict(set)
+    for item in qso_filtered:
+        callsign_regions[item['my_callsign']].add(item['ru_region'])
+
+    # Формируем список с позывным и количеством регионов
+    ratings = []
+    for callsign, regions in callsign_regions.items():
+        ratings.append({
+            'callsign': callsign,
+            'count': len(regions),
+            'regions': sorted(list(regions))
+        })
+
+    # Сортируем по количеству (убывание), затем по позывному
+    ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+    return render(request, 'qo100/regions.html', {
+        'ratings': ratings,
+        'title': 'Регионы России QO-100',
+        'subtitle': 'регионам РФ',
+    })
+
+
+def qo100_r150s(request):
+    """
+    Страница рейтинга QO-100 - страны Р-150-С
+    Показывает статистику по странам для всех QSO с lotw = 'Y'
+    """
+    # Получаем уникальные пары my_callsign + r150s для QSO с lotw = 'Y'
+    qso_filtered = QSO.objects.filter(
+        lotw='Y',
+        r150s__isnull=False
+    ).exclude(r150s='').values('my_callsign', 'r150s').distinct()
+
+    # Группируем по my_callsign и считаем страны
+    from collections import defaultdict
+    callsign_countries = defaultdict(set)
+    for item in qso_filtered:
+        callsign_countries[item['my_callsign']].add(item['r150s'])
+
+    # Формируем список с позывным и количеством стран
+    ratings = []
+    for callsign, countries in callsign_countries.items():
+        ratings.append({
+            'callsign': callsign,
+            'count': len(countries),
+            'countries': sorted(list(countries))
+        })
+
+    # Сортируем по количеству (убывание), затем по позывному
+    ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+    return render(request, 'qo100/r150s.html', {
+        'ratings': ratings,
+        'title': 'Страны Р-150-С QO-100',
+        'subtitle': 'странам Р-150-С',
+    })
+
+
+def qo100_grids(request):
+    """
+    Страница рейтинга QO-100 - локаторы
+    Показывает статистику по локаторам для всех QSO с lotw = 'Y'
+    """
+    # Получаем уникальные пары my_callsign + gridsquare для QSO с lotw = 'Y'
+    qso_filtered = QSO.objects.filter(
+        lotw='Y',
+        gridsquare__isnull=False
+    ).exclude(gridsquare='').values('my_callsign', 'gridsquare').distinct()
+
+    # Группируем по my_callsign и считаем локаторы
+    from collections import defaultdict
+    callsign_grids = defaultdict(set)
+    for item in qso_filtered:
+        callsign_grids[item['my_callsign']].add(item['gridsquare'])
+
+    # Формируем список с позывным и количеством локаторов
+    ratings = []
+    for callsign, grids in callsign_grids.items():
+        ratings.append({
+            'callsign': callsign,
+            'count': len(grids),
+            'grids': sorted(list(grids))
+        })
+
+    # Сортируем по количеству (убывание), затем по позывному
+    ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+    return render(request, 'qo100/grids.html', {
+        'ratings': ratings,
+        'title': 'Локаторы QO-100',
+        'subtitle': 'локаторам',
+    })
+
+
+def qo100_unique_callsigns(request):
+    """
+    Страница рейтинга QO-100 - уникальные позывные
+    Показывает статистику по уникальным позывным для всех QSO с lotw = 'Y'
+    """
+    # Получаем уникальные пары my_callsign + callsign для QSO с lotw = 'Y'
+    qso_filtered = QSO.objects.filter(
+        lotw='Y',
+        callsign__isnull=False
+    ).exclude(callsign='').values('my_callsign', 'callsign').distinct()
+
+    # Группируем по my_callsign и считаем уникальные позывные
+    from collections import defaultdict
+    callsign_unique = defaultdict(set)
+    for item in qso_filtered:
+        callsign_unique[item['my_callsign']].add(item['callsign'])
+
+    # Формируем список с позывным и количеством уникальных корреспондентов
+    ratings = []
+    for callsign, unique_callsigns in callsign_unique.items():
+        ratings.append({
+            'callsign': callsign,
+            'count': len(unique_callsigns),
+            'unique_callsigns': sorted(list(unique_callsigns))
+        })
+
+    # Сортируем по количеству (убывание), затем по позывному
+    ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+    return render(request, 'qo100/unique_callsigns.html', {
+        'ratings': ratings,
+        'title': 'Уникальные позывные QO-100',
+        'subtitle': 'уникальным позывным',
+    })
