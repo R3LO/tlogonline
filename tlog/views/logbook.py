@@ -677,6 +677,72 @@ def achievements(request):
                     'unlocked': True
                 })
 
+            # === Награды QO-100 ===
+            # Статистика для QO-100 с подтверждением LoTW
+            qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
+            qo100_lotw_ru_regions = qo100_lotw_qsos.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+            qo100_lotw_countries = qo100_lotw_qsos.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+            qo100_lotw_grids = qo100_lotw_qsos.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
+            qo100_lotw_callsigns = qo100_lotw_qsos.values('callsign').distinct().count()
+
+            # Статистика для QO-100 без фильтра LoTW
+            qo100_all_qsos = QSO.objects.filter(user=user, sat_name='QO-100')
+            qo100_all_callsigns = qo100_all_qsos.values('callsign').distinct().count()
+
+            # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
+            if qo100_lotw_ru_regions >= 25:
+                achievements.append({
+                    'title': 'W-QO100-R',
+                    'description': '25+ регионов РФ через QO-100 (LoTW)',
+                    'icon': '🗺️',
+                    'unlocked': True
+                })
+
+            # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
+            if qo100_lotw_ru_regions >= 30:
+                achievements.append({
+                    'title': 'W-QO100-PROFI',
+                    'description': '30+ регионов РФ через QO-100 (LoTW)',
+                    'icon': '🎓',
+                    'unlocked': True
+                })
+
+            # W-QO100-C: 100+ стран (QO-100, LoTW)
+            if qo100_lotw_countries >= 100:
+                achievements.append({
+                    'title': 'W-QO100-C',
+                    'description': '100+ стран через QO-100 (LoTW)',
+                    'icon': '🌐',
+                    'unlocked': True
+                })
+
+            # W-QO100-L: 500+ уникальных QTH локаторов (QO-100, LoTW)
+            if qo100_lotw_grids >= 500:
+                achievements.append({
+                    'title': 'W-QO100-L',
+                    'description': '500+ QTH локаторов через QO-100 (LoTW)',
+                    'icon': '📍',
+                    'unlocked': True
+                })
+
+            # W-QO100-U: 1000+ уникальных позывных (QO-100, LoTW)
+            if qo100_lotw_callsigns >= 1000:
+                achievements.append({
+                    'title': 'W-QO100-U',
+                    'description': '1000+ позывных через QO-100 (LoTW)',
+                    'icon': '📡',
+                    'unlocked': True
+                })
+
+            # W-QO100-B: 1000+ связей (QO-100)
+            if qo100_all_callsigns >= 1000:
+                achievements.append({
+                    'title': 'W-QO100-B',
+                    'description': '1000+ связей через QO-100',
+                    'icon': '🛰️',
+                    'unlocked': True
+                })
+
             # Формируем HTML достижений
             achievements_html = ''
             for achievement in achievements:
@@ -884,6 +950,72 @@ def achievements(request):
             'title': 'В эфире',
             'description': '50+ связей за неделю',
             'icon': '📻',
+            'unlocked': True
+        })
+
+    # === Награды QO-100 ===
+    # Статистика для QO-100 с подтверждением LoTW
+    qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
+    qo100_lotw_ru_regions = qo100_lotw_qsos.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+    qo100_lotw_countries = qo100_lotw_qsos.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+    qo100_lotw_grids = qo100_lotw_qsos.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
+    qo100_lotw_callsigns = qo100_lotw_qsos.values('callsign').distinct().count()
+
+    # Статистика для QO-100 без фильтра LoTW
+    qo100_all_qsos = QSO.objects.filter(user=user, sat_name='QO-100')
+    qo100_all_callsigns = qo100_all_qsos.values('callsign').distinct().count()
+
+    # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
+    if qo100_lotw_ru_regions >= 25:
+        achievements.append({
+            'title': 'W-QO100-R',
+            'description': '25+ регионов РФ через QO-100 (LoTW)',
+            'icon': '🗺️',
+            'unlocked': True
+        })
+
+    # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
+    if qo100_lotw_ru_regions >= 30:
+        achievements.append({
+            'title': 'W-QO100-PROFI',
+            'description': '30+ регионов РФ через QO-100 (LoTW)',
+            'icon': '🎓',
+            'unlocked': True
+        })
+
+    # W-QO100-C: 100+ стран (QO-100, LoTW)
+    if qo100_lotw_countries >= 100:
+        achievements.append({
+            'title': 'W-QO100-C',
+            'description': '100+ стран через QO-100 (LoTW)',
+            'icon': '🌐',
+            'unlocked': True
+        })
+
+    # W-QO100-L: 500+ уникальных QTH локаторов (QO-100, LoTW)
+    if qo100_lotw_grids >= 500:
+        achievements.append({
+            'title': 'W-QO100-L',
+            'description': '500+ QTH локаторов через QO-100 (LoTW)',
+            'icon': '📍',
+            'unlocked': True
+        })
+
+    # W-QO100-U: 1000+ уникальных позывных (QO-100, LoTW)
+    if qo100_lotw_callsigns >= 1000:
+        achievements.append({
+            'title': 'W-QO100-U',
+            'description': '1000+ позывных через QO-100 (LoTW)',
+            'icon': '📡',
+            'unlocked': True
+        })
+
+    # W-QO100-B: 1000+ связей (QO-100)
+    if qo100_all_callsigns >= 1000:
+        achievements.append({
+            'title': 'W-QO100-B',
+            'description': '1000+ связей через QO-100',
+            'icon': '🛰️',
             'unlocked': True
         })
 
@@ -1256,3 +1388,130 @@ def add_qso(request):
         return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def user_achievements(request):
+    """
+    Страница с наградами всех пользователей
+    """
+    from django.contrib.auth.models import User
+    from datetime import timedelta
+    from django.utils import timezone
+
+    # Проверяем, не заблокирован ли пользователь (если авторизован)
+    if request.user.is_authenticated:
+        is_blocked, reason = check_user_blocked(request.user)
+        if is_blocked:
+            return render(request, 'blocked.html', {'reason': reason})
+
+    # Получаем всех пользователей с QSO
+    users_with_qso = User.objects.filter(
+        qsos__isnull=False
+    ).distinct().order_by('username')
+
+    user_achievements_list = []
+
+    for user in users_with_qso:
+        # Получаем позывной из профиля
+        try:
+            profile = user.radio_profile
+            callsign = profile.callsign or user.username
+        except Exception:
+            callsign = user.username
+
+        # Основная статистика
+        total_qso = QSO.objects.filter(user=user).count()
+        if total_qso == 0:
+            continue
+
+        # Диапазоны
+        bands = QSO.objects.filter(user=user).exclude(band__isnull=True).exclude(band='').values('band').distinct().count()
+
+        # Модуляции
+        modes = QSO.objects.filter(user=user).exclude(mode__isnull=True).values('mode').distinct().count()
+
+        # Страны Р-150-С
+        r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+
+        # Регионы России
+        ru_regions = QSO.objects.filter(user=user).exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+
+        # LoTW подтверждения
+        lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
+
+        # QO-100 статистика
+        qo100_all = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
+        qo100_lotw = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y').values('callsign').distinct().count()
+
+        # Собираем награды пользователя
+        achievements = []
+
+        # 100+ QSO
+        if total_qso >= 100:
+            achievements.append({'title': 'Новичок', 'icon': '🎯'})
+        # 500+ QSO
+        if total_qso >= 500:
+            achievements.append({'title': 'Опытный', 'icon': '⭐'})
+        # 1000+ QSO
+        if total_qso >= 1000:
+            achievements.append({'title': 'Мастер', 'icon': '🏆'})
+        # 10+ диапазонов
+        if bands >= 10:
+            achievements.append({'title': 'Разведчик', 'icon': '📡'})
+        # 5+ модуляций
+        if modes >= 5:
+            achievements.append({'title': 'Универсал', 'icon': '🎛️'})
+        # 50+ стран Р-150-С
+        if r150s_count >= 50:
+            achievements.append({'title': 'Охотник за DX', 'icon': '🌍'})
+        # 100+ стран Р-150-С
+        if r150s_count >= 100:
+            achievements.append({'title': 'Патриот', 'icon': '🎖️'})
+        # 10+ LoTW
+        if lotw_count >= 10:
+            achievements.append({'title': 'Цифровой оператор', 'icon': '💻'})
+
+        # Награды QO-100
+        if qo100_all >= 1000:
+            achievements.append({'title': 'W-QO100-B', 'icon': '🛰️'})
+        if qo100_lotw >= 1000:
+            achievements.append({'title': 'W-QO100-U', 'icon': '📡'})
+        if qo100_lotw >= 500:
+            achievements.append({'title': 'W-QO100-L', 'icon': '📍'})
+        if qo100_lotw >= 100:
+            achievements.append({'title': 'W-QO100-C', 'icon': '🌐'})
+        if qo100_lotw >= 30:
+            achievements.append({'title': 'W-QO100-PROFI', 'icon': '🎓'})
+        if qo100_lotw >= 25:
+            achievements.append({'title': 'W-QO100-R', 'icon': '🗺️'})
+
+        user_achievements_list.append({
+            'user_id': user.id,
+            'username': user.username,
+            'callsign': callsign,
+            'total_qso': total_qso,
+            'bands': bands,
+            'modes': modes,
+            'r150s_count': r150s_count,
+            'ru_regions': ru_regions,
+            'lotw_count': lotw_count,
+            'qo100_all': qo100_all,
+            'qo100_lotw': qo100_lotw,
+            'achievements': achievements,
+            'achievement_count': len(achievements),
+        })
+
+    # Сортируем по количеству наград (DESC), затем по QSO (DESC)
+    user_achievements_list.sort(key=lambda x: (x['achievement_count'], x['total_qso']), reverse=True)
+
+    # Статистика платформы
+    total_users = users_with_qso.count()
+    total_qso_all = QSO.objects.count()
+    total_qso_lotw = QSO.objects.filter(lotw='Y').count()
+
+    return render(request, 'user_achievements.html', {
+        'user_achievements_list': user_achievements_list,
+        'total_users': total_users,
+        'total_qso_all': total_qso_all,
+        'total_qso_lotw': total_qso_lotw,
+    })

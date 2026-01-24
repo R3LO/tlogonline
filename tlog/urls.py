@@ -11,7 +11,7 @@ from .views import (
     privacy, export_adif, qth_map, achievements, add_qso,
     get_callsigns_list, chat_list, chat_send,
     verify_lotw_credentials, delete_lotw_credentials,
-    change_password
+    change_password, user_achievements
 )
 
 urlpatterns = [
@@ -41,5 +41,6 @@ urlpatterns = [
     path('qth-map/', qth_map, name='qth_map'),
     path('qth-loc.html', RedirectView.as_view(url='/static/qth-loc.html', permanent=False), name='qth_loc'),
     path('achievements/', achievements, name='achievements'),
+    path('user-awards/', user_achievements, name='user_achievements'),
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
 ]
