@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title|default:"QO-100 Рейтинг" }}</title>
+    <title>{% block title %}QO-100 Рейтинг{% endblock %}</title>
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -98,11 +98,11 @@
                     <ol class="breadcrumb mb-2">
                         <li class="breadcrumb-item"><a href="/dashboard/">📊 Панель</a></li>
                         <li class="breadcrumb-item"><a href="/dashboard/">🛠️ Утилиты</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ page_title|default:"QO-100 Рейтинг" }}</li>
                     </ol>
                 </nav>
-                <h2><span>📡</span> {{ title }}</h2>
-                <p class="mb-0 opacity-75">{% if subtitle %}{{ subtitle }}{% else %}Конвертер ADIF файлов для спутника QO-100{% endif %}</p>
+                <h2><span>📡</span> {{ page_title|default:"QO-100 Рейтинг" }}</h2>
+                <p class="mb-0 opacity-75">{{ page_subtitle|default:"Конвертер ADIF файлов для спутника QO-100" }}</p>
             </div>
 
             <div class="p-4">

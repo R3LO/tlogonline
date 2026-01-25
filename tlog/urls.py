@@ -13,7 +13,8 @@ from .views import (
     verify_lotw_credentials, delete_lotw_credentials,
     change_password, user_achievements,
     qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
-    qo100_dxcc, qo100_converter, qo100_converter_download
+    qo100_dxcc, qo100_converter, qo100_converter_download,
+    cosmos_diploma, cosmos_download
 )
 
 urlpatterns = [
@@ -40,6 +41,9 @@ urlpatterns = [
     # QO-100 конвертер
     path('dashboard/qo100/converter/', qo100_converter, name='qo100_converter'),
     path('dashboard/qo100/converter/download/', qo100_converter_download, name='qo100_converter_download'),
+    # Диплом Космос
+    path('dashboard/cosmos/', cosmos_diploma, name='cosmos_diploma'),
+    path('dashboard/cosmos/download/', cosmos_download, name='cosmos_download'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),
