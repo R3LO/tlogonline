@@ -155,15 +155,6 @@ def dashboard(request):
                 messages.warning(request, 'QSO с такими данными уже существует в логе')
                 return redirect('dashboard')
 
-            # Определение частоты по диапазону (упрощенное сопоставление)
-            band_frequencies = {
-                '160m': 1.9, '80m': 3.7, '40m': 7.1, '30m': 10.15, '20m': 14.2,
-                '17m': 18.12, '15m': 21.3, '12m': 24.95, '10m': 28.5, '6m': 52.0,
-                '2m': 144.0, '70cm': 435.0, '23cm': 1290.0, '13cm': 2400.0, '3cm': 10000.0
-            }
-
-            frequency = band_frequencies.get(band, 0.0)
-
             # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному
             cqz = None
             ituz = None
@@ -191,6 +182,8 @@ def dashboard(request):
                     continent = dxcc_info.get('continent')
 
                     r150s_country = dxcc_info.get('country')
+                    if r150s_country:
+                        r150s_country = r150s_country.upper()[:100]
 
                     dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
 
@@ -208,7 +201,6 @@ def dashboard(request):
                     callsign=callsign,
                     date=qso_date,
                     time=qso_time,
-                    frequency=frequency,
                     band=band,
                     mode=mode,
                     rst_rcvd=rst_rcvd if rst_rcvd else None,

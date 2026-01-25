@@ -55,8 +55,20 @@ function initAddQSOModal() {
         if (savedSatName && savedSatQSO === 'true') document.getElementById('add_sat_name').value = savedSatName;
         if (savedBand) document.getElementById('add_band').value = savedBand;
         if (savedMode) document.getElementById('add_mode').value = savedMode;
-        if (savedLotw) document.getElementById('add_lotw').value = savedLotw;
         if (savedMyCallsign) document.getElementById('add_my_callsign').value = savedMyCallsign;
+
+        // Добавляем обработчики для автоматического преобразования в верхний регистр
+        const textFields = ['add_my_callsign', 'add_callsign', 'add_band', 'add_mode',
+                           'add_rst_rcvd', 'add_rst_sent', 'add_my_gridsquare',
+                           'add_gridsquare', 'add_sat_prop_mode', 'add_sat_name'];
+        textFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+        });
     });
 }
 
@@ -84,7 +96,6 @@ function saveQSOsettings() {
 
     setCookie('add_qso_band', document.getElementById('add_band').value, 365);
     setCookie('add_qso_mode', document.getElementById('add_mode').value, 365);
-    setCookie('add_qso_lotw', document.getElementById('add_lotw').value, 365);
     setCookie('add_qso_my_callsign', document.getElementById('add_my_callsign').value, 365);
 }
 
@@ -149,13 +160,13 @@ function initSaveAddQSO() {
             band: document.getElementById('add_band').value.trim().toUpperCase() || null,
             mode: document.getElementById('add_mode').value.trim().toUpperCase(),
             frequency: document.getElementById('add_frequency').value,
-            rst_rcvd: document.getElementById('add_rst_rcvd').value,
-            rst_sent: document.getElementById('add_rst_sent').value,
-            my_gridsquare: document.getElementById('add_my_gridsquare').value,
-            gridsquare: document.getElementById('add_gridsquare').value,
+            rst_rcvd: document.getElementById('add_rst_rcvd').value.toUpperCase(),
+            rst_sent: document.getElementById('add_rst_sent').value.toUpperCase(),
+            my_gridsquare: document.getElementById('add_my_gridsquare').value.toUpperCase(),
+            gridsquare: document.getElementById('add_gridsquare').value.toUpperCase(),
             cqz: document.getElementById('add_cqz').value,
             ituz: document.getElementById('add_ituz').value,
-            lotw: document.getElementById('add_lotw').value,
+            lotw: 'N',
             sat_qso: satQSO ? 'Y' : 'N'
         };
 
@@ -164,8 +175,8 @@ function initSaveAddQSO() {
 
         // Добавляем SAT поля только если Sat QSO включен
         if (satQSO) {
-            data.sat_prop_mode = document.getElementById('add_sat_prop_mode').value;
-            data.sat_name = document.getElementById('add_sat_name').value;
+            data.prop_mode = document.getElementById('add_sat_prop_mode').value.toUpperCase();
+            data.sat_name = document.getElementById('add_sat_name').value.toUpperCase();
         }
 
         fetch('/logbook/add/', {

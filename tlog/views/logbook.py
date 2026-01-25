@@ -357,9 +357,28 @@ def edit_qso(request, qso_id):
 
         qso.paper_qsl = data.get('paper_qsl', 'N')
 
-        # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному
+        # Получаем callsign для пересчёта
         callsign = qso.callsign
-        if callsign:
+
+        # Если lotw = N, принимаем cqz, ituz, continent, r150s, dxcc, ru_region из формы
+        # Если lotw = Y, оставляем их без изменений (они заблокированы на клиенте)
+        if qso.lotw != 'Y':
+            # Сохраняем как есть - пустые значения будут None
+            cqz_val = data.get('cqz')
+            ituz_val = data.get('ituz')
+            qso.cqz = int(cqz_val) if cqz_val and str(cqz_val).strip() else None
+            qso.ituz = int(ituz_val) if ituz_val and str(ituz_val).strip() else None
+            qso.continent = (data.get('continent') or '').upper()[:10] or None
+            qso.r150s = (data.get('r150s') or '').upper()[:100] or None
+            qso.dxcc = (data.get('dxcc') or '').upper()[:10] or None
+            qso.ru_region = (data.get('ru_region') or '').upper()[:10] or None
+        else:
+            # lotw = Y - поля заблокированы на клиенте, оставляем как есть
+            pass
+
+        # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному ТОЛЬКО если они пустые в форме
+        # и lotw != 'Y'
+        if qso.lotw != 'Y' and callsign and not data.get('cqz') and not data.get('ituz'):
             # Инициализируем базы данных CTY и R150
             tlog_dir = os.path.join(settings.BASE_DIR, 'tlog')
             db_path = os.path.join(tlog_dir, 'r150cty.dat')
@@ -370,35 +389,27 @@ def edit_qso(request, qso_id):
 
             dxcc_info = r150s.get_dxcc_info(callsign, db_path)
             if dxcc_info:
-                qso.cqz = dxcc_info.get('cq_zone')
-                qso.ituz = dxcc_info.get('itu_zone')
-                qso.continent = dxcc_info.get('continent')
+                # Пересчитываем только если пользователь не заполнил эти поля вручную
+                if not data.get('cqz'):
+                    qso.cqz = dxcc_info.get('cq_zone')
+                if not data.get('ituz'):
+                    qso.ituz = dxcc_info.get('itu_zone')
+                if not data.get('continent'):
+                    qso.continent = dxcc_info.get('continent')
+                if not data.get('r150s'):
+                    r150s_country = dxcc_info.get('country')
+                    qso.r150s = r150s_country.upper()[:100] if r150s_country else None
+                if not data.get('dxcc'):
+                    dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
+                    qso.dxcc = dxcc.upper()[:10] if dxcc else None
 
-                r150s_country = dxcc_info.get('country')
-                if r150s_country:
-                    qso.r150s = r150s_country.upper()[:100]
-                else:
-                    qso.r150s = None
-
-                dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
-                if dxcc:
-                    qso.dxcc = dxcc.upper()[:10]
-                else:
-                    qso.dxcc = None
-            else:
-                qso.cqz = None
-                qso.ituz = None
-                qso.continent = None
-                qso.r150s = None
-                qso.dxcc = None
-
-            # Определяем код региона России только для российских позывных (UA, UA9, UA2)
-            if qso.dxcc and qso.dxcc.upper() in ('UA', 'UA9', 'UA2'):
-                exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
-                region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
-                qso.ru_region = region_finder.get_region_code(callsign)
-            else:
-                qso.ru_region = None
+                # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+                if qso.dxcc and qso.dxcc.upper() in ('UA', 'UA9', 'UA2') and not data.get('ru_region'):
+                    exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
+                    region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
+                    qso.ru_region = region_finder.get_region_code(callsign)
+                elif not data.get('ru_region'):
+                    qso.ru_region = None
 
         qso.save()
 
@@ -1285,8 +1296,6 @@ def add_qso(request):
         rst_sent = data.get('rst_sent', '').upper()[:10] or None
         my_gridsquare = data.get('my_gridsquare', '').upper()[:10] or None
         gridsquare = data.get('gridsquare', '').upper()[:10] or None
-        my_qth = data.get('my_qth', '').upper()[:100] or None
-        his_qth = data.get('his_qth', '').upper()[:100] or None
         sat_qso = data.get('sat_qso', 'N')
         prop_mode = data.get('prop_mode', '').upper()[:50] or None
         sat_name = data.get('sat_name', '').upper()[:50] or None
@@ -1364,8 +1373,6 @@ def add_qso(request):
             rst_sent=rst_sent,
             my_gridsquare=my_gridsquare,
             gridsquare=gridsquare,
-            my_qth=my_qth,
-            his_qth=his_qth,
             sat_name=sat_name,
             prop_mode=prop_mode,
             cqz=int(cqz) if cqz else None,

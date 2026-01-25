@@ -881,6 +881,16 @@
                 });
             });
 
+            // Все текстовые поля формы QSO в верхний регистр
+            const qsoTextFields = document.querySelectorAll('#qsoInputForm input[type="text"]');
+            qsoTextFields.forEach(field => {
+                if (field.name && !['date', 'time', 'frequency', 'cqz', 'ituz'].includes(field.name)) {
+                    field.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
+                }
+            });
+
             // 3. Показать/скрыть поля SAT при отметке checkbox
             const satQsoCheckbox = document.getElementById('sat_qso');
             const satFields = document.getElementById('sat_fields');
