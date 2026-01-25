@@ -342,17 +342,12 @@
                                     </div>
                                 </div>
 
-                                <!-- QTH данные -->
+                                <!-- QTH локатор корреспондента -->
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">QTH локатор</label>
                                         <input type="text" class="form-control form-control-sm" name="his_gridsquare"
                                                placeholder="KO85UU" maxlength="8">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">QTH</label>
-                                        <input type="text" class="form-control form-control-sm" name="his_qth"
-                                               placeholder="Город, страна">
                                     </div>
                                 </div>
 
@@ -372,7 +367,8 @@
                                 <div class="row g-2 mb-3" id="sat_fields" style="display: none;">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Режим распространения (PROP_MODE)</label>
-                                        <select class="form-select form-select-sm" name="prop_mode">
+                                        <select class="form-select form-select-sm cookie-field"
+                                                data-cookie="qso_sat_prop_mode" name="prop_mode">
                                             <option value="">-</option>
                                             <option value="SAT">SAT - Спутник</option>
                                             <option value="AUR">AUR - Аврора</option>
@@ -385,24 +381,19 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Название спутника (SAT_NAME)</label>
-                                        <input type="text" class="form-control form-control-sm" name="sat_name"
+                                        <input type="text" class="form-control form-control-sm cookie-field"
+                                               data-cookie="qso_sat_name" name="sat_name"
                                                placeholder="AO-91" maxlength="50">
                                     </div>
                                 </div>
 
-                                <!-- Дополнительные поля (сохраняются в куки) -->
+                                <!-- Мой QTH локатор (сохраняется в куки) -->
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Мой QTH локатор</label>
                                         <input type="text" class="form-control form-control-sm cookie-field"
                                                data-cookie="qso_my_gridsquare" name="my_gridsquare"
                                                placeholder="KO85UU" maxlength="8" value="{{ profile.my_gridsquare|default:'' }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">Мой QTH</label>
-                                        <input type="text" class="form-control form-control-sm cookie-field"
-                                               data-cookie="qso_my_qth" name="my_qth"
-                                               placeholder="Город, страна" value="{{ profile.qth|default:'' }}">
                                     </div>
                                 </div>
 
@@ -882,7 +873,7 @@
             const callsignInputs = document.querySelectorAll('input[name="my_callsign"], input[name="callsign"]');
             callsignInputs.forEach(input => {
                 input.addEventListener('input', function() {
-                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
                 });
             });
 
@@ -890,8 +881,20 @@
             const satQsoCheckbox = document.getElementById('sat_qso');
             const satFields = document.getElementById('sat_fields');
             if (satQsoCheckbox && satFields) {
+                // Загружаем состояние из cookies при загрузке страницы
+                const savedSatQso = getCookieValue('qso_sat_qso');
+                if (savedSatQso === 'true') {
+                    satQsoCheckbox.checked = true;
+                    satFields.style.display = 'flex';
+                } else {
+                    satQsoCheckbox.checked = false;
+                    satFields.style.display = 'none';
+                }
+
                 satQsoCheckbox.addEventListener('change', function() {
                     satFields.style.display = this.checked ? 'flex' : 'none';
+                    // Сохраняем состояние в cookie
+                    setCookieValue('qso_sat_qso', this.checked, 365);
                     if (!this.checked) {
                         satFields.querySelector('select[name="prop_mode"]').value = '';
                         satFields.querySelector('input[name="sat_name"]').value = '';
@@ -947,6 +950,12 @@
                     textFields.forEach(field => {
                         field.value = field.value.toUpperCase();
                     });
+
+                    // Сохраняем состояние чекбокса sat_qso
+                    const satQsoCheckbox = document.getElementById('sat_qso');
+                    if (satQsoCheckbox) {
+                        setCookieValue('qso_sat_qso', satQsoCheckbox.checked, 365);
+                    }
 
                     // Сохраняем значения полей с куки
                     const cookieFieldsToSave = qsoInputForm.querySelectorAll('.cookie-field');

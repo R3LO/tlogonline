@@ -111,8 +111,12 @@ def dashboard(request):
             mode = request.POST.get('mode', '').strip().upper()
             rst_rcvd = request.POST.get('rst_rcvd', '').strip().upper()
             rst_sent = request.POST.get('rst_sent', '').strip().upper()
-            gridsquare = request.POST.get('gridsquare', '').strip().upper()
+            gridsquare = request.POST.get('his_gridsquare', '').strip().upper()
+            my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
             ru_region = request.POST.get('ru_region', '').strip().upper()
+            sat_qso = 'sat_qso' in request.POST
+            prop_mode = request.POST.get('prop_mode', '').strip().upper() if sat_qso else ''
+            sat_name = request.POST.get('sat_name', '').strip().upper() if sat_qso else ''
 
             # Валидация обязательных полей
             if not all([my_callsign, callsign, date_str, time_str, band, mode]):
@@ -210,12 +214,15 @@ def dashboard(request):
                     rst_rcvd=rst_rcvd if rst_rcvd else None,
                     rst_sent=rst_sent if rst_sent else None,
                     gridsquare=gridsquare if gridsquare else None,
+                    my_gridsquare=my_gridsquare if my_gridsquare else None,
                     ru_region=ru_region_val,
                     cqz=cqz,
                     ituz=ituz,
                     continent=continent if continent else None,
                     r150s=r150s_country if r150s_country else None,
                     dxcc=dxcc if dxcc else None,
+                    prop_mode=prop_mode if prop_mode else None,
+                    sat_name=sat_name if sat_name else None,
                     lotw='N',
                     paper_qsl='N'
                 )
