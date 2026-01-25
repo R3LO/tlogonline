@@ -342,12 +342,18 @@
                                     </div>
                                 </div>
 
-                                <!-- QTH локатор корреспондента -->
+                                <!-- QTH локаторы -->
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">QTH локатор</label>
+                                        <label class="form-label small fw-bold text-muted">QTH локатор оператора</label>
                                         <input type="text" class="form-control form-control-sm" name="his_gridsquare"
                                                placeholder="KO85UU" maxlength="8">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-muted">Мой QTH локатор</label>
+                                        <input type="text" class="form-control form-control-sm cookie-field"
+                                               data-cookie="qso_my_gridsquare" name="my_gridsquare"
+                                               placeholder="KO85UU" maxlength="8" value="{{ profile.my_gridsquare|default:'' }}">
                                     </div>
                                 </div>
 
@@ -363,7 +369,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Sat поля (скрытые по умолчанию) -->
+                                                                <!-- Sat поля (скрытые по умолчанию) -->
                                 <div class="row g-2 mb-3" id="sat_fields" style="display: none;">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Режим распространения (PROP_MODE)</label>
@@ -384,16 +390,6 @@
                                         <input type="text" class="form-control form-control-sm cookie-field"
                                                data-cookie="qso_sat_name" name="sat_name"
                                                placeholder="AO-91" maxlength="50">
-                                    </div>
-                                </div>
-
-                                <!-- Мой QTH локатор (сохраняется в куки) -->
-                                <div class="row g-2 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">Мой QTH локатор</label>
-                                        <input type="text" class="form-control form-control-sm cookie-field"
-                                               data-cookie="qso_my_gridsquare" name="my_gridsquare"
-                                               placeholder="KO85UU" maxlength="8" value="{{ profile.my_gridsquare|default:'' }}">
                                     </div>
                                 </div>
 
@@ -869,11 +865,19 @@
                 timeInput.value = timeString;
             }
 
-            // 2. Валидация позывных в реальном времени
+            // 2. Валидация позывных и QTH локаторов в реальном времени
             const callsignInputs = document.querySelectorAll('input[name="my_callsign"], input[name="callsign"]');
             callsignInputs.forEach(input => {
                 input.addEventListener('input', function() {
                     this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+                });
+            });
+
+            // QTH локаторы в верхний регистр
+            const gridsquareInputs = document.querySelectorAll('input[name="his_gridsquare"], input[name="my_gridsquare"]');
+            gridsquareInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                 });
             });
 

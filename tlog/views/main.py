@@ -524,7 +524,7 @@ def chat_list(request):
             'user_id': msg.user.id,
             'username': msg.username,
             'message': msg.message,
-            'created_at': msg.created_at.strftime('%H:%M'),
+            'created_at': msg.created_at.strftime('%d.%m.%Y %H:%M'),
         })
 
     return JsonResponse({'messages': messages_data})
@@ -577,7 +577,7 @@ def chat_send(request):
                 'id': str(chat_message.id),
                 'username': chat_message.username,
                 'message': chat_message.message,
-                'created_at': chat_message.created_at.strftime('%H:%M'),
+                'created_at': chat_message.created_at.strftime('%d.%m.%Y %H:%M'),
             }
         })
 
