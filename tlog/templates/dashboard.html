@@ -256,7 +256,7 @@
                                 data-bs-toggle="collapse" data-bs-target="#qsoForm"
                                 aria-expanded="false" aria-controls="qsoForm">
                             <span id="qsoFormToggle">📖</span>
-                            <span class="d-none d-sm-inline ms-1">Развернуть</span>
+                            <span class="d-none d-sm-inline ms-1" id="qsoFormToggleText">Развернуть</span>
                         </button>
                     </div>
 
@@ -833,6 +833,17 @@
             const qsoInputForm = document.getElementById('qsoInputForm');
             const toggleBtn = document.querySelector('[data-bs-target="#qsoForm"]');
             const toggleIcon = document.getElementById('qsoFormToggle');
+            const toggleText = document.getElementById('qsoFormToggleText');
+
+            // Обработчики для переключения текста кнопки
+            if (qsoForm && toggleText) {
+                qsoForm.addEventListener('shown.bs.collapse', function() {
+                    toggleText.textContent = 'Свернуть';
+                });
+                qsoForm.addEventListener('hidden.bs.collapse', function() {
+                    toggleText.textContent = 'Развернуть';
+                });
+            }
 
             // Функции для работы с куки
             function getCookieValue(name) {
