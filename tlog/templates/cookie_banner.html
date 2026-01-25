@@ -65,15 +65,6 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
-.cookie-btn-decline {
-    background: transparent;
-    color: #adb5bd;
-    border: 1px solid #495057;
-}
-.cookie-btn-decline:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
 </style>
 
 <div id="cookieBanner" class="cookie-banner">
@@ -86,7 +77,6 @@
             </p>
         </div>
         <div class="cookie-buttons">
-            <button class="cookie-btn cookie-btn-decline" onclick="declineCookies()">Отклонить</button>
             <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">Принять</button>
         </div>
     </div>
@@ -102,11 +92,6 @@ function checkCookieConsent() {
 
 function acceptCookies() {
     localStorage.setItem('cookie_consent', 'accepted');
-    document.getElementById('cookieBanner').classList.remove('show');
-}
-
-function declineCookies() {
-    localStorage.setItem('cookie_consent', 'declined');
     document.getElementById('cookieBanner').classList.remove('show');
 }
 

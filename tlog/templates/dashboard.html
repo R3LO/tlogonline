@@ -8,120 +8,37 @@
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        .logbook-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .logbook-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><Данные LoTWstoLoTW p offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            pointer-events: none;
-        }
-        .filter-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-2px);
-        }
-        .stats-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .qso-item {
-            border-left: 4px solid #667eea;
-            transition: all 0.3s ease;
-        }
-        .qso-item:hover {
-            background-color: rgba(102, 126, 234, 0.1);
-        }
-        .callsign-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-        }
-        .mode-badge {
-            background: #28a745;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-        }
-        .band-badge {
-            background: #ffc107;
-            color: #212529;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-        }
-        .section-title {
-            color: #667eea;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e9ecef;
-        }
-    </style>
+    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light me-3" href="/dashboard/">
-                    <span>📊</span> Панель
-                </a>
-                <a class="nav-link text-light me-3" href="/logbook/">
-                    <span>📓</span> Logbook
-                </a>
-                <a class="nav-link text-light me-3" href="/qth-loc.html" target="_blank">
-                    <span>🗺️</span> Grid map
-                </a>
-                <a class="nav-link text-light me-3" href="/achievements/">
-                    <span>🏆</span> Достижения
-                </a>
-                <a class="nav-link text-light me-3" href="/dashboard/profile/">
-                    <span>👤</span> {{ user.username }}
-                </a>
-                <a class="nav-link text-light" href="/logout/">
-                    <span>🚪</span> Выйти
-                </a>
+            <a class="navbar-brand" href="/">📡 TLog</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="/dashboard/">
+                        <span>📊</span> Панель
+                    </a>
+                    <a class="nav-link" href="/logbook/">
+                        <span>📓</span> Logbook
+                    </a>
+                    <a class="nav-link" href="/qth-loc.html" target="_blank">
+                        <span>🗺️</span> Grid map
+                    </a>
+                    <a class="nav-link" href="/achievements/">
+                        <span>🏆</span> Достижения
+                    </a>
+                    <a class="nav-link" href="/dashboard/profile/">
+                        <span>👤</span> {{ user.username }}
+                    </a>
+                    <a class="nav-link" href="/logout/">
+                        <span>🚪</span> Выйти
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -796,333 +713,6 @@
             white-space: nowrap;
         }
     </style>
-    <script>
-        // Принудительно сбрасываем строки overflow и padding-right при открытии модальных окон
-        document.addEventListener('DOMContentLoaded', function() {
-            // Сбрасываем стили при загрузке
-            document.body.style.overflow = 'visible';
-            document.body.style.paddingRight = '0';
-
-            // Находим все кнопки открытия модальных окон и добавляем обработчики
-            document.querySelectorAll('[data-bs-toggle="modal"]').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    setTimeout(function() {
-                        document.body.style.overflow = 'visible';
-                        document.body.style.paddingRight = '0';
-                    }, 50);
-                });
-            });
-
-            // Находим все модальные окна и добавляем обработчики
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(function(modal) {
-                modal.addEventListener('show.bs.modal', function() {
-                    document.body.style.overflow = 'visible';
-                    document.body.style.paddingRight = '0';
-                });
-                modal.addEventListener('shown.bs.modal', function() {
-                    document.body.style.overflow = 'visible';
-                    document.body.style.paddingRight = '0';
-                });
-            });
-        });
-
-        // Единый обработчик для всей логики формы QSO
-        document.addEventListener('DOMContentLoaded', function() {
-            const qsoForm = document.getElementById('qsoForm');
-            const qsoInputForm = document.getElementById('qsoInputForm');
-            const toggleBtn = document.querySelector('[data-bs-target="#qsoForm"]');
-            const toggleIcon = document.getElementById('qsoFormToggle');
-            const toggleText = document.getElementById('qsoFormToggleText');
-
-            // Обработчики для переключения текста кнопки
-            if (qsoForm && toggleText) {
-                qsoForm.addEventListener('shown.bs.collapse', function() {
-                    toggleText.textContent = 'Свернуть';
-                });
-                qsoForm.addEventListener('hidden.bs.collapse', function() {
-                    toggleText.textContent = 'Развернуть';
-                });
-            }
-
-            // Функции для работы с куки
-            function getCookieValue(name) {
-                const value = '; ' + document.cookie;
-                const parts = value.split('; ' + name + '=');
-                if (parts.length === 2) {
-                    return parts.pop().split(';').shift();
-                }
-                return '';
-            }
-
-            function setCookieValue(name, value, days = 365) {
-                const expires = new Date();
-                expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-                document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + expires.toUTCString() + ';path=/';
-            }
-
-            // 1. Устанавливаем текущую дату и время
-            const dateInput = document.querySelector('input[name="date"]');
-            const timeInput = document.querySelector('input[name="time"]');
-
-            if (dateInput && !dateInput.value) {
-                dateInput.value = new Date().toISOString().split('T')[0];
-            }
-
-            if (timeInput && !timeInput.value) {
-                const now = new Date();
-                const timeString = now.getHours().toString().padStart(2, '0') + ':' +
-                                 now.getMinutes().toString().padStart(2, '0');
-                timeInput.value = timeString;
-            }
-
-            // 2. Валидация позывных и QTH локаторов в реальном времени
-            const callsignInputs = document.querySelectorAll('input[name="my_callsign"], input[name="callsign"]');
-            callsignInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
-                });
-            });
-
-            // QTH локаторы в верхний регистр
-            const gridsquareInputs = document.querySelectorAll('input[name="his_gridsquare"], input[name="my_gridsquare"]');
-            gridsquareInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                });
-            });
-
-            // Все текстовые поля формы QSO в верхний регистр
-            const qsoTextFields = document.querySelectorAll('#qsoInputForm input[type="text"]');
-            qsoTextFields.forEach(field => {
-                if (field.name && !['date', 'time', 'frequency', 'cqz', 'ituz'].includes(field.name)) {
-                    field.addEventListener('input', function() {
-                        this.value = this.value.toUpperCase();
-                    });
-                }
-            });
-
-            // 3. Показать/скрыть поля SAT при отметке checkbox
-            const satQsoCheckbox = document.getElementById('sat_qso');
-            const satFields = document.getElementById('sat_fields');
-            if (satQsoCheckbox && satFields) {
-                // Загружаем состояние из cookies при загрузке страницы
-                const savedSatQso = getCookieValue('qso_sat_qso');
-                if (savedSatQso === 'true') {
-                    satQsoCheckbox.checked = true;
-                    satFields.style.display = 'flex';
-                } else {
-                    satQsoCheckbox.checked = false;
-                    satFields.style.display = 'none';
-                }
-
-                satQsoCheckbox.addEventListener('change', function() {
-                    satFields.style.display = this.checked ? 'flex' : 'none';
-                    // Сохраняем состояние в cookie
-                    setCookieValue('qso_sat_qso', this.checked, 365);
-                    if (!this.checked) {
-                        satFields.querySelector('select[name="prop_mode"]').value = '';
-                        satFields.querySelector('input[name="sat_name"]').value = '';
-                    }
-                });
-            }
-
-            // 4. Загружаем состояние формы (свернута/развернута)
-            // Сначала проверяем cookie
-            const qsoFormCollapsed = getCookieValue('qso_form_collapsed');
-
-            // Если форма должна быть развернута, но Bootstrap свернул её - разворачиваем
-            if (qsoFormCollapsed !== 'true' && qsoForm && toggleBtn && toggleIcon) {
-                // Проверяем, свернута ли форма сейчас
-                if (!qsoForm.classList.contains('show')) {
-                    // Принудительно разворачиваем форму
-                    qsoForm.classList.add('show');
-                    toggleBtn.setAttribute('aria-expanded', 'true');
-                    toggleIcon.textContent = '📖';
-                }
-            } else if (qsoFormCollapsed === 'true' && qsoForm && toggleBtn && toggleIcon) {
-                // Сворачиваем форму если в cookie 'true'
-                qsoForm.classList.remove('show');
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                toggleIcon.textContent = '📖';
-            }
-
-            // 5. Сохраняем состояние формы при изменении
-            if (qsoForm) {
-                qsoForm.addEventListener('shown.bs.collapse', function() {
-                    setCookieValue('qso_form_collapsed', 'false', 365);
-                });
-                qsoForm.addEventListener('hidden.bs.collapse', function() {
-                    setCookieValue('qso_form_collapsed', 'true', 365);
-                });
-            }
-
-            // 6. Загружаем значения полей из куки
-            const cookieFields = document.querySelectorAll('.cookie-field');
-            cookieFields.forEach(field => {
-                const cookieName = field.dataset.cookie;
-                const value = getCookieValue(cookieName);
-                if (value) {
-                    field.value = decodeURIComponent(value);
-                }
-            });
-
-            // 7. Обработка формы QSO перед отправкой
-            if (qsoInputForm) {
-                qsoInputForm.addEventListener('submit', function(e) {
-                    // Преобразуем все текстовые поля в верхний регистр
-                    const textFields = qsoInputForm.querySelectorAll('input[type="text"], input[type="search"]');
-                    textFields.forEach(field => {
-                        field.value = field.value.toUpperCase();
-                    });
-
-                    // Сохраняем состояние чекбокса sat_qso
-                    const satQsoCheckbox = document.getElementById('sat_qso');
-                    if (satQsoCheckbox) {
-                        setCookieValue('qso_sat_qso', satQsoCheckbox.checked, 365);
-                    }
-
-                    // Сохраняем значения полей с куки
-                    const cookieFieldsToSave = qsoInputForm.querySelectorAll('.cookie-field');
-                    cookieFieldsToSave.forEach(field => {
-                        const cookieName = field.dataset.cookie;
-                        if (field.value) {
-                            setCookieValue(cookieName, field.value);
-                        }
-                    });
-
-                    // Устанавливаем cookie что форма должна быть развернута после перезагрузки
-                    setCookieValue('qso_form_collapsed', 'false', 365);
-                });
-            }
-        });
-
-        // Удаление ADIF загрузки
-        function deleteAdifUpload(uploadId, fileName) {
-            document.getElementById('deleteFileName').textContent = fileName;
-            const deleteModalEl = document.getElementById('deleteConfirmModal');
-            const deleteModal = new bootstrap.Modal(deleteModalEl, { backdrop: false });
-            deleteModal.show();
-
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-
-            // Очищаем предыдущие обработчики
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-            newConfirmBtn.onclick = function() {
-                newConfirmBtn.disabled = true;
-                newConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Удаление...';
-
-                fetch('/dashboard/adif-delete/' + uploadId + '/', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Скрываем модальное окно
-                    deleteModal.hide();
-
-                    if (data.success) {
-                        // Показываем временное сообщение и перезагружаем
-                        showTempAlert('success', data.message);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 500);
-                    } else {
-                        showTempAlert('danger', 'Ошибка: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    deleteModal.hide();
-                    showTempAlert('danger', 'Произошла ошибка при удалении');
-                    console.error('Error:', error);
-                });
-            };
-
-            // Закрываем модальное при нажатии "Отмена"
-            deleteModalEl.querySelector('.btn-secondary').onclick = function() {
-                deleteModal.hide();
-            };
-        }
-
-        // Получение CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Показать временное сообщение (исчезает через 3 сек)
-        function showTempAlert(type, message) {
-            // Удаляем старые alert
-            document.querySelectorAll('.alert-dynamic').forEach(el => el.remove());
-
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show alert-dynamic';
-            alertDiv.style.position = 'fixed';
-            alertDiv.style.top = '20px';
-            alertDiv.style.right = '20px';
-            alertDiv.style.zIndex = '9999';
-            alertDiv.style.maxWidth = '400px';
-            alertDiv.role = 'alert';
-            alertDiv.innerHTML = message +
-                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-
-            document.body.appendChild(alertDiv);
-
-            // Удаляем через 3 секунды
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-                    if (bsAlert) bsAlert.close();
-                }
-            }, 3000);
-        }
-    </script>
-
-    <style>
-    /* Убираем backdrop и поднимаем модальные окна */
-    .modal-backdrop {
-        display: none !important;
-    }
-    .modal {
-        z-index: 99999 !important;
-        background: rgba(0, 0, 0, 0.3) !important;
-        overflow: visible !important;
-        padding-right: 0 !important;
-    }
-    .modal .modal-dialog {
-        z-index: 100000 !important;
-        position: relative;
-        overflow: visible !important;
-    }
-    /* Убираем проблемы с overflow от Bootstrap */
-    html body {
-        overflow: visible !important;
-        padding-right: 0 !important;
-    }
-    html body.modal-open {
-        overflow: visible !important;
-        padding-right: 0 !important;
-    }
-    /* Чат не должен перехватывать клики когда открыто модальное окно */
-    body.modal-open .chat-card {
-        display: none !important;
-    }
-    </style>
 
     <!-- Модальное окно редактирования профиля -->
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
@@ -1198,5 +788,6 @@
     </div>
 
 {% include 'cookie_banner.html' %}
+<script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 </html>
