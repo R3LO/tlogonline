@@ -212,23 +212,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.25);
 }
 
-/* Mobile Optimizations */
-@media (max-width: 992px) {
-    .navbar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .navbar-nav .nav-link {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    .navbar-brand {
-        font-size: 1rem;
-    }
-}
-
 @media (max-width: 768px) {
     body {
         padding: 10px 0;
@@ -338,13 +321,5 @@ body {
 @media (max-width: 400px) {
     .stats-card {
         flex: 0 0 calc(50% - 0.25rem) !important;
-    }
-
-    .navbar-brand {
-        font-size: 0.9rem;
-    }
-
-    .nav-link span {
-        display: none;
     }
 }

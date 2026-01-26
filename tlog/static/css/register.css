@@ -52,19 +52,6 @@ body {
     border-bottom: 2px solid #e9ecef;
 }
 
-/* Mobile Optimizations */
-@media (max-width: 992px) {
-    .navbar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .navbar-nav .nav-link {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-}
-
 @media (max-width: 768px) {
     body {
         padding: 10px 0;

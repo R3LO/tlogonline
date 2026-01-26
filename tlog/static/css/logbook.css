@@ -1,0 +1,551 @@
+/* ========== Стили для logbook ========== */
+
+/* Base styles */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-text-size-adjust: 100%;
+}
+
+.main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+/* Header */
+.logbook-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.logbook-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Filter card */
+.filter-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Stats cards */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.stats-card div:last-child {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+/* Table styles */
+.qso-table th {
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 0.5rem;
+    white-space: nowrap;
+}
+
+.qso-table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+
+/* Badges */
+.callsign-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.mode-badge {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.band-badge {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #212529;
+    padding: 2px 5px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Action buttons */
+.action-column {
+    width: 70px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+}
+
+.action-buttons .btn {
+    padding: 0.25rem 0.35rem;
+    font-size: 0.65rem;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+    min-width: 28px;
+}
+
+.action-buttons .btn:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.action-buttons .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Modal styles */
+.modal-body {
+    padding: 0.75rem;
+}
+
+.modal-body .form-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+    height: auto;
+}
+
+.modal-footer {
+    padding: 0.5rem 0.75rem;
+}
+
+.modal-footer .btn {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.modal-header .btn-close {
+    margin: 0;
+    padding: 0.5rem;
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination .page-link {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .logbook-header {
+        padding: 2rem;
+    }
+
+    .logbook-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .stats-number {
+        font-size: 1.75rem;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .logbook-header h2 {
+        font-size: 2rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+    }
+
+    .qso-table th {
+        font-size: 0.75rem;
+    }
+
+    .qso-table td {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========== Mobile First - Extra small devices (phones, less than 576px) ========== */
+@media (max-width: 575.98px) {
+    /* Container */
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .main-container {
+        border-radius: 10px;
+    }
+
+    /* Header */
+    .logbook-header {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .logbook-header h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .logbook-header p {
+        font-size: 0.75rem;
+    }
+
+    .logbook-header small {
+        font-size: 0.65rem;
+    }
+
+    /* Content padding */
+    .p-4 {
+        padding: 1rem !important;
+    }
+
+    /* Management buttons - stack vertically */
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .d-flex.justify-content-between.align-items-center.mb-4 h4 {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .d-flex.gap-2 {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .d-flex.gap-2 .btn {
+        flex: 1;
+        min-width: 100px;
+        max-width: 150px;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+    }
+
+    .d-flex.gap-2 .btn span {
+        display: none;
+    }
+
+    /* Filter form */
+    .filter-card {
+        padding: 0.75rem;
+    }
+
+    .filter-card h6 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-card p {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-card form {
+        gap: 0.5rem;
+    }
+
+    .filter-card form > div {
+        min-width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.5rem;
+    }
+
+    /* Stats cards */
+    .d-flex.flex-wrap.gap-3.mb-4 {
+        justify-content: center;
+    }
+
+    .stats-card {
+        flex: 0 0 calc(33.333% - 0.25rem) !important;
+        min-width: 90px;
+        padding: 0.75rem;
+    }
+
+    .stats-card div:last-child {
+        font-size: 0.65rem;
+    }
+
+    .stats-number {
+        font-size: 1.25rem;
+    }
+
+    /* Table - hide less important columns */
+    .qso-table {
+        font-size: 0.75rem;
+    }
+
+    .qso-table thead {
+        display: none;
+    }
+
+    .qso-table tbody tr {
+        display: block;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: #fff;
+    }
+
+    .qso-table tbody tr td {
+        display: block;
+        padding: 0.25rem 0.5rem;
+        border: none;
+        font-size: 0.8rem;
+    }
+
+    .qso-table tbody tr td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6c757d;
+        display: inline;
+        margin-right: 0.5rem;
+    }
+
+    .qso-table tbody tr td:nth-child(1) {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .qso-table tbody tr td:nth-child(12) {
+        text-align: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #eee;
+    }
+
+    /* Badges for mobile */
+    .callsign-badge {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+    }
+
+    .mode-badge,
+    .band-badge {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        gap: 5px;
+    }
+
+    .action-buttons .btn {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+        min-width: 32px;
+    }
+
+    /* Pagination */
+    .pagination {
+        gap: 0.25rem;
+    }
+
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Modal dialogs */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    .modal-lg {
+        max-width: 100%;
+    }
+
+    .modal-body .row {
+        margin-bottom: 0;
+    }
+
+    .modal-body .col-md-4,
+    .modal-body .col-md-6 {
+        margin-bottom: 0.75rem;
+    }
+
+    .modal-body .form-label {
+        font-size: 0.75rem;
+    }
+
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 0.875rem;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    /* Empty state */
+    .text-center.py-5 {
+        padding: 2rem 1rem !important;
+    }
+
+    .text-center.py-5 span {
+        font-size: 2.5rem !important;
+    }
+
+    .text-center.py-5 h4 {
+        font-size: 1rem;
+    }
+
+    .text-center.py-5 p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .page-link {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 44px;
+    }
+
+    .action-buttons .btn {
+        min-width: 36px;
+        min-height: 36px;
+    }
+}
+
+/* Landscape phone optimizations */
+@media (max-width: 767.98px) and (orientation: landscape) {
+    .logbook-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .d-flex.gap-2 .btn {
+        min-width: 90px;
+    }
+
+    .stats-card {
+        flex: 0 0 calc(25% - 0.25rem) !important;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+    .stats-card {
+        flex: 0 0 calc(50% - 0.25rem) !important;
+        min-width: 80px;
+        padding: 0.5rem;
+    }
+
+    .stats-number {
+        font-size: 1rem;
+    }
+
+    .d-flex.gap-2 .btn {
+        min-width: 80px;
+        font-size: 0.7rem;
+    }
+
+    .modal-dialog {
+        margin: 0.25rem;
+        max-width: calc(100% - 0.5rem);
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+    }
+
+    .main-container {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .filter-card,
+    .d-flex.justify-content-between,
+    .modal,
+    nav {
+        display: none !important;
+    }
+}

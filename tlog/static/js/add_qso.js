@@ -1,6 +1,42 @@
 // ========== Функции для добавления QSO ==========
 
-// Функции для работы с cookies (общие с logbook.js)
+// Функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Функция для показа уведомлений
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Функции для работы с cookies
 function setCookie(name, value, days) {
     let expires = '';
     if (days) {
@@ -170,9 +206,6 @@ function initSaveAddQSO() {
             sat_qso: satQSO ? 'Y' : 'N'
         };
 
-        // Логируем данные для отладки
-        console.log('Отправляемые данные QSO:', data);
-
         // Добавляем SAT поля только если Sat QSO включен
         if (satQSO) {
             data.prop_mode = document.getElementById('add_sat_prop_mode').value.toUpperCase();
@@ -248,7 +281,6 @@ function initSaveAddQSO() {
         .catch(error => {
             this.disabled = false;
             this.innerHTML = '<span>➕</span> Добавить QSO';
-            console.error('Error:', error);
             showAlert('danger', 'Ошибка при добавлении QSO: ' + error.message);
         });
     });
@@ -260,3 +292,8 @@ function initAddQSO() {
     initSatQSOCheckbox();
     initSaveAddQSO();
 }
+
+// Запускаем инициализацию при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initAddQSO();
+});

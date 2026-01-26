@@ -9,249 +9,38 @@
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        .logbook-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .logbook-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            pointer-events: none;
-        }
-        .filter-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .qso-table th {
-            font-weight: 600;
-            font-size: 0.75rem;
-            padding: 0.5rem;
-        }
-        .qso-table td {
-            padding: 0.4rem 0.5rem;
-            font-size: 0.85rem;
-            vertical-align: middle;
-        }
-        .qso-table .badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-        }
-        .qso-table .btn-sm {
-            padding: 0.15rem 0.3rem;
-            font-size: 0.7rem;
-        }
-
-        /* Компактные стили */
-        .qso-row {
-            transition: all 0.3s ease;
-            margin-bottom: 0;
-        }
-        .qso-row:hover {
-            background-color: #f8f9fa;
-        }
-        .callsign-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 500;
-            font-size: 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .mode-badge {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-        .band-badge {
-            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-            color: #212529;
-            padding: 2px 5px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-
-        /* Компактные модальные окна */
-        .modal-body {
-            padding: 0.75rem;
-        }
-        .modal-body .row {
-            margin-bottom: 0.15rem;
-        }
-        .modal-body .col-md-4,
-        .modal-body .col-md-6 {
-            margin-bottom: 0.15rem;
-        }
-        .modal-body .form-label {
-            font-size: 0.7rem;
-            margin-bottom: 0.1rem;
-        }
-        .modal-body .form-control,
-        .modal-body .form-select {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.4rem;
-            height: auto;
-        }
-        .modal-footer {
-            padding: 0.4rem 0.75rem;
-        }
-        .modal-footer .btn {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.4rem;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        .pagination {
-            justify-content: center;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-2px);
-        }
-        .stats-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .table th {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .table td {
-            font-weight: 400;
-        }
-        .pagination {
-            margin-bottom: 2rem;
-        }
-        /* Стили для колонки действий */
-        .action-column {
-            width: 80px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-        }
-        .action-buttons .btn {
-            padding: 0.25rem 0.4rem;
-            font-size: 0.7rem;
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: #fff;
-        }
-        .action-buttons .btn:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-        }
-        .action-buttons .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-        .action-buttons .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
-        }
-        .modal-header .btn-close {
-            margin: 0;
-        }
-        .modal-body .form-select,
-        .modal-body .form-control {
-            margin-bottom: 10px;
-        }
-        .modal-body label {
-            font-weight: 500;
-            margin-bottom: 3px;
-        }
-        /* Компактные чекбоксы в input-group для ADIF загрузки */
-        .adif-options .input-group-text,
-        .adif-options-sat .input-group-text {
-            padding: 0.25rem 0.5rem !important;
-            min-width: auto !important;
-            width: auto !important;
-            height: auto !important;
-            line-height: 1 !important;
-        }
-        .adif-options .input-group-text input[type="checkbox"],
-        .adif-options-sat .input-group-text input[type="checkbox"] {
-            margin: 0 !important;
-            width: 1.2em !important;
-            height: 1.2em !important;
-            min-height: unset !important;
-        }
-        .adif-options .input-group,
-        .adif-options-sat .input-group {
-            min-height: unset !important;
-        }
-    </style>
+    <link href="{% static 'css/common.css' %}" rel="stylesheet">
+    <link href="{% static 'css/logbook.css' %}" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light me-3" href="/dashboard/">
-                    <span>📊</span> Панель
-                </a>
-                <a class="nav-link active text-light me-3" href="/logbook/">
-                    <span>📓</span> Logbook
-                </a>
-                <a class="nav-link text-light me-3" href="/qth-loc.html" target="_blank">
-                    <span>🗺️</span> Grid map
-                </a>
-                <a class="nav-link text-light me-3" href="/achievements/">
-                    <span>🏆</span> Достижения
-                </a>
-                <a class="nav-link text-light me-3" href="/dashboard/profile/">
-                    <span>👤</span> {{ user.username }}
-                </a>
-                <a class="nav-link text-light" href="/logout/">
-                    <span>🚪</span> Выйти
-                </a>
+            <a class="navbar-brand" href="/">📡 TLog</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="/dashboard/">
+                        <span>📊</span> Панель
+                    </a>
+                    <a class="nav-link active" href="/logbook/">
+                        <span>📓</span> Logbook
+                    </a>
+                    <a class="nav-link" href="/qth-loc.html" target="_blank">
+                        <span>🗺️</span> Grid map
+                    </a>
+                    <a class="nav-link" href="/achievements/">
+                        <span>🏆</span> Достижения
+                    </a>
+                    <a class="nav-link" href="/dashboard/profile/">
+                        <span>👤</span> {{ user.username }}
+                    </a>
+                    <a class="nav-link" href="/logout/">
+                        <span>🚪</span> Выйти
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -262,22 +51,14 @@
             <div class="logbook-header text-center">
                 <h2><span>📓</span> Logbook</h2>
                 <p class="mb-0">Полный журнал радиосвязей</p>
-                <p class="mb-0">
-                    <small>
-                        Всего QSO: <strong>{{ total_count }}</strong> |
-                        Уникальные позывные: <strong>{{ filtered_stats.unique_callsigns }}</strong> |
-                        Стран DXCC: <strong>{{ filtered_stats.unique_dxcc }}</strong> |
-                        Стран Р-150-С: <strong>{{ filtered_stats.unique_r150s }}</strong>
-                    </small>
-                </p>
             </div>
 
             <!-- Content -->
             <div class="p-4">
                 <!-- Заголовок и кнопки управления -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0"><span>📋</span> Записи QSO</h4>
-                    <div class="d-flex gap-2">
+                <div class="mb-4">
+                    <h4 class="mb-3"><span>📋</span> QSO в вашем логе</h4>
+                    <div class="d-flex gap-2 flex-wrap">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQSOModal">
                             <span>➕</span> Добавить QSO
                         </button>
@@ -438,19 +219,19 @@
                             <tbody>
                                 {% for qso in qso_list %}
                                 <tr class="qso-row" data-qso-id="{{ qso.id }}">
-                                    <td>
+                                    <td data-label="📅 Дата">
                                         <small>{{ qso.date|date:"d.m.Y" }}</small>
                                     </td>
-                                    <td>
+                                    <td data-label="🕐 Время">
                                         <small>{{ qso.time|date:"H:i" }}</small>
                                     </td>
-                                    <td>
+                                    <td data-label="📻 Мой">
                                         <span class="badge bg-primary">{{ qso.my_callsign|default:"-" }}</span>
                                     </td>
-                                    <td>
+                                    <td data-label="📡 Позывной">
                                         <span class="callsign-badge">{{ qso.callsign }}</span>
                                     </td>
-                                    <td>
+                                    <td data-label="📶 Диапазон">
                                         {% if qso.band %}
                                             <span class="band-badge">{{ qso.band }}</span>
                                         {% elif qso.frequency %}
@@ -462,25 +243,25 @@
                                             <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
-                                    <td>
+                                    <td data-label="📟 Mode">
                                         <span class="mode-badge">{{ qso.mode }}</span>
                                     </td>
-                                    <td>
+                                    <td data-label="RST">
                                         <small>{{ qso.rst_rcvd|default:"-" }}/{{ qso.rst_sent|default:"-" }}</small>
                                     </td>
-                                    <td>
+                                    <td data-label="📍 QTH">
                                         {% if qso.gridsquare %}
                                             <small>{{ qso.gridsquare }}</small>
                                         {% else %}
                                             <small class="text-muted">-</small>
                                         {% endif %}
                                     </td>
-                                    <td>
+                                    <td data-label="LoTW">
                                         {% if qso.lotw == 'Y' %}
                                             <span style="color: green;">✅</span>
                                         {% endif %}
                                     </td>
-                                    <td>
+                                    <td data-label="Prop/SAT">
                                         {% if qso.prop_mode or qso.sat_name %}
                                             <small>
                                                 {% if qso.prop_mode %}{{ qso.prop_mode }}{% endif %}
@@ -491,7 +272,7 @@
                                             <small class="text-muted">-</small>
                                         {% endif %}
                                     </td>
-                                    <td class="action-column">
+                                    <td data-label="⚙️ Действия" class="action-column">
                                         <div class="action-buttons">
                                             {% if qso.lotw == 'Y' %}
                                             <button type="button" class="btn btn-sm btn-info btn-view" data-id="{{ qso.id }}" title="Просмотр">
@@ -1166,505 +947,9 @@
                 this.innerHTML = '<span>🗑️</span> Удалить весь лог';
             });
         });
-
-        // Функция для получения CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Функция для показа уведомлений
-        function showAlert(type, message) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-
-            document.body.appendChild(alertDiv);
-
-            // Автоматически скрываем через 5 секунд
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
     </script>
-    <script>
-        // ========== Основные функции для работы со страницей logbook ==========
-
-        // Функция для получения CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Функция для показа уведомлений
-        function showAlert(type, message) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-
-            document.body.appendChild(alertDiv);
-
-            // Автоматически скрываем через 5 секунд
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
-        // Обработка кнопок редактирования
-        function initEditButtons() {
-            document.querySelectorAll('.btn-edit').forEach(button => {
-                button.addEventListener('click', function() {
-                    const qsoId = this.dataset.id;
-
-                    // Загружаем данные QSO из базы данных
-                    fetch(`/logbook/get/${qsoId}/`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'same-origin'
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('HTTP error ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            const qso = data.qso;
-
-                            // Заполняем форму данными из базы
-                            document.getElementById('edit_id').value = qso.id;
-                            document.getElementById('edit_date').value = qso.date || '';
-                            document.getElementById('edit_time').value = qso.time ? qso.time.substring(0, 5) : '';
-                            document.getElementById('edit_my_callsign').value = qso.my_callsign || '';
-                            document.getElementById('edit_callsign').value = qso.callsign || '';
-
-                            document.getElementById('edit_band').value = qso.band || '';
-                            document.getElementById('edit_mode').value = qso.mode || 'SSB';
-                            document.getElementById('edit_frequency').value = qso.frequency || '';
-                            document.getElementById('edit_rst_rcvd').value = qso.rst_rcvd || '';
-                            document.getElementById('edit_rst_sent').value = qso.rst_sent || '';
-                            document.getElementById('edit_my_gridsquare').value = qso.my_gridsquare || '';
-                            document.getElementById('edit_gridsquare').value = qso.gridsquare || '';
-                            document.getElementById('edit_sat_name').value = qso.sat_name || '';
-                            document.getElementById('edit_prop_mode').value = qso.prop_mode || '';
-                            document.getElementById('edit_cqz').value = qso.cqz || '';
-                            document.getElementById('edit_ituz').value = qso.ituz || '';
-                            document.getElementById('edit_continent').value = qso.continent || '';
-                            document.getElementById('edit_r150s').value = qso.r150s || '';
-                            document.getElementById('edit_dxcc').value = qso.dxcc || '';
-                            document.getElementById('edit_ru_region').value = qso.ru_region || '';
-                            document.getElementById('edit_paper_qsl').value = qso.paper_qsl || 'N';
-
-                            // Блокируем поля если QSO подтверждено в LoTW
-                            const lotwConfirmed = qso.lotw === 'Y';
-                            const lockedFields = ['edit_cqz', 'edit_ituz', 'edit_continent', 'edit_r150s', 'edit_dxcc', 'edit_ru_region'];
-                            lockedFields.forEach(fieldId => {
-                                const field = document.getElementById(fieldId);
-                                field.disabled = lotwConfirmed;
-                                if (lotwConfirmed) {
-                                    field.style.backgroundColor = '#e9ecef';
-                                } else {
-                                    field.style.backgroundColor = '';
-                                }
-                            });
-
-                            // Показываем бейдж LoTW если подтверждено
-                            const lotwBadge = document.getElementById('edit_lotw_badge');
-                            const lotwWarning = document.getElementById('edit_lotw_warning');
-                            if (lotwConfirmed) {
-                                lotwBadge.style.display = 'inline-block';
-                                lotwWarning.style.display = 'block';
-                            } else {
-                                lotwBadge.style.display = 'none';
-                                lotwWarning.style.display = 'none';
-                            }
-
-                            // Добавляем обработчики для автоматического преобразования в верхний регистр
-                            const textFields = ['edit_my_callsign', 'edit_callsign', 'edit_band', 'edit_mode',
-                                               'edit_rst_rcvd', 'edit_rst_sent', 'edit_my_gridsquare',
-                                               'edit_gridsquare', 'edit_sat_name', 'edit_prop_mode',
-                                               'edit_continent', 'edit_r150s', 'edit_dxcc', 'edit_ru_region'];
-                            textFields.forEach(fieldId => {
-                                const field = document.getElementById(fieldId);
-                                if (field) {
-                                    field.addEventListener('input', function() {
-                                        this.value = this.value.toUpperCase();
-                                    });
-                                }
-                            });
-
-                            // Открываем модальное окно
-                            const modal = new bootstrap.Modal(document.getElementById('editQSOModal'));
-                            modal.show();
-                        } else {
-                            throw new Error(data.error || 'Ошибка при загрузке данных');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
-                    });
-                });
-            });
-        }
-
-        // Обработка кнопок просмотра (для LoTW подтверждённых записей)
-        function initViewButtons() {
-            document.querySelectorAll('.btn-view').forEach(button => {
-                button.addEventListener('click', function() {
-                    const qsoId = this.dataset.id;
-
-                    // Загружаем данные QSO из базы данных
-                    fetch(`/logbook/get/${qsoId}/`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'same-origin'
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('HTTP error ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            const qso = data.qso;
-
-                            // Заполняем форму просмотра данными из базы
-                            document.getElementById('view_id').value = qso.id || '';
-                            document.getElementById('view_date').value = qso.date || '';
-                            document.getElementById('view_time').value = qso.time ? qso.time.substring(0, 5) : '';
-                            document.getElementById('view_my_callsign').value = qso.my_callsign || '';
-                            document.getElementById('view_callsign').value = qso.callsign || '';
-                            document.getElementById('view_band').value = qso.band || '';
-                            document.getElementById('view_mode').value = qso.mode || 'SSB';
-                            document.getElementById('view_frequency').value = qso.frequency || '';
-                            document.getElementById('view_rst_rcvd').value = qso.rst_rcvd || '';
-                            document.getElementById('view_rst_sent').value = qso.rst_sent || '';
-                            document.getElementById('view_my_gridsquare').value = qso.my_gridsquare || '';
-                            document.getElementById('view_gridsquare').value = qso.gridsquare || '';
-                            document.getElementById('view_sat_name').value = qso.sat_name || '';
-                            document.getElementById('view_prop_mode').value = qso.prop_mode || '';
-                            document.getElementById('view_cqz').value = qso.cqz || '';
-                            document.getElementById('view_ituz').value = qso.ituz || '';
-                            document.getElementById('view_continent').value = qso.continent || '';
-                            document.getElementById('view_r150s').value = qso.r150s || '';
-                            document.getElementById('view_dxcc').value = qso.dxcc || '';
-                            document.getElementById('view_ru_region').value = qso.ru_region || '';
-                            document.getElementById('view_paper_qsl').value = qso.paper_qsl === 'Y' ? 'Да' : 'Нет';
-
-                            // Открываем модальное окно просмотра
-                            const modal = new bootstrap.Modal(document.getElementById('viewQSOModal'));
-                            modal.show();
-                        } else {
-                            throw new Error(data.error || 'Ошибка при загрузке данных');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
-                    });
-                });
-            });
-        }
-
-        // Сохранение редактирования
-        function initSaveEditQSO() {
-            document.getElementById('saveEditQSO').addEventListener('click', function() {
-                const form = document.getElementById('editQSOForm');
-                const formData = new FormData(form);
-                const qsoId = formData.get('id');
-
-                // Преобразуем текстовые поля в верхний регистр
-                const textFields = ['my_callsign', 'callsign', 'band', 'mode', 'rst_rcvd', 'rst_sent',
-                                   'gridsquare', 'my_gridsquare', 'sat_name', 'prop_mode',
-                                   'continent', 'r150s', 'dxcc', 'ru_region'];
-                textFields.forEach(fieldName => {
-                    const field = form.querySelector(`[name="${fieldName}"]`);
-                    if (field && field.value) {
-                        formData.set(fieldName, field.value.toUpperCase());
-                    }
-                });
-
-                this.disabled = true;
-                this.innerHTML = '<span>⏳</span> Сохранение...';
-
-                fetch(`/logbook/edit/${qsoId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(Object.fromEntries(formData)),
-                    credentials: 'same-origin'
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('HTTP error ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span>💾</span> Сохранить';
-
-                    if (data.success) {
-                        // Закрываем модальное окно
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('editQSOModal'));
-                        modal.hide();
-
-                        // Показываем уведомление
-                        showAlert('success', 'Запись успешно обновлена');
-
-                        // Перезагружаем страницу через 1 секунду
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        throw new Error(data.error || 'Неизвестная ошибка');
-                    }
-                })
-                .catch(error => {
-                    this.disabled = false;
-                    this.innerHTML = '<span>💾</span> Сохранить';
-                    console.error('Error:', error);
-                    showAlert('danger', 'Ошибка при сохранении: ' + error.message);
-                });
-            });
-        }
-
-        // Обработка кнопок удаления
-        function initDeleteButtons() {
-            document.querySelectorAll('.btn-delete').forEach(button => {
-                button.addEventListener('click', function() {
-                    const qsoId = this.dataset.id;
-                    const callsign = this.dataset.callsign;
-                    const row = document.querySelector(`.qso-row[data-qso-id="${qsoId}"]`);
-
-                    // Сначала проверяем LoTW статус через API
-                    fetch(`/logbook/get/${qsoId}/`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'same-origin'
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('HTTP error ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success && data.qso.lotw === 'Y') {
-                            showAlert('warning', 'Подтверждения LoTW удалить нельзя');
-                            return;
-                        }
-
-                        // Заполняем информацию
-                        document.getElementById('delete_id').value = qsoId;
-                        document.getElementById('delete_callsign').textContent = callsign;
-
-                        const dateCell = row.querySelector('td:nth-child(1) small');
-                        const timeCell = row.querySelector('td:nth-child(2) small');
-                        document.getElementById('delete_date').textContent = dateCell ? dateCell.textContent : '';
-                        document.getElementById('delete_time').textContent = timeCell ? timeCell.textContent : '';
-
-                        // Открываем модальное окно
-                        const modal = new bootstrap.Modal(document.getElementById('deleteQSOModal'));
-                        modal.show();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('danger', 'Ошибка при проверке статуса LoTW');
-                    });
-                });
-            });
-        }
-
-        // Подтверждение удаления одной записи
-        function initConfirmDeleteQSO() {
-            document.getElementById('confirmDeleteQSO').addEventListener('click', function() {
-                const qsoId = document.getElementById('delete_id').value;
-
-                this.disabled = true;
-                this.innerHTML = '<span>⏳</span> Удаление...';
-
-                fetch(`/logbook/delete/${qsoId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('HTTP error ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.disabled = false;
-                    this.innerHTML = '<span>🗑️</span> Удалить';
-
-                    if (data.success) {
-                        // Закрываем модальное окно
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteQSOModal'));
-                        modal.hide();
-
-                        // Показываем уведомление
-                        showAlert('success', 'Запись успешно удалена');
-
-                        // Перезагружаем страницу через 1 секунду
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        throw new Error(data.error || 'Неизвестная ошибка');
-                    }
-                })
-                .catch(error => {
-                    this.disabled = false;
-                    this.innerHTML = '<span>🗑️</span> Удалить';
-                    console.error('Error:', error);
-                    showAlert('danger', 'Ошибка при удалении: ' + error.message);
-                });
-            });
-        }
-
-        // Обработка удаления лога
-        function initClearLog() {
-            document.getElementById('confirmClearLog')?.addEventListener('click', function() {
-                this.disabled = true;
-                this.innerHTML = '<span>⏳</span> Удаление...';
-
-                fetch('/logbook/clear/', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Закрываем модальное окно
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('clearLogModal'));
-                        modal.hide();
-
-                        // Показываем уведомление
-                        showAlert('success', data.message);
-
-                        // Перезагружаем страницу через 1.5 секунды
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        throw new Error(data.error || 'Неизвестная ошибка');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showAlert('danger', 'Ошибка при удалении лога: ' + error.message);
-
-                    // Восстанавливаем кнопку
-                    this.disabled = false;
-                    this.innerHTML = '<span>🗑️</span> Удалить весь лог';
-                });
-            });
-        }
-
-        // Инициализация всех основных функций страницы logbook
-        function initLogbookPage() {
-            initClearLog();
-            initEditButtons();
-            initViewButtons();
-            initSaveEditQSO();
-            initDeleteButtons();
-            initConfirmDeleteQSO();
-
-            // Сбрасываем бейдж LoTW при закрытии модального окна редактирования
-            const editModal = document.getElementById('editQSOModal');
-            if (editModal) {
-                editModal.addEventListener('hidden.bs.modal', function() {
-                    document.getElementById('edit_lotw_badge').style.display = 'none';
-                    document.getElementById('edit_lotw_warning').style.display = 'none';
-                });
-            }
-        }
-
-        // Запускаем инициализацию при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            initLogbookPage();
-        });
-    </script>
+    <script src="{% static 'js/logbook.js' %}"></script>
     <script src="{% static 'js/add_qso.js' %}"></script>
-    <script>
-        // Автоматическое преобразование в верхний регистр для формы добавления QSO
-        document.addEventListener('DOMContentLoaded', function() {
-            const textFields = ['add_my_callsign', 'add_callsign', 'add_band', 'add_mode',
-                               'add_rst_rcvd', 'add_rst_sent', 'add_my_gridsquare',
-                               'add_gridsquare', 'add_sat_prop_mode', 'add_sat_name'];
-            textFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.addEventListener('input', function() {
-                        this.value = this.value.toUpperCase();
-                    });
-                }
-            });
-        });
-    </script>
-    <script>
-        // Инициализация функций добавления QSO при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof initAddQSO === 'function') {
-                initAddQSO();
-            }
-        });
-    </script>
 {% include 'cookie_banner.html' %}
 
     <!-- Модальное окно загрузки ADIF файла -->
@@ -1766,7 +1051,3 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Инициализация модального окна загрузки ADIF
-        document.addEventListener('DOMContentLoa

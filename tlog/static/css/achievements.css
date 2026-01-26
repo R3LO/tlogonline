@@ -154,23 +154,7 @@ body {
 }
 
 /* Mobile Optimizations */
-@media (max-width: 992px) {
-    .navbar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .navbar-nav .nav-link {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-}
-
 @media (max-width: 768px) {
-    body {
-        padding: 10px 0;
-    }
-
     .logbook-header {
         padding: 1.5rem 1rem;
     }
@@ -231,10 +215,6 @@ body {
 }
 
 @media (max-width: 576px) {
-    body {
-        padding: 5px 0;
-    }
-
     .logbook-header {
         padding: 1rem;
         border-radius: 10px 10px 0 0;
@@ -315,14 +295,6 @@ body {
 
     .stats-card .mb-0 {
         font-size: 0.8rem;
-    }
-
-    .navbar-brand {
-        font-size: 0.9rem;
-    }
-
-    .nav-link span {
-        display: none;
     }
 
     .band-badge,
