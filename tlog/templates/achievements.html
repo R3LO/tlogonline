@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/common.css' %}" rel="stylesheet">
     <link href="{% static 'css/achievements.css' %}" rel="stylesheet">
+    <link href="{% static 'css/logbook.css' %}" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -53,28 +54,8 @@
 
             <div class="p-4">
                 <!-- Основная статистика -->
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ total_qso }}</div>
-                        <div>Всего QSO</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ unique_callsigns }}</div>
-                        <div>Позывных</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ dxcc_count|default:"0" }}</div>
-                        <div>Стран DXCC</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ r150s_count }}</div>
-                        <div>Стран Р-150-С</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ ru_region_count|default:"0" }}</div>
-                        <div>Регионов РФ</div>
-                    </div>
-                </div>
+                <!-- Статистические карточки -->
+            {% include 'includes/stats_cards.html' %}
 
                 <!-- Фильтры -->
                 <div class="filter-card">

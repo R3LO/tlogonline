@@ -277,6 +277,9 @@ def dashboard(request):
         'recent_qso': recent_qso,
         'mode_statistics': mode_stats,
         'adif_uploads': adif_uploads,
+        'cqz_count': user_qso.exclude(cqz__isnull=True).values('cqz').distinct().count(),
+        'ituz_count': user_qso.exclude(ituz__isnull=True).values('ituz').distinct().count(),
+        'grids_count': user_qso.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count(),
     }
 
     return render(request, 'dashboard.html', context)

@@ -174,23 +174,23 @@
                 {% if filtered_stats.total_qso > 0 %}
                 <div class="d-flex flex-wrap gap-3 mb-4">
                     <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ filtered_stats.total_qso }}</div>
+                        <div class="stats-number">{{ filtered_stats.total_qso|default:0 }}</div>
                         <div>Всего QSO</div>
                     </div>
                     <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ filtered_stats.unique_callsigns }}</div>
+                        <div class="stats-number">{{ filtered_stats.unique_callsigns|default:0 }}</div>
                         <div>Уникальные позывные</div>
                     </div>
                     <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ filtered_stats.unique_dxcc }}</div>
+                        <div class="stats-number">{{ filtered_stats.unique_dxcc|default:0 }}</div>
                         <div>Стран DXCC</div>
                     </div>
                     <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ filtered_stats.unique_r150s }}</div>
+                        <div class="stats-number">{{ filtered_stats.unique_r150s|default:0 }}</div>
                         <div>Стран Р-150-С</div>
                     </div>
                     <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ filtered_stats.unique_ru_regions|default:"0" }}</div>
+                        <div class="stats-number">{{ filtered_stats.unique_ru_regions|default:0 }}</div>
                         <div>Регионов РФ</div>
                     </div>
                 </div>
