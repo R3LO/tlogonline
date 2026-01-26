@@ -1,18 +1,44 @@
 /* Общие стили для всех страниц */
+:root {
+    --primary: #2a9d8f;
+    --primary-hover: #21867a;
+    --secondary: #264653;
+    --accent: #e9c46a;
+    --surface: #ffffff;
+    --surface-hover: #f8f9fa;
+    --border: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar */
+.navbar {
+    background: var(--surface) !important;
+    padding: 0.75rem 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--border);
+}
 
 /* Navbar links */
 .nav-link {
-    color: rgba(255, 255, 255, 0.85);
-    transition: color 0.2s ease;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px;
+    font-weight: 500;
+    margin: 0 0.25rem;
 }
 
 .nav-link:hover {
-    color: #fff;
+    color: var(--primary);
+    background: var(--surface-hover);
 }
 
 .nav-link.active {
-    color: #fff;
-    font-weight: 500;
+    color: var(--primary);
+    background: rgba(42, 157, 143, 0.1);
 }
 
 /* Mobile Optimizations */
@@ -20,22 +46,23 @@
     .navbar-nav {
         flex-direction: row;
         flex-wrap: wrap;
+        padding-top: 1rem;
     }
 
     .navbar-nav .nav-link {
-        padding: 0.5rem;
-        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.875rem;
     }
 
     .nav-link.active {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
+        background: rgba(99, 102, 241, 0.25);
+        border-radius: 6px;
     }
 }
 
 @media (max-width: 400px) {
     .navbar-brand {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .nav-link span {

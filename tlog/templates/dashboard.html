@@ -14,31 +14,33 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand fw-bold" href="/">
+                📡 TLog
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav ms-auto">
-                    <a class="nav-link active" href="/dashboard/">
-                        <span>📊</span> Панель
+                    <a class="nav-link{% if request.path == '/dashboard/' %} active{% endif %}" href="/dashboard/">
+                        Главная
                     </a>
-                    <a class="nav-link" href="/logbook/">
-                        <span>📓</span> Logbook
+                    <a class="nav-link{% if '/logbook/' in request.path %} active{% endif %}" href="/logbook/">
+                        Logbook
                     </a>
                     <a class="nav-link" href="/qth-loc.html" target="_blank">
-                        <span>🗺️</span> Grid map
+                        Grid map
                     </a>
-                    <a class="nav-link" href="/achievements/">
-                        <span>🏆</span> Достижения
+                    <a class="nav-link{% if '/achievements/' in request.path %} active{% endif %}" href="/achievements/">
+                        Достижения
                     </a>
-                    <a class="nav-link" href="/dashboard/profile/">
-                        <span>👤</span> {{ user.username }}
+                    <a class="nav-link{% if '/profile/' in request.path %} active{% endif %}" href="/dashboard/profile/">
+                        {{ user.username }}
                     </a>
                     <a class="nav-link" href="/logout/">
-                        <span>🚪</span> Выйти
+                        Выйти
                     </a>
                 </div>
             </div>
@@ -55,14 +57,229 @@
 
             <div class="p-4">
 
-        <!-- Статистика -->
-                <!-- Статистические карточки -->
-            {% include 'includes/stats_cards.html' %}
-
         <div class="row">
             <!-- Основной контент -->
-            <div class="col-lg-8">
-                1111
+            <div class="col-lg-9">
+                <!-- Статистика QO-100 -->
+                <div class="stats-section mb-4">
+                    <h5 class="section-title">📡 Статистика QO-100</h5>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📡</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">QSO Uniq</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🌍</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">QSO DXCC</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🏳️</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Р-150-С</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🇷🇺</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">RU Reg</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📍</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">CQ Zone</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🌐</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">ITU Zone</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🎯</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Grid</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📋</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Всего QSO</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статистика КВ+УКВ -->
+                <div class="stats-section mb-4">
+                    <h5 class="section-title">📊 Статистика КВ+УКВ</h5>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📡</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">QSO Uniq</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🌍</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">QSO DXCC</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🏳️</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Р-150-С</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🇷🇺</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">RU Reg</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📍</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">CQ Zone</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🌐</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">ITU Zone</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">🎯</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Grid</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card p-3">
+                                <div class="stat-icon mb-2">📋</div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Всего QSO</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры -->
+                <div class="filter-card mb-4">
+                    <h5 class="section-title"><span>🔍</span> Фильтры</h5>
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">Мой позывной</label>
+                            <select class="form-select">
+                                <option value="">Все</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">Диапазон</label>
+                            <select class="form-select">
+                                <option value="">Все</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">Вид связи</label>
+                            <select class="form-select">
+                                <option value="">Все</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">Prop Mode</label>
+                            <select class="form-select">
+                                <option value="">Все</option>
+                                <option value="SAT">SAT</option>
+                                <option value="AUR">AUR</option>
+                                <option value="ES">ES</option>
+                                <option value="F2">F2</option>
+                                <option value="TRO">TRO</option>
+                                <option value="MS">MS</option>
+                                <option value="ECH">ECH</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">Спутник</label>
+                            <select class="form-select">
+                                <option value="">Все</option>
+                                <option value="QO-100">QO-100</option>
+                                <option value="AO-91">AO-91</option>
+                                <option value="AO-92">AO-92</option>
+                                <option value="SO-50">SO-50</option>
+                                <option value="FO-29">FO-29</option>
+                                <option value="AO-27">AO-27</option>
+                                <option value="ISS">ISS</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button type="button" class="btn btn-secondary" title="Сбросить">
+                                <span>🔄</span>
+                            </button>
+                            <button type="button" class="btn btn-primary" title="Применить">
+                                <span>🔍</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статистическая таблица -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="section-title"><span>📊</span> Статистика</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">QSO</th>
+                                        <th class="text-center">Uniq QSO</th>
+                                        <th class="text-center">DXCC</th>
+                                        <th class="text-center">Р-150-С</th>
+                                        <th class="text-center">RU Reg</th>
+                                        <th class="text-center">CQ Zone</th>
+                                        <th class="text-center">ITU Zone</th>
+                                        <th class="text-center">Grid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Сообщения -->
                 {% if messages %}
                     {% for message in messages %}
@@ -72,56 +289,108 @@
                         </div>
                     {% endfor %}
                 {% endif %}
-                222
-
-
             </div>
 
             <!-- Боковая панель -->
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <!-- Утилиты -->
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">🛠️ Утилиты</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex flex-column gap-2">
-                            <a href="/dashboard/qo100/converter/" class="btn btn-outline-primary btn-sm">
-                                <span>🛰️</span> Конвертер лога QO-100
-                            </a>
-                            <a href="/dashboard/cosmos/" class="btn btn-outline-primary btn-sm">
-                                <span>🚀</span> Заявка на диплом Космос
-                            </a>
-                            <a href="/user-awards/" class="btn btn-outline-success btn-sm">
-                                <span>🏆</span> Награды пользователей
-                            </a>
+                <div class="utility-card mb-3">
+                    <div class="utility-header">
+                        <div class="utility-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 0a.5.5 0 0 1 .5.5v.93l4.387 4.388a.5.5 0 0 1-.707.707L8.5 7.03V.5h.5a.5.5 0 0 1 .5.5zM6 8.793 1.354 4.207a.5.5 0 1 1 .708-.708L6 7.586l4.646 4.646a.5.5 0 0 1-.708.708L6 8.793z"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                            </svg>
                         </div>
+                        <h6 class="utility-title">Это полезно!</h6>
+                    </div>
+                    <div class="utility-body">
+                        <a href="/dashboard/qo100/converter/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <span>🛰️</span>
+                            </div>
+                            <span class="utility-link-text">Конвертер лога QO-100</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/dashboard/cosmos/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                <span>🚀</span>
+                            </div>
+                            <span class="utility-link-text">Заявка на диплом Космос</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/user-awards/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <span>🏆</span>
+                            </div>
+                            <span class="utility-link-text">Награды пользователей</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
 
                 <!-- QO-100 рейтинги -->
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">📡 QO-100 рейтинги</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex flex-column gap-2">
-                            <a href="/dashboard/qo100/regions/" class="btn btn-outline-primary btn-sm">
-                                <span>🗺️</span> Регионы РФ
-                            </a>
-                            <a href="/dashboard/qo100/r150s/" class="btn btn-outline-primary btn-sm">
-                                <span>🌍</span> Страны Р-150-С
-                            </a>
-                            <a href="/dashboard/qo100/dxcc/" class="btn btn-outline-primary btn-sm">
-                                <span>🌐</span> Страны DXCC
-                            </a>
-                            <a href="/dashboard/qo100/grids/" class="btn btn-outline-primary btn-sm">
-                                <span>📍</span> Локаторы
-                            </a>
-                            <a href="/dashboard/qo100/unique-callsigns/" class="btn btn-outline-primary btn-sm">
-                                <span>📡</span> Уникальные позывные
-                            </a>
+                <div class="utility-card mb-3">
+                    <div class="utility-header">
+                        <div class="utility-icon" style="background: #264653;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.25-14.75v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zm0 12v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zM4.5 8a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1 0-.5h1.5A.25.25 0 0 1 4.5 8zm9.75.25h-1.5a.25.25 0 0 1 0-.5h1.5a.25.25 0 0 1 0 .5z"/>
+                            </svg>
                         </div>
+                        <h6 class="utility-title">QO-100 рейтинги</h6>
+                    </div>
+                    <div class="utility-body">
+                        <a href="/dashboard/qo100/regions/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #264653, #2a9d8f);">
+                                <span>🗺️</span>
+                            </div>
+                            <span class="utility-link-text">Регионы РФ</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/dashboard/qo100/r150s/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #2a9d8f, #e9c46a);">
+                                <span>🌍</span>
+                            </div>
+                            <span class="utility-link-text">Страны Р-150-С</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/dashboard/qo100/dxcc/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #e9c46a, #f4a261);">
+                                <span>🌐</span>
+                            </div>
+                            <span class="utility-link-text">Страны DXCC</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/dashboard/qo100/grids/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #f4a261, #e76f51);">
+                                <span>📍</span>
+                            </div>
+                            <span class="utility-link-text">Локаторы</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
+                        <a href="/dashboard/qo100/unique-callsigns/" class="utility-link">
+                            <div class="utility-link-icon" style="background: linear-gradient(135deg, #e76f51, #c44536);">
+                                <span>📡</span>
+                            </div>
+                            <span class="utility-link-text">Уникальные позывные</span>
+                            <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
 
