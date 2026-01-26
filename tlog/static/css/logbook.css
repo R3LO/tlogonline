@@ -340,50 +340,6 @@ body {
         font-size: 1.25rem;
     }
 
-    /* Table - hide less important columns */
-    .qso-table {
-        font-size: 0.75rem;
-    }
-
-    .qso-table thead {
-        display: none;
-    }
-
-    .qso-table tbody tr {
-        display: block;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        padding: 0.5rem;
-        background: #fff;
-    }
-
-    .qso-table tbody tr td {
-        display: block;
-        padding: 0.25rem 0.5rem;
-        border: none;
-        font-size: 0.8rem;
-    }
-
-    .qso-table tbody tr td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #6c757d;
-        display: inline;
-        margin-right: 0.5rem;
-    }
-
-    .qso-table tbody tr td:nth-child(1) {
-        border-bottom: 1px solid #eee;
-        padding-bottom: 0.5rem;
-    }
-
-    .qso-table tbody tr td:nth-child(12) {
-        text-align: center;
-        padding-top: 0.75rem;
-        border-top: 1px solid #eee;
-    }
-
     /* Badges for mobile */
     .callsign-badge {
         font-size: 0.8rem;
@@ -508,26 +464,33 @@ body {
     }
 }
 
-/* Very small phones */
-@media (max-width: 400px) {
-    .stats-card {
-        flex: 0 0 calc(50% - 0.25rem) !important;
-        min-width: 80px;
-        padding: 0.5rem;
+/* Small screens (<=1200px) - show all columns with labels */
+@media (max-width: 1200px) {
+    .qso-table thead { display: none !important; }
+    .qso-table tbody tr { display: block !important; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 0.75rem; padding: 0.5rem; background: #fff; }
+    .qso-table tbody tr td {
+        display: block !important;
+        padding: 0.25rem 0.5rem;
+        border: none;
     }
-
-    .stats-number {
-        font-size: 1rem;
+    /* Показываем название колонки перед содержимым */
+    .qso-table tbody tr td::before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        color: #6c757d;
+        margin-right: 0.5rem;
     }
+    /* Стили для ячеек */
+    .qso-table tbody tr td.col-date { border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-bottom: 0.25rem; }
+    .qso-table tbody tr td.col-lotw { text-align: left !important; padding-top: 0.5rem; }
+    .qso-table tbody tr td.col-actions { text-align: center; padding-top: 0.75rem; border-top: 1px solid #eee; }
+}
 
-    .d-flex.gap-2 .btn {
-        min-width: 80px;
-        font-size: 0.7rem;
-    }
-
-    .modal-dialog {
-        margin: 0.25rem;
-        max-width: calc(100% - 0.5rem);
+/* Medium and larger screens (>576px) - show all columns */
+@media (min-width: 577px) {
+    .qso-table thead th,
+    .qso-table tbody td {
+        display: table-cell !important;
     }
 }
 
