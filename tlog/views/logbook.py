@@ -144,6 +144,7 @@ def logbook(request):
         'user_callsign': user_callsign,
         'qso_list': qso_list,
         'total_count': total_count,
+        'unique_callsigns': filtered_stats.get('unique_callsigns', 0),
         'current_page': page,
         'total_pages': total_pages,
         'page_size': page_size,

@@ -5,7 +5,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from ..models import check_user_blocked
+from django.utils.translation import gettext_lazy as _
+from ..models import RadioProfile
 
 
 def register_page(request):
@@ -86,7 +87,7 @@ def login_page(request):
 
         # Проверяем обязательные поля
         if not username or not password:
-            messages.error(request, 'Имя пользователя и пароль обязательны')
+            messages.error(request, _('Имя пользователя и пароль обязательны'))
             return render(request, 'login.html')
 
         # Аутентификация
@@ -94,10 +95,13 @@ def login_page(request):
 
         if user is not None:
             # Проверяем, не заблокирован ли пользователь
-            is_blocked, reason = check_user_blocked(user)
-            if is_blocked:
-                messages.error(request, f'Ваш аккаунт заблокирован. Причина: {reason}')
-                return render(request, 'login.html')
+            try:
+                profile = user.radio_profile
+                if profile.is_blocked:
+                    messages.error(request, _('Ваш аккаунт заблокирован. Причина: ') + (profile.blocked_reason or ''))
+                    return render(request, 'login.html')
+            except RadioProfile.DoesNotExist:
+                pass  # Профиля нет - считаем пользователя незаблокированным
 
             login(request, user)
 
@@ -113,7 +117,7 @@ def login_page(request):
                 response.delete_cookie('remembered_password')
                 return response
         else:
-            messages.error(request, 'Неверные учетные данные')
+            messages.error(request, _('Неверные учетные данные'))
             return render(request, 'login.html')
 
     return render(request, 'login.html')

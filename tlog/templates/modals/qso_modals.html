@@ -1,0 +1,664 @@
+<!-- qso_modals.html - Модальные окна для QSO -->
+{% load i18n %}
+
+<!-- Модальное окно подтверждения добавления следующего QSO -->
+<div class="modal fade" id="addAnotherQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <span>✅</span> {% trans "QSO добавлено" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <span style="font-size: 3rem; color: #198754;">✅</span>
+                <p class="mb-0">{% trans "QSO успешно добавлено!" %}</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" id="addAnotherQSO">
+                    <span>➕</span> {% trans "Добавить еще QSO" %}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Завершить" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления QSO -->
+<div class="modal fade" id="addQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <span>➕</span> {% trans "Добавление QSO" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addQSOForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Дата" %} *</label>
+                            <input type="date" class="form-control" id="add_date" name="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Время" %} *</label>
+                            <input type="time" class="form-control" id="add_time" name="time" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой позывной" %}</label>
+                            <input type="text" class="form-control" id="add_my_callsign" name="my_callsign" value="{{ user_callsign }}" placeholder="Например: UA1ABC">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Позывной корреспондента" %} *</label>
+                            <input type="text" class="form-control" id="add_callsign" name="callsign" required placeholder="Например: UA3XYZ">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Диапазон" %}</label>
+                            <select class="form-select" id="add_band" name="band">
+                                <option value="">{% trans "Не указано" %}</option>
+                                <option value="160M">160m</option>
+                                <option value="80M">80m</option>
+                                <option value="40M">40m</option>
+                                <option value="30M">30m</option>
+                                <option value="20M">20m</option>
+                                <option value="17M">17m</option>
+                                <option value="15M">15m</option>
+                                <option value="12M">12m</option>
+                                <option value="10M">10m</option>
+                                <option value="6M">6m</option>
+                                <option value="4M">4m</option>
+                                <option value="2M">2m</option>
+                                <option value="70CM">70cm</option>
+                                <option value="23CM">23cm</option>
+                                <option value="13CM">13cm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Вид связи" %}</label>
+                            <select class="form-select" id="add_mode" name="mode">
+                                <option value="SSB">SSB</option>
+                                <option value="CW">CW</option>
+                                <option value="FT8">FT8</option>
+                                <option value="FT4">FT4</option>
+                                <option value="JS8">JS8</option>
+                                <option value="RTTY">RTTY</option>
+                                <option value="PSK31">PSK31</option>
+                                <option value="PSK63">PSK63</option>
+                                <option value="SSTV">SSTV</option>
+                                <option value="MFSK">MFSK</option>
+                                <option value="JT65">JT65</option>
+                                <option value="JT9">JT9</option>
+                                <option value="WSPR">WSPR</option>
+                                <option value="ATV">ATV</option>
+                                <option value="DMR">DMR</option>
+                                <option value="DSTAR">DSTAR</option>
+                                <option value="C4FM">C4FM</option>
+                                <option value="AM">AM</option>
+                                <option value="FM">FM</option>
+                                <option value="DIGITAL">DIGITAL</option>
+                                <option value="OTHER">OTHER</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Частота (МГц)" %}</label>
+                            <input type="number" step="0.001" class="form-control" id="add_frequency" name="frequency" placeholder="Например: 14.200">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST принятый" %}</label>
+                            <input type="text" class="form-control" id="add_rst_rcvd" name="rst_rcvd" placeholder="Например: 59">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST переданный" %}</label>
+                            <input type="text" class="form-control" id="add_rst_sent" name="rst_sent" placeholder="Например: 59">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Бумажная QSL" %}</label>
+                            <select class="form-select" id="add_paper_qsl" name="paper_qsl">
+                                <option value="N">{% trans "Нет" %}</option>
+                                <option value="Y">{% trans "Да" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой QTH локатор" %}</label>
+                            <input type="text" class="form-control" id="add_my_gridsquare" name="my_gridsquare" placeholder="Например: KO85UU">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "QTH локатор корреспондента" %}</label>
+                            <input type="text" class="form-control" id="add_gridsquare" name="gridsquare" placeholder="Например: KO85UU">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "CQ зона" %}</label>
+                            <input type="number" class="form-control" id="add_cqz" name="cqz" placeholder="Например: 15">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "ITU зона" %}</label>
+                            <input type="number" class="form-control" id="add_ituz" name="ituz" placeholder="Например: 54">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="add_sat_qso" name="sat_qso">
+                                <label class="form-check-label" for="add_sat_qso">
+                                    <strong>{% trans "Sat QSO" %}</strong> - {% trans "спутниковая связь" %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3" id="sat_fields" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Режим распространения (PROP_MODE)" %}</label>
+                            <select class="form-select" id="add_sat_prop_mode" name="sat_prop_mode">
+                                <option value="">{% trans "Не указано" %}</option>
+                                <option value="SAT">SAT - {% trans "Спутник" %}</option>
+                                <option value="AUR">AUR - {% trans "Аврора" %}</option>
+                                <option value="EME">EME - {% trans "Луна" %}</option>
+                                <option value="F2">F2 - {% trans "Распространение F2" %}</option>
+                                <option value="BS">BS - {% trans "Рассеяние на метеорах" %}</option>
+                                <option value="AIR">AIR - {% trans "Авиационная связь" %}</option>
+                                <option value="TROPO">TROPO - {% trans "Тропосферное прохождение" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Название спутника (SAT_NAME)" %}</label>
+                            <input type="text" class="form-control" id="add_sat_name" name="sat_name" placeholder="Например: AO-91, FO-29, SO-50">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Завершить" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="saveAddQSO">
+                    <span>➕</span> {% trans "Добавить QSO" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления лога -->
+<div class="modal fade" id="clearLogModal" tabindex="-1" aria-labelledby="clearLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="clearLogModalLabel">
+                    <span>⚠️</span> {% trans "Подтверждение удаления" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <span>⚠️</span>
+                    <strong>{% trans "Внимание!" %}</strong> {% trans "Это действие нельзя отменить." %}
+                </div>
+                <p>{% trans "Вы действительно хотите удалить весь лог радиосвязей?" %}</p>
+                <p><strong>{% trans "Будет удалено:" %}</strong></p>
+                <ul>
+                    <li>{% trans "Всего QSO" %}: <strong>{{ total_count }}</strong></li>
+                    <li>{% trans "Уникальные позывные" %}: <strong>{{ filtered_stats.unique_callsigns }}</strong></li>
+                    <li>{% trans "Стран DXCC" %}: <strong>{{ filtered_stats.unique_dxcc }}</strong></li>
+                    <li>{% trans "Стран Р-150-С" %}: <strong>{{ filtered_stats.unique_r150s }}</strong></li>
+                </ul>
+                <p class="text-muted mb-0">
+                    <small>
+                        <span>ℹ️</span>
+                        {% trans "Рекомендуем создать резервную копию перед удалением." %}
+                    </small>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Отмена" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmClearLog">
+                    <span>🗑️</span> {% trans "Удалить весь лог" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования QSO -->
+<div class="modal fade" id="editQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <span>✏️</span> {% trans "Редактирование QSO" %} <span id="edit_lotw_badge" style="display:none;">📡 LoTW</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="edit_lotw_warning" class="alert alert-warning mb-3" style="display:none;">
+                    <small>
+                        <span>⚠️</span>
+                        <strong>{% trans "Подтверждено LoTW:" %}</strong> {% trans "Поля CQ зона, ITU зона, Континент, Страна (R-150), DXCC, RU область/регион недоступны для редактирования." %}
+                    </small>
+                </div>
+                <form id="editQSOForm">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Дата" %}</label>
+                            <input type="date" class="form-control" id="edit_date" name="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Время" %}</label>
+                            <input type="time" class="form-control" id="edit_time" name="time" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой позывной" %}</label>
+                            <input type="text" class="form-control" id="edit_my_callsign" name="my_callsign" placeholder="Например: UA1ABC">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Позывной корреспондента" %}</label>
+                            <input type="text" class="form-control" id="edit_callsign" name="callsign" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Диапазон" %}</label>
+                            <select class="form-select" id="edit_band" name="band">
+                                <option value="">{% trans "Не указано" %}</option>
+                                <option value="160M">160m</option>
+                                <option value="80M">80m</option>
+                                <option value="40M">40m</option>
+                                <option value="30M">30m</option>
+                                <option value="20M">20m</option>
+                                <option value="17M">17m</option>
+                                <option value="15M">15m</option>
+                                <option value="12M">12m</option>
+                                <option value="10M">10m</option>
+                                <option value="6M">6m</option>
+                                <option value="4M">4m</option>
+                                <option value="2M">2m</option>
+                                <option value="70CM">70cm</option>
+                                <option value="23CM">23cm</option>
+                                <option value="13CM">13cm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Вид связи" %}</label>
+                            <select class="form-select" id="edit_mode" name="mode">
+                                <option value="SSB">SSB</option>
+                                <option value="CW">CW</option>
+                                <option value="FT8">FT8</option>
+                                <option value="FT4">FT4</option>
+                                <option value="JS8">JS8</option>
+                                <option value="RTTY">RTTY</option>
+                                <option value="PSK31">PSK31</option>
+                                <option value="PSK63">PSK63</option>
+                                <option value="SSTV">SSTV</option>
+                                <option value="MFSK">MFSK</option>
+                                <option value="JT65">JT65</option>
+                                <option value="JT9">JT9</option>
+                                <option value="WSPR">WSPR</option>
+                                <option value="ATV">ATV</option>
+                                <option value="DMR">DMR</option>
+                                <option value="DSTAR">DSTAR</option>
+                                <option value="C4FM">C4FM</option>
+                                <option value="AM">AM</option>
+                                <option value="FM">FM</option>
+                                <option value="DIGITAL">DIGITAL</option>
+                                <option value="OTHER">OTHER</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Частота (МГц)" %}</label>
+                            <input type="number" step="0.001" class="form-control" id="edit_frequency" name="frequency">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST принятый" %}</label>
+                            <input type="text" class="form-control" id="edit_rst_rcvd" name="rst_rcvd" placeholder="Например: 59">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST переданный" %}</label>
+                            <input type="text" class="form-control" id="edit_rst_sent" name="rst_sent" placeholder="Например: 59">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Бумажная QSL" %}</label>
+                            <select class="form-select" id="edit_paper_qsl" name="paper_qsl">
+                                <option value="N">{% trans "Нет" %}</option>
+                                <option value="Y">{% trans "Да" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой QTH локатор" %}</label>
+                            <input type="text" class="form-control" id="edit_my_gridsquare" name="my_gridsquare" placeholder="Например: KO85UU">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "QTH локатор корреспондента" %}</label>
+                            <input type="text" class="form-control" id="edit_gridsquare" name="gridsquare" placeholder="Например: KO85UU">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">SAT NAME</label>
+                            <input type="text" class="form-control" id="edit_sat_name" name="sat_name" placeholder="Например: AO-91">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Режим распространения (PROP_MODE)" %}</label>
+                            <input type="text" class="form-control" id="edit_prop_mode" name="prop_mode" placeholder="Например: SAT">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "CQ зона" %}</label>
+                            <input type="number" class="form-control" id="edit_cqz" name="cqz">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "ITU зона" %}</label>
+                            <input type="number" class="form-control" id="edit_ituz" name="ituz">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Континент" %}</label>
+                            <input type="text" class="form-control" id="edit_continent" name="continent" placeholder="Например: EU">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Страна (R-150)" %}</label>
+                            <input type="text" class="form-control" id="edit_r150s" name="r150s" placeholder="Например: RUSSIA">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">DXCC</label>
+                            <input type="text" class="form-control" id="edit_dxcc" name="dxcc" placeholder="Например: 279">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "RU область/регион" %}</label>
+                            <input type="text" class="form-control" id="edit_ru_region" name="ru_region" placeholder="{% trans 'Двухбуквенный код региона' %}" maxlength="2">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Отмена" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="saveEditQSO">
+                    <span>💾</span> {% trans "Сохранить" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно просмотра QSO (для LoTW подтверждённых записей) -->
+<div class="modal fade" id="viewQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <span>👁️</span> {% trans "Просмотр QSO" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="viewQSOForm">
+                    <input type="hidden" id="view_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Дата" %}</label>
+                            <input type="date" class="form-control" id="view_date" name="date" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Время" %}</label>
+                            <input type="time" class="form-control" id="view_time" name="time" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой позывной" %}</label>
+                            <input type="text" class="form-control" id="view_my_callsign" name="my_callsign" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Позывной корреспондента" %}</label>
+                            <input type="text" class="form-control" id="view_callsign" name="callsign" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Диапазон" %}</label>
+                            <input type="text" class="form-control" id="view_band" name="band" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Вид связи" %}</label>
+                            <input type="text" class="form-control" id="view_mode" name="mode" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Частота (МГц)" %}</label>
+                            <input type="text" class="form-control" id="view_frequency" name="frequency" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST принятый" %}</label>
+                            <input type="text" class="form-control" id="view_rst_rcvd" name="rst_rcvd" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "RST переданный" %}</label>
+                            <input type="text" class="form-control" id="view_rst_sent" name="rst_sent" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Бумажная QSL" %}</label>
+                            <input type="text" class="form-control" id="view_paper_qsl" name="paper_qsl" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Мой QTH локатор" %}</label>
+                            <input type="text" class="form-control" id="view_my_gridsquare" name="my_gridsquare" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "QTH локатор корреспондента" %}</label>
+                            <input type="text" class="form-control" id="view_gridsquare" name="gridsquare" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">SAT NAME</label>
+                            <input type="text" class="form-control" id="view_sat_name" name="sat_name" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Режим распространения (PROP_MODE)" %}</label>
+                            <input type="text" class="form-control" id="view_prop_mode" name="prop_mode" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "CQ зона" %}</label>
+                            <input type="text" class="form-control" id="view_cqz" name="cqz" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "ITU зона" %}</label>
+                            <input type="text" class="form-control" id="view_ituz" name="ituz" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Континент" %}</label>
+                            <input type="text" class="form-control" id="view_continent" name="continent" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Страна (R-150)" %}</label>
+                            <input type="text" class="form-control" id="view_r150s" name="r150s" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">DXCC</label>
+                            <input type="text" class="form-control" id="view_dxcc" name="dxcc" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "RU область/регион" %}</label>
+                            <input type="text" class="form-control" id="view_ru_region" name="ru_region" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Закрыть" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления одной записи -->
+<div class="modal fade" id="deleteQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <span>🗑️</span> {% trans "Подтверждение удаления" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <span>⚠️</span>
+                    <strong>{% trans "Внимание!" %}</strong> {% trans "Вы действительно хотите удалить эту запись?" %}
+                </div>
+                <p>{% trans "Позывной" %}: <strong id="delete_callsign"></strong></p>
+                <p>{% trans "Дата" %}: <strong id="delete_date"></strong></p>
+                <p>{% trans "Время" %}: <strong id="delete_time"></strong></p>
+                <input type="hidden" id="delete_id">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> {% trans "Отмена" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteQSO">
+                    <span>🗑️</span> {% trans "Удалить" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно загрузки ADIF файла -->
+<div class="modal fade" id="adifUploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <span>📤</span> {% trans "Загрузить ADIF файл" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'adif_upload' %}" method="post" enctype="multipart/form-data" id="adifUploadForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Индикатор загрузки -->
+                    <div id="adifUploadProgress" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">{% trans "Загрузка..." %}</span>
+                        </div>
+                        <h5 class="mb-2">{% trans "Идёт загрузка и обработка файла..." %}</h5>
+                        <p class="text-muted small">{% trans "Это может занять несколько минут для больших файлов" %}</p>
+                        <div class="progress mt-3" style="height: 10px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div id="adifUploadFormContent">
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Выберите файл" %}</label>
+                            <input type="file" class="form-control" name="file" accept=".adi,.adif" required>
+                            <div class="form-text">{% trans "Поддерживаемые форматы: .adi, .adif" %}</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="adif_add_extra_tags" name="add_extra_tags">
+                                <label class="form-check-label" for="adif_add_extra_tags">
+                                    {% trans "Добавить дополнительные теги" %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row adif-options" id="adif-options" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Мой позывной (MY_CALLSIGN)" %}</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_my_callsign" name="override_my_callsign">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_callsign" id="adif_my_callsign" placeholder="Например: R3LO">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Мой QTH Loc (MY_GRIDSQUARE)" %}</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_my_gridsquare" name="override_my_gridsquare">
+                                    </div>
+                                    <input type="text" class="form-control" name="my_gridsquare" id="adif_my_gridsquare" placeholder="Например: KO85UU">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row adif-options-sat" id="adif-options-sat" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Режим распространения (PROP_MODE)" %}</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_prop_mode" name="override_prop_mode">
+                                    </div>
+                                    <input type="text" class="form-control" name="prop_mode" id="adif_prop_mode" value="SAT">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Название спутника (SAT_NAME)" %}</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="adif_override_sat_name" name="override_sat_name">
+                                    </div>
+                                    <input type="text" class="form-control" name="sat_name" id="adif_sat_name" value="QO-100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <span>ℹ️</span>
+                                <strong>{% trans "Оптимизированная загрузка:" %}</strong> {% trans "данные загружаются пакетами по 100 записей с автоматической проверкой дубликатов. Дубликаты определяются по совпадению: мой позывной, позывной корреспондента, дата, время, диапазон и вид связи." %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span>✖</span> {% trans "Отмена" %}
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <span>📤</span> {% trans "Загрузить и обработать" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

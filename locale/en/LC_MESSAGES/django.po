@@ -1,0 +1,129 @@
+# English translations for TLOG project.
+# Copyright (C) 2025
+# This file is distributed under the same license as the TLOG project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TLOG 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-29 12:00+0000\n"
+"PO-Revision-Date: 2025-01-29 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Navigation
+msgid "Home"
+msgstr "Home"
+
+msgid "Logbook"
+msgstr "Logbook"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Register"
+msgstr "Register"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Profile"
+msgstr "Profile"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Russian"
+msgstr "Russian"
+
+msgid "English"
+msgstr "English"
+
+# Common
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"
+
+# Index page
+msgid "Welcome to Ham Radio Logbook"
+msgstr "Welcome to Ham Radio Logbook"
+
+msgid "Your amateur radio contacts logbook"
+msgstr "Your amateur radio contacts logbook"
+
+# Logbook
+msgid "My Logbook"
+msgstr "My Logbook"
+
+msgid "Add QSO"
+msgstr "Add QSO"
+
+msgid "QSO List"
+msgstr "QSO List"
+
+msgid "Callsign"
+msgstr "Callsign"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "Frequency"
+msgstr "Frequency"
+
+msgid "Mode"
+msgstr "Mode"
+
+msgid "RST Sent"
+msgstr "RST Sent"
+
+msgid "RST Received"
+msgstr "RST Received"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "No records found"
+msgstr "No records found"
+
+msgid "Total QSOs"
+msgstr "Total QSOs"
+
+msgid "Countries"
+msgstr "Countries"

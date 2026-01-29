@@ -2,10 +2,11 @@
 <html lang="ru">
 {% load static %}
 {% load custom_filters %}
+{% load i18n %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои QSO - HamLog</title>
+    <title>{% trans "Мои QSO" %} - HamLog</title>
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -111,11 +112,14 @@
     <div class="container">
         <div class="main-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-list"></i> Мои QSO</h2>
-                <div class="stats-card">
-                    <h5>Всего QSO: {{ page_obj.paginator.count }}</h5>
-                </div>
+                <h2><i class="fas fa-list"></i> {% trans "Мои QSO" %}</h2>
             </div>
+
+            <!-- Статистика QSO -->
+            {% include 'includes/qso_stats.html' %}
+
+            <!-- Фильтры QSO -->
+            {% include 'includes/qso_filter.html' %}
 
             {% if qso_list %}
                 {% for qso in qso_list %}
@@ -162,14 +166,14 @@
 
                 <!-- Пагинация -->
                 {% if page_obj.has_other_pages %}
-                <nav aria-label="Навигация по страницам">
+                <nav aria-label="{% trans 'Навигация по страницам' %}">
                     <ul class="pagination">
                         {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page=1">Первая</a>
+                                <a class="page-link" href="?page=1">{% trans "Первая" %}</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Предыдущая" %}</a>
                             </li>
                         {% endif %}
 
@@ -192,10 +196,10 @@
 
                         {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Следующая" %}</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{% trans "Последняя" %}</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -205,10 +209,10 @@
             {% else %}
                 <div class="text-center py-5">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h4 class="text-muted">QSO не найдены</h4>
-                    <p class="text-muted">Загрузите ADIF файл или добавьте QSO вручную</p>
+                    <h4 class="text-muted">{% trans "QSO не найдены" %}</h4>
+                    <p class="text-muted">{% trans "Загрузите ADIF файл или добавьте QSO вручную" %}</p>
                     <a href="/dashboard/" class="btn btn-primary">
-                        <i class="fas fa-upload"></i> Загрузить ADIF файл
+                        <i class="fas fa-upload"></i> {% trans "Загрузить ADIF файл" %}
                     </a>
                 </div>
             {% endif %}
@@ -221,10 +225,25 @@
     <footer class="footer mt-auto py-3 bg-dark">
         <div class="container text-center">
             <p class="mb-0 text-muted small">
-                <strong>Автор:</strong> R3LO Владимир Павленко
+                <strong>{% trans "Автор:" %}</strong> R3LO Владимир Павленко
             </p>
         </div>
     </footer>
+
+    <!-- Модальные окна -->
+    {% include 'modals/qso_modals.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Обработчик для модального окна удаления
+        function setupDeleteModal(button) {
+            button.addEventListener('click', function() {
+                const qsoId = this.getAttribute('data-qso-id');
+                const form = document.getElementById('deleteQsoForm');
+                form.action = '/qso/' + qsoId + '/delete/';
+            });
+        }
+    </script>
 {% include 'cookie_banner.html' %}
 </body>
 </html>
