@@ -282,7 +282,7 @@ def dashboard(request):
         'grids_count': user_qso.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count(),
     }
 
-    return render(request, 'dashboard.html', context)
+    return render(request, 'dashboard_base.html', context)
 
 
 def profile_update(request):
@@ -580,6 +580,21 @@ def chat_send(request):
         return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def lotw_page(request):
+    """
+    Страница LoTW (Logbook of the World)
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
+
+    return render(request, 'lotw.html')
 
 
 def custom_404_view(request, exception):

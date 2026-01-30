@@ -14,7 +14,8 @@ from .views import (
     change_password, user_achievements,
     qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
     qo100_dxcc, qo100_converter, qo100_converter_download,
-    cosmos_diploma, cosmos_download
+    cosmos_diploma, cosmos_download,
+    lotw_page
 )
 
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
     path('dashboard/profile/verify-lotw/', verify_lotw_credentials, name='verify_lotw_credentials'),
     path('dashboard/profile/delete-lotw/', delete_lotw_credentials, name='delete_lotw_credentials'),
     path('dashboard/profile/change-password/', change_password, name='change_password'),
+    path('lotw/', lotw_page, name='lotw_page'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('dashboard/chat/list/', chat_list, name='chat_list'),

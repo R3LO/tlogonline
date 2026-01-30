@@ -13,6 +13,7 @@ from .views.main import (
     home,
     dashboard,
     profile_update,
+    lotw_page,
 )
 
 # Импорты из модуля логбука

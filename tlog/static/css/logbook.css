@@ -622,8 +622,7 @@ body {
 
     .filter-card,
     .d-flex.justify-content-between,
-    .modal,
-    nav {
+    .modal {
         display: none !important;
     }
 }

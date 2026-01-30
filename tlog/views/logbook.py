@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Count
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from datetime import datetime, time
 from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked
 
@@ -44,6 +45,7 @@ def logbook(request):
         return render(request, 'blocked.html', {'reason': reason})
 
     # Получаем параметры фильтрации
+    my_callsign_filter = request.GET.get('my_callsign', '').strip()
     search_callsign = request.GET.get('search_callsign', '').strip()
     search_qth = request.GET.get('search_qth', '').strip()
     date_from = request.GET.get('date_from', '').strip()
@@ -55,6 +57,10 @@ def logbook(request):
 
     # Базовый QuerySet для QSO пользователя
     qso_queryset = QSO.objects.filter(user=request.user)
+
+    # Фильтр по моему позывному
+    if my_callsign_filter:
+        qso_queryset = qso_queryset.filter(my_callsign__iexact=my_callsign_filter)
 
     # Применяем поиск по части позывного
     if search_callsign:
@@ -106,6 +112,10 @@ def logbook(request):
     unique_bands = qso_queryset.values_list('band', flat=True).distinct().exclude(band__isnull=True).exclude(band='').order_by('band')
     unique_sat_names = qso_queryset.values_list('sat_name', flat=True).distinct().exclude(sat_name__isnull=True).exclude(sat_name='').order_by('sat_name')
 
+    # Уникальные мои позывные для фильтра
+    my_callsigns = list(QSO.objects.filter(user=request.user, my_callsign__isnull=False, my_callsign__gt='')
+                       .values_list('my_callsign', flat=True).distinct().order_by('my_callsign'))
+
     # Статистика для выбранных фильтров
     filtered_stats = {
         'total_qso': total_count,
@@ -148,6 +158,7 @@ def logbook(request):
         'current_page': page,
         'total_pages': total_pages,
         'page_size': page_size,
+        'my_callsign_filter': my_callsign_filter,
         'search_callsign': search_callsign,
         'search_qth': search_qth,
         'date_from': date_from,
@@ -156,6 +167,7 @@ def logbook(request):
         'band_filter': band_filter,
         'sat_name_filter': sat_name_filter,
         'lotw_filter': lotw_filter,
+        'my_callsigns': my_callsigns,
         'available_modes': unique_modes,
         'available_bands': unique_bands,
         'available_sat_names': unique_sat_names,
@@ -164,7 +176,7 @@ def logbook(request):
         'get_band_from_frequency': get_band_from_frequency,
     }
 
-    return render(request, 'logbook.html', context)
+    return render(request, 'logbook_base.html', context)
 
 
 def logbook_search(request, callsign):
@@ -548,13 +560,25 @@ def qth_map(request):
 
 def achievements(request):
     """
-    Мои достижения - статистика и награды
+    Мои достижения - статистика и награды (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
     """
     import json
+    from django.db.models import Count
     from ..models import QSO, ADIFUpload
     from django.utils import timezone
     from django.template.loader import render_to_string
+    from django.core.cache import cache
+    from django.contrib.auth.decorators import login_required
     from datetime import timedelta
+
+    # Проверяем аутентификацию пользователя
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
 
     user = request.user
 
@@ -583,45 +607,25 @@ def achievements(request):
             if sat_name_filter:
                 qso_queryset = qso_queryset.filter(sat_name=sat_name_filter)
 
-            # Основная статистика с фильтрами
+            # Оптимизированная статистика с фильтрами (все в одном запросе)
             total_qso = qso_queryset.count()
 
-            # Статистика по диапазонам
-            bands = {}
-            band_order = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
-            for band in band_order:
-                count = qso_queryset.filter(band=band).count()
-                if count > 0:
-                    bands[band] = count
+            # Статистика по диапазонам (один запрос)
+            band_counts = dict(qso_queryset.filter(band__isnull=False, band__gt='')
+                               .values('band').annotate(count=Count('id')).values_list('band', 'count'))
+            
+            # Статистика по модуляциям (один запрос)
+            mode_counts = dict(qso_queryset.filter(mode__isnull=False, mode__gt='')
+                               .values('mode').annotate(count=Count('id')).values_list('mode', 'count'))
 
-            # Статистика по модуляциям
-            modes = {}
-            mode_list = qso_queryset.values_list('mode', flat=True).distinct()
-            for mode in mode_list:
-                count = qso_queryset.filter(mode=mode).count()
-                if count > 0:
-                    modes[mode] = count
-
-            # Уникальные позывные
-            unique_callsigns = qso_queryset.values('callsign').distinct().count()
-
-            # Страны Р-150-С
-            r150s_count = qso_queryset.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
-
-            # Уникальные DXCC
-            dxcc_count = qso_queryset.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
-
-            # Уникальные регионы России
-            ru_region_count = qso_queryset.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
-
-            # Уникальные CQ Zone
-            cqz_count = qso_queryset.exclude(cqz__isnull=True).values('cqz').distinct().count()
-
-            # Уникальные ITU Zone
-            ituz_count = qso_queryset.exclude(ituz__isnull=True).values('ituz').distinct().count()
-
-            # QTH локаторы (уникальные - первые 4 знака)
-            grids_count = qso_queryset.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
+            # Уникальные значения (оптимизированные запросы)
+            unique_callsigns = qso_queryset.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
+            r150s_count = qso_queryset.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
+            dxcc_count = qso_queryset.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
+            ru_region_count = qso_queryset.filter(ru_region__isnull=False, ru_region__gt='').values('ru_region').distinct().count()
+            cqz_count = qso_queryset.filter(cqz__isnull=False).values('cqz').distinct().count()
+            ituz_count = qso_queryset.filter(ituz__isnull=False).values('ituz').distinct().count()
+            grids_count = qso_queryset.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
 
             # Достижения (awards)
             achievements = []
@@ -654,7 +658,7 @@ def achievements(request):
                 })
 
             # 10 диапазонов
-            if len(bands) >= 10:
+            if len(band_counts) >= 10:
                 achievements.append({
                     'title': 'Разведчик',
                     'description': 'Связи на 10+ диапазонах',
@@ -663,7 +667,7 @@ def achievements(request):
                 })
 
             # 5 видов модуляции
-            if len(modes) >= 5:
+            if len(mode_counts) >= 5:
                 achievements.append({
                     'title': 'Универсал',
                     'description': 'Связи на 5+ видах модуляции',
@@ -689,20 +693,21 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # === Награды QO-100 ===
-            # Статистика для QO-100 с подтверждением LoTW
+            # === Награды QO-100 (оптимизированные) ===
+            # QO-100 с LoTW
             qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
-            qo100_lotw_ru_regions = qo100_lotw_qsos.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
-            qo100_lotw_countries = qo100_lotw_qsos.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
-            qo100_lotw_grids = qo100_lotw_qsos.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
-            qo100_lotw_callsigns = qo100_lotw_qsos.values('callsign').distinct().count()
+            qo100_lotw_stats = qo100_lotw_qsos.aggregate(
+                ru_regions=Count('ru_region', filter=Q(ru_region__isnull=False, ru_region__gt='')),
+                countries=Count('r150s', filter=Q(r150s__isnull=False, r150s__gt='')),
+                grids=Count('gridsquare', filter=Q(gridsquare__isnull=False, gridsquare__gt='')),
+                callsigns=Count('callsign', filter=Q(callsign__isnull=False, callsign__gt=''))
+            )
 
-            # Статистика для QO-100 без фильтра LoTW
-            qo100_all_qsos = QSO.objects.filter(user=user, sat_name='QO-100')
-            qo100_all_callsigns = qo100_all_qsos.values('callsign').distinct().count()
+            # QO-100 общая статистика
+            qo100_all_callsigns = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
 
-            # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
-            if qo100_lotw_ru_regions >= 25:
+            # Награды QO-100
+            if qo100_lotw_stats['ru_regions'] >= 25:
                 achievements.append({
                     'title': 'W-QO100-R',
                     'description': '25+ регионов РФ через QO-100 (LoTW)',
@@ -710,8 +715,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
-            if qo100_lotw_ru_regions >= 30:
+            if qo100_lotw_stats['ru_regions'] >= 30:
                 achievements.append({
                     'title': 'W-QO100-PROFI',
                     'description': '30+ регионов РФ через QO-100 (LoTW)',
@@ -719,8 +723,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # W-QO100-C: 100+ стран (QO-100, LoTW)
-            if qo100_lotw_countries >= 100:
+            if qo100_lotw_stats['countries'] >= 100:
                 achievements.append({
                     'title': 'W-QO100-C',
                     'description': '100+ стран через QO-100 (LoTW)',
@@ -728,8 +731,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # W-QO100-L: 500+ уникальных QTH локаторов (QO-100, LoTW)
-            if qo100_lotw_grids >= 500:
+            if qo100_lotw_stats['grids'] >= 500:
                 achievements.append({
                     'title': 'W-QO100-L',
                     'description': '500+ QTH локаторов через QO-100 (LoTW)',
@@ -737,8 +739,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # W-QO100-U: 1000+ уникальных позывных (QO-100, LoTW)
-            if qo100_lotw_callsigns >= 1000:
+            if qo100_lotw_stats['callsigns'] >= 1000:
                 achievements.append({
                     'title': 'W-QO100-U',
                     'description': '1000+ позывных через QO-100 (LoTW)',
@@ -746,7 +747,6 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # W-QO100-B: 1000+ связей (QO-100)
             if qo100_all_callsigns >= 1000:
                 achievements.append({
                     'title': 'W-QO100-B',
@@ -787,8 +787,8 @@ def achievements(request):
             return JsonResponse({
                 'success': True,
                 'total_qso': total_qso,
-                'bands': bands,
-                'modes': modes,
+                'bands': band_counts,
+                'modes': mode_counts,
                 'unique_callsigns': unique_callsigns,
                 'dxcc_count': dxcc_count,
                 'r150s_count': r150s_count,
@@ -806,78 +806,94 @@ def achievements(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-    # GET запрос - обычная загрузка страницы
+    # GET запрос - обычная загрузка страницы (ОПТИМИЗИРОВАННАЯ)
+    
+    # Проверяем кэш для пользователя (кэшируем на 5 минут)
+    cache_key = f'achievements_{user.id}'
+    cached_data = cache.get(cache_key)
+    
+    if cached_data:
+        return render(request, 'achievements_base.html', cached_data)
+
+    # Базовая статистика пользователя
+    user_qsos = QSO.objects.filter(user=user)
+    
+    # Проверяем, есть ли данные для пользователя
+    if not user_qsos.exists():
+        # Если нет данных, показываем пустую страницу
+        return render(request, 'achievements_base.html', {
+            'total_qso': 0,
+            'bands': {},
+            'available_bands': [],
+            'band_order': ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm'],
+            'modes': {},
+            'unique_callsigns': 0,
+            'r150s_count': 0,
+            'dxcc_count': 0,
+            'ru_region_count': 0,
+            'cqz_count': 0,
+            'ituz_count': 0,
+            'grids_count': 0,
+            'lotw_count': 0,
+            'today_qso': 0,
+            'week_qso': 0,
+            'month_qso': 0,
+            'most_active_date': None,
+            'achievements': [],
+            'my_callsigns': [],
+        })
+
+    # Оптимизированная загрузка всех статистических данных
     # Основная статистика
-    total_qso = QSO.objects.filter(user=user).count()
+    total_qso = user_qsos.count()
 
-    # Статистика по диапазонам
-    bands = {}
+    # Статистика по диапазонам (оптимизировано)
     band_order = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '2m', '70cm', '23cm', '13cm']
-    band_ranges = {
-        '160m': (1.8, 2.0), '80m': (3.5, 4.0), '40m': (7.0, 7.3), '30m': (10.1, 10.15),
-        '20m': (14.0, 14.35), '17m': (18.068, 18.168), '15m': (21.0, 21.45),
-        '12m': (24.89, 24.99), '10m': (28.0, 29.7), '6m': (50.0, 54.0),
-        '2m': (144.0, 148.0), '70cm': (420.0, 450.0), '23cm': (1240.0, 1300.0),
-        '13cm': (2300.0, 2450.0),
-    }
-
-    for band in band_order:
-        count = QSO.objects.filter(user=user, band=band).count()
-        if count > 0:
-            bands[band] = count
-
+    band_counts = dict(user_qsos.filter(band__isnull=False, band__gt='')
+                       .values('band').annotate(count=Count('id')).values_list('band', 'count'))
+    
     # Уникальные диапазоны для фильтров
-    available_bands = QSO.objects.filter(user=user).values_list('band', flat=True).distinct().exclude(band__isnull=True).exclude(band='').order_by('band')
+    available_bands = list(user_qsos.filter(band__isnull=False, band__gt='')
+                          .values_list('band', flat=True).distinct().order_by('band'))
 
-    # Статистика по модуляциям
-    modes = {}
-    mode_list = QSO.objects.filter(user=user).values_list('mode', flat=True).distinct()
-    for mode in mode_list:
-        count = QSO.objects.filter(user=user, mode=mode).count()
-        if count > 0:
-            modes[mode] = count
+    # Статистика по модуляциям (оптимизировано)
+    mode_counts = dict(user_qsos.filter(mode__isnull=False, mode__gt='')
+                       .values('mode').annotate(count=Count('id')).values_list('mode', 'count'))
 
-    # Уникальные позывные
-    unique_callsigns = QSO.objects.filter(user=user).values('callsign').distinct().count()
-
-    # Страны Р-150-С
-    r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
-
-    # Уникальные DXCC
-    dxcc_count = QSO.objects.filter(user=user).exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
-
-    # Уникальные регионы России
-    ru_region_count = QSO.objects.filter(user=user).exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
-
-    # Уникальные CQ Zone
-    cqz_count = QSO.objects.filter(user=user).exclude(cqz__isnull=True).values('cqz').distinct().count()
-
-    # Уникальные ITU Zone
-    ituz_count = QSO.objects.filter(user=user).exclude(ituz__isnull=True).values('ituz').distinct().count()
-
+    # Оптимизированные подсчеты уникальных значений
+    unique_callsigns = user_qsos.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
+    r150s_count = user_qsos.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
+    dxcc_count = user_qsos.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
+    ru_region_count = user_qsos.filter(ru_region__isnull=False, ru_region__gt='').values('ru_region').distinct().count()
+    cqz_count = user_qsos.filter(cqz__isnull=False).values('cqz').distinct().count()
+    ituz_count = user_qsos.filter(ituz__isnull=False).values('ituz').distinct().count()
+    grids_count = user_qsos.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
+    
     # Уникальные мои позывные
-    my_callsigns = QSO.objects.filter(user=user).exclude(my_callsign__isnull=True).exclude(my_callsign='').values_list('my_callsign', flat=True).distinct().order_by('my_callsign')
-
-    # QTH локаторы
-    grids_count = QSO.objects.filter(user=user).exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
+    my_callsigns = list(user_qsos.filter(my_callsign__isnull=False, my_callsign__gt='')
+                       .values_list('my_callsign', flat=True).distinct().order_by('my_callsign'))
 
     # LoTW подтверждения
-    lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
+    lotw_count = user_qsos.filter(lotw='Y').count()
 
-    # Сегодняшние связи
+    # Статистика по датам (оптимизировано)
     today = timezone.now().date()
-    today_qso = QSO.objects.filter(user=user, date=today).count()
-
-    # Связи за последнюю неделю
     week_ago = today - timedelta(days=7)
-    week_qso = QSO.objects.filter(user=user, date__gte=week_ago).count()
-
-    # Связи за последний месяц
     month_ago = today - timedelta(days=30)
-    month_qso = QSO.objects.filter(user=user, date__gte=month_ago).count()
+    
+    # Получаем всю датовую статистику одним запросом
+    date_stats = user_qsos.aggregate(
+        today_qso=Count('id', filter=Q(date=today)),
+        week_qso=Count('id', filter=Q(date__gte=week_ago)),
+        month_qso=Count('id', filter=Q(date__gte=month_ago))
+    )
+    
+    today_qso = date_stats['today_qso']
+    week_qso = date_stats['week_qso']
+    month_qso = date_stats['month_qso']
 
-    # Самая активная дата
-    most_active_date = QSO.objects.filter(user=user).values('date').annotate(
+    # Самая активная дата (оптимизировано)
+    most_active_date = user_qsos.values('date').annotate(
         count=Count('id')
     ).order_by('-count').first()
 
@@ -912,7 +928,7 @@ def achievements(request):
         })
 
     # 10 диапазонов
-    if len(bands) >= 10:
+    if len(band_counts) >= 10:
         achievements.append({
             'title': 'Разведчик',
             'description': 'Связи на 10+ диапазонах',
@@ -921,7 +937,7 @@ def achievements(request):
         })
 
     # 5 видов модуляции
-    if len(modes) >= 5:
+    if len(mode_counts) >= 5:
         achievements.append({
             'title': 'Универсал',
             'description': 'Связи на 5+ видах модуляции',
@@ -965,20 +981,20 @@ def achievements(request):
             'unlocked': True
         })
 
-    # === Награды QO-100 ===
-    # Статистика для QO-100 с подтверждением LoTW
-    qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
-    qo100_lotw_ru_regions = qo100_lotw_qsos.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
-    qo100_lotw_countries = qo100_lotw_qsos.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
-    qo100_lotw_grids = qo100_lotw_qsos.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count()
-    qo100_lotw_callsigns = qo100_lotw_qsos.values('callsign').distinct().count()
+    # === Награды QO-100 (оптимизировано) ===
+    # QO-100 статистика с LoTW (оптимизированный запрос)
+    qo100_lotw_stats = user_qsos.filter(sat_name='QO-100', lotw='Y').aggregate(
+        ru_regions=Count('ru_region', filter=Q(ru_region__isnull=False, ru_region__gt='')),
+        countries=Count('r150s', filter=Q(r150s__isnull=False, r150s__gt='')),
+        grids=Count('gridsquare', filter=Q(gridsquare__isnull=False, gridsquare__gt='')),
+        callsigns=Count('callsign', filter=Q(callsign__isnull=False, callsign__gt=''))
+    )
 
-    # Статистика для QO-100 без фильтра LoTW
-    qo100_all_qsos = QSO.objects.filter(user=user, sat_name='QO-100')
-    qo100_all_callsigns = qo100_all_qsos.values('callsign').distinct().count()
+    # QO-100 общая статистика
+    qo100_all_callsigns = user_qsos.filter(sat_name='QO-100').values('callsign').distinct().count()
 
     # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
-    if qo100_lotw_ru_regions >= 25:
+    if qo100_lotw_stats['ru_regions'] >= 25:
         achievements.append({
             'title': 'W-QO100-R',
             'description': '25+ регионов РФ через QO-100 (LoTW)',
@@ -987,7 +1003,7 @@ def achievements(request):
         })
 
     # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
-    if qo100_lotw_ru_regions >= 30:
+    if qo100_lotw_stats['ru_regions'] >= 30:
         achievements.append({
             'title': 'W-QO100-PROFI',
             'description': '30+ регионов РФ через QO-100 (LoTW)',
@@ -996,7 +1012,7 @@ def achievements(request):
         })
 
     # W-QO100-C: 100+ стран (QO-100, LoTW)
-    if qo100_lotw_countries >= 100:
+    if qo100_lotw_stats['countries'] >= 100:
         achievements.append({
             'title': 'W-QO100-C',
             'description': '100+ стран через QO-100 (LoTW)',
@@ -1005,7 +1021,7 @@ def achievements(request):
         })
 
     # W-QO100-L: 500+ уникальных QTH локаторов (QO-100, LoTW)
-    if qo100_lotw_grids >= 500:
+    if qo100_lotw_stats['grids'] >= 500:
         achievements.append({
             'title': 'W-QO100-L',
             'description': '500+ QTH локаторов через QO-100 (LoTW)',
@@ -1014,7 +1030,7 @@ def achievements(request):
         })
 
     # W-QO100-U: 1000+ уникальных позывных (QO-100, LoTW)
-    if qo100_lotw_callsigns >= 1000:
+    if qo100_lotw_stats['callsigns'] >= 1000:
         achievements.append({
             'title': 'W-QO100-U',
             'description': '1000+ позывных через QO-100 (LoTW)',
@@ -1031,12 +1047,13 @@ def achievements(request):
             'unlocked': True
         })
 
-    return render(request, 'achievements.html', {
+    # Формируем данные для шаблона
+    context_data = {
         'total_qso': total_qso,
-        'bands': bands,
-        'available_bands': list(available_bands),
+        'bands': band_counts,
+        'available_bands': available_bands,
         'band_order': band_order,
-        'modes': modes,
+        'modes': mode_counts,
         'unique_callsigns': unique_callsigns,
         'r150s_count': r150s_count,
         'dxcc_count': dxcc_count,
@@ -1050,8 +1067,13 @@ def achievements(request):
         'month_qso': month_qso,
         'most_active_date': most_active_date,
         'achievements': achievements,
-        'my_callsigns': list(my_callsigns),
-    })
+        'my_callsigns': my_callsigns,
+    }
+
+    # Кэшируем результат на 5 минут
+    cache.set(cache_key, context_data, 300)
+    
+    return render(request, 'achievements_base.html', context_data)
 
 
 @login_required

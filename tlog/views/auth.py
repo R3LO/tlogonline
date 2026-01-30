@@ -27,24 +27,24 @@ def register_page(request):
         # Валидация
         if not all([callsign, email, password, password_confirm]):
             messages.error(request, 'Все обязательные поля должны быть заполнены')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
         if password != password_confirm:
             messages.error(request, 'Пароли не совпадают')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
         if len(password) < 8:
             messages.error(request, 'Пароль должен содержать минимум 8 символов')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
         # Проверяем уникальность позывного (как username)
         if User.objects.filter(username=callsign).exists():
             messages.error(request, 'Пользователь с таким позывным уже существует')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Пользователь с таким email уже существует')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
         # Создаем пользователя (позывной = username)
         try:
@@ -71,9 +71,9 @@ def register_page(request):
 
         except Exception as e:
             messages.error(request, f'Ошибка при регистрации: {str(e)}')
-            return render(request, 'register.html')
+            return render(request, 'register_base.html')
 
-    return render(request, 'register.html')
+    return render(request, 'register_base.html')
 
 
 def login_page(request):
@@ -88,7 +88,7 @@ def login_page(request):
         # Проверяем обязательные поля
         if not username or not password:
             messages.error(request, _('Имя пользователя и пароль обязательны'))
-            return render(request, 'login.html')
+            return render(request, 'login_base.html')
 
         # Аутентификация
         user = authenticate(request, username=username, password=password)
@@ -99,7 +99,7 @@ def login_page(request):
                 profile = user.radio_profile
                 if profile.is_blocked:
                     messages.error(request, _('Ваш аккаунт заблокирован. Причина: ') + (profile.blocked_reason or ''))
-                    return render(request, 'login.html')
+                    return render(request, 'login_base.html')
             except RadioProfile.DoesNotExist:
                 pass  # Профиля нет - считаем пользователя незаблокированным
 
@@ -118,9 +118,9 @@ def login_page(request):
                 return response
         else:
             messages.error(request, _('Неверные учетные данные'))
-            return render(request, 'login.html')
+            return render(request, 'login_base.html')
 
-    return render(request, 'login.html')
+    return render(request, 'login_base.html')
 
 
 def logout_view(request):

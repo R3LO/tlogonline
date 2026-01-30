@@ -2,26 +2,46 @@
 {% load i18n %}
 
 {% if filtered_stats.total_qso > 0 %}
-<div class="d-flex flex-wrap gap-3 mb-4">
-    <div class="stats-card flex-fill" style="min-width: 140px;">
-        <div class="stats-number">{{ filtered_stats.total_qso|default:0 }}</div>
-        <div>{% trans "Всего QSO" %}</div>
+<div class="stats-section">
+    <div class="section-title">
+        <span>📊</span> Статистика по фильтрам
     </div>
-    <div class="stats-card flex-fill" style="min-width: 140px;">
-        <div class="stats-number">{{ filtered_stats.unique_callsigns|default:0 }}</div>
-        <div>{% trans "Уникальные позывные" %}</div>
-    </div>
-    <div class="stats-card flex-fill" style="min-width: 140px;">
-        <div class="stats-number">{{ filtered_stats.unique_dxcc|default:0 }}</div>
-        <div>{% trans "Стран DXCC" %}</div>
-    </div>
-    <div class="stats-card flex-fill" style="min-width: 140px;">
-        <div class="stats-number">{{ filtered_stats.unique_r150s|default:0 }}</div>
-        <div>{% trans "Стран Р-150-С" %}</div>
-    </div>
-    <div class="stats-card flex-fill" style="min-width: 140px;">
-        <div class="stats-number">{{ filtered_stats.unique_ru_regions|default:0 }}</div>
-        <div>{% trans "Регионов РФ" %}</div>
+    <div class="row">
+        <div class="col-md-2 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon">📡</div>
+                <div class="stat-value">{{ filtered_stats.total_qso|default:0 }}</div>
+                <div class="stat-label">{% trans "Всего QSO" %}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">{{ filtered_stats.unique_callsigns|default:0 }}</div>
+                <div class="stat-label">{% trans "Уникальные позывные" %}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon">🌍</div>
+                <div class="stat-value">{{ filtered_stats.unique_dxcc|default:0 }}</div>
+                <div class="stat-label">{% trans "Стран DXCC" %}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value">{{ filtered_stats.unique_r150s|default:0 }}</div>
+                <div class="stat-label">{% trans "Стран Р-150-С" %}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon">🗺️</div>
+                <div class="stat-value">{{ filtered_stats.unique_ru_regions|default:0 }}</div>
+                <div class="stat-label">{% trans "Регионов РФ" %}</div>
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}

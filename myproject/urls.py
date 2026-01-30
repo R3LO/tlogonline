@@ -16,5 +16,6 @@ urlpatterns = [
     path('favicon.svg', RedirectView.as_view(url='/static/favicon.svg', permanent=True)),
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.svg', permanent=True)),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('log-online/', include('log_online.urls')),
     path('', include('tlog.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -25,11 +25,35 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">{% trans "Home" %}</a>
+                        <a class="nav-link" href="/">{% trans "Главная" %}</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">
+                            <span>📓</span> {% trans "Журнал" %}
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logbook/">{% trans "Logbook" %}</a>
+                        <a class="nav-link" href="/lotw/">
+                            <span>📡</span> LoTW
+                        </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/qth-loc.html" target="_blank">
+                            <span>🗺️</span> Grid map
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="/dashboard/">
+                            <span>📊</span> {% trans "Profile" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/achievements/">
+                            <span>🏆</span> {% trans "Achievements" %}
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     <!-- Language Switcher -->
@@ -54,10 +78,14 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/">{% trans "Profile" %}</a>
+                        <a class="nav-link" href="/dashboard/profile/">
+                            <span>👤</span> {{ user.username }}
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout/">{% trans "Logout" %}</a>
+                        <a class="nav-link" href="/logout/">
+                            <span>🚪</span> {% trans "Logout" %}
+                        </a>
                     </li>
                     {% else %}
                     <li class="nav-item">

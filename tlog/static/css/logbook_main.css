@@ -1,40 +1,64 @@
-/* ========== Dashboard Styles ========== */
+/* ========== Logbook Beautiful Styles ========== */
+/* All styles scoped to logbook pages to avoid conflicts with base template */
 
 :root {
-    --primary: #2a9d8f;
-    --primary-hover: #21867a;
-    --secondary: #264653;
+    --primary: #667eea;
+    --primary-hover: #5a6fd8;
+    --secondary: #764ba2;
     --surface: #ffffff;
     --surface-hover: #f8f9fa;
     --border: #e9ecef;
     --text-primary: #212529;
     --text-secondary: #6c757d;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --gradient-info: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-body {
+/* Body styles for logbook page only */
+.logbook-page body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-primary);
     margin: 0;
 }
 
-.main-container {
-    background: #f8f9fa;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+.logbook-page .main-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     margin-bottom: 1rem;
+    overflow: hidden;
 }
 
-/* Navigation */
-.navbar {
+/* Navigation styles scoped to logbook */
+.logbook-page .navbar {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.75rem 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
 }
 
-.navbar-brand {
+.logbook-page .navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    pointer-events: none;
+}
+
+.logbook-page .navbar-brand {
     font-weight: 700;
     font-size: 1.25rem;
     color: #fff !important;
@@ -44,7 +68,7 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.nav-link {
+.logbook-page .nav-link {
     color: rgba(255, 255, 255, 0.75) !important;
     padding: 0.5rem 1rem;
     border-radius: 8px;
@@ -57,7 +81,7 @@ body {
     gap: 0.4rem;
 }
 
-.nav-link::after {
+.logbook-page .nav-link::after {
     content: '';
     position: absolute;
     bottom: 4px;
@@ -70,51 +94,51 @@ body {
     transition: transform 0.2s ease;
 }
 
-.nav-link:hover {
+.logbook-page .nav-link:hover {
     color: #fff !important;
     background: rgba(255, 255, 255, 0.1);
 }
 
-.nav-link:hover::after {
+.logbook-page .nav-link:hover::after {
     transform: translateX(-50%) scaleX(1);
 }
 
-.nav-link.active {
+.logbook-page .nav-link.active {
     color: #fff !important;
     background: rgba(102, 126, 234, 0.2);
 }
 
-.nav-link.active::after {
+.logbook-page .nav-link.active::after {
     transform: translateX(-50%) scaleX(1);
 }
 
-.navbar-toggler {
+.logbook-page .navbar-toggler {
     border: none;
     padding: 0.5rem;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
 }
 
-.navbar-toggler:focus {
+.logbook-page .navbar-toggler:focus {
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
 }
 
-.navbar-toggler-icon {
+.logbook-page .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* Header */
-.logbook-header {
+/* Header scoped to logbook */
+.logbook-page .logbook-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem 1.5rem;
-    border-radius: 12px 12px 0 0;
     color: white;
+    padding: 2rem 1.5rem;
     text-align: center;
+    margin-bottom: 0;
     position: relative;
     overflow: hidden;
 }
 
-.logbook-header::before {
+.logbook-page .logbook-header::before {
     content: '';
     position: absolute;
     top: 0;
@@ -125,10 +149,10 @@ body {
     pointer-events: none;
 }
 
-.logbook-header h2 {
-    font-size: 1.75rem;
+.logbook-page .logbook-header h2 {
+    font-size: 2rem;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
@@ -136,73 +160,104 @@ body {
     gap: 0.75rem;
 }
 
-.logbook-header p {
-    color: rgba(255, 255, 255, 0.85);
-    margin: 0.75rem 0 0 0;
+.logbook-page .logbook-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
     font-size: 1rem;
     font-weight: 400;
 }
 
-/* Stats Section */
-.stats-section {
+/* Stats Section scoped to logbook */
+.logbook-page .stats-section {
     margin-bottom: 2rem;
 }
 
-.stats-section .section-title {
+.logbook-page .stats-section .section-title {
+    color: #667eea;
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--primary);
+    border-bottom: 2px solid #e9ecef;
     display: inline-block;
 }
 
-.stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1rem;
-    text-align: center;
-    transition: all 0.2s;
-    height: 100%;
-}
-
-.stat-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.stat-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-}
-
-.stat-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 0.25rem;
-}
-
-/* Filter Card */
-.filter-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
+.logbook-page .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
-.filter-card .section-title {
+.logbook-page .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+}
+
+.logbook-page .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.logbook-page .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.logbook-page .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.logbook-page .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Filter Card scoped to logbook */
+.logbook-page .filter-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.logbook-page .filter-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.logbook-page .filter-card .section-title {
+    color: #667eea;
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .filter-controls {
@@ -222,96 +277,155 @@ body {
     gap: 0.5rem;
 }
 
-/* Table */
-.card {
+/* Table scoped to logbook */
+.logbook-page .card {
     border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
 }
 
-.card-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+.logbook-page .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
     padding: 1rem 1.25rem;
     font-weight: 600;
+    position: relative;
 }
 
-.card-body {
-    padding: 1.25rem;
+.logbook-page .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+    pointer-events: none;
 }
 
-.table {
+.logbook-page .card-body {
+    padding: 0;
+}
+
+.logbook-page .table {
     margin: 0;
+    background: transparent;
 }
 
-.table th {
+.logbook-page .table th {
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-secondary);
+    color: #495057;
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    padding: 1rem 0.75rem;
 }
 
-.table td {
+.logbook-page .table td {
     vertical-align: middle;
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f3f4;
+    transition: background-color 0.2s ease;
 }
 
-/* Utility Card */
-.utility-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
+.logbook-page .table tbody tr:hover td {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+.logbook-page .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Utility Card scoped to logbook */
+.logbook-page .utility-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e9ecef;
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.utility-header {
-    background: var(--surface-hover);
+.logbook-page .utility-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.logbook-page .utility-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
 
-.utility-icon {
+.logbook-page .utility-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+    pointer-events: none;
+}
+
+.logbook-page .utility-icon {
     width: 28px;
     height: 28px;
-    background: var(--primary);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
+    position: relative;
+    z-index: 1;
 }
 
-.utility-title {
+.logbook-page .utility-title {
     font-weight: 600;
     font-size: 0.9rem;
     margin: 0;
+    position: relative;
+    z-index: 1;
 }
 
-.utility-body {
+.logbook-page .utility-body {
     padding: 8px;
 }
 
-.utility-link {
+.logbook-page .utility-link {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 12px 16px;
     border-radius: 8px;
     text-decoration: none;
     color: var(--text-primary);
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     font-size: 0.875rem;
+    border: 1px solid transparent;
 }
 
-.utility-link:hover {
-    background: var(--surface-hover);
+.logbook-page .utility-link:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateX(4px);
 }
 
-.utility-link-icon {
+.logbook-page .utility-link-icon {
     width: 28px;
     height: 28px;
     border-radius: 6px;
@@ -319,59 +433,520 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 0.9rem;
-}
-
-/* Buttons */
-.btn {
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.btn-outline-primary {
-    border-color: var(--border);
-    color: var(--text-secondary);
-}
-
-.btn-outline-primary:hover {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
-/* Badges */
-.badge {
+/* Buttons scoped to logbook */
+.logbook-page .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.logbook-page .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.logbook-page .btn:hover::before {
+    left: 100%;
+}
+
+.logbook-page .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.logbook-page .btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.logbook-page .btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: transparent;
+}
+
+.logbook-page .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.logbook-page .btn-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+}
+
+.logbook-page .btn-success:hover {
+    background: linear-gradient(135deg, #38d86a 0%, #2ee5c4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+}
+
+.logbook-page .btn-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);
+}
+
+.logbook-page .btn-warning:hover {
+    background: linear-gradient(135deg, #f95d8a 0%, #fdd62b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 112, 154, 0.4);
+}
+
+/* Badges scoped to logbook */
+.logbook-page .badge {
     font-weight: 500;
     padding: 0.35em 0.65em;
     border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
-/* Messages */
-.alert {
+.logbook-page .badge:hover {
+    transform: scale(1.05);
+}
+
+.logbook-page .badge-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.logbook-page .badge-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.logbook-page .badge-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: #212529;
+}
+
+.logbook-page .badge-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Messages scoped to logbook */
+.logbook-page .alert {
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 1rem 1.25rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
 }
 
-/* Responsive */
+.logbook-page .alert-success {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%);
+    border-left: 4px solid #43e97b;
+    color: #155724;
+}
+
+.logbook-page .alert-warning {
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+    border-left: 4px solid #fa709a;
+    color: #856404;
+}
+
+.logbook-page .alert-info {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+    border-left: 4px solid #4facfe;
+    color: #0c5460;
+}
+
+/* QSO Table Specific Styles */
+.qso-table {
+    background: transparent;
+}
+
+.logbook-table-header {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%) !important;
+    border-radius: 0 !important;
+}
+
+.qso-table .table th {
+    background: inherit;
+    color: white;
+    border: none;
+}
+
+.qso-table .table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.qso-table .table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    transform: scale(1.01);
+}
+
+/* Status Indicators scoped to logbook */
+.logbook-page .status-online {
+    color: #43e97b;
+    animation: logbook-pulse 2s infinite;
+}
+
+.logbook-page .status-offline {
+    color: #6c757d;
+}
+
+@keyframes logbook-pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Band and Mode Badges scoped to logbook */
+.logbook-page .band-badge {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #212529;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin: 2px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.logbook-page .band-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.logbook-page .mode-badge {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin: 2px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.logbook-page .mode-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Form Controls scoped to logbook */
+.logbook-page .form-control, .logbook-page .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+}
+
+.logbook-page .form-control:focus, .logbook-page .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 1);
+}
+
+.logbook-page .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Loading Spinner scoped to logbook */
+.logbook-page .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.1em;
+}
+
+/* Pagination scoped to logbook */
+.logbook-page .pagination {
+    gap: 0.25rem;
+}
+
+.logbook-page .page-link {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    color: #667eea;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+}
+
+.logbook-page .page-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.logbook-page .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive Design scoped to logbook */
+@media (max-width: 1200px) {
+    .logbook-page .stats-section .row {
+        gap: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
-    .logbook-header {
-        padding: 1.25rem;
+    .logbook-page .logbook-header {
+        padding: 1.5rem 1rem;
     }
 
-    .logbook-header h2 {
-        font-size: 1.25rem;
+    .logbook-page .logbook-header h2 {
+        font-size: 1.5rem;
     }
 
-    .p-4 {
+    .logbook-page .logbook-header p {
+        font-size: 0.9rem;
+    }
+
+    .logbook-page .p-4 {
         padding: 1rem !important;
     }
 
-    .stat-card {
-        padding: 1rem;
+    .logbook-page .stat-card {
+        padding: 1.25rem 1rem;
+        margin-bottom: 1rem;
     }
 
-    .stat-value {
+    .logbook-page .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .logbook-page .stat-icon {
+        font-size: 1.75rem;
+    }
+
+    .logbook-page .filter-card {
+        padding: 1.25rem;
+    }
+
+    .logbook-page .filter-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .logbook-page .filter-group {
+        flex: none;
+        min-width: 100%;
+    }
+
+    .logbook-page .card-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .logbook-page .table th, .logbook-page .table td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .logbook-page .utility-card {
+        margin-bottom: 0.75rem;
+    }
+
+    .logbook-page .utility-header {
+        padding: 10px 14px;
+    }
+
+    .logbook-page .utility-link {
+        padding: 10px 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .logbook-page .logbook-header {
+        padding: 1.25rem 0.75rem;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .logbook-page .logbook-header h2 {
+        font-size: 1.25rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .logbook-page .p-4 {
+        padding: 0.75rem !important;
+    }
+
+    .logbook-page .stat-card {
+        padding: 1rem 0.75rem;
+        border-radius: 10px;
+    }
+
+    .logbook-page .stat-value {
         font-size: 1.5rem;
+    }
+
+    .logbook-page .stat-icon {
+        font-size: 1.5rem;
+    }
+
+    .logbook-page .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .logbook-page .filter-card {
+        padding: 1rem 0.75rem;
+        border-radius: 10px;
+    }
+
+    .logbook-page .section-title {
+        font-size: 1rem;
+    }
+
+    .logbook-page .form-label {
+        font-size: 0.9rem;
+    }
+
+    .logbook-page .form-control, .logbook-page .form-select {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .logbook-page .table {
+        font-size: 0.85rem;
+    }
+
+    .logbook-page .table th, .logbook-page .table td {
+        padding: 0.375rem;
+        font-size: 0.8rem;
+    }
+
+    .logbook-page .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .logbook-page .badge {
+        font-size: 0.75rem;
+        padding: 0.25em 0.5em;
+    }
+
+    .logbook-page .band-badge, .logbook-page .mode-badge {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+
+    .logbook-page .utility-header {
+        padding: 8px 12px;
+    }
+
+    .logbook-page .utility-title {
+        font-size: 0.85rem;
+    }
+
+    .logbook-page .utility-link {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .logbook-page .utility-link-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+
+    .logbook-page .utility-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .logbook-page .logbook-header {
+        padding: 1rem 0.5rem;
+    }
+
+    .logbook-page .logbook-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .logbook-page .p-4 {
+        padding: 0.5rem !important;
+    }
+
+    .logbook-page .stat-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .logbook-page .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .logbook-page .stat-icon {
+        font-size: 1.25rem;
+    }
+
+    .logbook-page .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .logbook-page .filter-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .logbook-page .section-title {
+        font-size: 0.9rem;
+    }
+
+    .logbook-page .table th, .logbook-page .table td {
+        padding: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .logbook-page .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .logbook-page .band-badge, .logbook-page .mode-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+
+    .logbook-page .utility-header {
+        padding: 6px 10px;
+    }
+
+    .logbook-page .utility-link {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .logbook-page .utility-link-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+
+    .logbook-page .utility-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
     }
 }

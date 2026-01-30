@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}TLog - {% trans "Вход" %}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="logbook-header text-center">
+    <h2><span>🔐</span> {% trans "Вход" %}</h2>
+    <p class="mb-0">{% trans "Войдите в свой аккаунт" %}</p>
+</div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <span class="me-2">📻</span>{% trans "Позывной" %}
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="username" 
+                                   name="username" 
+                                   required
+                                   placeholder="{% trans 'Введите позывной' %}" 
+                                   style="text-transform: uppercase;"
+                                   value="{{ request.COOKIES.remembered_username|default:'' }}">
+                            <div class="invalid-feedback">
+                                {% trans "Пожалуйста, введите позывной." %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <span class="me-2">🔒</span>{% trans "Пароль" %}
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password" 
+                                       name="password" 
+                                       required
+                                       placeholder="{% trans 'Введите пароль' %}">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        id="togglePassword"
+                                        title="{% trans 'Показать/скрыть пароль' %}">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                {% trans "Пожалуйста, введите пароль." %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="rememberMe" 
+                                       name="rememberMe"
+                                       {% if request.COOKIES.remembered_username %}checked{% endif %}>
+                                <label class="form-check-label" for="rememberMe">
+                                    {% trans "Запомнить меня" %}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <span class="me-2">🚀</span>{% trans "Войти" %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            {% trans "Нет аккаунта?" %}
+                            <a href="/register/" class="text-decoration-none fw-bold">
+                                <span class="me-1">📝</span>{% trans "Зарегистрироваться" %}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="text-center mt-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center gap-4 text-muted small">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🔒</span>
+                                <span>{% trans "Безопасность" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">⚡</span>
+                                <span>{% trans "Быстрый доступ" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">📱</span>
+                                <span>{% trans "Мобильная версия" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Валидация формы
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Переключение видимости пароля
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const password = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        toggleIcon.className = 'fas fa-eye-slash';
+    } else {
+        password.type = 'password';
+        toggleIcon.className = 'fas fa-eye';
+    }
+});
+
+// Автоматическое преобразование позывного в верхний регистр
+document.getElementById('username').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+</script>
+
+<style>
+.card {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0b5ed7 0%, #5a20d9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+.input-group .btn-outline-secondary {
+    border-left: none;
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .card {
+        margin: 20px 0;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+    }
+}
+</style>
+{% endblock %}

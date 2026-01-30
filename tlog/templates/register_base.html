@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}TLog - {% trans "Регистрация" %}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="logbook-header text-center">
+    <h2><span>📝</span> {% trans "Регистрация" %}</h2>
+    <p class="mb-0">{% trans "Присоединяйтесь к сообществу радиолюбителей" %}</p>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Основной контент -->
+        <div class="col-lg-8 mx-auto">
+            <!-- Сообщения Django -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:"info" }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form id="registerForm" method="POST" action="{% url 'register_page' %}">
+                        {% csrf_token %}
+
+                        <!-- Учётная запись -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="section-title mb-3">
+                                    <span class="me-2">🔐</span>{% trans "Учётная запись" %}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="callsign" class="form-label">
+                                    <span class="me-2">📻</span>{% trans "Ваш позывной (используется как логин)" %} *
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="callsign" 
+                                       name="callsign"
+                                       maxlength="10" 
+                                       required
+                                       placeholder="{% trans 'Введите позывной' %}"
+                                       style="text-transform: uppercase;">
+                                <div class="form-text">
+                                    {% trans "Ваш позывной будет использоваться для входа в систему" %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    <span class="me-2">📧</span>Email *
+                                </label>
+                                <input type="email" 
+                                       class="form-control form-control-lg" 
+                                       id="email" 
+                                       name="email" 
+                                       required
+                                       placeholder="email@example.com" 
+                                       autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <span class="me-2">🔒</span>{% trans "Пароль" %} *
+                                </label>
+                                <input type="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password" 
+                                       name="password" 
+                                       required
+                                       placeholder="{% trans 'Минимум 8 символов' %}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="password_confirm" class="form-label">
+                                    <span class="me-2">🔒</span>{% trans "Подтвердите пароль" %} *
+                                </label>
+                                <input type="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password_confirm" 
+                                       name="password_confirm" 
+                                       required
+                                       placeholder="{% trans 'Повторите пароль' %}">
+                            </div>
+                        </div>
+
+                        <!-- Личная информация -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h5 class="section-title mb-3">
+                                    <span class="me-2">👤</span>{% trans "Личная информация" %}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">
+                                    <span class="me-2">👤</span>{% trans "Имя" %}
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="first_name" 
+                                       name="first_name"
+                                       placeholder="{% trans 'Иван' %}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">
+                                    <span class="me-2">👤</span>{% trans "Фамилия" %}
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="last_name" 
+                                       name="last_name"
+                                       placeholder="{% trans 'Петров' %}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="qth" class="form-label">
+                                    <span class="me-2">📍</span>QTH ({% trans "населённый пункт" %})
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="qth" 
+                                       name="qth"
+                                       placeholder="{% trans 'г. Москва, Россия' %}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="qth_locator" class="form-label">
+                                    <span class="me-2">🗺️</span>QTH {% trans "локатор" %}
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="qth_locator" 
+                                       name="qth_locator"
+                                       maxlength="6" 
+                                       placeholder="KO85UU">
+                                <div class="form-text">
+                                    {% trans "Например: KO85UU для Москвы" %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                                        <span class="me-2">✅</span>{% trans "Зарегистрироваться" %}
+                                    </button>
+                                    <a href="/login/" class="btn btn-outline-secondary btn-lg px-4">
+                                        <span class="me-2">🔙</span>{% trans "Назад" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <span class="me-2">ℹ️</span>{% trans "Информация о регистрации" %}
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li class="mb-2">
+                                    <span class="me-2">🔒</span>
+                                    {% trans "Ваши данные защищены и используются только для работы с сайтом" %}
+                                </li>
+                                <li class="mb-2">
+                                    <span class="me-2">📧</span>
+                                    {% trans "Email необходим для восстановления доступа к аккаунту" %}
+                                </li>
+                                <li class="mb-0">
+                                    <span class="me-2">📻</span>
+                                    {% trans "Позывной должен быть вашим реальным позывным радиолюбителя" %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Автоматическое преобразование позывного в верхний регистр
+document.getElementById('callsign').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+// Валидация паролей
+document.getElementById('password_confirm').addEventListener('input', function() {
+    const password = document.getElementById('password');
+    const confirmPassword = this;
+    
+    if (password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('Пароли не совпадают');
+    } else {
+        confirmPassword.setCustomValidity('');
+    }
+});
+
+// Валидация локатора
+document.getElementById('qth_locator').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+// Проверка сложности пароля
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    const strengthIndicator = document.getElementById('password-strength');
+    
+    if (password.length < 8) {
+        this.setCustomValidity('Пароль должен содержать минимум 8 символов');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+
+<style>
+.section-title {
+    color: #495057;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0b5ed7 0%, #5a20d9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.card {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+    .form-control-lg {
+        font-size: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

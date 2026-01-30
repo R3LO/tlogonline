@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}TLog - {% trans "Achievements" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/achievements.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="logbook-header text-center">
+            <h2><span>🏆</span> {% trans "Мои достижения" %}</h2>
+            <p class="mb-0">{% trans "Ваша статистика и награды" %}</p>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4">
+        <!-- Фильтры -->
+        <div class="filter-card mb-4">
+            <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
+                    <select class="form-select" id="filter_my_callsign">
+                        <option value="">{% trans "Все" %}</option>
+                        {% for my_call in my_callsigns %}
+                            <option value="{{ my_call }}">{{ my_call }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label small mb-1">{% trans "Диапазон" %}</label>
+                    <select class="form-select" id="filter_band">
+                        <option value="">{% trans "Все" %}</option>
+                        {% for band in available_bands %}
+                            <option value="{{ band }}">{{ band }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label small mb-1">{% trans "Вид связи" %}</label>
+                    <select class="form-select" id="filter_mode">
+                        <option value="">{% trans "Все" %}</option>
+                        {% for mode, count in modes.items %}
+                            <option value="{{ mode }}">{{ mode }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label small mb-1">Prop Mode</label>
+                    <select class="form-select" id="filter_prop_mode">
+                        <option value="">{% trans "Все" %}</option>
+                        <option value="SAT">SAT</option>
+                        <option value="AUR">AUR</option>
+                        <option value="ES">ES</option>
+                        <option value="F2">F2</option>
+                        <option value="TRO">TRO</option>
+                        <option value="MS">MS</option>
+                        <option value="ECH">ECH</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label small mb-1">{% trans "Спутник" %}</label>
+                    <select class="form-select" id="filter_sat_name">
+                        <option value="">{% trans "Все" %}</option>
+                        <option value="QO-100">QO-100</option>
+                        <option value="AO-91">AO-91</option>
+                        <option value="AO-92">AO-92</option>
+                        <option value="SO-50">SO-50</option>
+                        <option value="FO-29">FO-29</option>
+                        <option value="AO-27">AO-27</option>
+                        <option value="ISS">ISS</option>
+                        <option value="ES'HAIL-2">ES'HAIL-2</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-secondary" id="reset_filters" title="{% trans "Сбросить" %}">
+                        <span>🔄</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="apply_filters" title="{% trans "Применить" %}">
+                        <span>🔍</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по фильтрам -->
+        <div id="filtered_stats" class="mb-4" style="display: none;">
+            <div class="alert alert-info">
+                <span>ℹ️</span>
+                <span id="filtered_message">{% trans "Отфильтровано" %}</span>
+                <button type="button" class="btn-close float-end" id="close_filtered_stats"></button>
+            </div>
+        </div>
+
+        <!-- Статистическая таблица -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="section-title"><span>📊</span> {% trans "Статистика" %}</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">QSO</th>
+                                <th class="text-center">Uniq QSO</th>
+                                <th class="text-center">DXCC</th>
+                                <th class="text-center">Р-150-С</th>
+                                <th class="text-center">RU Reg</th>
+                                <th class="text-center">CQ Zone</th>
+                                <th class="text-center">ITU Zone</th>
+                                <th class="text-center">Grid</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats_table_body">
+                            <tr>
+                                <td class="text-center" id="stat_qso">{{ total_qso }}</td>
+                                <td class="text-center" id="stat_uniq_callsigns">{{ unique_callsigns }}</td>
+                                <td class="text-center" id="stat_dxcc">{{ dxcc_count|default:"0" }}</td>
+                                <td class="text-center" id="stat_r150s">{{ r150s_count }}</td>
+                                <td class="text-center" id="stat_ru_region">{{ ru_region_count|default:"0" }}</td>
+                                <td class="text-center" id="stat_cqz">{{ cqz_count|default:"0" }}</td>
+                                <td class="text-center" id="stat_ituz">{{ ituz_count|default:"0" }}</td>
+                                <td class="text-center" id="stat_grid">{{ grids_count|default:"0" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дополнительная статистика -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card p-3">
+                    <div class="stat-icon mb-2">📅</div>
+                    <div class="stat-value">{{ today_qso|default:"0" }}</div>
+                    <div class="stat-label">{% trans "Сегодня" %}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card p-3">
+                    <div class="stat-icon mb-2">📅</div>
+                    <div class="stat-value">{{ week_qso|default:"0" }}</div>
+                    <div class="stat-label">{% trans "За неделю" %}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card p-3">
+                    <div class="stat-icon mb-2">📅</div>
+                    <div class="stat-value">{{ month_qso|default:"0" }}</div>
+                    <div class="stat-label">{% trans "За месяц" %}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stat-card p-3">
+                    <div class="stat-icon mb-2">✅</div>
+                    <div class="stat-value">{{ lotw_count|default:"0" }}</div>
+                    <div class="stat-label">LoTW</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Самая активная дата -->
+        {% if most_active_date %}
+        <div class="alert alert-success mb-4">
+            <span>🎯</span>
+            <strong>{% trans "Самая активная дата:" %}</strong>
+            {{ most_active_date.date|date:"d.m.Y" }} ({{ most_active_date.count }} QSO)
+        </div>
+        {% endif %}
+
+        <!-- Достижения -->
+        <h5 class="section-title"><span>⭐</span> {% trans "Награды" %}</h5>
+        {% if achievements %}
+        <div class="row">
+            {% for achievement in achievements %}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="achievement-card {% if achievement.unlocked %}unlocked{% else %}locked{% endif %}">
+                    <div class="achievement-icon">{{ achievement.icon }}</div>
+                    <div class="achievement-title">{{ achievement.title }}</div>
+                    <div class="achievement-description">{{ achievement.description }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <span style="font-size: 3rem;">🏆</span>
+            <p>{% trans "Начните вести журнал, чтобы получать достижения!" %}</p>
+        </div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/achievements.js' %}"></script>
+{% endblock %}

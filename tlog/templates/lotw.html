@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}TLog - LoTW{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="logbook-header text-center">
+    <h2><span>📡</span> LoTW - Logbook of the World</h2>
+    <p class="mb-0">{% trans "Information about ARRL's LoTW system" %}</p>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Основная информация о LoTW -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span>📋</span> {% trans "What is LoTW?" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        {% trans "LoTW (Logbook of the World) is a system maintained by the American Radio Relay League (ARRL) that allows amateur radio operators to submit and confirm their QSO records electronically." %}
+                    </p>
+                    <p class="card-text">
+                        {% trans "Through LoTW, radio amateurs can confirm QSOs with other operators worldwide, earning credits for various awards such as DXCC, WAS, and others." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Преимущества LoTW -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span>✨</span> {% trans "Benefits of LoTW" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="text-primary">📊</span> {% trans "Electronic QSO confirmation" %}</li>
+                                <li class="mb-2"><span class="text-primary">🏆</span> {% trans "Award credit accumulation" %}</li>
+                                <li class="mb-2"><span class="text-primary">💰</span> {% trans "Free to use" %}</li>
+                                <li class="mb-2"><span class="text-primary">🌍</span> {% trans "Global QSO database" %}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="text-primary">⚡</span> {% trans "Instant QSO confirmation" %}</li>
+                                <li class="mb-2"><span class="text-primary">📱</span> {% trans "Mobile app support" %}</li>
+                                <li class="mb-2"><span class="text-primary">🔒</span> {% trans "Secure and reliable" %}</li>
+                                <li class="mb-2"><span class="text-primary">📈</span> {% trans "Detailed statistics" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Как начать использовать LoTW -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span>🚀</span> {% trans "Getting Started with LoTW" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>{% trans "Step 1: Registration" %}</h6>
+                            <p class="small">{% trans "Create a free account on the LoTW website" %}</p>
+                            
+                            <h6>{% trans "Step 2: Certificate Request" %}</h6>
+                            <p class="small">{% trans "Request a digital certificate for your callsign" %}</p>
+                            
+                            <h6>{% trans "Step 3: Certificate Installation" %}</h6>
+                            <p class="small">{% trans "Install the certificate in your logging software" %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{% trans "Step 4: QSO Logging" %}</h6>
+                            <p class="small">{% trans "Log your QSOs using software that supports LoTW" %}</p>
+                            
+                            <h6>{% trans "Step 5: Upload Logs" %}</h6>
+                            <p class="small">{% trans "Upload your ADIF files to LoTW for confirmation" %}</p>
+                            
+                            <h6>{% trans "Step 6: Award Applications" %}</h6>
+                            <p class="small">{% trans "Apply for awards once you have enough confirmations" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Полезные ссылки -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span>🔗</span> {% trans "Useful Links" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="https://lotw.arrl.org/lotwuser/default" target="_blank" class="btn btn-outline-primary mb-2 w-100">
+                                <span>🌐</span> {% trans "LoTW Official Website" %}
+                            </a>
+                            <a href="https://lotw.arrl.org/lotwuser/lotwhelp/default" target="_blank" class="btn btn-outline-info mb-2 w-100">
+                                <span>📚</span> {% trans "LoTW Help & Documentation" %}
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="https://www.arrl.org/dxcc" target="_blank" class="btn btn-outline-success mb-2 w-100">
+                                <span>🏆</span> {% trans "DXCC Award Information" %}
+                            </a>
+                            <a href="https://www.arrl.org/was" target="_blank" class="btn btn-outline-warning mb-2 w-100">
+                                <span>🎖️</span> {% trans "WAS Award Information" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Боковая панель -->
+        <div class="col-lg-4">
+            <!-- Статус LoTW -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><span>📊</span> {% trans "Your LoTW Status" %}</h6>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        {% if profile.lotw_user and profile.lotw_password %}
+                            {% if profile.lotw_chk_pass %}
+                                <div class="alert alert-success py-2">
+                                    <span class="me-2">✅</span>
+                                    <strong>{% trans "LoTW Connected" %}</strong>
+                                </div>
+                                <p class="mb-2">
+                                    <span class="me-2">👤</span>
+                                    <small>{% trans "Username:" %} <strong>{{ profile.lotw_user }}</strong></small>
+                                </p>
+                                {% if profile.lotw_lastsync %}
+                                    <p class="mb-0">
+                                        <span class="me-2">📅</span>
+                                        <small>{% trans "Last sync:" %} <strong>{{ profile.lotw_lastsync|date:"d.m.Y H:i" }}</strong></small>
+                                    </p>
+                                {% else %}
+                                    <p class="mb-0 text-muted">
+                                        <span class="me-2">❌</span>
+                                        <small>{% trans "No sync performed yet" %}</small>
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-warning py-2">
+                                    <span class="me-2">⚠️</span>
+                                    <strong>{% trans "LoTW Authentication Failed" %}</strong>
+                                </div>
+                                <p class="mb-0 text-muted">
+                                    <small>{% trans "Please check your LoTW login credentials" %}</small>
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-info py-2">
+                                <span class="me-2">ℹ️</span>
+                                <strong>{% trans "LoTW Not Configured" %}</strong>
+                            </div>
+                            <p class="mb-0 text-muted">
+                                <small>{% trans "Add your LoTW credentials in profile settings" %}</small>
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-secondary py-2">
+                            <span class="me-2">🔒</span>
+                            <strong>{% trans "Login Required" %}</strong>
+                        </div>
+                        <p class="mb-0 text-muted">
+                            <small>{% trans "Please log in to view your LoTW status" %}</small>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><span>⚡</span> {% trans "Quick Actions" %}</h6>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <a href="/dashboard/profile/" class="btn btn-primary w-100 mb-2">
+                            <span>⚙️</span> {% trans "Configure LoTW" %}
+                        </a>
+                        <a href="/dashboard/" class="btn btn-outline-primary w-100 mb-2">
+                            <span>📊</span> {% trans "View Dashboard" %}
+                        </a>
+                        <a href="/logbook/" class="btn btn-outline-secondary w-100">
+                            <span>📋</span> {% trans "Manage Logbook" %}
+                        </a>
+                    {% else %}
+                        <a href="/login/" class="btn btn-primary w-100 mb-2">
+                            <span>🔑</span> {% trans "Login" %}
+                        </a>
+                        <a href="/register/" class="btn btn-outline-primary w-100">
+                            <span>📝</span> {% trans "Register" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Поддерживаемые программы -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><span>💻</span> {% trans "Supported Software" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "TQSL (ARRL's official LoTW software)" %}</small></li>
+                        <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "DXToolbox" %}</small></li>
+                        <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "QSO Log" %}</small></li>
+                        <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "LoTW Mobile" %}</small></li>
+                        <li class="mb-0"><span class="text-primary">📱</span> <small>{% trans "And many more..." %}</small></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.logbook-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 0;
+}
+
+.logbook-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.logbook-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.25rem;
+}
+
+.card-header h5, .card-header h6 {
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    color: #0c5460;
+}
+
+.alert-secondary {
+    background: linear-gradient(135deg, #d6d8db, #c8d6e5);
+    color: #383d41;
+}
+</style>
+{% endblock %}

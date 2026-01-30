@@ -1,37 +1,26 @@
-/* Base Styles */
-body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* Achievements specific styles */
+/* Note: Background and main container styles are handled by base template */
 
-.main-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
+/* Logbook header styles (used in achievements page) */
 .logbook-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-radius: 15px 15px 0 0;
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
+    padding: 2rem 1rem;
+    text-align: center;
+    margin-bottom: 0;
 }
 
-.logbook-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-    pointer-events: none;
+.logbook-header h2 {
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
 }
 
+.logbook-header p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Filter card styles */
 .filter-card {
     background: #f8f9fa;
     border-radius: 10px;
@@ -68,6 +57,40 @@ body {
     transition: all 0.3s;
     border: 2px solid #e9ecef;
     height: 100%;
+}
+
+/* Stat card styles */
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
 }
 
 .achievement-card.unlocked {

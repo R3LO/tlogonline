@@ -18,7 +18,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'tlogonline.com', '192.168.31.5']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'tlogonline.com', '192.168.31.5']
 
 # Application definition
 INSTALLED_APPS = [
@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tlog',
+    'log_online',
 ]
 
 MIDDLEWARE = [
@@ -149,5 +150,6 @@ SESSION_COOKIE_AGE = 86400  # 24 hours
 CSRF_TRUSTED_ORIGINS = [
     'https://tlogonline.com',
     'http://localhost',
+    'http://127.0.0.1',
     'http://192.168.31.5',
 ]
