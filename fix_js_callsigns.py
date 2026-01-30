@@ -1,4 +1,25 @@
-// Profile Edit JavaScript - ИСПРАВЛЕННАЯ ВЕРСИЯ
+#!/usr/bin/env python
+"""
+Исправление JavaScript для загрузки позывных из базы
+"""
+import os
+import sys
+import json
+
+# Настройка Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+sys.path.append('.')
+
+import django
+django.setup()
+
+from django.contrib.auth.models import User
+from tlog.models import RadioProfile
+
+def fix_javascript():
+    """Создаем исправленный JavaScript файл"""
+    
+    js_content = '''// Profile Edit JavaScript - ИСПРАВЛЕННАЯ ВЕРСИЯ
 // ================================================
 
 (function($) {
@@ -25,22 +46,13 @@
     function loadProfileData() {
         console.log('=== Loading profile data ===');
         
-        // Сначала пробуем получить данные из script тега (новый способ)
-        let rawData = '';
-        const scriptElement = document.getElementById('callsigns-data');
-        if (scriptElement && scriptElement.textContent.trim()) {
-            rawData = scriptElement.textContent.trim();
-            console.log('Loaded data from script tag:', rawData);
-        } else {
-            // Если script тега нет, используем старый способ с input полем
-            const jsonField = document.getElementById('my_callsigns_json');
-            if (!jsonField) {
-                console.error('Neither script tag nor input field found!');
-                return;
-            }
-            rawData = jsonField.value.trim();
-            console.log('Loaded data from input field:', rawData);
+        const jsonField = document.getElementById('my_callsigns_json');
+        if (!jsonField) {
+            console.error('my_callsigns_json field not found!');
+            return;
         }
+        
+        const rawData = jsonField.value.trim();
         console.log('Raw data from database:', rawData);
         
         if (!rawData || rawData === '[]') {
@@ -109,7 +121,7 @@
     function initCallsignInputs() {
         document.querySelectorAll('.callsign-input').forEach(input => {
             input.addEventListener('input', function() {
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9\\/]/g, '');
             });
         });
         console.log('Initialized callsign inputs');
@@ -217,10 +229,15 @@
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
                 submitBtn.disabled = true;
-            }
                 
-            // Позволяем форме отправиться на сервер
-            // return false; // УБРАНО - теперь форма отправляется на сервер
+                // Восстанавливаем кнопку через 3 секунды
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+            
+            return false; // Предотвращаем отправку формы для тестирования
         });
         
         console.log('Event handlers initialized');
@@ -242,3 +259,54 @@
     }
     
 })(jQuery);
+'''
+    
+    return js_content
+
+def main():
+    """Основная функция"""
+    print("=== СОЗДАНИЕ ИСПРАВЛЕННОГО JAVASCRIPT ФАЙЛА ===")
+    
+    # Создаем исправленный JavaScript
+    js_content = fix_javascript()
+    
+    # Записываем в файл
+    output_file = 'tlog/static/js/profile_edit_fixed.js'
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(js_content)
+    
+    print(f"✓ Исправленный JavaScript создан: {output_file}")
+    
+    # Также создаем резервную копию оригинального файла
+    original_file = 'tlog/static/js/profile_edit.js'
+    backup_file = 'tlog/static/js/profile_edit_backup.js'
+    
+    try:
+        with open(original_file, 'r', encoding='utf-8') as f:
+            original_content = f.read()
+        with open(backup_file, 'w', encoding='utf-8') as f:
+            f.write(original_content)
+        print(f"✓ Резервная копия создана: {backup_file}")
+    except Exception as e:
+        print(f"⚠ Не удалось создать резервную копию: {e}")
+    
+    # Заменяем оригинальный файл
+    try:
+        with open(original_file, 'w', encoding='utf-8') as f:
+            f.write(js_content)
+        print(f"✓ Оригинальный файл обновлен: {original_file}")
+    except Exception as e:
+        print(f"✗ Ошибка при обновлении файла: {e}")
+    
+    print("\n=== ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ ===")
+    print("1. Замените в HTML шаблоне profile_edit.html:")
+    print("   <script src='{% static 'js/profile_edit.js' %}'></script>")
+    print("   на:")
+    print("   <script src='{% static 'js/profile_edit_fixed.js' %}'></script>")
+    print("")
+    print("2. Или замените содержимое profile_edit.js на исправленную версию")
+    print("")
+    print("3. Перезапустите сервер и проверьте работу")
+
+if __name__ == '__main__':
+    main()

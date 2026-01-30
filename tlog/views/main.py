@@ -282,7 +282,85 @@ def dashboard(request):
         'grids_count': user_qso.exclude(gridsquare__isnull=True).exclude(gridsquare='').values('gridsquare').distinct().count(),
     }
 
-    return render(request, 'dashboard_base.html', context)
+    return render(request, 'dashboard.html', context)
+
+
+def debug_callsigns(request):
+    """
+    Отладочная страница для проверки загрузки и сохранения позывных
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Получаем или создаем профиль
+    try:
+        profile = RadioProfile.objects.get(user=request.user)
+    except RadioProfile.DoesNotExist:
+        profile = RadioProfile.objects.create(user=request.user)
+
+    if request.method == 'POST':
+        try:
+            # Обрабатываем my_callsigns из JSON
+            my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
+            print(f"Debug - Received my_callsigns_json: {my_callsigns_json}")  # Debug log
+            try:
+                new_my_callsigns = json.loads(my_callsigns_json)
+                print(f"Debug - Parsed new_my_callsigns: {new_my_callsigns}")  # Debug log
+            except json.JSONDecodeError:
+                new_my_callsigns = []
+                print("Debug - Failed to parse JSON, using empty list")  # Debug log
+
+            # Сохраняем данные
+            profile.my_callsigns = new_my_callsigns
+            profile.save()
+            print(f"Debug - Saved my_callsigns: {profile.my_callsigns}")  # Debug log
+
+            messages.success(request, f'Данные сохранены! Получено: {new_my_callsigns}')
+        except Exception as e:
+            messages.error(request, f'Ошибка при сохранении: {str(e)}')
+
+    return render(request, 'debug_callsigns.html', {
+        'profile': profile,
+    })
+
+
+def test_callsigns_simple(request):
+    """
+    Простая тестовая страница для проверки сохранения позывных
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Получаем или создаем профиль
+    try:
+        profile = RadioProfile.objects.get(user=request.user)
+    except RadioProfile.DoesNotExist:
+        profile = RadioProfile.objects.create(user=request.user)
+
+    if request.method == 'POST':
+        try:
+            # Обрабатываем my_callsigns из JSON
+            my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
+            print(f"Test - Received my_callsigns_json: {my_callsigns_json}")  # Debug log
+            try:
+                new_my_callsigns = json.loads(my_callsigns_json)
+                print(f"Test - Parsed new_my_callsigns: {new_my_callsigns}")  # Debug log
+            except json.JSONDecodeError:
+                new_my_callsigns = []
+                print("Test - Failed to parse JSON, using empty list")  # Debug log
+
+            # Сохраняем данные
+            profile.my_callsigns = new_my_callsigns
+            profile.save()
+            print(f"Test - Saved my_callsigns: {profile.my_callsigns}")  # Debug log
+
+            messages.success(request, f'Данные сохранены! Получено: {new_my_callsigns}')
+        except Exception as e:
+            messages.error(request, f'Ошибка при сохранении: {str(e)}')
+
+    return render(request, 'test_callsigns_simple.html', {
+        'profile': profile,
+    })
 
 
 def profile_update(request):
@@ -305,6 +383,12 @@ def profile_update(request):
 
     if request.method == 'POST':
         try:
+            print(f"=== DEBUG: Profile POST request ===")  # Debug log
+            print(f"POST data keys: {list(request.POST.keys())}")  # Debug log
+            print(f"my_callsigns_json in POST: {'my_callsigns_json' in request.POST}")  # Debug log
+            print(f"my_callsigns_names[] in POST: {'my_callsigns_names[]' in request.POST}")  # Debug log
+            print(f"Number of my_callsigns_names[]: {len(request.POST.getlist('my_callsigns_names[]'))}")  # Debug log
+            
             # Обновляем поля профиля (callsign всегда равен username)
             profile.callsign = request.user.username.upper()
             profile.first_name = request.POST.get('first_name', '').strip()
@@ -315,17 +399,19 @@ def profile_update(request):
             # Обновляем email пользователя
             new_email = request.POST.get('email', '').strip()
             if new_email:
-                # Простая валидация email
+                # Простая валидация email - не прерываем сохранение если email неверный
                 import re
                 email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
                 if re.match(email_pattern, new_email):
                     request.user.email = new_email
                     request.user.save(update_fields=['email'])
                 else:
-                    messages.error(request, 'Введите корректный email адрес')
-                    return render(request, 'profile_edit.html', {
-                        'profile': profile,
-                    })
+                    # Показываем предупреждение, но не прерываем сохранение
+                    messages.warning(request, 'Введённый email адрес может быть некорректным, но данные профиля сохранены')
+            else:
+                # Если email пустой, очищаем его
+                request.user.email = ''
+                request.user.save(update_fields=['email'])
 
             # Обработка настроек LoTW
             use_lotw = 'use_lotw' in request.POST
@@ -341,24 +427,47 @@ def profile_update(request):
 
             # Обрабатываем my_callsigns из JSON
             my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
+            print(f"=== DEBUG: Profile Update ===")  # Debug log
+            print(f"Received my_callsigns_json: {my_callsigns_json}")  # Debug log
             try:
                 new_my_callsigns = json.loads(my_callsigns_json)
-            except json.JSONDecodeError:
+                print(f"Parsed new_my_callsigns: {new_my_callsigns}")  # Debug log
+                print(f"Type of new_my_callsigns: {type(new_my_callsigns)}")  # Debug log
+            except json.JSONDecodeError as e:
                 new_my_callsigns = []
+                print(f"Failed to parse JSON: {e}, using empty list")  # Debug log
 
             # Проверяем, изменились ли my_callsigns
             old_my_callsigns = profile.my_callsigns if profile.my_callsigns else []
+            print(f"Old my_callsigns from DB: {old_my_callsigns}")  # Debug log
+            print(f"Type of old_my_callsigns: {type(old_my_callsigns)}")  # Debug log
+            
             if isinstance(old_my_callsigns, str):
-                old_my_callsigns = json.loads(old_my_callsigns)
+                try:
+                    old_my_callsigns = json.loads(old_my_callsigns)
+                    print(f"Converted old_my_callsigns from string: {old_my_callsigns}")  # Debug log
+                except json.JSONDecodeError:
+                    old_my_callsigns = []
+                    print("Failed to parse old_my_callsigns as JSON, using empty list")  # Debug log
+
+            print(f"New my_callsigns: {new_my_callsigns}")  # Debug log
+            print(f"Are they equal? {old_my_callsigns == new_my_callsigns}")  # Debug log
 
             # Если изменились - очищаем lotw_lastsync
             if old_my_callsigns != new_my_callsigns:
                 profile.lotw_lastsync = None
                 profile.my_callsigns = new_my_callsigns
                 profile.save(update_fields=['lotw_lastsync', 'my_callsigns'])
+                print("✅ Saved with lotw_lastsync reset")  # Debug log
             else:
                 profile.my_callsigns = new_my_callsigns
-                profile.save()
+                profile.save(update_fields=['my_callsigns'])
+                print("✅ Saved without changes to lotw_lastsync")  # Debug log
+            
+            # Verify the data was saved correctly
+            profile.refresh_from_db()
+            print(f"After save - profile.my_callsigns: {profile.my_callsigns}")  # Debug log
+            print(f"After save - type: {type(profile.my_callsigns)}")  # Debug log
 
             # Также обновляем User модель
             request.user.first_name = profile.first_name
@@ -371,8 +480,13 @@ def profile_update(request):
             messages.error(request, f'Ошибка при обновлении профиля: {str(e)}')
 
     # Для GET запроса или после POST с ошибкой - показываем форму
+    # Добавляем JSON данные в контекст для JavaScript
+    import json
+    profile_json = json.dumps(profile.my_callsigns, ensure_ascii=False)
+    
     return render(request, 'profile_edit.html', {
         'profile': profile,
+        'profile_json': profile_json,
     })
 
 

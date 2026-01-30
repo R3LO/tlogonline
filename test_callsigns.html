@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Callsigns</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Test Callsigns Loading and Saving</h1>
+    
+    <div id="callsigns-container">
+        <!-- Callsigns will be loaded here -->
+    </div>
+    
+    <button onclick="addCallsign()">Add Callsign</button>
+    <button onclick="saveData()">Save Data</button>
+    <button onclick="loadData()">Load Data</button>
+    
+    <div>
+        <h3>Debug Info:</h3>
+        <div id="debug"></div>
+    </div>
+    
+    <script>
+        // Test data from Django template
+        const testData = [{"name": "TEST1"}, {"name": "TEST2"}, {"name": "TEST3/AM"}];
+        
+        function addCallsign() {
+            const container = document.getElementById('callsigns-container');
+            const item = document.createElement('div');
+            item.className = 'my-callsign-item';
+            item.innerHTML = `
+                <input type="text" class="form-control name-input callsign-input"
+                       name="my_callsigns_names[]"
+                       placeholder="Позывной"
+                       autocomplete="off">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        onclick="removeCallsign(this)">
+                    ✕
+                </button>
+            `;
+            container.appendChild(item);
+            
+            // Add input handler
+            const input = item.querySelector('.callsign-input');
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+            });
+        }
+        
+        function removeCallsign(button) {
+            const container = document.getElementById('callsigns-container');
+            const item = button.closest('.my-callsign-item');
+            item.remove();
+            
+            // If no items left, add one
+            const remainingItems = container.querySelectorAll('.my-callsign-item');
+            if (remainingItems.length === 0) {
+                addCallsign();
+            }
+        }
+        
+        function loadData() {
+            const container = document.getElementById('callsigns-container');
+            container.innerHTML = ''; // Clear existing
+            
+            testData.forEach(callsignItem => {
+                const item = document.createElement('div');
+                item.className = 'my-callsign-item';
+                item.innerHTML = `
+                    <input type="text" class="form-control name-input callsign-input"
+                           name="my_callsigns_names[]"
+                           value="${callsignItem.name}"
+                           placeholder="Позывной"
+                           autocomplete="off">
+                    <button type="button" class="btn btn-outline-danger btn-sm"
+                            onclick="removeCallsign(this)">
+                        ✕
+                    </button>
+                `;
+                container.appendChild(item);
+                
+                // Add input handler
+                const input = item.querySelector('.callsign-input');
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+                });
+            });
+            
+            document.getElementById('debug').innerHTML = 'Data loaded: ' + JSON.stringify(testData);
+        }
+        
+        function saveData() {
+            const callsigns = [];
+            const container = document.getElementById('callsigns-container');
+            const items = container.querySelectorAll('.my-callsign-item');
+            
+            items.forEach(item => {
+                const input = item.querySelector('input[name="my_callsigns_names[]"]');
+                const name = input.value.trim();
+                if (name) {
+                    callsigns.push({
+                        name: name.toUpperCase()
+                    });
+                }
+            });
+            
+            // Create hidden input for form submission
+            let hiddenInput = document.getElementById('my_callsigns_json');
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.id = 'my_callsigns_json';
+                hiddenInput.name = 'my_callsigns_json';
+                document.body.appendChild(hiddenInput);
+            }
+            
+            hiddenInput.value = JSON.stringify(callsigns);
+            
+            console.log('Saving callsigns:', callsigns);
+            console.log('JSON field value:', hiddenInput.value);
+            document.getElementById('debug').innerHTML = 'Data to save: ' + JSON.stringify(callsigns, null, 2);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+    </script>
+    
+    <style>
+        .my-callsign-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .my-callsign-item input {
+            flex: 1;
+        }
+    </style>
+</body>
+</html>

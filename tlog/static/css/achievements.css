@@ -1,14 +1,12 @@
 /* Achievements specific styles */
-/* Note: Background and main container styles are handled by base template */
+/* Note: Background, main container styles and common elements are handled by base template */
 
-/* Logbook header styles (used in achievements page) */
-.logbook-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem 1rem;
-    text-align: center;
-    margin-bottom: 0;
-}
+/* OVERRIDE BOOTSTRAP CONTAINER STYLES */
+/* Note: Container and main container styles are handled by base.html */
+
+/* Note: Body styles are handled by base.html */
+
+/* Note: Logbook header styles are handled by base.html */
 
 .logbook-header h2 {
     margin-bottom: 0.5rem;
@@ -20,13 +18,7 @@
     opacity: 0.9;
 }
 
-/* Filter card styles */
-.filter-card {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-}
+/* Note: Filter card styles are handled by base.html */
 
 .stats-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

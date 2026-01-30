@@ -1,19 +1,21 @@
-{% extends 'base_dashboard.html' %}
+{% extends 'base.html' %}
 {% load i18n %}
 {% load static %}
 {% block title %}TLog - {% trans "Profile" %}{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="logbook-header text-center">
-    <h2><span>📊</span> {% trans "Profile" %}</h2>
-    <p class="mb-0">{% trans "Manage your QSO and statistics" %}</p>
-</div>
+<div class="container-fluid mt-4">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="logbook-header text-center">
+            <h2><span>📊</span> {% trans "Profile" %}</h2>
+            <p class="mb-0">{% trans "Manage your QSO and statistics" %}</p>
+        </div>
 
-<div class="p-4">
-    <div class="row">
-        <!-- Основной контент -->
-        <div class="col-lg-9">
+        <div class="p-4">
+            <div class="row">
+                <!-- Основной контент -->
+                <div class="col-lg-9">
             <!-- Статистика QO-100 -->
             <div class="stats-section mb-4">
                 <h5 class="section-title">📡 QO-100 {% trans "Statistics" %}</h5>
@@ -431,9 +433,14 @@
                     {% endif %}
                 </div>
             </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block extra_js %}

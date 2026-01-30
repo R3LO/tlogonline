@@ -1,0 +1,11 @@
+/* Cosmos Diploma Styles */
+
+.my-callsign-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.my-callsign-item .callsign-input {
+    flex: 1;
+}

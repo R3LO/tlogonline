@@ -4,14 +4,16 @@
 {% block title %}TLog - LoTW{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="logbook-header text-center">
-    <h2><span>📡</span> LoTW - Logbook of the World</h2>
-    <p class="mb-0">{% trans "Information about ARRL's LoTW system" %}</p>
-</div>
+<div class="container-fluid mt-4">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="logbook-header text-center">
+            <h2><span>📡</span> LoTW - Logbook of the World</h2>
+            <p class="mb-0">{% trans "Information about ARRL's LoTW system" %}</p>
+        </div>
 
-<div class="container mt-4">
-    <div class="row">
+        <div class="p-4">
+            <div class="row">
         <div class="col-lg-8">
             <!-- Основная информация о LoTW -->
             <div class="card mb-4">
@@ -217,30 +219,14 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.logbook-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem 0;
-    margin-bottom: 0;
-}
-
-.logbook-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.logbook-header p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
+/* Специфичные стили для страницы LoTW */
 .card {
     border: none;
     border-radius: 12px;

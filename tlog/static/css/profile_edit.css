@@ -69,6 +69,8 @@ body {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid #e9ecef;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 @media (max-width: 768px) {

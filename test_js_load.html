@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест загрузки данных из базы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Тест загрузки данных из базы</h1>
+        
+        <div class="mb-3">
+            <label class="form-label">Данные из базы:</label>
+            <textarea id="databaseData" class="form-control" rows="5" placeholder="Вставьте JSON данные из базы"></textarea>
+            <button class="btn btn-primary mt-2" onclick="loadFromDatabase()">Загрузить в форму</button>
+        </div>
+        
+        <form id="testForm">
+            <div class="mb-3">
+                <label for="callsigns-container" class="form-label">Мои позывные в LoTW:</label>
+                <div id="callsigns-container">
+                    <!-- Поля будут добавлены динамически -->
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addCallsign()">
+                    + Добавить позывной
+                </button>
+            </div>
+            
+            <input type="hidden" id="my_callsigns_json" name="my_callsigns_json">
+            
+            <button type="submit" class="btn btn-success">Сохранить (тест)</button>
+        </form>
+        
+        <div id="results" class="mt-4">
+            <h3>Результаты:</h3>
+            <pre id="output"></pre>
+        </div>
+    </div>
+
+    <script>
+        // ========== Callsign Management Functions ==========
+        
+        // Initialize handlers for existing callsign inputs
+        function initCallsignInputs() {
+            document.querySelectorAll('.callsign-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+                });
+            });
+        }
+
+        // Add new callsign input
+        window.addCallsign = function(value = '') {
+            const container = document.getElementById('callsigns-container');
+            const item = document.createElement('div');
+            item.className = 'my-callsign-item mb-2 d-flex';
+            item.innerHTML = `
+                <input type="text" class="form-control name-input callsign-input flex-grow-1 me-2"
+                       name="my_callsigns_names[]"
+                       value="${value}"
+                       placeholder="Позывной"
+                       autocomplete="off">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        onclick="removeCallsign(this)">
+                    ✕
+                </button>
+            `;
+            container.appendChild(item);
+            
+            // Инициализируем обработчики для нового поля
+            initCallsignInputs();
+            
+            console.log('Added new callsign input:', value);
+        };
+
+        // Remove callsign input
+        window.removeCallsign = function(button) {
+            const container = document.getElementById('callsigns-container');
+            const items = container.querySelectorAll('.my-callsign-item');
+            
+            if (items.length > 1) {
+                // Удаляем элемент
+                const item = button.closest('.my-callsign-item');
+                item.remove();
+                console.log('Removed callsign input, remaining:', items.length - 1);
+            } else {
+                // Если это последний элемент, просто очищаем его
+                const item = button.closest('.my-callsign-item');
+                const input = item.querySelector('input');
+                input.value = '';
+                console.log('Cleared last callsign input');
+            }
+        };
+        
+        // Load data from database into form
+        window.loadFromDatabase = function() {
+            const databaseData = document.getElementById('databaseData').value.trim();
+            
+            if (!databaseData) {
+                alert('Введите данные из базы');
+                return;
+            }
+            
+            console.log('Loading from database:', databaseData);
+            
+            // Очищаем контейнер
+            const container = document.getElementById('callsigns-container');
+            container.innerHTML = '';
+            
+            try {
+                let callsigns;
+                
+                // Пытаемся распарсить как JSON
+                try {
+                    callsigns = JSON.parse(databaseData);
+                    console.log('Parsed as JSON:', callsigns);
+                } catch {
+                    // Если не JSON, может быть просто список строк
+                    if (databaseData.startsWith('[') && databaseData.endsWith(']')) {
+                        // Это JSON, но с ошибкой парсинга
+                        callsigns = [];
+                    } else {
+                        // Это простой список строк
+                        callsigns = databaseData.split('\n').filter(s => s.trim()).map(s => s.trim());
+                        console.log('Parsed as simple list:', callsigns);
+                    }
+                }
+                
+                // Добавляем позывные в форму
+                if (Array.isArray(callsigns)) {
+                    if (callsigns.length === 0) {
+                        // Добавляем одно пустое поле
+                        addCallsign();
+                    } else {
+                        callsigns.forEach(function(callsign) {
+                            if (typeof callsign === 'object' && callsign.name) {
+                                addCallsign(callsign.name);
+                            } else if (typeof callsign === 'string') {
+                                addCallsign(callsign);
+                            }
+                        });
+                    }
+                }
+                
+                console.log('Form populated with callsigns');
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Ошибка при загрузке данных: ' + error.message);
+            }
+        };
+        
+        // ========== Form Submit Handler ==========
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('=== DEBUG: Form Submit ===');
+            
+            const callsigns = [];
+            const container = document.getElementById('callsigns-container');
+            const items = container.querySelectorAll('.my-callsign-item');
+
+            console.log('Found items:', items.length);
+            
+            items.forEach(function(item, index) {
+                const input = item.querySelector('input[name="my_callsigns_names[]"]');
+                if (input) {
+                    const name = input.value.trim();
+                    console.log(`Item ${index}: "${name}"`);
+                    if (name) {
+                        callsigns.push({
+                            name: name.toUpperCase()
+                        });
+                    }
+                }
+            });
+
+            console.log('Collected callsigns:', callsigns);
+            
+            const jsonField = document.getElementById('my_callsigns_json');
+            if (jsonField) {
+                const jsonValue = JSON.stringify(callsigns);
+                jsonField.value = jsonValue;
+                console.log('JSON field value set to:', jsonValue);
+            } else {
+                console.error('my_callsigns_json field not found!');
+            }
+            
+            // Показываем результаты
+            const output = document.getElementById('output');
+            output.textContent = `
+Исходные данные из базы: ${databaseData}
+Собранные позывные: ${JSON.stringify(callsigns, null, 2)}
+JSON поле: ${jsonField.value}
+Проверка: ${jsonField.value === JSON.stringify(callsigns)}
+            `;
+            
+            return false;
+        });
+
+        // Initialize handlers when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCallsignInputs();
+            
+            // Заполняем поле тестовыми данными
+            const testData = '[{"name": "TEST123"}, {"name": "UA4LO/AM"}, {"name": "RV3LO"}]';
+            document.getElementById('databaseData').value = testData;
+        });
+    </script>
+</body>
+</html>

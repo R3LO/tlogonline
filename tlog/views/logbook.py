@@ -45,15 +45,15 @@ def logbook(request):
         return render(request, 'blocked.html', {'reason': reason})
 
     # Получаем параметры фильтрации
-    my_callsign_filter = request.GET.get('my_callsign', '').strip()
-    search_callsign = request.GET.get('search_callsign', '').strip()
-    search_qth = request.GET.get('search_qth', '').strip()
-    date_from = request.GET.get('date_from', '').strip()
-    date_to = request.GET.get('date_to', '').strip()
-    mode_filter = request.GET.get('mode', '').strip()
-    band_filter = request.GET.get('band', '').strip()
-    sat_name_filter = request.GET.get('sat_name', '').strip()
-    lotw_filter = request.GET.get('lotw', '').strip()
+    my_callsign_filter = request.POST.get('my_callsign', '').strip()
+    search_callsign = request.POST.get('search_callsign', '').strip()
+    search_qth = request.POST.get('search_qth', '').strip()
+    date_from = request.POST.get('date_from', '').strip()
+    date_to = request.POST.get('date_to', '').strip()
+    mode_filter = request.POST.get('mode', '').strip()
+    band_filter = request.POST.get('band', '').strip()
+    sat_name_filter = request.POST.get('sat_name', '').strip()
+    lotw_filter = request.POST.get('lotw', '').strip()
 
     # Базовый QuerySet для QSO пользователя
     qso_queryset = QSO.objects.filter(user=request.user)
@@ -99,7 +99,7 @@ def logbook(request):
 
     # Пагинация (50 записей на страницу)
     page_size = 50
-    page = int(request.GET.get('page', 1))
+    page = int(request.POST.get('page', 1))
     start = (page - 1) * page_size
     end = start + page_size
 
@@ -1082,6 +1082,7 @@ def export_adif(request):
     Экспорт лога в ADIF файл с учётом фильтров
     """
     # Получаем параметры фильтрации (те же что в logbook view)
+    my_callsign_filter = request.GET.get('my_callsign', '').strip()
     search_callsign = request.GET.get('search_callsign', '').strip()
     search_qth = request.GET.get('search_qth', '').strip()
     date_from = request.GET.get('date_from', '').strip()
@@ -1093,6 +1094,10 @@ def export_adif(request):
 
     # Базовый QuerySet для QSO пользователя
     qso_queryset = QSO.objects.filter(user=request.user)
+
+    # Фильтр по моему позывному
+    if my_callsign_filter:
+        qso_queryset = qso_queryset.filter(my_callsign__iexact=my_callsign_filter)
 
     # Применяем поиск по части позывного
     if search_callsign:

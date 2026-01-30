@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>Тест сохранения позывных</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Информация о пользователе</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Пользователь:</strong> {{ user.username }}</p>
+                    <p><strong>Профиль существует:</strong> {% if profile %}Да{% else %}Нет{% endif %}</p>
+                    {% if profile %}
+                        <p><strong>Текущие позывные в базе:</strong></p>
+                        <ul>
+                            {% for callsign in profile.my_callsigns %}
+                                <li>{{ callsign }}</li>
+                            {% empty %}
+                                <li>Позывных нет</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5>Тестовая форма</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'debug_callsigns' %}">
+                        {% csrf_token %}
+                        
+                        <div id="callsigns-container">
+                            <!-- Позывные будут добавляться здесь -->
+                        </div>
+                        
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addCallsign()">
+                            <span>+</span> Добавить позывной
+                        </button>
+                        
+                        <input type="hidden" name="my_callsigns_json" id="my_callsigns_json" value='{{ profile.my_callsigns|default:"[]"|safe }}'>
+                        
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </form>
+                    
+                    <div class="mt-3">
+                        <h6>Отладка:</h6>
+                        <div id="debug-info">
+                            <p>Проверьте консоль браузера для отладочной информации</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DEBUG: Тестовая страница загружена ===');
+    
+    // Получаем данные из профиля
+    const profileDataElement = document.getElementById('my_callsigns_json');
+    const profileDataRaw = profileDataElement ? profileDataElement.value : '[]';
+    console.log('Raw profile data:', profileDataRaw);
+    
+    let profileData = [];
+    try {
+        profileData = JSON.parse(profileDataRaw);
+        console.log('Parsed profile data:', profileData);
+    } catch (e) {
+        console.error('Failed to parse profile data:', e);
+        profileData = [];
+    }
+    
+    // Загружаем позывные
+    loadCallsignsFromProfile(profileData);
+    
+    // Добавляем обработчик формы
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        console.log('=== DEBUG: Форма отправлена ===');
+        
+        const callsigns = [];
+        const container = document.getElementById('callsigns-container');
+        const items = container.querySelectorAll('.my-callsign-item');
+        
+        console.log('Найдено элементов:', items.length);
+        
+        items.forEach(function(item, index) {
+            const input = item.querySelector('input[name="my_callsigns_names[]"]');
+            if (input) {
+                const name = input.value.trim();
+                console.log(`Элемент ${index}: "${name}"`);
+                if (name) {
+                    callsigns.push({
+                        name: name.toUpperCase()
+                    });
+                }
+            }
+        });
+        
+        console.log('Собранные позывные:', callsigns);
+        
+        const jsonField = document.getElementById('my_callsigns_json');
+        const jsonValue = JSON.stringify(callsigns);
+        jsonField.value = jsonValue;
+        console.log('JSON поле установлено:', jsonValue);
+        
+        // Проверяем, что данные действительно попали в форму
+        const formData = new FormData(form);
+        console.log('Данные в форме:', formData.get('my_callsigns_json'));
+    });
+});
+
+function loadCallsignsFromProfile(callsigns) {
+    const container = document.getElementById('callsigns-container');
+    container.innerHTML = '';
+    
+    console.log('Загружаем позывные:', callsigns);
+    
+    if (callsigns && callsigns.length > 0) {
+        callsigns.forEach(function(callsignItem) {
+            const name = callsignItem.name || callsignItem;
+            addCallsignInput(name);
+        });
+    } else {
+        addCallsignInput('');
+    }
+}
+
+function addCallsignInput(value) {
+    const container = document.getElementById('callsigns-container');
+    const item = document.createElement('div');
+    item.className = 'my-callsign-item';
+    item.innerHTML = `
+        <input type="text" class="form-control name-input callsign-input"
+               name="my_callsigns_names[]"
+               value="${value || ''}"
+               placeholder="Позывной"
+               autocomplete="off">
+        <button type="button" class="btn btn-outline-danger btn-sm"
+                onclick="removeCallsign(this)">
+            ✕
+        </button>
+    `;
+    container.appendChild(item);
+    
+    // Добавляем обработчик
+    const input = item.querySelector('.callsign-input');
+    input.addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+    });
+}
+
+function addCallsign() {
+    addCallsignInput('');
+}
+
+function removeCallsign(button) {
+    const container = document.getElementById('callsigns-container');
+    const item = button.closest('.my-callsign-item');
+    item.remove();
+    
+    const remainingItems = container.querySelectorAll('.my-callsign-item');
+    if (remainingItems.length === 0) {
+        addCallsign();
+    }
+}
+</script>
+
+<style>
+.my-callsign-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.my-callsign-item input {
+    flex: 1;
+}
+</style>
+{% endblock %}

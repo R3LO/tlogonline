@@ -29,14 +29,7 @@
     margin: 0;
 }
 
-.logbook-page .main-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1rem;
-    overflow: hidden;
-}
+/* Note: Main container styles are handled by base.html */
 
 /* Navigation styles scoped to logbook */
 .logbook-page .navbar {
@@ -480,35 +473,39 @@
 }
 
 .logbook-page .btn-outline-primary:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    color: white;
+    background-color: #5a67d8 !important;
+    border-color: #5a67d8 !important;
+    color: white !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(90, 103, 216, 0.3);
 }
 
 .logbook-page .btn-success {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    border: none;
-    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logbook-page .btn-success:hover {
-    background: linear-gradient(135deg, #38d86a 0%, #2ee5c4 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .logbook-page .btn-warning {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    border: none;
-    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);
+    background-color: #e0a800 !important;
+    border-color: #e0a800 !important;
+    color: #212529 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logbook-page .btn-warning:hover {
-    background: linear-gradient(135deg, #f95d8a 0%, #fdd62b 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(250, 112, 154, 0.4);
+    background-color: #d39e00 !important;
+    border-color: #d39e00 !important;
+    color: #212529 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Badges scoped to logbook */
@@ -698,9 +695,36 @@
 }
 
 .logbook-page .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    color: white !important;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.logbook-page .page-item.active .page-link span {
+    color: white !important;
+}
+
+.logbook-page .page-item.active .page-link * {
+    color: white !important;
+}
+
+/* Force white color for active page - maximum specificity */
+html body div.container-fluid div.main-container ul.pagination li.page-item.active span.page-link {
+    color: white !important;
+}
+
+html body div.container-fluid div.main-container ul.pagination li.page-item.active span.page-link * {
+    color: white !important;
+}
+
+/* Bootstrap override - maximum specificity */
+.page-item.active .page-link[style*="linear-gradient"] {
+    color: white !important;
+}
+
+.page-item.active .page-link[style*="linear-gradient"] * {
+    color: white !important;
 }
 
 /* Responsive Design scoped to logbook */

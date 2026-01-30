@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 logbook-page">
+<div class="container-fluid mt-4 logbook-page">
     <div class="main-container">
         <!-- Header -->
         <div class="logbook-header text-center">
-            <h2><span>📓</span> {% trans "Журнал" %}</h2>
+            <h2><span>📋</span> {% trans "Журнал" %}</h2>
             <p class="mb-0">{% trans "Полный журнал радиосвязей" %}</p>
         </div>
 
@@ -21,16 +21,16 @@
         <div class="p-4">
             <!-- Заголовок и кнопки управления -->
             <div class="mb-4">
-                <h4 class="mb-3"><span>📋</span> QSO в вашем логе</h4>
                 <div class="d-flex gap-2 flex-wrap button-row">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQSOModal">
                         <span>➕</span> Добавить QSO
                     </button>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adifUploadModal">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#adifUploadModal">
                         <span>📤</span> Загрузить ADIF
                     </button>
                     {% if total_count > 0 %}
                     <form action="{% url 'export_adif' %}" method="get" id="adifExportForm">
+                        <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
                         <input type="hidden" name="date_from" value="{{ date_from }}">
                         <input type="hidden" name="date_to" value="{{ date_to }}">
                         <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
@@ -39,11 +39,11 @@
                         <input type="hidden" name="band" value="{{ band_filter }}">
                         <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
                         <input type="hidden" name="lotw" value="{{ lotw_filter }}">
-                        <button type="submit" class="btn btn-success" title="Экспорт лога в ADIF файл по фильтру" id="exportAdifBtn">
+                        <button type="submit" class="btn btn-secondary" title="Экспорт лога в ADIF файл по фильтру" id="exportAdifBtn">
                             <span>📦</span> Экспорт ADIF
                         </button>
                     </form>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#clearLogModal">
+                    <button type="button" class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#clearLogModal">
                         <span>🗑️</span> Удалить весь лог
                     </button>
                     <div class="button-spacer"></div>
@@ -66,7 +66,8 @@
             <!-- Фильтры -->
             <div class="filter-card mb-4">
                 <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
-                <form method="GET" class="filter-controls">
+                <form method="POST" class="filter-controls">
+                    {% csrf_token %}
                     <div class="filter-group">
                         <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
                         <select class="form-select form-select-sm" name="my_callsign">
@@ -219,11 +220,11 @@
                                 <td class="col-actions action-column" data-label="⚙️ Действия">
                                     <div class="action-buttons">
                                         {% if qso.lotw == 'Y' %}
-                                        <button type="button" class="btn btn-sm btn-info btn-view" data-id="{{ qso.id }}" title="Просмотр">
+                                        <button type="button" class="btn btn-sm btn-secondary btn-view" data-id="{{ qso.id }}" title="Просмотр">
                                             <span>👁️</span>
                                         </button>
                                         {% else %}
-                                        <button type="button" class="btn btn-sm btn-primary btn-edit" data-id="{{ qso.id }}" title="Редактировать">
+                                        <button type="button" class="btn btn-sm btn-secondary btn-edit" data-id="{{ qso.id }}" title="Редактировать">
                                             <span>✏️</span>
                                         </button>
                                         {% endif %}
@@ -242,10 +243,23 @@
                 <!-- Пагинация -->
                 {% if total_pages > 1 %}
                 <nav aria-label="Навигация по страницам" class="mt-4">
-                    <ul class="pagination">
+                    <ul class="pagination justify-content-center">
                         {% if current_page > 1 %}
                             <li class="page-item">
-                                <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ current_page|add:'-1' }}">Предыдущая</a>
+                                <form method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
+                                    <input type="hidden" name="date_from" value="{{ date_from }}">
+                                    <input type="hidden" name="date_to" value="{{ date_to }}">
+                                    <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
+                                    <input type="hidden" name="search_qth" value="{{ search_qth }}">
+                                    <input type="hidden" name="mode" value="{{ mode_filter }}">
+                                    <input type="hidden" name="band" value="{{ band_filter }}">
+                                    <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
+                                    <input type="hidden" name="lotw" value="{{ lotw_filter }}">
+                                    <input type="hidden" name="page" value="{{ current_page|add:'-1' }}">
+                                    <button type="submit" class="page-link btn-link">Предыдущая</button>
+                                </form>
                             </li>
                         {% endif %}
 
@@ -261,14 +275,40 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ page_num }}">{{ page_num }}</a>
+                                    <form method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
+                                        <input type="hidden" name="date_from" value="{{ date_from }}">
+                                        <input type="hidden" name="date_to" value="{{ date_to }}">
+                                        <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
+                                        <input type="hidden" name="search_qth" value="{{ search_qth }}">
+                                        <input type="hidden" name="mode" value="{{ mode_filter }}">
+                                        <input type="hidden" name="band" value="{{ band_filter }}">
+                                        <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
+                                        <input type="hidden" name="lotw" value="{{ lotw_filter }}">
+                                        <input type="hidden" name="page" value="{{ page_num }}">
+                                        <button type="submit" class="page-link btn-link">{{ page_num }}</button>
+                                    </form>
                                 </li>
                             {% endif %}
                         {% endfor %}
 
                         {% if current_page < total_pages %}
                             <li class="page-item">
-                                <a class="page-link" href="?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search_callsign %}search_callsign={{ search_callsign }}&{% endif %}{% if search_qth %}search_qth={{ search_qth }}&{% endif %}{% if mode_filter %}mode={{ mode_filter }}&{% endif %}{% if band_filter %}band={{ band_filter }}&{% endif %}{% if sat_name_filter %}sat_name={{ sat_name_filter }}&{% endif %}{% if lotw_filter %}lotw={{ lotw_filter }}&{% endif %}page={{ current_page|add:'1' }}">Следующая</a>
+                                <form method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
+                                    <input type="hidden" name="date_from" value="{{ date_from }}">
+                                    <input type="hidden" name="date_to" value="{{ date_to }}">
+                                    <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
+                                    <input type="hidden" name="search_qth" value="{{ search_qth }}">
+                                    <input type="hidden" name="mode" value="{{ mode_filter }}">
+                                    <input type="hidden" name="band" value="{{ band_filter }}">
+                                    <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
+                                    <input type="hidden" name="lotw" value="{{ lotw_filter }}">
+                                    <input type="hidden" name="page" value="{{ current_page|add:'1' }}">
+                                    <button type="submit" class="page-link btn-link">Следующая</button>
+                                </form>
                             </li>
                         {% endif %}
                     </ul>
@@ -403,7 +443,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span>✖</span> Отмена
                         </button>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-secondary">
                             <span>📤</span> Загрузить и обработать
                         </button>
                     </div>

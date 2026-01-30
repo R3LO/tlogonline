@@ -25,22 +25,13 @@
     function loadProfileData() {
         console.log('=== Loading profile data ===');
         
-        // Сначала пробуем получить данные из script тега (новый способ)
-        let rawData = '';
-        const scriptElement = document.getElementById('callsigns-data');
-        if (scriptElement && scriptElement.textContent.trim()) {
-            rawData = scriptElement.textContent.trim();
-            console.log('Loaded data from script tag:', rawData);
-        } else {
-            // Если script тега нет, используем старый способ с input полем
-            const jsonField = document.getElementById('my_callsigns_json');
-            if (!jsonField) {
-                console.error('Neither script tag nor input field found!');
-                return;
-            }
-            rawData = jsonField.value.trim();
-            console.log('Loaded data from input field:', rawData);
+        const jsonField = document.getElementById('my_callsigns_json');
+        if (!jsonField) {
+            console.error('my_callsigns_json field not found!');
+            return;
         }
+        
+        const rawData = jsonField.value.trim();
         console.log('Raw data from database:', rawData);
         
         if (!rawData || rawData === '[]') {
@@ -217,10 +208,15 @@
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
                 submitBtn.disabled = true;
-            }
                 
-            // Позволяем форме отправиться на сервер
-            // return false; // УБРАНО - теперь форма отправляется на сервер
+                // Восстанавливаем кнопку через 3 секунды
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+            
+            return false; // Предотвращаем отправку формы для тестирования
         });
         
         console.log('Event handlers initialized');

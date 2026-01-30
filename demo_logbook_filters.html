@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест блока фильтров Logbook</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="tlog/static/css/common.css" rel="stylesheet">
+    <link href="tlog/static/css/achievements.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .page-header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .demo-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>📡 TLog - Демонстрация блока фильтров</h1>
+            <p class="mb-0">Страница logbook с обновленным блоком фильтрации в стиле achievements</p>
+        </div>
+
+        <div class="demo-section">
+            <h3 class="text-white mb-4">🔍 Блок фильтров (стиль achievements)</h3>
+            
+            <!-- Наш новый блок фильтров -->
+            <div class="filter-card mb-4">
+                <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
+                <form method="GET" class="filter-controls">
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
+                        <select class="form-select form-select-sm" name="my_callsign">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="UA6PEY">UA6PEY</option>
+                            <option value="UA3LPF">UA3LPF</option>
+                            <option value="R3LO">R3LO</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Дата от" %}</label>
+                        <input type="date" class="form-control form-control-sm" name="date_from" value="">
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Дата до" %}</label>
+                        <input type="date" class="form-control form-control-sm" name="date_to" value="">
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Позывной" %}</label>
+                        <input type="text" class="form-control form-control-sm" name="search_callsign" value="" placeholder="{% trans 'Позывной' %}">
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">QTH локатор</label>
+                        <input type="text" class="form-control form-control-sm" name="search_qth" value="" placeholder="QTH локатор">
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Диапазон" %}</label>
+                        <select class="form-select form-select-sm" name="band">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="160m">160m</option>
+                            <option value="80m">80m</option>
+                            <option value="40m">40m</option>
+                            <option value="20m">20m</option>
+                            <option value="15m">15m</option>
+                            <option value="10m">10m</option>
+                            <option value="2m">2m</option>
+                            <option value="70cm">70cm</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Вид связи" %}</label>
+                        <select class="form-select form-select-sm" name="mode">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="SSB">SSB</option>
+                            <option value="CW">CW</option>
+                            <option value="FM">FM</option>
+                            <option value="AM">AM</option>
+                            <option value="RTTY">RTTY</option>
+                            <option value="PSK31">PSK31</option>
+                            <option value="FT8">FT8</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">{% trans "Спутник" %}</label>
+                        <select class="form-select form-select-sm" name="sat_name">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="AO-7">AO-7</option>
+                            <option value="AO-10">AO-10</option>
+                            <option value="FO-29">FO-29</option>
+                            <option value="SO-50">SO-50</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label small mb-1">LoTW</label>
+                        <select class="form-select form-select-sm" name="lotw">
+                            <option value="">{% trans "Все" %}</option>
+                            <option value="Y">{% trans "Да" %}</option>
+                            <option value="N">{% trans "Нет" %}</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary btn-sm" title="{% trans 'Применить фильтры' %}">
+                            <span>🔍</span>
+                        </button>
+                        <a href="#" class="btn btn-secondary btn-sm" title="{% trans 'Сбросить фильтры' %}">
+                            <span>🔄</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3 class="text-white mb-4">📊 Что было изменено</h3>
+            <ul class="text-white">
+                <li>✅ Добавлен блок фильтрации в стиле achievements</li>
+                <li>✅ Название "🔍 Фильтры" как на achievements</li>
+                <li>✅ Использует CSS классы filter-card, filter-controls, filter-group</li>
+                <li>✅ Добавлен фильтр "Мой позывной" для выбора из доступных позывных</li>
+                <li>✅ Все существующие фильтры сохранены и работают</li>
+                <li>✅ Обновлено представление logbook для поддержки нового фильтра</li>
+                <li>✅ Кнопки "🔍 Применить" и "🔄 Сбросить"</li>
+            </ul>
+        </div>
+
+        <div class="text-center">
+            <a href="http://127.0.0.1:8000/logbook/" class="btn btn-light btn-lg">
+                🚀 Перейти к реальной странице Logbook
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
