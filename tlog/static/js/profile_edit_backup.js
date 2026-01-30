@@ -1,7 +1,7 @@
 // Profile Edit JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== Profile Edit JS Loaded ==='); // Debug log
+    // console.log removed // Debug log
     
     // ========== Callsign Management Functions ==========
     
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Инициализируем обработчики для нового поля
         initCallsignInputs();
         
-        console.log('Added new callsign input'); // Debug log
+        // console.log removed // Debug log
     };
 
     // Remove callsign input
@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Удаляем элемент
             const item = button.closest('.my-callsign-item');
             item.remove();
-            console.log('Removed callsign input, remaining:', items.length - 1); // Debug log
+            // console.log removed // Debug log
         } else {
             // Если это последний элемент, просто очищаем его
             const item = button.closest('.my-callsign-item');
             const input = item.querySelector('input');
             input.value = '';
-            console.log('Cleared last callsign input'); // Debug log
+            // console.log removed // Debug log
         }
     };
     
@@ -68,20 +68,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileForm = document.querySelector('form');
     if (profileForm) {
         profileForm.addEventListener('submit', function(e) {
-            console.log('=== DEBUG: Form Submit ==='); // Debug log
-            console.log('Form submit triggered'); // Debug log
+            // console.log removed // Debug log
+            // console.log removed // Debug log
             
             const callsigns = [];
             const container = document.getElementById('callsigns-container');
             const items = container.querySelectorAll('.my-callsign-item');
 
-            console.log('Found items:', items.length); // Debug log
+            // console.log removed // Debug log
             
             items.forEach(function(item, index) {
                 const input = item.querySelector('input[name="my_callsigns_names[]"]');
                 if (input) {
                     const name = input.value.trim();
-                    console.log(`Item ${index}: "${name}"`); // Debug log
+                    // console.log removed // Debug log
                     if (name) {
                         callsigns.push({
                             name: name.toUpperCase()
@@ -90,16 +90,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            console.log('Collected callsigns:', callsigns); // Debug log
+            // console.log removed // Debug log
             
             const jsonField = document.getElementById('my_callsigns_json');
             if (jsonField) {
                 const jsonValue = JSON.stringify(callsigns);
                 jsonField.value = jsonValue;
-                console.log('JSON field value set to:', jsonValue); // Debug log
+                // console.log removed // Debug log
                 
                 // Дополнительная проверка
-                console.log('JSON field after setting:', jsonField.value); // Debug log
+                // console.log removed // Debug log
             } else {
                 console.error('my_callsigns_json field not found!'); // Debug log
             }
@@ -320,5 +320,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // ========== Debug Info ==========
-    console.log('Profile edit page initialized successfully'); // Debug log
+    // console.log removed // Debug log
 });

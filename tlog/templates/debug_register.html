@@ -114,10 +114,10 @@
             responseDiv.innerHTML = '<strong>Отправляемые данные:</strong><br>' + JSON.stringify(data, null, 2) + '<br><br>';
 
             try {
-                console.log('Отправляем данные:', data);
+                // console.log removed
 
                 const csrfToken = getCookie('csrftoken');
-                console.log('CSRF токен:', csrfToken);
+                // console.log removed
 
                 const headers = {
                     'Content-Type': 'application/json',
@@ -133,11 +133,11 @@
                     body: JSON.stringify(data)
                 });
 
-                console.log('Статус ответа:', response.status);
+                // console.log removed
                 console.log('Заголовки ответа:', Object.fromEntries(response.headers.entries()));
 
                 const result = await response.json();
-                console.log('Полный ответ сервера:', result);
+                // console.log removed
 
                 responseDiv.innerHTML += '<strong>Статус ответа:</strong> ' + response.status + '<br>';
                 responseDiv.innerHTML += '<strong>Заголовки:</strong><br>' + JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2) + '<br><br>';

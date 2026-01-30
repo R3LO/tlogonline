@@ -62,17 +62,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== DEBUG: Тестовая страница загружена ===');
+    // console.log removed
     
     // Получаем данные из профиля
     const profileDataElement = document.getElementById('my_callsigns_json');
     const profileDataRaw = profileDataElement ? profileDataElement.value : '[]';
-    console.log('Raw profile data:', profileDataRaw);
+    // console.log removed
     
     let profileData = [];
     try {
         profileData = JSON.parse(profileDataRaw);
-        console.log('Parsed profile data:', profileData);
+        // console.log removed
     } catch (e) {
         console.error('Failed to parse profile data:', e);
         profileData = [];
@@ -84,19 +84,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Добавляем обработчик формы
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
-        console.log('=== DEBUG: Форма отправлена ===');
+        // console.log removed
         
         const callsigns = [];
         const container = document.getElementById('callsigns-container');
         const items = container.querySelectorAll('.my-callsign-item');
         
-        console.log('Найдено элементов:', items.length);
+        // console.log removed
         
         items.forEach(function(item, index) {
             const input = item.querySelector('input[name="my_callsigns_names[]"]');
             if (input) {
                 const name = input.value.trim();
-                console.log(`Элемент ${index}: "${name}"`);
+                // console.log removed
                 if (name) {
                     callsigns.push({
                         name: name.toUpperCase()
@@ -105,12 +105,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        console.log('Собранные позывные:', callsigns);
+        // console.log removed
         
         const jsonField = document.getElementById('my_callsigns_json');
         const jsonValue = JSON.stringify(callsigns);
         jsonField.value = jsonValue;
-        console.log('JSON поле установлено:', jsonValue);
+        // console.log removed
         
         // Проверяем, что данные действительно попали в форму
         const formData = new FormData(form);
@@ -122,7 +122,7 @@ function loadCallsignsFromProfile(callsigns) {
     const container = document.getElementById('callsigns-container');
     container.innerHTML = '';
     
-    console.log('Загружаем позывные:', callsigns);
+    // console.log removed
     
     if (callsigns && callsigns.length > 0) {
         callsigns.forEach(function(callsignItem) {

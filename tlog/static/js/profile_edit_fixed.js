@@ -4,12 +4,12 @@
 (function($) {
     'use strict';
     
-    console.log('=== Profile Edit JS Loaded ===');
+    // console.log removed
     
     // ========== Инициализация при загрузке страницы ==========
     
     function initProfileEdit() {
-        console.log('Initializing profile edit...');
+        // console.log removed
         
         // Загружаем данные из базы в форму
         loadProfileData();
@@ -23,7 +23,7 @@
     
     // Загрузка данных профиля при загрузке страницы
     function loadProfileData() {
-        console.log('=== Loading profile data ===');
+        // console.log removed
         
         const jsonField = document.getElementById('my_callsigns_json');
         if (!jsonField) {
@@ -32,11 +32,11 @@
         }
         
         const rawData = jsonField.value.trim();
-        console.log('Raw data from database:', rawData);
+        // console.log removed
         
         if (!rawData || rawData === '[]') {
-            console.log('No callsigns data found, adding empty field');
-            addCallsign();
+            // console.log removed
+            // Не добавляем поле автоматически - пользователь сам нажмет кнопку "Добавить позывной"
             return;
         }
         
@@ -46,9 +46,9 @@
             // Пытаемся распарсить как JSON
             try {
                 callsigns = JSON.parse(rawData);
-                console.log('Parsed callsigns:', callsigns);
+                // console.log removed
             } catch (parseError) {
-                console.log('Failed to parse as JSON, treating as simple list');
+                // console.log removed
                 // Если не JSON, возможно это простой список строк
                 if (rawData.startsWith('[') && rawData.endsWith(']')) {
                     // Это JSON, но с ошибкой парсинга
@@ -65,10 +65,7 @@
             
             // Добавляем позывные в форму
             if (Array.isArray(callsigns)) {
-                if (callsigns.length === 0) {
-                    // Добавляем одно пустое поле
-                    addCallsign();
-                } else {
+                if (callsigns.length > 0) {
                     callsigns.forEach(function(callsign) {
                         let callsignValue = '';
                         
@@ -80,17 +77,20 @@
                         
                         addCallsign(callsignValue);
                     });
+                    
+                    // console.log removed
+                } else {
+                    // console.log removed
+                    // Не добавляем пустое поле автоматически
                 }
-                
-                console.log('Loaded callsigns into form');
             } else {
                 console.error('Invalid callsigns data format:', callsigns);
-                addCallsign();
+                // Не добавляем пустое поле при ошибке
             }
             
         } catch (error) {
             console.error('Error loading profile data:', error);
-            addCallsign();
+            // Не добавляем пустое поле при ошибке
         }
     }
     
@@ -103,7 +103,7 @@
                 this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
             });
         });
-        console.log('Initialized callsign inputs');
+        // console.log removed
     }
 
     // Add new callsign input
@@ -127,7 +127,7 @@
         // Инициализируем обработчики для нового поля
         initCallsignInputs();
         
-        console.log('Added callsign input:', value);
+        // console.log removed
     }
 
     // Remove callsign input
@@ -139,14 +139,16 @@
             // Удаляем элемент
             const item = button.closest('.my-callsign-item');
             item.remove();
-            console.log('Removed callsign input, remaining:', items.length - 1);
+            // console.log removed
         } else {
-            // Если это последний элемент, просто очищаем его
+            // Если это последний элемент, удаляем его полностью
             const item = button.closest('.my-callsign-item');
-            const input = item.querySelector('input');
-            input.value = '';
-            console.log('Cleared last callsign input');
+            item.remove();
+            // console.log removed
         }
+        
+        // Если после удаления не осталось полей, ничего не добавляем автоматически
+        // Пользователь сам может добавить поле кнопкой "Добавить позывной"
     }
     
     // ========== Event Handlers ==========
@@ -162,20 +164,20 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            console.log('=== DEBUG: Form Submit ===');
-            console.log('Form submit triggered');
+            // console.log removed
+            // console.log removed
             
             const callsigns = [];
             const container = document.getElementById('callsigns-container');
             const items = container.querySelectorAll('.my-callsign-item');
 
-            console.log('Found items:', items.length);
+            // console.log removed
             
             items.forEach(function(item, index) {
                 const input = item.querySelector('input[name="my_callsigns_names[]"]');
                 if (input) {
                     const name = input.value.trim();
-                    console.log(`Item ${index}: "${name}"`);
+                    // console.log removed
                     if (name) {
                         callsigns.push({
                             name: name.toUpperCase()
@@ -184,16 +186,16 @@
                 }
             });
 
-            console.log('Collected callsigns:', callsigns);
+            // console.log removed
             
             const jsonField = document.getElementById('my_callsigns_json');
             if (jsonField) {
                 const jsonValue = JSON.stringify(callsigns);
                 jsonField.value = jsonValue;
-                console.log('JSON field value set to:', jsonValue);
+                // console.log removed
                 
                 // Debug: проверим, что данные действительно попали в поле
-                console.log('JSON field after setting:', jsonField.value);
+                // console.log removed
             } else {
                 console.error('my_callsigns_json field not found!');
             }
@@ -219,7 +221,7 @@
             return false; // Предотвращаем отправку формы для тестирования
         });
         
-        console.log('Event handlers initialized');
+        // console.log removed
     }
     
     // ========== Global Functions ==========

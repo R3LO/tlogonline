@@ -23,7 +23,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <form method="post" action="{% url 'profile_update' %}">
+                <form method="post" action="{% url 'profile_update' %}" id="profile-edit-form">
                     {% csrf_token %}
 
                     <div class="row">
@@ -220,19 +220,6 @@
                                                 </button>
                                             </div>
                                         {% endfor %}
-                                    {% else %}
-                                        <!-- Если нет сохранённых позывных, показываем одно пустое поле -->
-                                        <div class="my-callsign-item">
-                                            <input type="text" class="form-control name-input callsign-input"
-                                                   name="my_callsigns_names[]"
-                                                   value=""
-                                                   placeholder="Позывной"
-                                                   autocomplete="off">
-                                            <button type="button" class="btn btn-outline-danger btn-sm"
-                                                    onclick="removeCallsign(this)">
-                                                ✕
-                                            </button>
-                                        </div>
                                     {% endif %}
                                 </div>
 
