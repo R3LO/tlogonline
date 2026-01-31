@@ -1,0 +1,104 @@
+# Функции LoTW (Logbook of the World)
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import json
+import requests
+from ..models import RadioProfile, check_user_blocked
+
+
+@login_required
+def lotw_page(request):
+    """
+    Страница LoTW (Logbook of the World)
+    """
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
+
+    return render(request, 'lotw.html')
+
+
+@login_required
+def verify_lotw_credentials(request):
+    """
+    Проверка логина и пароля LoTW
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        # Получаем логин и пароль из POST данных
+        data = json.loads(request.body)
+        login = data.get('login', '').strip()
+        password = data.get('password', '').strip()
+
+        if not login or not password:
+            return JsonResponse({'error': 'Логин и пароль обязательны'}, status=400)
+
+        # Функция проверки
+        def check_lotw_pass(login, password):
+            params = {
+                'login': login,
+                'password': password,
+            }
+            response = requests.get(
+                "https://lotw.arrl.org/lotwuser/lotwreport.adi",
+                params=params,
+                timeout=15
+            )
+            if response.text.strip().startswith('ARRL Logbook of the World Status Report'):
+                return True
+            elif '<HTML>' in response.text.upper() or '<!DOCTYPE HTML' in response.text.upper():
+                return False
+            return False
+
+        # Выполняем проверку
+        is_valid = check_lotw_pass(login, password)
+
+        # Обновляем профиль пользователя
+        try:
+            profile = RadioProfile.objects.get(user=request.user)
+            profile.lotw_chk_pass = is_valid
+            if is_valid:
+                profile.lotw_user = login
+                profile.lotw_password = password
+            profile.save()
+        except RadioProfile.DoesNotExist:
+            pass
+
+        return JsonResponse({
+            'success': True,
+            'is_valid': is_valid,
+            'message': 'Логин и пароль верны' if is_valid else 'Логин или пароль неверны'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def delete_lotw_credentials(request):
+    """
+    Удаление логина и пароля LoTW
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        profile = RadioProfile.objects.get(user=request.user)
+        profile.lotw_user = ''
+        profile.lotw_password = ''
+        profile.lotw_chk_pass = False
+        profile.save()
+
+        return JsonResponse({'success': True})
+
+    except RadioProfile.DoesNotExist:
+        return JsonResponse({'error': 'Профиль не найден'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
