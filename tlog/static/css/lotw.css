@@ -138,11 +138,6 @@
     font-weight: 500;
 }
 
-.lotw-qso-table .col-callsign {
-    min-width: 110px;
-    font-weight: 600;
-}
-
 .lotw-qso-table .col-my-callsign {
     min-width: 90px;
     text-align: center;
@@ -165,6 +160,11 @@
     box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
 }
 
+.lotw-qso-table .col-callsign {
+    min-width: 110px;
+    font-weight: 600;
+}
+
 .lotw-qso-table .col-band {
     min-width: 80px;
 }
@@ -173,10 +173,7 @@
     min-width: 80px;
 }
 
-.lotw-qso-table .col-rst {
-    min-width: 70px;
-    font-size: 0.8rem;
-}
+
 
 .lotw-qso-table .col-qth {
     min-width: 80px;

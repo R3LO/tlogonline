@@ -85,7 +85,6 @@
                                     <th class="col-callsign"><span>📡</span> {% trans "Callsign" %}</th>
                                     <th class="col-band"><span>📶</span> {% trans "Band" %}</th>
                                     <th class="col-mode"><span>📟</span> {% trans "Mode" %}</th>
-                                    <th class="col-rst"><span>RST</span></th>
                                     <th class="col-qth"><span>📍</span> QTH</th>
                                     <th class="col-r150s"><span>🏆</span> Р-150-С</th>
                                     <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
@@ -103,7 +102,7 @@
                                         <small>{{ qso.time|date:"H:i" }}</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">{{ my_callsign }}</span>
+                                        <span class="my-callsign-badge">{{ qso.my_callsign|default:qso.user.username }}</span>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">{{ qso.callsign }}</span>
@@ -122,9 +121,6 @@
                                     </td>
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">{{ qso.mode }}</span>
-                                    </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>{{ qso.rst_rcvd|default:"-" }}/{{ qso.rst_sent|default:"-" }}</small>
                                     </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         {% if qso.gridsquare %}
@@ -181,7 +177,6 @@
                                     <th class="col-callsign"><span>📡</span> {% trans "Callsign" %}</th>
                                     <th class="col-band"><span>📶</span> {% trans "Band" %}</th>
                                     <th class="col-mode"><span>📟</span> {% trans "Mode" %}</th>
-                                    <th class="col-rst"><span>RST</span></th>
                                     <th class="col-qth"><span>📍</span> QTH</th>
                                     <th class="col-r150s"><span>🏆</span> Р-150-С</th>
                                     <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
@@ -208,9 +203,6 @@
                                     </td>
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">CW</span>
-                                    </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>599/599</small>
                                     </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         <small>FN31pr</small>
@@ -247,9 +239,6 @@
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">SSB</span>
                                     </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>59/59</small>
-                                    </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         <small>PM95sq</small>
                                     </td>
@@ -274,7 +263,7 @@
                                         <small>21:15</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA1ABC</span>
+                                        <span class="my-callsign-badge">RU1A</span>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">EA8/DL1ABC</span>
@@ -284,9 +273,6 @@
                                     </td>
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">FT8</span>
-                                    </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>-10/-12</small>
                                     </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         <small>IL18ea</small>
@@ -312,7 +298,7 @@
                                         <small>16:30</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA1ABC</span>
+                                        <span class="my-callsign-badge">UA4XYZ</span>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">ZL1ABC</span>
@@ -322,9 +308,6 @@
                                     </td>
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">SSB</span>
-                                    </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>59/57</small>
                                     </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         <small>RF73lb</small>
@@ -350,7 +333,7 @@
                                         <small>19:22</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA1ABC</span>
+                                        <span class="my-callsign-badge">RW1AB</span>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">VE2ABC</span>
@@ -360,9 +343,6 @@
                                     </td>
                                     <td class="col-mode" data-label="📟 {% trans "Mode" %}">
                                         <span class="mode-badge">CW</span>
-                                    </td>
-                                    <td class="col-rst" data-label="RST">
-                                        <small>559/559</small>
                                     </td>
                                     <td class="col-qth" data-label="📍 QTH">
                                         <small>FN25dq</small>

@@ -36,13 +36,6 @@ def lotw_page(request):
         recent_lotw_qso = lotw_confirmed_qso.filter(app_lotw_rxqsl__isnull=False).order_by('-app_lotw_rxqsl', '-date', '-time')[:10]
         context['recent_lotw_qso'] = recent_lotw_qso
         
-        # Получаем позывной пользователя из профиля
-        try:
-            profile = RadioProfile.objects.get(user=request.user)
-            context['my_callsign'] = profile.callsign if profile.callsign else request.user.username
-        except RadioProfile.DoesNotExist:
-            context['my_callsign'] = request.user.username
-        
         # Уникальные DXCC entities
         dxcc_entities = lotw_confirmed_qso.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
         context['dxcc_entities'] = dxcc_entities
