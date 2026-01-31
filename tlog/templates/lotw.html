@@ -19,7 +19,6 @@
                 </p>
                 
                 <!-- Статистика QSO -->
-                {% if user.is_authenticated %}
                 <div class="lotw-qso-stats">
                     <div class="lotw-qso-stat-card">
                         <div class="lotw-qso-stat-icon">📡</div>
@@ -42,31 +41,6 @@
                         <div class="lotw-qso-stat-label">{% trans "Award Credits" %}</div>
                     </div>
                 </div>
-                {% else %}
-                <!-- Демонстрационная статистика для неаутентифицированных пользователей -->
-                <div class="lotw-qso-stats">
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">📡</div>
-                        <div class="lotw-qso-stat-value">1,247</div>
-                        <div class="lotw-qso-stat-label">{% trans "Total QSOs" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">✅</div>
-                        <div class="lotw-qso-stat-value">892</div>
-                        <div class="lotw-qso-stat-label">{% trans "LoTW Confirmed" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">🌍</div>
-                        <div class="lotw-qso-stat-value">78</div>
-                        <div class="lotw-qso-stat-label">{% trans "DXCC Entities" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">🏆</div>
-                        <div class="lotw-qso-stat-value">892</div>
-                        <div class="lotw-qso-stat-label">{% trans "Award Credits" %}</div>
-                    </div>
-                </div>
-                {% endif %}
                 
                 <!-- Последние QSO с LoTW подтверждением -->
                 <h6 class="lotw-qso-section-title">
@@ -168,234 +142,10 @@
                     </div>
                 </div>
                 
-                {% if user.is_authenticated %}
                 <div class="text-center mt-3">
                     <a href="/logbook/?lotw=Y" class="btn btn-outline-primary btn-sm">
                         <span>📋</span> {% trans "View All LoTW QSOs" %}
                     </a>
-                </div>
-                {% endif %}
-                
-                {% elif not user.is_authenticated %}
-                <!-- Демонстрационные данные для неаутентифицированных пользователей -->
-                <div class="lotw-qso-table">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="col-date"><span>📅</span> {% trans "Date" %}</th>
-                                    <th class="col-time"><span>🕐</span> {% trans "Time" %}</th>
-                                    <th class="col-my-callsign"><span>👤</span> {% trans "My Call" %}</th>
-                                    <th class="col-callsign"><span>📡</span> {% trans "Callsign" %}</th>
-                                    <th class="col-band"><span>📶</span> {% trans "Band" %}</th>
-                                    <th class="col-mode"><span>📟</span> {% trans "Mode" %}</th>
-                                    <th class="col-qth"><span>📍</span> QTH</th>
-                                    <th class="col-r150s"><span>🏆</span> Р-150-С</th>
-                                    <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
-                                    <th class="col-propsat"><span>📡</span> PROP/SAT</th>
-                                    <th class="col-lotw-date"><span>📧</span> LoTW</th>
-                                    <th class="col-lotw"><span>LoTW</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>15.01.2025</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>14:25</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>UA1ABC</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">W1AW</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        <span class="band-badge">20m</span>
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">CW</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        <small>FN31pr</small>
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        <span class="r150s-badge">W1</span>
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        <span class="region-badge" title="Connecticut">Connecticut</span>
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        <small class="text-muted">-</small>
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">20.01.2025</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>12.01.2025</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>18:42</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>UA1ABC</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">JA1ZZZ</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        <span class="band-badge">40m</span>
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">SSB</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        <small>PM95sq</small>
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        <small class="text-muted">-</small>
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        <span class="region-badge" title="Tokyo">Tokyo</span>
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        <small>AUR</small>
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">18.01.2025</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>08.01.2025</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>21:15</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>RU1A</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">EA8/DL1ABC</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        <span class="band-badge">15m</span>
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">FT8</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        <small>IL18ea</small>
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        <span class="r150s-badge">EA8</span>
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        <span class="region-badge" title="Canary Islands">Canary Islands</span>
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        <small>SAT / QO-100</small>
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">15.01.2025</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>05.01.2025</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>16:30</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>UA4XYZ</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">ZL1ABC</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        <span class="band-badge">10m</span>
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">SSB</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        <small>RF73lb</small>
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        <span class="r150s-badge">ZL1</span>
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        <span class="region-badge" title="Auckland">Auckland</span>
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        <small class="text-muted">-</small>
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">12.01.2025</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>02.01.2025</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>19:22</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>RW1AB</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">VE2ABC</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        <span class="band-badge">80m</span>
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">CW</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        <small>FN25dq</small>
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        <small class="text-muted">-</small>
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        <span class="region-badge" title="Quebec">Quebec</span>
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        <small>EME</small>
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">10.01.2025</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="text-center mt-3">
-                    <div class="alert alert-info d-inline-block">
-                        <small><span>ℹ️</span> {% trans "Sample data shown. Login to view your actual QSO log." %}</small>
-                    </div>
                 </div>
                 
                 {% else %}
@@ -508,53 +258,43 @@
                 <h6 class="mb-0"><span>📊</span> {% trans "Your LoTW Status" %}</h6>
             </div>
             <div class="card-body">
-                {% if user.is_authenticated %}
-                    {% if profile.lotw_user and profile.lotw_password %}
-                        {% if profile.lotw_chk_pass %}
-                            <div class="alert alert-success py-2">
-                                <span class="me-2">✅</span>
-                                <strong>{% trans "LoTW Connected" %}</strong>
-                            </div>
-                            <p class="mb-2">
-                                <span class="me-2">👤</span>
-                                <small>{% trans "Username:" %} <strong>{{ profile.lotw_user }}</strong></small>
+                {% if profile.lotw_user and profile.lotw_password %}
+                    {% if profile.lotw_chk_pass %}
+                        <div class="alert alert-success py-2">
+                            <span class="me-2">✅</span>
+                            <strong>{% trans "LoTW Connected" %}</strong>
+                        </div>
+                        <p class="mb-2">
+                            <span class="me-2">👤</span>
+                            <small>{% trans "Username:" %} <strong>{{ profile.lotw_user }}</strong></small>
+                        </p>
+                        {% if profile.lotw_lastsync %}
+                            <p class="mb-0">
+                                <span class="me-2">📅</span>
+                                <small>{% trans "Last sync:" %} <strong>{{ profile.lotw_lastsync|date:"d.m.Y H:i" }}</strong></small>
                             </p>
-                            {% if profile.lotw_lastsync %}
-                                <p class="mb-0">
-                                    <span class="me-2">📅</span>
-                                    <small>{% trans "Last sync:" %} <strong>{{ profile.lotw_lastsync|date:"d.m.Y H:i" }}</strong></small>
-                                </p>
-                            {% else %}
-                                <p class="mb-0 text-muted">
-                                    <span class="me-2">❌</span>
-                                    <small>{% trans "No sync performed yet" %}</small>
-                                </p>
-                            {% endif %}
                         {% else %}
-                            <div class="alert alert-warning py-2">
-                                <span class="me-2">⚠️</span>
-                                <strong>{% trans "LoTW Authentication Failed" %}</strong>
-                            </div>
                             <p class="mb-0 text-muted">
-                                <small>{% trans "Please check your LoTW login credentials" %}</small>
+                                <span class="me-2">❌</span>
+                                <small>{% trans "No sync performed yet" %}</small>
                             </p>
                         {% endif %}
                     {% else %}
-                        <div class="alert alert-info py-2">
-                            <span class="me-2">ℹ️</span>
-                            <strong>{% trans "LoTW Not Configured" %}</strong>
+                        <div class="alert alert-warning py-2">
+                            <span class="me-2">⚠️</span>
+                            <strong>{% trans "LoTW Authentication Failed" %}</strong>
                         </div>
                         <p class="mb-0 text-muted">
-                            <small>{% trans "Add your LoTW credentials in profile settings" %}</small>
+                            <small>{% trans "Please check your LoTW login credentials" %}</small>
                         </p>
                     {% endif %}
                 {% else %}
-                    <div class="alert alert-secondary py-2">
-                        <span class="me-2">🔒</span>
-                        <strong>{% trans "Login Required" %}</strong>
+                    <div class="alert alert-info py-2">
+                        <span class="me-2">ℹ️</span>
+                        <strong>{% trans "LoTW Not Configured" %}</strong>
                     </div>
                     <p class="mb-0 text-muted">
-                        <small>{% trans "Please log in to view your LoTW status" %}</small>
+                        <small>{% trans "Add your LoTW credentials in profile settings" %}</small>
                     </p>
                 {% endif %}
             </div>
@@ -566,24 +306,15 @@
                 <h6 class="mb-0"><span>⚡</span> {% trans "Quick Actions" %}</h6>
             </div>
             <div class="card-body">
-                {% if user.is_authenticated %}
-                    <a href="/dashboard/profile/" class="btn btn-primary w-100 mb-2">
-                        <span>⚙️</span> {% trans "Configure LoTW" %}
-                    </a>
-                    <a href="/dashboard/" class="btn btn-outline-primary w-100 mb-2">
-                        <span>📊</span> {% trans "View Dashboard" %}
-                    </a>
-                    <a href="/logbook/" class="btn btn-outline-secondary w-100">
-                        <span>📋</span> {% trans "Manage Logbook" %}
-                    </a>
-                {% else %}
-                    <a href="/login/" class="btn btn-primary w-100 mb-2">
-                        <span>🔑</span> {% trans "Login" %}
-                    </a>
-                    <a href="/register/" class="btn btn-outline-primary w-100">
-                        <span>📝</span> {% trans "Register" %}
-                    </a>
-                {% endif %}
+                <a href="/dashboard/profile/" class="btn btn-primary w-100 mb-2">
+                    <span>⚙️</span> {% trans "Configure LoTW" %}
+                </a>
+                <a href="/dashboard/" class="btn btn-outline-primary w-100 mb-2">
+                    <span>📊</span> {% trans "View Dashboard" %}
+                </a>
+                <a href="/logbook/" class="btn btn-outline-secondary w-100">
+                    <span>📋</span> {% trans "Manage Logbook" %}
+                </a>
             </div>
         </div>
 
