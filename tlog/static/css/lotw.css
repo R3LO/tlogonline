@@ -120,7 +120,7 @@
 }
 
 .lotw-qso-table .table tbody tr:hover td {
-    background-color: rgba(102, 126, 234, 0.05);
+    background-color: transparent;
 }
 
 .lotw-qso-table .table tbody tr:last-child td {
@@ -143,21 +143,20 @@
     text-align: center;
 }
 
-/* Бейджи для моего позывного */
-.lotw-qso-table .my-callsign-badge {
-    background: linear-gradient(135deg, #6f42c1, #5a32a3);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    display: inline-block;
-    transition: all 0.2s ease;
+/* Стили для колонки PROP/SAT */
+.lotw-qso-table .col-propsat {
+    min-width: 100px;
+    font-size: 0.8rem;
 }
 
-.lotw-qso-table .my-callsign-badge:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
+.lotw-qso-table .prop-sat-badge {
+    background: linear-gradient(135deg, #fd7e14, #e8650e);
+    color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
 }
 
 .lotw-qso-table .col-callsign {
@@ -215,12 +214,6 @@
     font-weight: 600;
     font-size: 0.85rem;
     display: inline-block;
-    transition: all 0.2s ease;
-}
-
-.callsign-badge:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Бейджи для диапазонов */
@@ -446,11 +439,6 @@
         padding: 0.2rem 0.4rem;
     }
     
-    .my-callsign-badge {
-        font-size: 0.8rem;
-        padding: 0.2rem 0.4rem;
-    }
-    
     .lotw-qso-table .col-r150s {
         min-width: 60px;
     }
@@ -517,11 +505,6 @@
     }
     
     .callsign-badge {
-        font-size: 0.75rem;
-        padding: 0.15rem 0.3rem;
-    }
-    
-    .my-callsign-badge {
         font-size: 0.75rem;
         padding: 0.15rem 0.3rem;
     }

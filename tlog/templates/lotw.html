@@ -88,6 +88,7 @@
                                     <th class="col-qth"><span>📍</span> QTH</th>
                                     <th class="col-r150s"><span>🏆</span> Р-150-С</th>
                                     <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
+                                    <th class="col-propsat"><span>📡</span> PROP/SAT</th>
                                     <th class="col-lotw-date"><span>📧</span> LoTW</th>
                                     <th class="col-lotw"><span>LoTW</span></th>
                                 </tr>
@@ -102,7 +103,7 @@
                                         <small>{{ qso.time|date:"H:i" }}</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">{{ qso.my_callsign|default:qso.user.username }}</span>
+                                        <small>{{ qso.my_callsign|default:qso.user.username }}</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">{{ qso.callsign }}</span>
@@ -139,6 +140,17 @@
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         {% if qso.ru_region %}
                                             <span class="region-badge" title="{{ qso.ru_region }}">{{ qso.ru_region }}</span>
+                                        {% else %}
+                                            <small class="text-muted">-</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        {% if qso.prop_mode or qso.sat_name %}
+                                            <small>
+                                                {% if qso.prop_mode %}{{ qso.prop_mode }}{% endif %}
+                                                {% if qso.prop_mode and qso.sat_name %} / {% endif %}
+                                                {% if qso.sat_name %}{{ qso.sat_name }}{% endif %}
+                                            </small>
                                         {% else %}
                                             <small class="text-muted">-</small>
                                         {% endif %}
@@ -180,6 +192,7 @@
                                     <th class="col-qth"><span>📍</span> QTH</th>
                                     <th class="col-r150s"><span>🏆</span> Р-150-С</th>
                                     <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
+                                    <th class="col-propsat"><span>📡</span> PROP/SAT</th>
                                     <th class="col-lotw-date"><span>📧</span> LoTW</th>
                                     <th class="col-lotw"><span>LoTW</span></th>
                                 </tr>
@@ -193,7 +206,7 @@
                                         <small>14:25</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA1ABC</span>
+                                        <small>UA1ABC</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">W1AW</span>
@@ -213,6 +226,9 @@
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         <span class="region-badge" title="Connecticut">Connecticut</span>
                                     </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        <small class="text-muted">-</small>
+                                    </td>
                                     <td class="col-lotw-date" data-label="📧 LoTW">
                                         <span class="lotw-date-badge">20.01.2025</span>
                                     </td>
@@ -228,7 +244,7 @@
                                         <small>18:42</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA1ABC</span>
+                                        <small>UA1ABC</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">JA1ZZZ</span>
@@ -248,6 +264,9 @@
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         <span class="region-badge" title="Tokyo">Tokyo</span>
                                     </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        <small>AUR</small>
+                                    </td>
                                     <td class="col-lotw-date" data-label="📧 LoTW">
                                         <span class="lotw-date-badge">18.01.2025</span>
                                     </td>
@@ -263,7 +282,7 @@
                                         <small>21:15</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">RU1A</span>
+                                        <small>RU1A</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">EA8/DL1ABC</span>
@@ -283,6 +302,9 @@
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         <span class="region-badge" title="Canary Islands">Canary Islands</span>
                                     </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        <small>SAT / QO-100</small>
+                                    </td>
                                     <td class="col-lotw-date" data-label="📧 LoTW">
                                         <span class="lotw-date-badge">15.01.2025</span>
                                     </td>
@@ -298,7 +320,7 @@
                                         <small>16:30</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">UA4XYZ</span>
+                                        <small>UA4XYZ</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">ZL1ABC</span>
@@ -318,6 +340,9 @@
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         <span class="region-badge" title="Auckland">Auckland</span>
                                     </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        <small class="text-muted">-</small>
+                                    </td>
                                     <td class="col-lotw-date" data-label="📧 LoTW">
                                         <span class="lotw-date-badge">12.01.2025</span>
                                     </td>
@@ -333,7 +358,7 @@
                                         <small>19:22</small>
                                     </td>
                                     <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <span class="my-callsign-badge">RW1AB</span>
+                                        <small>RW1AB</small>
                                     </td>
                                     <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
                                         <span class="callsign-badge">VE2ABC</span>
@@ -352,6 +377,9 @@
                                     </td>
                                     <td class="col-region" data-label="🌍 {% trans "Region" %}">
                                         <span class="region-badge" title="Quebec">Quebec</span>
+                                    </td>
+                                    <td class="col-propsat" data-label="📡 PROP/SAT">
+                                        <small>EME</small>
                                     </td>
                                     <td class="col-lotw-date" data-label="📧 LoTW">
                                         <span class="lotw-date-badge">10.01.2025</span>

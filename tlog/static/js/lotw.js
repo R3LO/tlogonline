@@ -14,18 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cards.forEach((card, index) => {
             // Добавляем задержку для каждой карточки
             card.style.animationDelay = `${index * 0.1}s`;
-            
-            // Добавляем hover эффекты
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
         });
     }
-    
+            
     // Обновление статуса LoTW
     function initStatusRefresh() {
         const statusElements = document.querySelectorAll('.lotw-status');
