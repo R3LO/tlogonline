@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import json
 import requests
-from ..models import RadioProfile, check_user_blocked
+from ..models import RadioProfile, QSO, check_user_blocked
 
 
 @login_required
@@ -18,7 +18,33 @@ def lotw_page(request):
     if is_blocked:
         return render(request, 'blocked.html', {'reason': reason})
 
-    return render(request, 'lotw.html')
+    # Получаем данные пользователя для отображения статистики
+    context = {}
+    
+    if request.user.is_authenticated:
+        # Общая статистика QSO
+        total_qso_count = QSO.objects.filter(user=request.user).count()
+        context['total_qso_count'] = total_qso_count
+        
+        # QSO с подтверждением LoTW
+        lotw_confirmed_qso = QSO.objects.filter(user=request.user, lotw='Y')
+        lotw_confirmed_count = lotw_confirmed_qso.count()
+        context['lotw_confirmed_count'] = lotw_confirmed_count
+        
+        # Последние 10 QSO с подтверждением LoTW
+        recent_lotw_qso = lotw_confirmed_qso.order_by('-date', '-time')[:10]
+        context['recent_lotw_qso'] = recent_lotw_qso
+        
+        # Уникальные DXCC entities
+        dxcc_entities = lotw_confirmed_qso.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
+        context['dxcc_entities'] = dxcc_entities
+        
+        # Award credits (упрощенный расчет на основе подтвержденных QSO)
+        # Можно расширить логику подсчета различных наград
+        award_credits = lotw_confirmed_count  # Базовая логика - каждое подтверждение = 1 кредит
+        context['award_credits'] = award_credits
+
+    return render(request, 'lotw.html', context)
 
 
 @login_required

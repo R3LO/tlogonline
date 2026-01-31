@@ -79,6 +79,252 @@
     margin-bottom: 0;
 }
 
+/* ========== Таблица QSO для страницы LoTW ========== */
+.lotw-qso-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 1rem 0;
+}
+
+.lotw-qso-table .table {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.lotw-qso-table .table th {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lotw-qso-table .table th:first-child {
+    border-top-left-radius: 0;
+}
+
+.lotw-qso-table .table th:last-child {
+    border-top-right-radius: 0;
+}
+
+.lotw-qso-table .table td {
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+    transition: background-color 0.2s ease;
+}
+
+.lotw-qso-table .table tbody tr:hover td {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+.lotw-qso-table .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Стили для колонок таблицы QSO */
+.lotw-qso-table .col-date {
+    min-width: 90px;
+    font-weight: 500;
+}
+
+.lotw-qso-table .col-time {
+    min-width: 70px;
+    font-weight: 500;
+}
+
+.lotw-qso-table .col-callsign {
+    min-width: 110px;
+    font-weight: 600;
+}
+
+.lotw-qso-table .col-band {
+    min-width: 80px;
+}
+
+.lotw-qso-table .col-mode {
+    min-width: 80px;
+}
+
+.lotw-qso-table .col-rst {
+    min-width: 70px;
+    font-size: 0.8rem;
+}
+
+.lotw-qso-table .col-qth {
+    min-width: 80px;
+    font-size: 0.8rem;
+}
+
+.lotw-qso-table .col-lotw {
+    min-width: 60px;
+    text-align: center;
+}
+
+.lotw-qso-table .col-propsat {
+    min-width: 100px;
+    font-size: 0.8rem;
+}
+
+/* Бейджи для позывных */
+.callsign-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.callsign-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Бейджи для диапазонов */
+.lotw-qso-table .band-badge {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #212529;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Бейджи для режимов */
+.lotw-qso-table .mode-badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Статус LoTW */
+.lotw-qso-table .lotw-confirmed {
+    color: #28a745;
+    font-size: 1.1rem;
+}
+
+.lotw-qso-table .lotw-pending {
+    color: #ffc107;
+    font-size: 1.1rem;
+}
+
+.lotw-qso-table .lotw-none {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Пропагация/спутник */
+.lotw-qso-table .prop-sat-info {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Кнопки действий в таблице */
+.lotw-qso-table .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.lotw-qso-table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+/* Статистика QSO */
+.lotw-qso-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.lotw-qso-stat-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.lotw-qso-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.lotw-qso-stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.lotw-qso-stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.lotw-qso-stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* Заголовок секции QSO */
+.lotw-qso-section-title {
+    color: #667eea;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Пустое состояние */
+.lotw-qso-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.lotw-qso-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.lotw-qso-empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.lotw-qso-empty-text {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
 /* Анимации для карточек */
 .card {
     animation: fadeInUp 0.6s ease-out;
@@ -95,7 +341,7 @@
     }
 }
 
-/* Responsive улучшения */
+/* Responsive улучшения для таблицы QSO */
 @media (max-width: 768px) {
     .card-header h5, .card-header h6 {
         font-size: 1rem;
@@ -104,5 +350,70 @@
     .btn {
         font-size: 0.9rem;
         padding: 0.5rem 1rem;
+    }
+    
+    .lotw-qso-table .table th,
+    .lotw-qso-table .table td {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.8rem;
+    }
+    
+    .lotw-qso-table .col-callsign {
+        min-width: 90px;
+    }
+    
+    .callsign-badge {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .lotw-qso-stat-card {
+        padding: 1rem;
+    }
+    
+    .lotw-qso-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .lotw-qso-stat-icon {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .lotw-qso-table {
+        font-size: 0.8rem;
+    }
+    
+    .lotw-qso-table .table th,
+    .lotw-qso-table .table td {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.75rem;
+    }
+    
+    .lotw-qso-table .col-date,
+    .lotw-qso-table .col-time {
+        min-width: 70px;
+    }
+    
+    .lotw-qso-table .col-callsign {
+        min-width: 80px;
+    }
+    
+    .callsign-badge {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.3rem;
+    }
+    
+    .lotw-qso-stat-card {
+        padding: 0.75rem;
+    }
+    
+    .lotw-qso-stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .lotw-qso-stat-label {
+        font-size: 0.8rem;
     }
 }
