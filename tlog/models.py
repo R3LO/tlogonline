@@ -84,6 +84,11 @@ class QSO(models.Model):
     cqz = models.IntegerField(help_text="CQ зона", null=True, blank=True)
     ituz = models.IntegerField(help_text="ITU зона", null=True, blank=True)
 
+    # Дополнительные поля для подтверждений и наград
+    app_lotw_rxqsl = models.DateTimeField(help_text="Дата и время получения подтверждения LoTW", null=True, blank=True)
+    vucc_grids = models.CharField(max_length=100, help_text="VUCC Grids (несколько локаторов)", blank=True, null=True)
+    iota = models.CharField(max_length=20, help_text="IOTA номер острова", blank=True, null=True)
+
     # Подтверждения QSL
     lotw = models.CharField(max_length=1, help_text="Подтверждение LoTW", default='N', blank=True)
     paper_qsl = models.CharField(max_length=1, help_text="Бумажная QSL", default='N', blank=True)
