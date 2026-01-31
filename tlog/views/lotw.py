@@ -26,14 +26,22 @@ def lotw_page(request):
         total_qso_count = QSO.objects.filter(user=request.user).count()
         context['total_qso_count'] = total_qso_count
         
-        # QSO с подтверждением LoTW
+        # QSO с подтверждением LoTW (только lotw = 'Y')
         lotw_confirmed_qso = QSO.objects.filter(user=request.user, lotw='Y')
         lotw_confirmed_count = lotw_confirmed_qso.count()
         context['lotw_confirmed_count'] = lotw_confirmed_count
         
-        # Последние 10 QSO с подтверждением LoTW
-        recent_lotw_qso = lotw_confirmed_qso.order_by('-date', '-time')[:10]
+        # Последние 10 QSO с подтверждением LoTW, отсортированные по дате подтверждения LoTW
+        # Фильтруем только записи с заполненной датой app_lotw_rxqsl
+        recent_lotw_qso = lotw_confirmed_qso.filter(app_lotw_rxqsl__isnull=False).order_by('-app_lotw_rxqsl', '-date', '-time')[:10]
         context['recent_lotw_qso'] = recent_lotw_qso
+        
+        # Получаем позывной пользователя из профиля
+        try:
+            profile = RadioProfile.objects.get(user=request.user)
+            context['my_callsign'] = profile.callsign if profile.callsign else request.user.username
+        except RadioProfile.DoesNotExist:
+            context['my_callsign'] = request.user.username
         
         # Уникальные DXCC entities
         dxcc_entities = lotw_confirmed_qso.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
