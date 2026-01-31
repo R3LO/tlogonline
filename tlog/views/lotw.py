@@ -30,10 +30,38 @@ def lotw_page(request):
     lotw_confirmed_count = lotw_confirmed_qso.count()
     context['lotw_confirmed_count'] = lotw_confirmed_count
     
-    # Последние 10 QSO с подтверждением LoTW, отсортированные по дате подтверждения LoTW
+    # Пагинация для QSO с подтверждением LoTW
+    page_size = 20  # Показываем 20 записей на страницу
+    
+    # Обрабатываем GET параметр page
+    try:
+        page = int(request.GET.get('page', 1))
+    except (ValueError, TypeError):
+        page = 1
+    
+    # Проверяем корректность номера страницы
+    if page < 1:
+        page = 1
+        
+    start = (page - 1) * page_size
+    end = start + page_size
+    
     # Фильтруем только записи с заполненной датой app_lotw_rxqsl
-    recent_lotw_qso = lotw_confirmed_qso.filter(app_lotw_rxqsl__isnull=False).order_by('-app_lotw_rxqsl', '-date', '-time')[:10]
+    lotw_qso_filtered = lotw_confirmed_qso.filter(app_lotw_rxqsl__isnull=False).order_by('-app_lotw_rxqsl', '-date', '-time')
+    total_pages = (lotw_qso_filtered.count() + page_size - 1) // page_size if lotw_qso_filtered.exists() else 1
+    
+    # Проверяем, что запрашиваемая страница не превышает общее количество страниц
+    if page > total_pages:
+        page = total_pages
+        start = (page - 1) * page_size
+        end = start + page_size
+    
+    # Получаем записи для текущей страницы
+    recent_lotw_qso = lotw_qso_filtered[start:end]
     context['recent_lotw_qso'] = recent_lotw_qso
+    context['current_page'] = page
+    context['total_pages'] = total_pages
+    context['page_size'] = page_size
     
     # Уникальные DXCC entities
     dxcc_entities = lotw_confirmed_qso.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()

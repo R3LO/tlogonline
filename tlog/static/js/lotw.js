@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initStatusRefresh();
     initQuickActions();
     initTooltips();
+    initPaginationLoading();
     
     // Анимации для карточек
     function initCardAnimations() {
@@ -137,10 +138,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Индикатор загрузки для пагинации
+    function initPaginationLoading() {
+        const paginationLinks = document.querySelectorAll('.pagination .page-link');
+        
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Показываем индикатор загрузки
+                showLoadingIndicator();
+                
+                // Скрываем индикатор через 2 секунды (если страница не загрузилась)
+                setTimeout(() => {
+                    hideLoadingIndicator();
+                }, 2000);
+            });
+        });
+    }
+
+    function showLoadingIndicator() {
+        let overlay = document.querySelector('.loading-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Загрузка...</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        overlay.classList.add('show');
+    }
+
+    function hideLoadingIndicator() {
+        const overlay = document.querySelector('.loading-overlay');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+    }
+
     // Экспортируем функции для глобального использования
     window.LoTW = {
         refreshStatus: refreshLoTWStatus,
         showNotification: showNotification,
-        smoothScrollTo: smoothScrollTo
+        smoothScrollTo: smoothScrollTo,
+        showLoading: showLoadingIndicator,
+        hideLoading: hideLoadingIndicator
     };
 });
