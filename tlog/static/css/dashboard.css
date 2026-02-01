@@ -1,0 +1,172 @@
+/* =====================================
+   Dashboard специфичные стили
+   ===================================== */
+
+/* Стили для профиля пользователя */
+.profile-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--light-border);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.profile-header {
+    background: var(--bg-gradient);
+    color: var(--white);
+    padding: var(--padding-xl);
+    text-align: center;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto var(--padding-md);
+    backdrop-filter: blur(10px);
+}
+
+.profile-name {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--padding-xs);
+}
+
+.profile-callsign {
+    font-size: var(--font-size-base);
+    opacity: 0.9;
+    font-weight: var(--font-weight-medium);
+}
+
+/* Статистические карточки для dashboard */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--padding-lg);
+    margin-bottom: var(--padding-xl);
+}
+
+.dashboard-stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--padding-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--light-border);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--bg-gradient);
+}
+
+.dashboard-stat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.dashboard-stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--padding-md);
+    display: block;
+    color: var(--primary);
+}
+
+.dashboard-stat-value {
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--dark);
+    margin-bottom: var(--padding-sm);
+    line-height: 1.1;
+}
+
+.dashboard-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+}
+
+/* Формы настроек */
+.settings-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--light-border);
+    margin-bottom: var(--padding-lg);
+    overflow: hidden;
+}
+
+.settings-header {
+    background: var(--bg-gradient-light);
+    padding: var(--padding-md) var(--padding-lg);
+    border-bottom: 1px solid var(--light-border);
+    display: flex;
+    align-items: center;
+    gap: var(--padding-md);
+}
+
+.settings-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-gradient);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.2rem;
+}
+
+.settings-title {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-lg);
+    margin: 0;
+    color: var(--dark);
+}
+
+.settings-body {
+    padding: var(--padding-lg);
+}
+
+/* Адаптивность dashboard */
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: var(--padding-md);
+    }
+    
+    .dashboard-stat-card {
+        padding: var(--padding-md);
+    }
+    
+    .dashboard-stat-icon {
+        font-size: 2rem;
+    }
+    
+    .dashboard-stat-value {
+        font-size: 1.5rem;
+    }
+}

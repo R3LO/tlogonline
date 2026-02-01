@@ -12,6 +12,7 @@
     .container-fluid {
         padding-left: var(--padding-sm);
         padding-right: var(--padding-sm);
+        max-width: none !important;
     }
     
     /* Заголовки */
@@ -111,24 +112,6 @@
         font-size: var(--font-size-xs);
     }
     
-    /* Фильтры */
-    .filter-card {
-        padding: var(--padding-md);
-    }
-    
-    .filter-controls {
-        flex-direction: column;
-        gap: var(--padding-sm);
-    }
-    
-    .filter-group {
-        min-width: 100%;
-    }
-    
-    .filter-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
     
     /* Утилитарные карточки */
     .utility-card {
@@ -205,14 +188,6 @@
         font-size: var(--font-size-xs);
     }
     
-    /* Фильтры */
-    .filter-controls {
-        flex-wrap: wrap;
-    }
-    
-    .filter-group {
-        flex: 1 1 200px;
-    }
     
     /* Сетка */
     .row {
@@ -256,14 +231,6 @@
         font-size: var(--font-size-sm);
     }
     
-    /* Фильтры */
-    .filter-controls {
-        flex-wrap: wrap;
-    }
-    
-    .filter-group {
-        flex: 1 1 180px;
-    }
     
     /* Навигация */
     .navbar-nav {
@@ -312,15 +279,6 @@
         font-size: var(--font-size-base);
     }
     
-    /* Фильтры */
-    .filter-controls {
-        flex-wrap: nowrap;
-    }
-    
-    .filter-group {
-        flex: 1 1 auto;
-        min-width: 160px;
-    }
 }
 
 /* Extra large devices (large desktops, 1200px and up) */
@@ -336,7 +294,7 @@
         max-width: 1320px;
     }
 }
-    
+
 /* Ultra large devices (ultra wide monitors, 1600px and up) */
 @media (min-width: 1600px) {
     .container {
@@ -435,7 +393,7 @@
         max-width: calc(50% - 5px);
     }
 }
-
+    
 @media (max-width: 480px) {
     .stat-card {
         flex: 0 0 calc(50% - 5px) !important;

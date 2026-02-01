@@ -1,18 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
 {% load i18n %}
 {% load static %}
 {% block title %}TLog - {% trans "Редактирование профиля" %}{% endblock %}
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <div class="main-container">
-        <!-- Header -->
-        <div class="logbook-header text-center">
-            <h2><span>✏️</span> {% trans "Редактирование профиля" %}</h2>
-            <p class="mb-0">{% trans "Управление вашими настройками и профилем для синхронизации с LoTW" %}</p>
-        </div>
+{% block dashboard_content %}
+<!-- Header -->
+<div class="logbook-header text-center">
+    <h2><span>✏️</span> {% trans "Редактирование профиля" %}</h2>
+    <p class="mb-0">{% trans "Управление вашими настройками и профилем для синхронизации с LoTW" %}</p>
+</div>
 
-        <div class="p-4">
+<div class="p-4">
                 <!-- Сообщения -->
                 {% if messages %}
                     {% for message in messages %}
@@ -247,11 +245,7 @@
                         </a>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% endblock dashboard_content %}
 
 {% block extra_css %}
 <link href="{% static 'css/profile_edit.css' %}" rel="stylesheet">

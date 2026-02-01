@@ -1,0 +1,221 @@
+/* =====================================
+   Achievements стили
+   ===================================== */
+
+/* Стили для статистических карточек */
+.stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--light-border);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--bg-gradient);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: var(--padding-md);
+    display: block;
+    color: var(--primary);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--dark);
+    margin-bottom: var(--padding-sm);
+    line-height: 1.1;
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+}
+
+/* Стили для карточек достижений */
+.achievement-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--padding-lg);
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-card.unlocked {
+    border-color: var(--success);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.achievement-card.locked {
+    border-color: var(--light-border);
+    opacity: 0.7;
+    filter: grayscale(0.3);
+}
+
+.achievement-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.achievement-card.unlocked:hover {
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: var(--padding-md);
+    display: block;
+}
+
+.achievement-card.unlocked .achievement-icon {
+    color: var(--success);
+}
+
+.achievement-card.locked .achievement-icon {
+    color: var(--muted);
+}
+
+.achievement-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark);
+    margin-bottom: var(--padding-sm);
+}
+
+.achievement-description {
+    font-size: var(--font-size-sm);
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+/* Стили для статистической таблицы */
+.card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--light-border);
+    overflow: hidden;
+}
+
+.card .card-body {
+    padding: var(--padding-lg);
+}
+
+.card .table {
+    margin-bottom: 0;
+}
+
+.card .table th {
+    background: var(--bg-gradient-light);
+    border-bottom: 2px solid var(--primary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark);
+    text-align: center;
+    padding: var(--padding-md);
+}
+
+.card .table td {
+    text-align: center;
+    padding: var(--padding-md);
+    vertical-align: middle;
+    border-color: var(--light-border);
+}
+
+.card .table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+/* Стили для уведомлений */
+.alert {
+    border-radius: var(--radius-lg);
+    border: none;
+    padding: var(--padding-md) var(--padding-lg);
+    font-weight: var(--font-weight-medium);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .filter-actions {
+        justify-content: center;
+    }
+    
+    .achievement-card {
+        padding: var(--padding-md);
+    }
+    
+    .achievement-icon {
+        font-size: 2rem;
+    }
+    
+    .achievement-title {
+        font-size: var(--font-size-base);
+    }
+    
+    .stat-card {
+        padding: var(--padding-md);
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-card {
+        padding: var(--padding-md);
+    }
+    
+    .card .table th,
+    .card .table td {
+        padding: var(--padding-sm);
+        font-size: var(--font-size-sm);
+    }
+}

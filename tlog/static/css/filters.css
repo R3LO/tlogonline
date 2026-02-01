@@ -1,0 +1,138 @@
+/* =====================================
+   Стили для фильтров
+   ===================================== */
+
+/* Стили для карточки фильтров */
+.filter-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--light-border);
+    padding: var(--padding-lg);
+    margin-bottom: var(--padding-xl);
+}
+
+/* Контролы фильтров */
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--padding-md);
+    align-items: end;
+}
+
+/* Группа фильтра */
+.filter-group {
+    min-width: 140px;
+    flex: 1;
+}
+
+.filter-group .form-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark);
+    margin-bottom: var(--padding-sm);
+}
+
+.filter-group .form-select {
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-sm);
+    padding: var(--padding-sm) var(--padding-md);
+    font-size: var(--font-size-sm);
+    background-color: var(--white);
+    color: var(--dark);
+    transition: all 0.3s ease;
+}
+
+.filter-group .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Действия фильтров */
+.filter-actions {
+    display: flex;
+    gap: var(--padding-sm);
+    align-items: center;
+}
+
+.filter-actions .btn {
+    border-radius: var(--radius-sm);
+    padding: var(--padding-sm) var(--padding-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.3s ease;
+}
+
+.filter-actions .btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Сообщение о фильтрации */
+#filtered_stats {
+    transition: all 0.3s ease;
+}
+
+#filtered_stats .alert {
+    border-radius: var(--radius-lg);
+    border: none;
+    padding: var(--padding-md) var(--padding-lg);
+    font-weight: var(--font-weight-medium);
+}
+
+#filtered_stats .alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+}
+
+/* Адаптивность для фильтров */
+@media (max-width: 768px) {
+    .filter-card {
+        padding: var(--padding-md);
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--padding-sm);
+    }
+    
+    .filter-group {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .filter-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+    .filter-controls {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 200px;
+    }
+}
+
+@media (min-width: 993px) and (max-width: 1200px) {
+    .filter-controls {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 180px;
+    }
+}
+
+@media (min-width: 1201px) {
+    .filter-controls {
+        flex-wrap: nowrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 auto;
+        min-width: 160px;
+    }
+}
