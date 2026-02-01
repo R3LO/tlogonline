@@ -63,9 +63,17 @@
                             </select>
                         </div>
                         
-                        <div class="filter-actions">
-                            <button type="button" class="btn btn-secondary btn-sm" id="resetFilters" title="{% trans 'Сбросить фильтры' %}">
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">&nbsp;</label>
+                            <button type="button" class="btn btn-sm reset-btn" id="resetFilters" title="{% trans 'Сбросить фильтры' %}">
                                 <span>❌</span>
+                            </button>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button type="button" class="btn btn-primary btn-sm" id="searchFilters" title="{% trans 'Применить фильтры' %}">
+                                <span>🔍</span>
+                                <span class="ms-1">{% trans "Найти" %}</span>
                             </button>
                         </div>
                     </form>
@@ -241,7 +249,7 @@
                 {% endif %}
             </div>
         </div>
-       
+
     </div>
 
     <!-- Боковая панель -->

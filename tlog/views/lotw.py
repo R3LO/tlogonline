@@ -80,7 +80,6 @@ def lotw_page(request):
         
         context['my_callsigns'] = my_callsigns
     except Exception as e:
-        print(f"Error getting my_callsigns: {e}")
         context['my_callsigns'] = []
     
     # Получаем доступные значения для фильтров (из всех QSO пользователя с LoTW)
@@ -93,7 +92,6 @@ def lotw_page(request):
         context['available_bands'] = available_bands
         context['available_sat_names'] = available_sat_names
     except Exception as e:
-        print(f"Error getting filter values: {e}")
         context['available_modes'] = []
         context['available_bands'] = []
         context['available_sat_names'] = []
@@ -142,7 +140,6 @@ def lotw_page(request):
         dxcc_entities = lotw_qso_sorted.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
         context['dxcc_entities'] = dxcc_entities
     except Exception as e:
-        print(f"Error getting dxcc_entities: {e}")
         context['dxcc_entities'] = 0
     
     # Award credits
@@ -286,9 +283,6 @@ def debug_user_qso(request):
         })
 
     except Exception as e:
-        print(f"❌ Error in debug_user_qso: {e}")
-        import traceback
-        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -305,11 +299,8 @@ def get_user_callsigns(request):
         user_id = user.id
         username = user.username
         
-        print(f"🔍 Получение позывных для пользователя: ID={user_id}, Username={username}")
-        
         # Получаем уникальные позывные пользователя из базы данных QSO
         qsos_for_user = QSO.objects.filter(user=user_id)
-        print(f"📊 Всего QSO записей для пользователя: {qsos_for_user.count()}")
         
         # Фильтруем записи с непустыми my_callsign
         my_callsigns_query = qsos_for_user.exclude(
@@ -324,23 +315,12 @@ def get_user_callsigns(request):
         my_callsigns = list(my_callsigns_query.values_list('my_callsign', flat=True).distinct())
         my_callsigns.sort()
         
-        print(f"✅ Уникальные my_callsigns: {my_callsigns}")
-        
         # Добавляем username пользователя как дополнительный позывной
         username_callsigns = [username] if username else []
         
         # Объединяем и убираем дубликаты
         all_callsigns = list(set(my_callsigns + username_callsigns))
         all_callsigns.sort()
-        
-        print(f"🎯 Итоговый список позывных: {all_callsigns}")
-        
-        # Проверим несколько примеров записей для отладки
-        if qsos_for_user.exists():
-            sample_qsos = qsos_for_user[:3]
-            print(f"📋 Примеры QSO записей:")
-            for i, qso in enumerate(sample_qsos):
-                print(f"  {i+1}. my_callsign='{qso.my_callsign}', callsign='{qso.callsign}', date={qso.date}")
         
         return JsonResponse({
             'success': True,
@@ -355,9 +335,6 @@ def get_user_callsigns(request):
         })
 
     except Exception as e:
-        print(f"❌ Error getting user callsigns: {e}")
-        import traceback
-        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -432,7 +409,7 @@ def lotw_filter_api(request):
             qso_data.append({
                 'id': str(qso.id),
                 'date': qso.date.strftime('%d.%m.%Y'),
-                'time': qso.time.strftime('%H:%i') if qso.time else '',
+                'time': qso.time.strftime('%H:%M') if qso.time else '',
                 'my_callsign': qso.my_callsign or qso.user.username,
                 'callsign': qso.callsign,
                 'band': qso.band or '',
@@ -450,7 +427,6 @@ def lotw_filter_api(request):
         try:
             dxcc_entities = lotw_qso_sorted.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
         except Exception as e:
-            print(f"Error getting dxcc_entities: {e}")
             dxcc_entities = 0
 
         return JsonResponse({
@@ -474,7 +450,6 @@ def lotw_filter_api(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
-        print(f"Error in lotw_filter_api: {e}")
         return JsonResponse({'error': str(e)}, status=500)
 
 

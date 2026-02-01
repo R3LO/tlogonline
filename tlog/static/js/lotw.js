@@ -22,29 +22,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализация AJAX фильтров
     function initAjaxFilters() {
         const filterForm = document.querySelector('.filter-controls');
-        const filterInputs = filterForm.querySelectorAll('select, input[type="text"]');
+        const searchBtn = document.getElementById('searchFilters');
         const resetBtn = document.getElementById('resetFilters');
         
         // Загружаем позывные пользователя
         loadUserCallsigns();
         
-        // Автофильтрация при изменении значений (с задержкой)
-        let filterTimeout;
-        filterInputs.forEach(input => {
-            input.addEventListener('input', function() {
-                clearTimeout(filterTimeout);
-                filterTimeout = setTimeout(() => {
-                    applyFilters();
-                }, 500); // Задержка 500мс
-            });
-            
+        // Автофильтрация только для селектов (диапазон, вид связи, спутник)
+        const autoFilterInputs = filterForm.querySelectorAll('select');
+        autoFilterInputs.forEach(input => {
             input.addEventListener('change', function() {
-                clearTimeout(filterTimeout);
-                filterTimeout = setTimeout(() => {
-                    applyFilters();
-                }, 500);
+                applyFilters();
             });
         });
+        
+        // Для текстовых полей (позывной, QTH) - только по клику на кнопку
+        // Никаких автофильтров для текстовых полей
+        
+        // Кнопка поиска
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                applyFilters();
+            });
+        }
         
         // Кнопка сброса фильтров
         if (resetBtn) {
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+
     // Загрузка позывных пользователя
     async function loadUserCallsigns() {
         try {
@@ -86,12 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         option.textContent = callsign;
                         myCallsignSelect.appendChild(option);
                     });
-                    
-                    console.log(`Загружено ${data.callsigns.length} позывных пользователя`);
                 }
             }
         } catch (error) {
-            console.error('Ошибка загрузки позывных:', error);
+            // Ошибка загрузки позывных - скрываем для пользователя
         }
     }
 
@@ -149,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             hideLoadingIndicator();
             setFormEnabled(true);
-            console.error('Error:', error);
             showNotification('Ошибка фильтрации: ' + error.message, 'danger');
         });
     }
@@ -407,7 +405,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
             
         } catch (error) {
-            console.error('Ошибка обновления статуса:', error);
             showNotification('Ошибка обновления статуса', 'error');
         } finally {
             // Восстановить кнопку
