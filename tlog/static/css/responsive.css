@@ -1,0 +1,760 @@
+/* =====================================
+   Адаптивность - Responsive стили
+   ===================================== */
+
+/* =====================================
+   БРЕЙКПОИНТЫ
+   ===================================== */
+
+/* Extra small devices (portrait phones, less than 576px) */
+@media (max-width: 575px) {
+    /* Контейнеры */
+    .container-fluid {
+        padding-left: var(--padding-sm);
+        padding-right: var(--padding-sm);
+    }
+    
+    /* Заголовки */
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.25rem; }
+    h5 { font-size: 1.125rem; }
+    h6 { font-size: 1rem; }
+    
+    /* Карточки */
+    .card {
+        margin-bottom: var(--padding-md);
+    }
+    
+    .card-body {
+        padding: var(--padding-md);
+    }
+    
+    /* Кнопки */
+    .btn {
+        font-size: var(--font-size-sm);
+        padding: var(--padding-sm) var(--padding-md);
+    }
+    
+    .btn-lg {
+        padding: var(--padding-md) var(--padding-lg);
+        font-size: var(--font-size-lg);
+    }
+    
+    .btn-sm {
+        padding: var(--padding-xs) var(--padding-sm);
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Таблицы */
+    .table-responsive {
+        font-size: var(--font-size-sm);
+    }
+    
+    .table th,
+    .table td {
+        padding: var(--padding-xs) var(--padding-sm);
+    }
+    
+    /* Навигация */
+    .navbar-brand {
+        font-size: var(--font-size-lg);
+    }
+    
+    .nav-link {
+        padding: var(--padding-sm) !important;
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Формы */
+    .form-control,
+    .form-select {
+        font-size: var(--font-size-sm);
+        padding: var(--padding-sm);
+    }
+    
+    /* Главный контейнер */
+    .main-container {
+        margin-bottom: var(--padding-sm) !important;
+    }
+    
+    .logbook-header {
+        padding: var(--padding-lg) var(--padding-md) !important;
+    }
+    
+    .logbook-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .logbook-header p {
+        font-size: var(--font-size-sm);
+        opacity: 0.8;
+    }
+    
+    /* Статистические карточки */
+    .stat-card {
+        padding: var(--padding-md) var(--padding-sm);
+        min-height: 100px;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: var(--padding-sm);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Фильтры */
+    .filter-card {
+        padding: var(--padding-md);
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        gap: var(--padding-sm);
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .filter-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    /* Утилитарные карточки */
+    .utility-card {
+        margin-bottom: var(--padding-md);
+    }
+    
+    .utility-header {
+        padding: var(--padding-sm) var(--padding-md);
+    }
+    
+    .utility-body {
+        padding: var(--padding-sm) var(--padding-md);
+    }
+    
+    .utility-link {
+        padding: var(--padding-sm) var(--padding-md);
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Секции */
+    .stats-section {
+        margin-bottom: var(--padding-lg);
+    }
+    
+    .section-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    /* Уведомления */
+    .alert {
+        font-size: var(--font-size-sm);
+        padding: var(--padding-sm) var(--padding-md);
+    }
+    
+    /* Сетка */
+    .row {
+        margin: 0 -3px;
+    }
+    
+    .col,
+    .col-1, .col-2, .col-3, .col-4, .col-5, .col-6,
+    .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
+        padding: 0 3px;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .container {
+        max-width: 540px;
+    }
+    
+    /* Главный контейнер */
+    .main-container {
+        margin-bottom: var(--padding-md) !important;
+    }
+    
+    /* Статистические карточки */
+    .stat-card {
+        padding: var(--padding-md);
+        min-height: 110px;
+    }
+    
+    .stat-icon {
+        font-size: 1.75rem;
+        margin-bottom: var(--padding-md);
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Фильтры */
+    .filter-controls {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 200px;
+    }
+    
+    /* Сетка */
+    .row {
+        margin: 0 -5px;
+    }
+    
+    .col,
+    .col-1, .col-2, .col-3, .col-4, .col-5, .col-6,
+    .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
+        padding: 0 5px;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+    
+    /* Главный контейнер */
+    .main-container {
+        margin-bottom: var(--padding-lg) !important;
+    }
+    
+    /* Статистические карточки */
+    .stat-card {
+        padding: var(--padding-lg) var(--padding-md);
+        min-height: 130px;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: var(--padding-md);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Фильтры */
+    .filter-controls {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 180px;
+    }
+    
+    /* Навигация */
+    .navbar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .nav-link {
+        padding: var(--padding-sm) var(--padding-md) !important;
+        font-size: var(--font-size-sm);
+    }
+    
+    .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-sm);
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+    
+    /* Главный контейнер */
+    .main-container {
+        margin-bottom: var(--padding-xl) !important;
+    }
+    
+    /* Статистические карточки */
+    .stat-card {
+        padding: var(--padding-xl) var(--padding-lg);
+        min-height: 150px;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--padding-lg);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-base);
+    }
+    
+    /* Фильтры */
+    .filter-controls {
+        flex-wrap: nowrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 auto;
+        min-width: 160px;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* =====================================
+   ОСОБЫЕ АДАПТИВНЫЕ КЛАССЫ
+   ===================================== */
+
+/* Скрытие/показ на определенных брейкпоинтах */
+@media (max-width: 575px) {
+    .d-xs-none { display: none !important; }
+    .d-xs-block { display: block !important; }
+    .d-xs-flex { display: flex !important; }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .d-sm-none { display: none !important; }
+    .d-sm-block { display: block !important; }
+    .d-sm-flex { display: flex !important; }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .d-md-none { display: none !important; }
+    .d-md-block { display: block !important; }
+    .d-md-flex { display: flex !important; }
+}
+
+@media (min-width: 992px) {
+    .d-lg-none { display: none !important; }
+    .d-lg-block { display: block !important; }
+    .d-lg-flex { display: flex !important; }
+}
+
+@media (min-width: 1200px) {
+    .d-xl-none { display: none !important; }
+    .d-xl-block { display: block !important; }
+    .d-xl-flex { display: flex !important; }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ ОТСТУПЫ
+   ===================================== */
+
+@media (max-width: 575px) {
+    .m-xs-0 { margin: 0 !important; }
+    .m-xs-1 { margin: var(--padding-xs) !important; }
+    .m-xs-2 { margin: var(--padding-sm) !important; }
+    .m-xs-3 { margin: var(--padding-md) !important; }
+    .m-xs-4 { margin: var(--padding-lg) !important; }
+    .m-xs-5 { margin: var(--padding-xl) !important; }
+    
+    .p-xs-0 { padding: 0 !important; }
+    .p-xs-1 { padding: var(--padding-xs) !important; }
+    .p-xs-2 { padding: var(--padding-sm) !important; }
+    .p-xs-3 { padding: var(--padding-md) !important; }
+    .p-xs-4 { padding: var(--padding-lg) !important; }
+    .p-xs-5 { padding: var(--padding-xl) !important; }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ РАЗМЕРЫ ШРИФТОВ
+   ===================================== */
+
+@media (max-width: 575px) {
+    .fs-xs-1 { font-size: var(--font-size-xs) !important; }
+    .fs-xs-2 { font-size: var(--font-size-sm) !important; }
+    .fs-xs-3 { font-size: var(--font-size-base) !important; }
+    .fs-xs-4 { font-size: var(--font-size-lg) !important; }
+    .fs-xs-5 { font-size: var(--font-size-xl) !important; }
+    .fs-xs-6 { font-size: var(--font-size-2xl) !important; }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ СЕТКИ ДЛЯ СПЕЦИФИЧНЫХ КОМПОНЕНТОВ
+   ===================================== */
+
+/* Статистические карточки */
+@media (max-width: 767px) {
+    .stats-section .row {
+        margin: 0 -5px;
+    }
+    
+    .stats-section .col,
+    .stats-section .col-6,
+    .stats-section .col-md-3,
+    .stats-section .col-lg-3 {
+        padding: 0 5px;
+        margin-bottom: var(--padding-md);
+    }
+    
+    .stat-card {
+        flex: 0 0 calc(50% - 5px) !important;
+        max-width: calc(50% - 5px);
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        flex: 0 0 calc(50% - 5px) !important;
+        max-width: calc(50% - 5px);
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 400px) {
+    .stat-card {
+        flex: 0 0 100% !important;
+        max-width: 100%;
+    }
+}
+
+/* Утилитарные карточки в боковой панели */
+@media (max-width: 991px) {
+    .col-lg-4 .card {
+        margin-bottom: var(--padding-md) !important;
+        border-radius: var(--radius-lg) !important;
+    }
+    
+    .col-lg-4 .card-header {
+        padding: var(--padding-md) var(--padding-lg);
+        background: var(--light);
+    }
+    
+    .col-lg-4 .card-body {
+        padding: var(--padding-md);
+    }
+    
+    .col-lg-4 .d-flex.flex-column.gap-2 {
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        gap: var(--padding-sm) !important;
+    }
+    
+    .col-lg-4 .d-flex.flex-column.gap-2 .btn {
+        flex: 1 1 45%;
+        font-size: var(--font-size-sm);
+        padding: var(--padding-sm) var(--padding-md);
+        border-radius: var(--radius-sm);
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-4 .d-flex.flex-column.gap-2 {
+        flex-direction: column !important;
+    }
+    
+    .col-lg-4 .d-flex.flex-column.gap-2 .btn {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ МОДАЛКИ
+   ===================================== */
+
+@media (max-width: 575px) {
+    .modal-dialog {
+        margin: var(--padding-sm);
+        max-width: calc(100% - 2rem);
+    }
+    
+    .modal-content {
+        border-radius: var(--radius-md);
+    }
+    
+    .modal-header {
+        padding: var(--padding-md);
+    }
+    
+    .modal-body {
+        padding: var(--padding-md);
+    }
+    
+    .modal-footer {
+        padding: var(--padding-md);
+        flex-direction: column;
+        gap: var(--padding-sm);
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ ТАБЛИЦЫ
+   ===================================== */
+
+@media (max-width: 767px) {
+    .table-responsive {
+        border-radius: var(--radius-md);
+    }
+    
+    .table th,
+    .table td {
+        padding: var(--padding-xs) var(--padding-sm);
+        font-size: var(--font-size-sm);
+    }
+    
+    .table thead th {
+        font-size: var(--font-size-xs);
+        padding: var(--padding-sm) var(--padding-xs);
+    }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ ФОРМЫ
+   ===================================== */
+
+@media (max-width: 575px) {
+    .form-group {
+        margin-bottom: var(--padding-md);
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: var(--font-size-sm);
+        padding: var(--padding-sm) var(--padding-md);
+    }
+    
+    .form-label {
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--padding-xs);
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        border-radius: var(--radius-md) !important;
+        margin-bottom: var(--padding-xs);
+    }
+    
+    .btn-group .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ УВЕДОМЛЕНИЯ
+   ===================================== */
+
+@media (max-width: 575px) {
+    .alert {
+        padding: var(--padding-sm) var(--padding-md);
+        font-size: var(--font-size-sm);
+        border-radius: var(--radius-sm);
+    }
+    
+    .alert-dismissible {
+        padding-right: var(--padding-xl);
+    }
+    
+    .alert-dismissible .btn-close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        padding: var(--padding-md);
+    }
+}
+
+/* =====================================
+   АДАПТИВНАЯ НАВИГАЦИЯ
+   ===================================== */
+
+@media (max-width: 991px) {
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--padding-md) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-nav .nav-link:last-child {
+        border-bottom: none;
+    }
+    
+    .navbar-toggler {
+        border: none;
+        padding: var(--padding-xs);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+}
+
+@media (max-width: 400px) {
+    .navbar-brand {
+        font-size: var(--font-size-lg);
+    }
+    
+    .nav-link span {
+        display: none;
+    }
+    
+    .nav-link.active span {
+        display: inline;
+    }
+}
+
+/* =====================================
+   АДАПТИВНЫЕ КАРТОЧКИ ДОСТИЖЕНИЙ
+   ===================================== */
+
+@media (max-width: 767px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+        gap: var(--padding-md);
+    }
+    
+    .achievement-card {
+        padding: var(--padding-md);
+    }
+    
+    .achievement-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .achievement-title {
+        font-size: var(--font-size-base);
+    }
+    
+    .achievement-description {
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* =====================================
+   ПЕЧАТЬ
+   ===================================== */
+
+@media print {
+    /* Скрываем все интерактивные элементы */
+    .navbar,
+    .btn,
+    .alert-dismissible .btn-close,
+    .modal,
+    .dropdown,
+    .pagination,
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Оптимизируем для печати */
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    
+    .container-fluid,
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .main-container {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        break-inside: avoid;
+    }
+    
+    .card-header {
+        background: #f5f5f5 !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+    
+    .table {
+        border: 1px solid #ccc !important;
+    }
+    
+    .table th,
+    .table td {
+        border: 1px solid #ccc !important;
+        padding: 0.5rem !important;
+    }
+    
+    .table thead th {
+        background: #f5f5f5 !important;
+        color: black !important;
+    }
+    
+    /* Разрывы страниц */
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .no-page-break {
+        page-break-inside: avoid;
+    }
+}
+
+/* =====================================
+   ОТЗЫВЧИВЫЕ РАЗМЕРЫ ШРИФТОВ
+   ===================================== */
+
+/* Отзывчивые размеры шрифтов */
+.fs-responsive-xl {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.fs-responsive-lg {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.fs-responsive-md {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.fs-responsive-sm {
+    font-size: clamp(0.875rem, 2vw, 1.25rem);
+}

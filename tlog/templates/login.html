@@ -10,74 +10,17 @@
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .auth-card {
-            max-width: 400px;
-            margin: 50px auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        .auth-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .auth-header h2 {
-            color: #1e3c72;
-        }
-        .form-label {
-            color: #333;
-            font-weight: 500;
-        }
-        .form-control {
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-        .form-control:focus {
-            border-color: #2a5298;
-            box-shadow: 0 0 0 0.2rem rgba(42, 82, 152, 0.25);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 500;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
-        }
-        .auth-links {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .auth-links a {
-            color: #2a5298;
-            text-decoration: none;
-        }
-        .auth-links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h2 class="mb-0">
-                    <i class="fas fa-key"></i> {% trans "Вход" %}
-                </h2>
-                <p class="mb-0 small text-muted mt-2">{% trans "Войдите в свой аккаунт" %}</p>
+                <div class="auth-logo">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h2 class="auth-title">{% trans "Вход" %}</h2>
+                <p class="auth-subtitle">{% trans "Войдите в свой аккаунт" %}</p>
             </div>
 
             {% if messages %}
@@ -95,9 +38,8 @@
                     <label for="username" class="form-label">
                         <i class="fas fa-broadcast-tower"></i> {% trans "Позывной" %}
                     </label>
-                    <input type="text" class="form-control" id="username" name="username" required
+                    <input type="text" class="form-control text-uppercase" id="username" name="username" required
                            placeholder="{% trans 'Введите позывной' %}" 
-                           style="text-transform: uppercase;"
                            value="{{ request.COOKIES.remembered_username|default:'' }}">
                 </div>
 

@@ -1,0 +1,12 @@
+/* =====================================
+   TLog - Главный файл стилей
+   ===================================== */
+
+/* Импортируем все остальные стили в правильном порядке */
+@import url('./variables.css');
+@import url('./base.css');
+@import url('./components.css');
+@import url('./layout.css');
+@import url('./pages.css');
+@import url('./utilities.css');
+@import url('./responsive.css');

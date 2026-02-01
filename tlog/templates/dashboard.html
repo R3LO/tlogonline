@@ -262,7 +262,7 @@
                 </div>
                 <div class="utility-body">
                     <a href="/dashboard/qo100/converter/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="utility-link-icon bg-gradient-primary">
                             <span>🛰️</span>
                         </div>
                         <span class="utility-link-text">{% trans "QO-100 Log Converter" %}</span>
@@ -271,7 +271,7 @@
                         </svg>
                     </a>
                     <a href="/dashboard/cosmos/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <div class="utility-link-icon bg-gradient-secondary">
                             <span>🚀</span>
                         </div>
                         <span class="utility-link-text">{% trans "Space Diploma Application" %}</span>
@@ -280,7 +280,7 @@
                         </svg>
                     </a>
                     <a href="/user-awards/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <div class="utility-link-icon bg-gradient-info">
                             <span>🏆</span>
                         </div>
                         <span class="utility-link-text">{% trans "User Awards" %}</span>
@@ -303,7 +303,7 @@
                 </div>
                 <div class="utility-body">
                     <a href="/dashboard/qo100/regions/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #264653, #2a9d8f);">
+                        <div class="utility-link-icon bg-gradient-warning">
                             <span>🗺️</span>
                         </div>
                         <span class="utility-link-text">{% trans "RF Regions" %}</span>
@@ -312,7 +312,7 @@
                         </svg>
                     </a>
                     <a href="/dashboard/qo100/r150s/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #2a9d8f, #e9c46a);">
+                        <div class="utility-link-icon bg-gradient-success">
                             <span>🌍</span>
                         </div>
                         <span class="utility-link-text">{% trans "R-150-S Countries" %}</span>
@@ -321,7 +321,7 @@
                         </svg>
                     </a>
                     <a href="/dashboard/qo100/dxcc/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #e9c46a, #f4a261);">
+                        <div class="utility-link-icon bg-gradient-danger">
                             <span>🌐</span>
                         </div>
                         <span class="utility-link-text">{% trans "DXCC Countries" %}</span>
@@ -330,7 +330,7 @@
                         </svg>
                     </a>
                     <a href="/dashboard/qo100/grids/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #f4a261, #e76f51);">
+                        <div class="utility-link-icon bg-gradient-purple">
                             <span>📍</span>
                         </div>
                         <span class="utility-link-text">{% trans "Locators" %}</span>
@@ -339,7 +339,7 @@
                         </svg>
                     </a>
                     <a href="/dashboard/qo100/unique-callsigns/" class="utility-link">
-                        <div class="utility-link-icon" style="background: linear-gradient(135deg, #e76f51, #c44536);">
+                        <div class="utility-link-icon bg-gradient-orange">
                             <span>📡</span>
                         </div>
                         <span class="utility-link-text">{% trans "Unique Callsigns" %}</span>
@@ -363,7 +363,7 @@
                         </p>
                     {% elif profile.lotw_chk_pass %}
                         <p class="mb-0 text-success">
-                            <span class="me-2" style="color: green;">✅</span>
+                            <span class="me-2 text-success">✅</span>
                             {% trans "LoTW Access" %}
                         </p>
                     {% endif %}
@@ -405,7 +405,7 @@
                             {% for upload in adif_uploads %}
                                 <div class="list-group-item px-2 py-2">
                                     <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <small class="text-truncate fw-bold" style="max-width: 120px;">{{ upload.file_name }}</small>
+                                        <small class="text-truncate fw-bold max-width-120px">{{ upload.file_name }}</small>
                                         <div class="d-flex align-items-center gap-1">
                                             <span class="badge {% if upload.processed %}bg-success{% else %}bg-warning{% endif %} py-1">
                                                 {{ upload.qso_count|default:0 }} QSO
@@ -417,7 +417,7 @@
                                                     data-bs-backdrop="false"
                                                     onclick="deleteAdifUpload('{{ upload.id }}', '{{ upload.file_name }}')"
                                                     {% if upload.qso_count|default:0 == 0 %}disabled{% endif %}>
-                                                <span style="font-size: 0.75rem;">🗑️</span>
+                                                <span class="icon-small">🗑️</span>
                                             </button>
                                         </div>
                                     </div>
@@ -440,7 +440,6 @@
 {% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block extra_js %}

@@ -1,0 +1,558 @@
+/* =====================================
+   Утилиты - Дополнительные вспомогательные классы
+   ===================================== */
+
+/* =====================================
+   АНИМАЦИИ И ПЕРЕХОДЫ
+   ===================================== */
+
+/* Основные анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Утилиты для анимаций */
+.fade-in { animation: fadeIn 0.6s ease-out; }
+.slide-up { animation: slideUp 0.6s ease-out; }
+.slide-down { animation: slideDown 0.6s ease-out; }
+.slide-left { animation: slideLeft 0.6s ease-out; }
+.slide-right { animation: slideRight 0.6s ease-out; }
+.bounce-in { animation: bounceIn 0.8s ease-out; }
+.pulse { animation: pulse 2s ease-in-out infinite; }
+.shake { animation: shake 0.5s ease-in-out; }
+
+/* Задержки анимаций */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* =====================================
+   СОСТОЯНИЯ ЗАГРУЗКИ
+   ===================================== */
+
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 1px;
+}
+
+.spinner-lg {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+}
+
+/* =====================================
+   СКРЫТИЕ/ПОКАЗ ЭЛЕМЕНТОВ
+   ===================================== */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.invisible {
+    visibility: hidden !important;
+}
+
+.visible {
+    visibility: visible !important;
+}
+
+/* =====================================
+   ОБРЕЗАНИЕ ТЕКСТА
+   ===================================== */
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =====================================
+   ГРАДИЕНТЫ
+   ===================================== */
+
+.text-gradient {
+    background: var(--bg-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-primary {
+    background: var(--bg-gradient) !important;
+}
+
+.bg-gradient-light {
+    background: var(--bg-gradient-light) !important;
+}
+
+.bg-gradient-card {
+    background: var(--bg-gradient-card) !important;
+}
+
+/* =====================================
+   ТЕНИ
+   ===================================== */
+
+.shadow-soft {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow-medium {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-strong {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-colored {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25) !important;
+}
+
+/* =====================================
+   РАМКИ
+   ===================================== */
+
+.border-gradient {
+    border: 2px solid;
+    border-image: var(--bg-gradient) 1;
+    border-image-slice: 1;
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+.border-dotted {
+    border-style: dotted !important;
+}
+
+.border-thick {
+    border-width: 3px !important;
+}
+
+.border-thin {
+    border-width: 1px !important;
+}
+
+/* =====================================
+   ИНТЕРВАЛЫ И ОТСТУПЫ
+   ===================================== */
+
+.gap-xs { gap: var(--padding-xs) !important; }
+.gap-sm { gap: var(--padding-sm) !important; }
+.gap-md { gap: var(--padding-md) !important; }
+.gap-lg { gap: var(--padding-lg) !important; }
+.gap-xl { gap: var(--padding-xl) !important; }
+
+/* =====================================
+   КУРСОРЫ
+   ===================================== */
+
+.cursor-pointer { cursor: pointer !important; }
+.cursor-default { cursor: default !important; }
+.cursor-not-allowed { cursor: not-allowed !important; }
+.cursor-help { cursor: help !important; }
+.cursor-wait { cursor: wait !important; }
+
+/* =====================================
+   ПОЛЬЗОВАТЕЛЬСКИЙ ВЫБОР
+   ===================================== */
+
+.user-select-none {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+.user-select-all {
+    -webkit-user-select: all !important;
+    -moz-user-select: all !important;
+    -ms-user-select: all !important;
+    user-select: all !important;
+}
+
+/* =====================================
+   TRANSFORM
+   ===================================== */
+
+.transform-scale-90 { transform: scale(0.9) !important; }
+.transform-scale-95 { transform: scale(0.95) !important; }
+.transform-scale-105 { transform: scale(1.05) !important; }
+.transform-scale-110 { transform: scale(1.1) !important; }
+.transform-scale-120 { transform: scale(1.2) !important; }
+
+.transform-rotate-45 { transform: rotate(45deg) !important; }
+.transform-rotate-90 { transform: rotate(90deg) !important; }
+.transform-rotate-180 { transform: rotate(180deg) !important; }
+.transform-rotate-270 { transform: rotate(270deg) !important; }
+
+.transform-translate-x-25 { transform: translateX(25%) !important; }
+.transform-translate-x-50 { transform: translateX(50%) !important; }
+.transform-translate-x-75 { transform: translateX(75%) !important; }
+.transform-translate-x-100 { transform: translateX(100%) !important; }
+
+.transform-translate-y-25 { transform: translateY(25%) !important; }
+.transform-translate-y-50 { transform: translateY(50%) !important; }
+.transform-translate-y-75 { transform: translateY(75%) !important; }
+.transform-translate-y-100 { transform: translateY(100%) !important; }
+
+/* =====================================
+   HOVER ЭФФЕКТЫ
+   ===================================== */
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hover-scale {
+    transition: all 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.hover-rotate {
+    transition: all 0.3s ease;
+}
+
+.hover-rotate:hover {
+    transform: rotate(5deg);
+}
+
+/* =====================================
+   BACKDROP FILTER
+   ===================================== */
+
+.backdrop-blur {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.backdrop-blur-lg {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* =====================================
+   ИКОНКИ И ЭМОДЗИ
+   ===================================== */
+
+.icon-xs { font-size: 0.75rem !important; }
+.icon-sm { font-size: 0.875rem !important; }
+.icon-md { font-size: 1rem !important; }
+.icon-lg { font-size: 1.25rem !important; }
+.icon-xl { font-size: 1.5rem !important; }
+.icon-2xl { font-size: 2rem !important; }
+.icon-3xl { font-size: 3rem !important; }
+
+/* =====================================
+   СОСТОЯНИЯ
+   ===================================== */
+
+.is-success {
+    border-color: var(--success) !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+.is-error {
+    border-color: var(--danger) !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.is-warning {
+    border-color: var(--warning) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+}
+
+.is-info {
+    border-color: var(--info) !important;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25) !important;
+}
+
+/* =====================================
+   ПЕЧАТЬ
+   ===================================== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    .shadow,
+    .shadow-sm,
+    .shadow-md,
+    .shadow-lg,
+    .shadow-xl {
+        box-shadow: none !important;
+    }
+    
+    .bg-gradient,
+    .bg-gradient-primary,
+    .bg-gradient-light {
+        background: var(--white) !important;
+        color: var(--dark) !important;
+    }
+}
+
+/* =====================================
+   СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ
+   ===================================== */
+
+/* Glitch effect */
+.glitch {
+    position: relative;
+    color: var(--white);
+    letter-spacing: 0.5em;
+    animation: glitch-skew 1s infinite linear alternate-reverse;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    animation: glitch-anim-1 0.5s infinite linear alternate-reverse;
+    color: var(--danger);
+    z-index: -1;
+}
+
+.glitch::after {
+    animation: glitch-anim-2 0.5s infinite linear alternate-reverse;
+    color: var(--info);
+    z-index: -2;
+}
+
+@keyframes glitch-anim-1 {
+    0% { clip: rect(42px, 9999px, 44px, 0); transform: skew(0.85deg); }
+    5% { clip: rect(12px, 9999px, 59px, 0); transform: skew(0.4deg); }
+    10% { clip: rect(48px, 9999px, 29px, 0); transform: skew(0.7deg); }
+    15% { clip: rect(42px, 9999px, 73px, 0); transform: skew(0.1deg); }
+    20% { clip: rect(63px, 9999px, 27px, 0); transform: skew(0.8deg); }
+    25% { clip: rect(34px, 9999px, 55px, 0); transform: skew(0.2deg); }
+    30% { clip: rect(86px, 9999px, 73px, 0); transform: skew(0.5deg); }
+    35% { clip: rect(20px, 9999px, 20px, 0); transform: skew(1.1deg); }
+    40% { clip: rect(26px, 9999px, 60px, 0); transform: skew(0.3deg); }
+    45% { clip: rect(86px, 9999px, 36px, 0); transform: skew(0.6deg); }
+    50% { clip: rect(14px, 9999px, 89px, 0); transform: skew(0.2deg); }
+    55% { clip: rect(1px, 9999px, 66px, 0); transform: skew(0.9deg); }
+    60% { clip: rect(86px, 9999px, 30px, 0); transform: skew(0.4deg); }
+    65% { clip: rect(26px, 9999px, 37px, 0); transform: skew(0.7deg); }
+    70% { clip: rect(59px, 9999px, 70px, 0); transform: skew(0.1deg); }
+    75% { clip: rect(17px, 9999px, 70px, 0); transform: skew(0.8deg); }
+    80% { clip: rect(85px, 9999px, 39px, 0); transform: skew(0.2deg); }
+    85% { clip: rect(71px, 9999px, 75px, 0); transform: skew(0.5deg); }
+    90% { clip: rect(83px, 9999px, 40px, 0); transform: skew(0.6deg); }
+    95% { clip: rect(22px, 9999px, 67px, 0); transform: skew(0.1deg); }
+    100% { clip: rect(98px, 9999px, 5px, 0); transform: skew(0.8deg); }
+}
+
+@keyframes glitch-anim-2 {
+    6% { clip: rect(65px, 9999px, 100px, 0); transform: skew(0.8deg); }
+    10% { clip: rect(40px, 9999px, 105px, 0); transform: skew(0.2deg); }
+    14% { clip: rect(79px, 9999px, 130px, 0); transform: skew(0.7deg); }
+    18% { clip: rect(75px, 9999px, 110px, 0); transform: skew(0.1deg); }
+    22% { clip: rect(67px, 9999px, 130px, 0); transform: skew(0.8deg); }
+    26% { clip: rect(10px, 9999px, 85px, 0); transform: skew(0.2deg); }
+    30% { clip: rect(78px, 9999px, 115px, 0); transform: skew(0.5deg); }
+    34% { clip: rect(14px, 9999px, 142px, 0); transform: skew(0.6deg); }
+    38% { clip: rect(1px, 9999px, 79px, 0); transform: skew(0.1deg); }
+    42% { clip: rect(1px, 9999px, 138px, 0); transform: skew(0.9deg); }
+    46% { clip: rect(86px, 9999px, 30px, 0); transform: skew(0.4deg); }
+    50% { clip: rect(23px, 9999px, 84px, 0); transform: skew(0.7deg); }
+    54% { clip: rect(26px, 9999px, 103px, 0); transform: skew(0.2deg); }
+    58% { clip: rect(59px, 9999px, 74px, 0); transform: skew(0.5deg); }
+    62% { clip: rect(65px, 9999px, 123px, 0); transform: skew(0.1deg); }
+    66% { clip: rect(44px, 9999px, 77px, 0); transform: skew(0.8deg); }
+    70% { clip: rect(78px, 9999px, 115px, 0); transform: skew(0.6deg); }
+    74% { clip: rect(35px, 9999px, 103px, 0); transform: skew(0.2deg); }
+    78% { clip: rect(41px, 9999px, 120px, 0); transform: skew(0.5deg); }
+    82% { clip: rect(44px, 9999px, 48px, 0); transform: skew(0.1deg); }
+    86% { clip: rect(21px, 9999px, 127px, 0); transform: skew(0.9deg); }
+    90% { clip: rect(63px, 9999px, 107px, 0); transform: skew(0.4deg); }
+    94% { clip: rect(43px, 9999px, 92px, 0); transform: skew(0.7deg); }
+    98% { clip: rect(18px, 9999px, 103px, 0); transform: skew(0.2deg); }
+    100% { clip: rect(23px, 9999px, 85px, 0); transform: skew(0.8deg); }
+}
+
+@keyframes glitch-skew {
+    2% { transform: skew(0.8deg); }
+    4% { transform: skew(0.9deg); }
+    50% { transform: skew(-0.4deg); }
+    52% { transform: skew(0.4deg); }
+    98% { transform: skew(0deg); }
+    100% { transform: skew(0deg); }
+}

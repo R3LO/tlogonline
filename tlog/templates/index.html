@@ -4,7 +4,6 @@
 {% block title %}TLog - {% trans "Welcome to Ham Radio Logbook" %}{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/index.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -13,7 +12,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <h1 class="fw-bold mb-4" style="font-size: clamp(1.5rem, 4vw, 2.5rem);">📡 {% trans "Welcome to Ham Radio Logbook" %}</h1>
+                <h1 class="fw-bold mb-4 fs-responsive-xl">📡 {% trans "Welcome to Ham Radio Logbook" %}</h1>
                 <p class="lead mb-4">
                     {% trans "Your amateur radio contacts logbook" %}
                 </p>
@@ -91,8 +90,7 @@
                             <label for="my_callsign" class="form-label small fw-bold">{% trans "Callsign" %}</label>
                             <input type="text" class="form-control" id="my_callsign"
                                    placeholder="{% trans "Callsign" %}..." autocomplete="off">
-                            <div id="callsignSuggestions" class="list-group position-absolute w-100"
-                                 style="z-index: 1000;"></div>
+                            <div id="callsignSuggestions" class="list-group position-absolute w-100 z-dropdown"></div>
                         </div>
                         <div class="col-md-5">
                             <label for="callsign" class="form-label small fw-bold">{% trans "Callsign" %}</label>
@@ -116,7 +114,7 @@
     <div class="container">
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
-                <div class="card text-center h-100 border-0" style="background: rgba(255,255,255,0.1);">
+                <div class="card text-center h-100 border-0 bg-transparent-light">
                     <div class="card-body">
                         <div class="stats-number">{{ total_users }}</div>
                         <p class="card-text mb-0">👥 {% trans "Total QSOs" %}</p>
@@ -124,7 +122,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center h-100 border-0" style="background: rgba(255,255,255,0.1);">
+                <div class="card text-center h-100 border-0 bg-transparent-light">
                     <div class="card-body">
                         <div class="stats-number">{{ total_qso }}</div>
                         <p class="card-text mb-0">📡 QSO</p>

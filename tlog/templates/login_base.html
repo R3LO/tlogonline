@@ -32,12 +32,11 @@
                                 <span class="me-2">📻</span>{% trans "Позывной" %}
                             </label>
                             <input type="text" 
-                                   class="form-control form-control-lg" 
+                                   class="form-control form-control-lg text-uppercase" 
                                    id="username" 
                                    name="username" 
                                    required
                                    placeholder="{% trans 'Введите позывной' %}" 
-                                   style="text-transform: uppercase;"
                                    value="{{ request.COOKIES.remembered_username|default:'' }}">
                             <div class="invalid-feedback">
                                 {% trans "Пожалуйста, введите позывной." %}
@@ -162,53 +161,4 @@ document.getElementById('username').addEventListener('input', function(e) {
     e.target.value = e.target.value.toUpperCase();
 });
 </script>
-
-<style>
-.card {
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95);
-}
-
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    border: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #0b5ed7 0%, #5a20d9 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-}
-
-.btn-outline-secondary:hover {
-    background-color: #6c757d;
-    color: white;
-}
-
-.input-group .btn-outline-secondary {
-    border-left: none;
-}
-
-@media (max-width: 576px) {
-    .container {
-        padding: 0 15px;
-    }
-    
-    .card {
-        margin: 20px 0;
-    }
-    
-    .btn-lg {
-        padding: 0.75rem 1rem;
-    }
-}
-</style>
 {% endblock %}
