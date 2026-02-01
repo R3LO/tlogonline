@@ -330,6 +330,20 @@
     }
 }
 
+/* Extra extra large devices (very large desktops, 1400px and up) */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+    
+/* Ultra large devices (ultra wide monitors, 1600px and up) */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1500px;
+    }
+}
+    
 /* =====================================
    ОСОБЫЕ АДАПТИВНЫЕ КЛАССЫ
    ===================================== */
@@ -599,10 +613,11 @@
     .navbar-nav {
         flex-direction: column;
         width: 100%;
+        padding: var(--padding-md) 0;
     }
     
     .navbar-nav .nav-link {
-        padding: var(--padding-md) !important;
+        padding: var(--padding-sm) var(--padding-md);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
@@ -620,20 +635,12 @@
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 576px) {
     .navbar-brand {
         font-size: var(--font-size-lg);
     }
-    
-    .nav-link span {
-        display: none;
-    }
-    
-    .nav-link.active span {
-        display: inline;
-    }
 }
-
+    
 /* =====================================
    АДАПТИВНЫЕ КАРТОЧКИ ДОСТИЖЕНИЙ
    ===================================== */
@@ -757,4 +764,23 @@
 
 .fs-responsive-sm {
     font-size: clamp(0.875rem, 2vw, 1.25rem);
+}
+
+/* =====================================
+   АДАПТИВНЫЕ GAP КЛАССЫ
+   ===================================== */
+
+/* Упрощенные gap для больших экранов */
+@media (min-width: 1400px) {
+    .gap-xl-1 { gap: var(--padding-md) !important; }
+    .gap-xl-2 { gap: var(--padding-lg) !important; }
+    .gap-xl-3 { gap: var(--padding-xl) !important; }
+    .gap-xl-4 { gap: 3rem !important; }
+}
+
+@media (min-width: 1600px) {
+    .gap-xxl-1 { gap: var(--padding-lg) !important; }
+    .gap-xxl-2 { gap: var(--padding-xl) !important; }
+    .gap-xxl-3 { gap: 3rem !important; }
+    .gap-xxl-4 { gap: 4rem !important; }
 }

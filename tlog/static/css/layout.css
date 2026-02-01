@@ -45,6 +45,10 @@ footer {
 .gap-2 { gap: var(--padding-md) !important; }
 .gap-3 { gap: var(--padding-lg) !important; }
 .gap-4 { gap: var(--padding-xl) !important; }
+.gap-5 { gap: var(--padding-2xl) !important; }
+.gap-6 { gap: var(--padding-3xl) !important; }
+.gap-7 { gap: var(--padding-4xl) !important; }
+.gap-8 { gap: var(--padding-5xl) !important; }
 
 /* =====================================
    АДАПТИВНЫЕ GRID

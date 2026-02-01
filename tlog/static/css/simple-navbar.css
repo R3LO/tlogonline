@@ -1,0 +1,171 @@
+/* =====================================
+   УПРОЩЕННАЯ НАВИГАЦИЯ
+   ===================================== */
+
+/* Базовая навигация */
+.navbar {
+    padding: var(--padding-sm) 0;
+    background: var(--bg-gradient) !important;
+}
+
+.navbar-brand {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--white) !important;
+    padding: var(--padding-sm) var(--padding-md);
+    transition: all 0.2s ease;
+}
+
+.navbar-brand:hover {
+    color: var(--white) !important;
+    transform: translateY(-1px);
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-md);
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: var(--padding-sm) var(--padding-md);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: var(--white) !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    color: var(--white) !important;
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Dropdown стили */
+.dropdown-menu {
+    background: var(--white);
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    margin-top: var(--padding-xs);
+    min-width: 180px;
+}
+
+.dropdown-item {
+    color: var(--dark);
+    padding: var(--padding-sm) var(--padding-md);
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-gradient-card);
+    color: var(--primary);
+}
+
+.dropdown-item.active {
+    background: var(--bg-gradient);
+    color: var(--white);
+}
+
+/* Кнопка мобильного меню */
+.navbar-toggler {
+    border: none;
+    padding: var(--padding-sm);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* =====================================
+   АДАПТИВНОСТЬ
+   ===================================== */
+
+/* Планшеты */
+@media (max-width: 991px) {
+    .navbar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--padding-sm);
+        padding: var(--padding-sm) 0;
+    }
+    
+    .nav-link {
+        padding: var(--padding-sm) var(--padding-sm);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 767px) {
+    .navbar-brand {
+        font-size: var(--font-size-lg);
+        padding: var(--padding-sm);
+    }
+    
+    .navbar-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--padding-xs);
+        padding: var(--padding-md) 0;
+        width: 100%;
+    }
+    
+    .nav-link {
+        padding: var(--padding-sm) var(--padding-md);
+        font-size: var(--font-size-sm);
+        width: 100%;
+        border-radius: var(--radius-sm);
+    }
+    
+    .nav-link:hover {
+        transform: none;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: var(--font-size-base);
+    }
+    
+    .nav-link {
+        padding: var(--padding-sm);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* =====================================
+   СПЕЦИАЛЬНЫЕ СЛУЧАИ
+   ===================================== */
+
+/* Убираем проблемные правила из других файлов */
+.navbar-nav .nav-link .nav-text {
+    display: inline !important;
+}
+
+.navbar-nav .nav-link span {
+    display: inline !important;
+}
+
+/* Фиксируем ширину для dropdown */
+@media (max-width: 576px) {
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        left: auto;
+    }
+}
