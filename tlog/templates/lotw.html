@@ -15,8 +15,11 @@
             <div class="card-body pt-3">
                 <div class="filter-card mb-4">
                     <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
-                    <form class="filter-controls">
+                    <form class="filter-controls" method="POST" action="{% url 'lotw_page' %}">
                         {% csrf_token %}
+                        <!-- Скрытое поле для номера страницы -->
+                        <input type="hidden" name="page" value="{{ current_page|default:1 }}">
+                        
                         <div class="filter-group">
                             <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
                             <select class="form-select form-select-sm" name="my_callsign">
@@ -65,13 +68,13 @@
                         
                         <div class="filter-group">
                             <label class="form-label small mb-1">&nbsp;</label>
-                            <button type="button" class="btn btn-sm reset-btn" id="resetFilters" title="{% trans 'Сбросить фильтры' %}">
+                            <button type="submit" name="action" value="reset" class="btn btn-sm reset-btn" id="resetFilters" title="{% trans 'Сбросить фильтры' %}">
                                 <span>❌</span>
                             </button>
                         </div>
                         
                         <div class="filter-actions">
-                            <button type="button" class="btn btn-primary btn-sm" id="searchFilters" title="{% trans 'Применить фильтры' %}">
+                            <button type="submit" name="action" value="search" class="btn btn-primary btn-sm" id="searchFilters" title="{% trans 'Применить фильтры' %}">
                                 <span>🔍</span>
                                 <span class="ms-1">{% trans "Найти" %}</span>
                             </button>
@@ -187,39 +190,58 @@
                         (<span data-current-count>{{ recent_lotw_qso|length }}</span> из <span data-total-count>{{ lotw_confirmed_count }}</span> записей)
                     </small>
                 </div>
-                <nav aria-label="Навигация по страницам QSO" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if current_page > 1 %}
-                            <li class="page-item">
-                                <a class="page-link btn-link" href="#" data-page="{{ current_page|add:'-1' }}">Предыдущая</a>
-                            </li>
-                        {% endif %}
 
-                        {% load custom_filters %}
-                        {% paginate_numbers current_page total_pages 3 as page_numbers %}
-                        {% for page_num in page_numbers %}
-                            {% if page_num == '...' %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            {% elif page_num == current_page %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ page_num }}</span>
-                                </li>
-                            {% else %}
+                <!-- Пагинация под таблицей -->
+                <form method="POST" action="{% url 'lotw_page' %}" class="d-inline">
+                    {% csrf_token %}
+                    <!-- Скрытые поля для сохранения фильтров при пагинации -->
+                    <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
+                    <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
+                    <input type="hidden" name="search_qth" value="{{ search_qth }}">
+                    <input type="hidden" name="band" value="{{ band_filter }}">
+                    <input type="hidden" name="mode" value="{{ mode_filter }}">
+                    <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
+                
+                    <nav aria-label="Навигация по страницам QSO" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if current_page > 1 %}
                                 <li class="page-item">
-                                    <a class="page-link btn-link" href="#" data-page="{{ page_num }}">{{ page_num }}</a>
+                                    <button type="submit" name="page" value="{{ current_page|add:'-1' }}" class="page-link btn-link bg-transparent border-0 text-decoration-none">
+                                        Предыдущая
+                                    </button>
                                 </li>
                             {% endif %}
-                        {% endfor %}
 
-                        {% if current_page < total_pages %}
-                            <li class="page-item">
-                                <a class="page-link btn-link" href="#" data-page="{{ current_page|add:'1' }}">Следующая</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                            {% load custom_filters %}
+                            {% paginate_numbers current_page total_pages 3 as page_numbers %}
+                            {% for page_num in page_numbers %}
+                                {% if page_num == '...' %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% elif page_num == current_page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <button type="submit" name="page" value="{{ page_num }}" class="page-link btn-link bg-transparent border-0 text-decoration-none">
+                                            {{ page_num }}
+                                        </button>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if current_page < total_pages %}
+                                <li class="page-item">
+                                    <button type="submit" name="page" value="{{ current_page|add:'1' }}" class="page-link btn-link bg-transparent border-0 text-decoration-none">
+                                        Следующая
+                                    </button>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </form>
                 
                 <div class="text-center mt-3">
                     {% if lotw_confirmed_count > 20 %}

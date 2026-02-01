@@ -26,13 +26,27 @@ def lotw_page(request):
     
     # Получаем параметры фильтрации (из POST или GET)
     if request.method == 'POST':
-        my_callsign_filter = request.POST.get('my_callsign', '').strip()
-        search_callsign = request.POST.get('search_callsign', '').strip()
-        search_qth = request.POST.get('search_qth', '').strip()
-        band_filter = request.POST.get('band', '').strip()
-        mode_filter = request.POST.get('mode', '').strip()
-        sat_name_filter = request.POST.get('sat_name', '').strip()
-        page = int(request.POST.get('page', 1))
+        # Проверяем действие (сброс или поиск)
+        action = request.POST.get('action', '')
+        
+        if action == 'reset':
+            # Сбрасываем все фильтры
+            my_callsign_filter = ''
+            search_callsign = ''
+            search_qth = ''
+            band_filter = ''
+            mode_filter = ''
+            sat_name_filter = ''
+            page = 1
+        else:
+            # Обычная обработка формы
+            my_callsign_filter = request.POST.get('my_callsign', '').strip()
+            search_callsign = request.POST.get('search_callsign', '').strip()
+            search_qth = request.POST.get('search_qth', '').strip()
+            band_filter = request.POST.get('band', '').strip()
+            mode_filter = request.POST.get('mode', '').strip()
+            sat_name_filter = request.POST.get('sat_name', '').strip()
+            page = int(request.POST.get('page', 1))
     else:
         my_callsign_filter = request.GET.get('my_callsign', '').strip()
         search_callsign = request.GET.get('search_callsign', '').strip()
@@ -41,7 +55,7 @@ def lotw_page(request):
         mode_filter = request.GET.get('mode', '').strip()
         sat_name_filter = request.GET.get('sat_name', '').strip()
         page = int(request.GET.get('page', 1))
-    
+        
     # Общая статистика QSO
     total_qso_count = QSO.objects.filter(user=request.user).count()
     context['total_qso_count'] = total_qso_count
@@ -70,17 +84,29 @@ def lotw_page(request):
     
     # Получаем уникальные позывные пользователя из базы данных
     try:
-        my_callsigns = QSO.objects.filter(
+        # Получаем уникальные позывные из QSO записей
+        my_callsigns_qso = QSO.objects.filter(
             user=request.user
         ).exclude(
             my_callsign__isnull=True
         ).exclude(
-            my_callsign__=''
+            my_callsign__exact=''
         ).values_list('my_callsign', flat=True).distinct().order_by('my_callsign')
         
-        context['my_callsigns'] = my_callsigns
+        # Добавляем username пользователя как дополнительный позывной
+        username_callsigns = [request.user.username] if request.user.username else []
+        
+        # Объединяем и убираем дубликаты
+        all_callsigns = list(set(list(my_callsigns_qso) + username_callsigns))
+        all_callsigns.sort()
+        
+        context['my_callsigns'] = all_callsigns
+        
+        print(f"📞 Загружено позывных для {request.user.username}: {len(all_callsigns)}")
+        
     except Exception as e:
-        context['my_callsigns'] = []
+        print(f"❌ Ошибка загрузки позывных: {e}")
+        context['my_callsigns'] = [request.user.username] if request.user.username else []
     
     # Получаем доступные значения для фильтров (из всех QSO пользователя с LoTW)
     try:
