@@ -8,45 +8,13 @@
         <!-- Основная информация о LoTW -->
         <div class="card mb-4 fade-in">
             <div class="card-header">
-                <h5 class="mb-0"><span>📋</span> {% trans "What is LoTW?" %}</h5>
+                <h5 class="mb-0"><span>📋</span> {% trans "Recent QSOs with LoTW" %}</h5>
             </div>
             <div class="card-body">
-                <p class="card-text">
-                    {% trans "LoTW (Logbook of the World) is a system maintained by the American Radio Relay League (ARRL) that allows amateur radio operators to submit and confirm their QSO records electronically." %}
-                </p>
-                <p class="card-text">
-                    {% trans "Through LoTW, radio amateurs can confirm QSOs with other operators worldwide, earning credits for various awards such as DXCC, WAS, and others." %}
-                </p>
+
+                123456
                 
-                <!-- Статистика QSO -->
-                <div class="lotw-qso-stats">
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">📡</div>
-                        <div class="lotw-qso-stat-value">{{ total_qso_count|default:"0" }}</div>
-                        <div class="lotw-qso-stat-label">{% trans "Total QSOs" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">✅</div>
-                        <div class="lotw-qso-stat-value">{{ lotw_confirmed_count|default:"0" }}</div>
-                        <div class="lotw-qso-stat-label">{% trans "LoTW Confirmed" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">🌍</div>
-                        <div class="lotw-qso-stat-value">{{ dxcc_entities|default:"0" }}</div>
-                        <div class="lotw-qso-stat-label">{% trans "DXCC Entities" %}</div>
-                    </div>
-                    <div class="lotw-qso-stat-card">
-                        <div class="lotw-qso-stat-icon">🏆</div>
-                        <div class="lotw-qso-stat-value">{{ award_credits|default:"0" }}</div>
-                        <div class="lotw-qso-stat-label">{% trans "Award Credits" %}</div>
-                    </div>
-                </div>
-                
-                <!-- Последние QSO с LoTW подтверждением -->
-                <h6 class="lotw-qso-section-title">
-                    <span>📊</span> {% trans "Recent QSOs with LoTW" %}
-                </h6>
-                
+                <!-- Последние QSO с LoTW подтверждением -->                
                 {% if recent_lotw_qso %}
                 <div class="qso-table-container">
                     <div class="lotw-qso-table">
