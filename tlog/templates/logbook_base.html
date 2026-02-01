@@ -160,6 +160,7 @@
                                     <th class="col-mode"><span>📟</span> Mode</th>
                                     <th class="col-rst"><span>RST</span></th>
                                     <th class="col-qth"><span>📍</span> QTH</th>
+                                    <th class="col-region"><span>🇷🇺</span> RU</th>
                                     <th class="col-lotw"><span>LoTW</span></th>
                                     <th class="col-propsat"><span>Prop/SAT</span></th>
                                     <th class="col-actions"><span>⚙️</span></th>
@@ -201,6 +202,13 @@
                                 <td class="col-qth" data-label="📍 QTH">
                                     {% if qso.gridsquare %}
                                         <small>{{ qso.gridsquare }}</small>
+                                    {% else %}
+                                        <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td class="col-region" data-label="🇷🇺 RU">
+                                    {% if qso.ru_region %}
+                                        <span class="region-badge">{{ qso.ru_region }}</span>
                                     {% else %}
                                         <small class="text-muted">-</small>
                                     {% endif %}

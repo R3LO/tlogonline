@@ -139,15 +139,7 @@
     letter-spacing: 0.5px;
 }
 
-.qso-table thead th:first-child,
-.lotw-qso-table thead th:first-child {
-    text-align: left !important;
-}
-
-.qso-table thead th:last-child,
-.lotw-qso-table thead th:last-child {
-    text-align: right !important;
-}
+/* Все заголовки таблиц отцентрированы */
 
 /* Ячейки таблицы (общие для всех QSO таблиц) */
 .qso-table td,
@@ -163,7 +155,10 @@
 }
 
 
-/* Hover эффекты для строк таблиц убраны */
+/* Hover эффекты для строк таблиц QSO */
+.qso-row:hover {
+    background-color: #f8f9fa;
+}
 
 .qso-table tbody tr:last-child td,
 .lotw-qso-table tbody tr:last-child td {
@@ -370,6 +365,21 @@
 }
 
 /* Hover эффекты бейджей убраны */
+
+/* Дополнительные бейджи для регионов */
+.region-badge {
+    background: linear-gradient(135deg, #6f42c1 0%, #8e44ad 100%) !important;
+    color: white !important;
+    padding: 2px 6px !important;
+    border-radius: 8px !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    vertical-align: baseline !important;
+    /* Transition эффекты убраны */
+}
 
 /* Стили для диапазона */
 .band {
