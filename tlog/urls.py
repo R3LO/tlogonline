@@ -15,7 +15,7 @@ from .views import (
     qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
     qo100_dxcc, qo100_converter, qo100_converter_download,
     cosmos_diploma, cosmos_download,
-    lotw_page, debug_callsigns, test_callsigns_simple
+    lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns
 )
 
 urlpatterns = [
@@ -29,6 +29,8 @@ urlpatterns = [
     path('dashboard/test-callsigns/', test_callsigns_simple, name='test_callsigns_simple'),
     path('dashboard/profile/verify-lotw/', verify_lotw_credentials, name='verify_lotw_credentials'),
     path('dashboard/profile/delete-lotw/', delete_lotw_credentials, name='delete_lotw_credentials'),
+    path('api/lotw/filter/', lotw_filter_api, name='lotw_filter_api'),
+    path('api/lotw/callsigns/', get_user_callsigns, name='get_user_callsigns'),
     path('dashboard/profile/change-password/', change_password, name='change_password'),
     path('lotw/', lotw_page, name='lotw_page'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),

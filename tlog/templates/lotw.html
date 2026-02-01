@@ -10,9 +10,69 @@
             <div class="card-header">
                 <h5 class="mb-0"><span>📋</span> {% trans "Recent QSOs with LoTW" %}</h5>
             </div>
-            <div class="card-body">
+            
+            <!-- Фильтры для LoTW QSO - размещены вне card-body -->
+            <div class="card-body pt-3">
+                <div class="filter-card mb-4">
+                    <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
+                    <form class="filter-controls">
+                        {% csrf_token %}
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
+                            <select class="form-select form-select-sm" name="my_callsign">
+                                <option value="">{% trans "Все" %}</option>
+                                {% for my_call in my_callsigns %}
+                                    <option value="{{ my_call }}" {% if my_call == my_callsign_filter %}selected{% endif %}>{{ my_call }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                123456
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">{% trans "Позывной" %}</label>
+                            <input type="text" class="form-control form-control-sm" name="search_callsign" value="{{ search_callsign }}" placeholder="{% trans 'Позывной' %}">
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">QTH локатор</label>
+                            <input type="text" class="form-control form-control-sm" name="search_qth" value="{{ search_qth }}" placeholder="QTH локатор">
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">{% trans "Диапазон" %}</label>
+                            <select class="form-select form-select-sm" name="band">
+                                <option value="">{% trans "Все" %}</option>
+                                {% for band in available_bands %}
+                                    <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>{{ band }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">{% trans "Вид связи" %}</label>
+                            <select class="form-select form-select-sm" name="mode">
+                                <option value="">{% trans "Все" %}</option>
+                                {% for mode in available_modes %}
+                                    <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>{{ mode }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label small mb-1">{% trans "Спутник" %}</label>
+                            <select class="form-select form-select-sm" name="sat_name">
+                                <option value="">{% trans "Все" %}</option>
+                                {% for sat in available_sat_names %}
+                                    <option value="{{ sat }}" {% if sat == sat_name_filter %}selected{% endif %}>{{ sat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button type="button" class="btn btn-secondary btn-sm" id="resetFilters" title="{% trans 'Сбросить фильтры' %}">
+                                <span>❌</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card-body pt-0">
                 
                 <!-- Последние QSO с LoTW подтверждением -->                
                 {% if recent_lotw_qso %}
@@ -113,18 +173,17 @@
                 </div>
                 
                 <!-- Пагинация для QSO с LoTW -->
-                {% if total_pages > 1 %}
                 <div class="pagination-info text-center text-muted mb-2">
                     <small>
                         Страница {{ current_page }} из {{ total_pages }} 
-                        ({{ recent_lotw_qso|length }} из {{ lotw_confirmed_count }} записей)
+                        (<span data-current-count>{{ recent_lotw_qso|length }}</span> из <span data-total-count>{{ lotw_confirmed_count }}</span> записей)
                     </small>
                 </div>
                 <nav aria-label="Навигация по страницам QSO" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if current_page > 1 %}
                             <li class="page-item">
-                                <a class="page-link" href="{% url 'lotw_page' %}?page={{ current_page|add:'-1' }}">Предыдущая</a>
+                                <a class="page-link btn-link" href="#" data-page="{{ current_page|add:'-1' }}">Предыдущая</a>
                             </li>
                         {% endif %}
 
@@ -141,19 +200,18 @@
                                 </li>
                             {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="{% url 'lotw_page' %}?page={{ page_num }}">{{ page_num }}</a>
+                                    <a class="page-link btn-link" href="#" data-page="{{ page_num }}">{{ page_num }}</a>
                                 </li>
                             {% endif %}
                         {% endfor %}
 
                         {% if current_page < total_pages %}
                             <li class="page-item">
-                                <a class="page-link" href="{% url 'lotw_page' %}?page={{ current_page|add:'1' }}">Следующая</a>
+                                <a class="page-link btn-link" href="#" data-page="{{ current_page|add:'1' }}">Следующая</a>
                             </li>
                         {% endif %}
                     </ul>
                 </nav>
-                {% endif %}
                 
                 <div class="text-center mt-3">
                     {% if lotw_confirmed_count > 20 %}
@@ -183,91 +241,7 @@
                 {% endif %}
             </div>
         </div>
-
-        <!-- Преимущества LoTW -->
-        <div class="card mb-4 fade-in">
-            <div class="card-header">
-                <h5 class="mb-0"><span>✨</span> {% trans "Benefits of LoTW" %}</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><span class="text-primary">📊</span> {% trans "Electronic QSO confirmation" %}</li>
-                            <li class="mb-2"><span class="text-primary">🏆</span> {% trans "Award credit accumulation" %}</li>
-                            <li class="mb-2"><span class="text-primary">💰</span> {% trans "Free to use" %}</li>
-                            <li class="mb-2"><span class="text-primary">🌍</span> {% trans "Global QSO database" %}</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><span class="text-primary">⚡</span> {% trans "Instant QSO confirmation" %}</li>
-                            <li class="mb-2"><span class="text-primary">📱</span> {% trans "Mobile app support" %}</li>
-                            <li class="mb-2"><span class="text-primary">🔒</span> {% trans "Secure and reliable" %}</li>
-                            <li class="mb-2"><span class="text-primary">📈</span> {% trans "Detailed statistics" %}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Как начать использовать LoTW -->
-        <div class="card mb-4 fade-in">
-            <div class="card-header">
-                <h5 class="mb-0"><span>🚀</span> {% trans "Getting Started with LoTW" %}</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>{% trans "Step 1: Registration" %}</h6>
-                        <p class="small">{% trans "Create a free account on the LoTW website" %}</p>
-                        
-                        <h6>{% trans "Step 2: Certificate Request" %}</h6>
-                        <p class="small">{% trans "Request a digital certificate for your callsign" %}</p>
-                        
-                        <h6>{% trans "Step 3: Certificate Installation" %}</h6>
-                        <p class="small">{% trans "Install the certificate in your logging software" %}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>{% trans "Step 4: QSO Logging" %}</h6>
-                        <p class="small">{% trans "Log your QSOs using software that supports LoTW" %}</p>
-                        
-                        <h6>{% trans "Step 5: Upload Logs" %}</h6>
-                        <p class="small">{% trans "Upload your ADIF files to LoTW for confirmation" %}</p>
-                        
-                        <h6>{% trans "Step 6: Award Applications" %}</h6>
-                        <p class="small">{% trans "Apply for awards once you have enough confirmations" %}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Полезные ссылки -->
-        <div class="card mb-4 fade-in">
-            <div class="card-header">
-                <h5 class="mb-0"><span>🔗</span> {% trans "Useful Links" %}</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <a href="https://lotw.arrl.org/lotwuser/default" target="_blank" class="btn btn-outline-primary mb-2 w-100">
-                            <span>🌐</span> {% trans "LoTW Official Website" %}
-                        </a>
-                        <a href="https://lotw.arrl.org/lotwuser/lotwhelp/default" target="_blank" class="btn btn-outline-info mb-2 w-100">
-                            <span>📚</span> {% trans "LoTW Help & Documentation" %}
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="https://www.arrl.org/dxcc" target="_blank" class="btn btn-outline-success mb-2 w-100">
-                            <span>🏆</span> {% trans "DXCC Award Information" %}
-                        </a>
-                        <a href="https://www.arrl.org/was" target="_blank" class="btn btn-outline-warning mb-2 w-100">
-                            <span>🎖️</span> {% trans "WAS Award Information" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
     </div>
 
     <!-- Боковая панель -->

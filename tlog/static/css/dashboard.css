@@ -12,10 +12,7 @@
     transition: all 0.3s ease;
 }
 
-.profile-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
+/* Hover эффекты для карточки профиля убраны */
 
 .profile-header {
     background: var(--bg-gradient);
@@ -80,10 +77,7 @@
     background: var(--bg-gradient);
 }
 
-.dashboard-stat-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
-}
+/* Hover эффекты для статистических карточек дашборда убраны */
 
 .dashboard-stat-icon {
     font-size: 2.5rem;
