@@ -24,10 +24,7 @@
     background: var(--bg-gradient);
 }
 
-.stat-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
-}
+/* Hover эффекты для статистических карточек убраны */
 
 .stat-icon {
     font-size: 2rem;
@@ -76,14 +73,7 @@
     filter: grayscale(0.3);
 }
 
-.achievement-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-.achievement-card.unlocked:hover {
-    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-}
+/* Hover эффекты для карточек достижений убраны */
 
 .achievement-icon {
     font-size: 3rem;
@@ -145,9 +135,7 @@
     border-color: var(--light-border);
 }
 
-.card .table-hover tbody tr:hover {
-    background-color: rgba(102, 126, 234, 0.05);
-}
+/* Hover эффекты для таблиц убраны */
 
 /* Стили для уведомлений */
 .alert {

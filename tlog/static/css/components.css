@@ -355,16 +355,7 @@
     overflow: hidden;
 }
 
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    background: var(--white);
-    border-color: var(--primary);
-}
-
-.stat-card:hover .stat-icon {
-    transform: scale(1.1);
-}
+/* Hover эффекты для статистических карточек убраны */
 
 .stat-icon {
     font-size: 2rem;
@@ -402,11 +393,7 @@
     margin-bottom: var(--padding-lg);
 }
 
-.utility-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-    border-color: var(--primary);
-}
+/* Hover эффекты для utility-card убраны */
 
 .utility-header {
     background: var(--bg-gradient);
@@ -457,13 +444,7 @@
     border: 1px solid transparent;
 }
 
-.utility-link:hover {
-    background: var(--bg-gradient-card);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateX(4px);
-    text-decoration: none;
-}
+/* Hover эффекты для utility-link убраны */
 
 .utility-link-icon {
     width: 28px;
@@ -486,10 +467,7 @@
     transition: all 0.2s ease;
 }
 
-.utility-link:hover .utility-link-arrow {
-    color: var(--primary);
-    transform: translateX(4px);
-}
+/* Hover эффекты для utility-link-arrow убраны */
 
 /* Цветовые варианты для иконок утилитарных ссылок */
 .utility-link-icon.bg-gradient-primary {
@@ -587,9 +565,7 @@
     vertical-align: middle;
 }
 
-.table-hover tbody tr:hover {
-    background-color: var(--bg-gradient-card);
-}
+/* Hover эффекты для таблиц убраны */
 
 /* =====================================
    ФИЛЬТРЫ
@@ -667,9 +643,7 @@
     transition: all 0.2s ease;
 }
 
-.list-group-item:hover {
-    background-color: var(--light);
-}
+/* Hover эффекты для list-group-item убраны */
 
 /* =====================================
    СЕКЦИИ
