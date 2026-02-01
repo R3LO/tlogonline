@@ -22,8 +22,10 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog</a>
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/">
+                <span>📡</span> <span class="brand-text">TLog</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -34,28 +36,28 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">
-                            <span>📋</span> {% trans "Журнал" %}
+                        <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/" title="{% trans 'Журнал' %}">
+                            <span>📋</span> <span class="nav-text">{% trans "Журнал" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/lotw/">
-                            <span>📡</span> LoTW
+                        <a class="nav-link" href="/lotw/" title="LoTW">
+                            <span>📡</span> <span class="nav-text">LoTW</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/qth-loc.html" target="_blank">
-                            <span>🗺️</span> Grid map
+                        <a class="nav-link" href="/qth-loc.html" target="_blank" title="Grid map">
+                            <span>🗺️</span> <span class="nav-text">Grid map</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="/dashboard/">
-                            <span>📊</span> {% trans "Profile" %}
+                        <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="/dashboard/" title="{% trans 'Profile' %}">
+                            <span>📊</span> <span class="nav-text">{% trans "Profile" %}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/achievements/">
-                            <span>🏆</span> {% trans "Achievements" %}
+                        <a class="nav-link" href="/achievements/" title="{% trans 'Achievements' %}">
+                            <span>🏆</span> <span class="nav-text">{% trans "Achievements" %}</span>
                         </a>
                     </li>
                     {% endif %}
@@ -63,8 +65,8 @@
                 <ul class="navbar-nav">
                     <!-- Language Switcher -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {% trans "Language" %}: {{ LANGUAGE_CODE|upper }}
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" title="{% trans 'Language' %}">
+                            <span>🌐</span> <span class="nav-text">{% trans "Language" %}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% for lang_code, lang_name in LANGUAGES %}
@@ -83,21 +85,25 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/profile/">
-                            <span>👤</span> {{ user.username }}
+                        <a class="nav-link" href="/dashboard/profile/" title="{{ user.username }}">
+                            <span>👤</span> <span class="nav-text">{{ user.username }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout/">
-                            <span>🚪</span> {% trans "Logout" %}
+                        <a class="nav-link" href="/logout/" title="{% trans 'Logout' %}">
+                            <span>🚪</span> <span class="nav-text">{% trans "Logout" %}</span>
                         </a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/login/">{% trans "Login" %}</a>
+                        <a class="nav-link" href="/login/" title="{% trans 'Login' %}">
+                            <span>🔑</span> <span class="nav-text">{% trans "Login" %}</span>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/register/">{% trans "Register" %}</a>
+                        <a class="nav-link" href="/register/" title="{% trans 'Register' %}">
+                            <span>📝</span> <span class="nav-text">{% trans "Register" %}</span>
+                        </a>
                     </li>
                     {% endif %}
                 </ul>

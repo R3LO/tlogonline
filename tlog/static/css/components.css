@@ -11,6 +11,46 @@
     background: var(--bg-gradient) !important;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+/* Навигация на всю ширину */
+.navbar .container-fluid {
+    max-width: 100%;
+    padding-left: var(--padding-lg);
+    padding-right: var(--padding-lg);
+}
+
+@media (max-width: 576px) {
+    .navbar .container-fluid {
+        padding-left: var(--padding-md);
+        padding-right: var(--padding-md);
+    }
+}
+    
+.navbar-toggler {
+    border: none;
+    padding: var(--padding-sm);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-toggler:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    width: 1.5em;
+    height: 1.5em;
 }
 
 .navbar-brand {
@@ -19,23 +59,274 @@
     color: var(--white) !important;
 }
 
+/* Стили для иконок и текста в навигации */
 .nav-link {
     color: rgba(255, 255, 255, 0.85) !important;
     padding: var(--padding-sm) var(--padding-md) !important;
     border-radius: var(--radius-sm);
     font-weight: var(--font-weight-medium);
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--padding-md);  /* Больший gap для больших экранов */
+    white-space: nowrap;
+    min-height: 40px;
+    position: relative;
 }
 
-.nav-link:hover {
-    color: var(--white) !important;
-    background: rgba(255, 255, 255, 0.15);
+.nav-link span {
+    font-size: 1rem;  /* Возвращаем обычный размер */
+    line-height: 1;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2em;    /* Возвращаем обычный размер */
+    height: 1.2em;   /* Возвращаем обычный размер */
+    text-align: center;
+    /* УБРАЛИ ФОН - больше никаких квадратиков */
+    transition: all 0.2s ease;
 }
 
-.nav-link.active {
-    color: var(--white) !important;
-    background: rgba(255, 255, 255, 0.2);
+.nav-link:hover span {
+    transform: scale(1.05);  /* Убираем фон, оставляем только масштабирование */
+}
+
+.nav-link.active span {
+    transform: scale(1.02);  /* Убираем фон, оставляем только масштабирование */
+}
+
+.nav-text {
+    font-weight: var(--font-weight-medium);
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover .nav-text {
     font-weight: var(--font-weight-semibold);
+}
+
+/* Адаптивные стили для навигации */
+@media (max-width: 991px) {
+    .navbar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--padding-sm);
+        padding: var(--padding-sm) 0;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--padding-sm) var(--padding-md);
+        font-size: var(--font-size-sm);
+        min-height: 44px;
+        gap: var(--padding-sm);  /* Средний gap для планшетов */
+    }
+    
+    .navbar-nav .nav-link span {
+        font-size: 0.95rem;
+        width: 1.1em;   /* Компактные иконки */
+        height: 1.1em;  /* Компактные иконки */
+        /* УБРАЛИ ФОН */
+    }
+}
+
+@media (max-width: 767px) {
+    .navbar-nav .nav-link {
+        padding: var(--padding-sm) var(--padding-sm);
+        font-size: var(--font-size-sm);
+        min-height: 40px;
+        gap: var(--padding-xs);  /* Маленький gap для мобильных */
+    }
+    
+    .navbar-nav .nav-link span {
+        font-size: 0.9rem;
+        width: 1em;    /* Маленькие иконки */
+        height: 1em;   /* Маленькие иконки */
+        /* УБРАЛИ ФОН */
+    }
+    
+    .navbar-nav .nav-text {
+        font-size: var(--font-size-sm);
+    }
+}
+    
+@media (max-width: 576px) {
+    /* На мобильных показываем и иконку, и текст - без круглых кнопок */
+    .navbar-nav .nav-link .nav-text {
+        display: inline;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--padding-sm) var(--padding-sm);
+        gap: 0.25rem;  /* Самый маленький gap для маленьких экранов */
+        border-radius: var(--radius-sm);
+    }
+    
+    .navbar-nav .nav-link span {
+        font-size: 0.9rem;    /* Немного меньше размер шрифта */
+        width: 1.1em;      /* Компактный размер иконки */
+        height: 1.1em;     /* Компактный размер иконки */
+        /* УБРАЛИ ФОН - больше никаких квадратиков */
+    }
+    
+    .navbar-nav .nav-link:hover span {
+        /* УБРАЛИ ФОН, оставляем только масштабирование */
+        transform: scale(1.05);
+    }
+    
+    .navbar-nav .nav-text {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Навигация на всю ширину */
+.navbar-expand-lg .container-fluid {
+    max-width: none;
+}
+
+.navbar-expand-lg .navbar-collapse {
+    flex-grow: 1;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-sm);
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Dropdown стили */
+.navbar .dropdown-menu {
+    background: var(--white);
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    margin-top: var(--padding-xs);
+    min-width: 200px;
+}
+
+.navbar .dropdown-item {
+    color: var(--dark);
+    padding: var(--padding-sm) var(--padding-md);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--padding-sm);
+}
+
+.navbar .dropdown-item:hover {
+    background: var(--bg-gradient-card);
+    color: var(--primary);
+}
+
+.navbar .dropdown-item.active {
+    background: var(--bg-gradient);
+    color: var(--white);
+}
+
+.navbar .dropdown-toggle::after {
+    margin-left: var(--padding-xs);
+    transition: transform 0.2s ease;
+}
+
+.navbar .dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
+}
+
+/* Специальные стили для бренда */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;  /* Большой gap для бренда */
+    padding: var(--padding-sm) var(--padding-md);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.navbar-brand:hover {
+    /* УБРАЛИ ФОН */
+    transform: translateY(-1px);
+}
+
+.navbar-brand span {
+    font-size: 1.1rem;  /* Уменьшен размер шрифта */
+    width: 1.2em;      /* Уменьшен размер иконки бренда */
+    height: 1.2em;     /* Уменьшен размер иконки бренда */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* УБРАЛИ ФОН - больше никаких квадратиков */
+    transition: all 0.2s ease;
+}
+
+.navbar-brand:hover span {
+    /* УБРАЛИ ФОН, оставляем только масштабирование */
+    transform: scale(1.1);
+}
+
+.brand-text {
+    font-weight: var(--font-weight-bold);
+    transition: all 0.2s ease;
+}
+
+.navbar-brand:hover .brand-text {
+    font-weight: var(--font-weight-bold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: var(--font-size-lg) !important;
+        padding: var(--padding-sm);
+        gap: var(--padding-xs);  /* Маленький gap для мобильных */
+    }
+    
+    .navbar-brand span {
+        font-size: 1rem;   /* Уменьшен размер шрифта */
+        width: 1em;        /* Маленькая иконка для мобильных */
+        height: 1em;       /* Маленькая иконка для мобильных */
+        /* УБРАЛИ ФОН */
+    }
+    
+    /* На мобильных скрываем текст бренда, оставляем только иконку */
+    .brand-text {
+        display: none;
+    }
+    
+    .navbar-brand:hover span {
+        /* УБРАЛИ ФОН, оставляем только масштабирование */
+        transform: scale(1.05);
+    }
+}
+
+/* Dropdown стили */
+.navbar .dropdown-menu {
+    background: var(--white);
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    margin-top: var(--padding-xs);
+}
+
+.navbar .dropdown-item {
+    color: var(--dark);
+    padding: var(--padding-sm) var(--padding-md);
+    transition: all 0.2s ease;
+}
+
+.navbar .dropdown-item:hover {
+    background: var(--bg-gradient-card);
+    color: var(--primary);
+}
+
+.navbar .dropdown-item.active {
+    background: var(--bg-gradient);
+    color: var(--white);
 }
 
 /* =====================================

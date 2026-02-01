@@ -16,29 +16,31 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog</a>
+            <a class="navbar-brand" href="/">
+                <span>📡</span> <span class="brand-text">TLog</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="/dashboard/">
-                        <span>📊</span> Панель
+                    <a class="nav-link" href="/dashboard/" title="Панель">
+                        <span>📊</span> <span class="nav-text">Панель</span>
                     </a>
-                    <a class="nav-link active" href="/qso100/converter/">
-                        <span>📡</span> QO-100
+                    <a class="nav-link active" href="/qso100/converter/" title="QO-100">
+                        <span>📡</span> <span class="nav-text">QO-100</span>
                     </a>
-                    <a class="nav-link" href="/logbook/">
-                        <span>📓</span> Logbook
+                    <a class="nav-link" href="/logbook/" title="Logbook">
+                        <span>📓</span> <span class="nav-text">Logbook</span>
                     </a>
-                    <a class="nav-link" href="/achievements/">
-                        <span>🏆</span> Достижения
+                    <a class="nav-link" href="/achievements/" title="Достижения">
+                        <span>🏆</span> <span class="nav-text">Достижения</span>
                     </a>
-                    <a class="nav-link" href="/dashboard/profile/">
-                        <span>👤</span> {{ user.username }}
+                    <a class="nav-link" href="/dashboard/profile/" title="{{ user.username }}">
+                        <span>👤</span> <span class="nav-text">{{ user.username }}</span>
                     </a>
-                    <a class="nav-link" href="/logout/">
-                        <span>🚪</span> Выйти
+                    <a class="nav-link" href="/logout/" title="Выйти">
+                        <span>🚪</span> <span class="nav-text">Выйти</span>
                     </a>
                 </div>
             </div>
