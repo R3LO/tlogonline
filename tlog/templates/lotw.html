@@ -48,97 +48,99 @@
                 </h6>
                 
                 {% if recent_lotw_qso %}
-                <div class="lotw-qso-table">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="col-date"><span>📅</span> {% trans "Date" %}</th>
-                                    <th class="col-time"><span>🕐</span> {% trans "Time" %}</th>
-                                    <th class="col-my-callsign"><span>👤</span> {% trans "My Call" %}</th>
-                                    <th class="col-callsign"><span>📡</span> {% trans "Callsign" %}</th>
-                                    <th class="col-band"><span>📶</span> {% trans "Band" %}</th>
-                                    <th class="col-mode"><span>📟</span> {% trans "Mode" %}</th>
-                                    <th class="col-qth"><span>📍</span> QTH</th>
-                                    <th class="col-r150s"><span>🏆</span> Р-150-С</th>
-                                    <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
-                                    <th class="col-propsat"><span>📡</span> PROP/SAT</th>
-                                    <th class="col-lotw-date"><span>📧</span> LoTW</th>
-                                    <th class="col-lotw"><span>LoTW</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for qso in recent_lotw_qso %}
-                                <tr>
-                                    <td class="col-date" data-label="📅 {% trans "Date" %}">
-                                        <small>{{ qso.date|date:"d.m.Y" }}</small>
-                                    </td>
-                                    <td class="col-time" data-label="🕐 {% trans "Time" %}">
-                                        <small>{{ qso.time|date:"H:i" }}</small>
-                                    </td>
-                                    <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
-                                        <small>{{ qso.my_callsign|default:qso.user.username }}</small>
-                                    </td>
-                                    <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
-                                        <span class="callsign-badge">{{ qso.callsign }}</span>
-                                    </td>
-                                    <td class="col-band" data-label="📶 {% trans "Band" %}">
-                                        {% if qso.band %}
-                                            <span class="band-badge">{{ qso.band }}</span>
-                                        {% elif qso.frequency %}
-                                            {% with band=qso.frequency|default_if_none:"" %}
-                                                <span class="band-badge">{{ band }}</span>
-                                                <br><small class="text-muted">{{ qso.frequency }} MHz</small>
-                                            {% endwith %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="col-mode" data-label="📟 {% trans "Mode" %}">
-                                        <span class="mode-badge">{{ qso.mode }}</span>
-                                    </td>
-                                    <td class="col-qth" data-label="📍 QTH">
-                                        {% if qso.gridsquare %}
-                                            <small>{{ qso.gridsquare }}</small>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="col-r150s" data-label="🏆 Р-150-С">
-                                        {% if qso.r150s %}
-                                            <span class="r150s-badge">{{ qso.r150s }}</span>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="col-region" data-label="🌍 {% trans "Region" %}">
-                                        {% if qso.ru_region %}
-                                            <span class="region-badge" title="{{ qso.ru_region }}">{{ qso.ru_region }}</span>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="col-propsat" data-label="📡 PROP/SAT">
-                                        {% if qso.prop_mode or qso.sat_name %}
-                                            <small>
-                                                {% if qso.prop_mode %}{{ qso.prop_mode }}{% endif %}
-                                                {% if qso.prop_mode and qso.sat_name %} / {% endif %}
-                                                {% if qso.sat_name %}{{ qso.sat_name }}{% endif %}
-                                            </small>
-                                        {% else %}
-                                            <small class="text-muted">-</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="col-lotw-date" data-label="📧 LoTW">
-                                        <span class="lotw-date-badge">{{ qso.app_lotw_rxqsl|date:"d.m.Y" }}</span>
-                                    </td>
-                                    <td class="col-lotw" data-label="LoTW">
-                                        <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="qso-table-container">
+                    <div class="lotw-qso-table">
+                        <div class="table-responsive">
+                            <table class="table table-hover qso-table lotw-table">
+                                <thead class="qso-table-header">
+                                    <tr>
+                                        <th class="col-date"><span>📅</span> {% trans "Date" %}</th>
+                                        <th class="col-time"><span>🕐</span> {% trans "Time" %}</th>
+                                        <th class="col-my-callsign"><span>👤</span> {% trans "My Call" %}</th>
+                                        <th class="col-callsign"><span>📡</span> {% trans "Callsign" %}</th>
+                                        <th class="col-band"><span>📶</span> {% trans "Band" %}</th>
+                                        <th class="col-mode"><span>📟</span> {% trans "Mode" %}</th>
+                                        <th class="col-qth"><span>📍</span> QTH</th>
+                                        <th class="col-r150s"><span>🏆</span> Р-150-С</th>
+                                        <th class="col-region"><span>🌍</span> {% trans "Region" %}</th>
+                                        <th class="col-propsat"><span>📡</span> PROP/SAT</th>
+                                        <th class="col-lotw-date"><span>📧</span> LoTW</th>
+                                        <th class="col-lotw"><span>LoTW</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for qso in recent_lotw_qso %}
+                                    <tr>
+                                        <td class="col-date" data-label="📅 {% trans "Date" %}">
+                                            <small>{{ qso.date|date:"d.m.Y" }}</small>
+                                        </td>
+                                        <td class="col-time" data-label="🕐 {% trans "Time" %}">
+                                            <small>{{ qso.time|date:"H:i" }}</small>
+                                        </td>
+                                        <td class="col-my-callsign" data-label="👤 {% trans "My Call" %}">
+                                            <small>{{ qso.my_callsign|default:qso.user.username }}</small>
+                                        </td>
+                                        <td class="col-callsign" data-label="📡 {% trans "Callsign" %}">
+                                            <span class="callsign-badge">{{ qso.callsign }}</span>
+                                        </td>
+                                        <td class="col-band" data-label="📶 {% trans "Band" %}">
+                                            {% if qso.band %}
+                                                <span class="band-badge">{{ qso.band }}</span>
+                                            {% elif qso.frequency %}
+                                                {% with band=qso.frequency|default_if_none:"" %}
+                                                    <span class="band-badge">{{ band }}</span>
+                                                    <br><small class="text-muted">{{ qso.frequency }} MHz</small>
+                                                {% endwith %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="col-mode" data-label="📟 {% trans "Mode" %}">
+                                            <span class="mode-badge">{{ qso.mode }}</span>
+                                        </td>
+                                        <td class="col-qth" data-label="📍 QTH">
+                                            {% if qso.gridsquare %}
+                                                <small>{{ qso.gridsquare }}</small>
+                                            {% else %}
+                                                <small class="text-muted">-</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="col-r150s" data-label="🏆 Р-150-С">
+                                            {% if qso.r150s %}
+                                                <span class="r150s-badge">{{ qso.r150s }}</span>
+                                            {% else %}
+                                                <small class="text-muted">-</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="col-region" data-label="🌍 {% trans "Region" %}">
+                                            {% if qso.ru_region %}
+                                                <span class="region-badge" title="{{ qso.ru_region }}">{{ qso.ru_region }}</span>
+                                            {% else %}
+                                                <small class="text-muted">-</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="col-propsat" data-label="📡 PROP/SAT">
+                                            {% if qso.prop_mode or qso.sat_name %}
+                                                <small>
+                                                    {% if qso.prop_mode %}{{ qso.prop_mode }}{% endif %}
+                                                    {% if qso.prop_mode and qso.sat_name %} / {% endif %}
+                                                    {% if qso.sat_name %}{{ qso.sat_name }}{% endif %}
+                                                </small>
+                                            {% else %}
+                                                <small class="text-muted">-</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="col-lotw-date" data-label="📧 LoTW">
+                                            <span class="lotw-date-badge">{{ qso.app_lotw_rxqsl|date:"d.m.Y" }}</span>
+                                        </td>
+                                        <td class="col-lotw" data-label="LoTW">
+                                            <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
@@ -200,10 +202,10 @@
                 
                 {% else %}
                 <!-- Пустое состояние для аутентифицированных пользователей без QSO -->
-                <div class="lotw-qso-empty">
-                    <div class="lotw-qso-empty-icon">📡</div>
-                    <div class="lotw-qso-empty-title">{% trans "No LoTW QSOs Yet" %}</div>
-                    <div class="lotw-qso-empty-text">
+                <div class="qso-table-empty">
+                    <div class="qso-table-empty-icon">📡</div>
+                    <div class="qso-table-empty-title">{% trans "No LoTW QSOs Yet" %}</div>
+                    <div class="qso-table-empty-text">
                         {% trans "Start logging your QSOs to see them here with LoTW confirmation status." %}
                     </div>
                     <a href="/logbook/" class="btn btn-primary">

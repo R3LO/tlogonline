@@ -7,6 +7,8 @@
 {% block extra_css %}
 <!-- Специфичные стили для logbook (main.css уже подключен в base.html) -->
 <link href="{% static 'css/logbook_main.css' %}" rel="stylesheet">
+<!-- Единые стили для таблиц QSO в стиле LoTW -->
+<link href="{% static 'css/qso-tables.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -145,23 +147,24 @@
 
             <!-- Список QSO -->
             {% if qso_list %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover rounded overflow-hidden qso-table">
-                        <thead class="table-dark logbook-table-header">
-                            <tr>
-                                <th class="col-date"><span>📅</span> Дата</th>
-                                <th class="col-time"><span>🕐</span> Время</th>
-                                <th class="col-my-callsign"><span>📻</span> Мой позывной</th>
-                                <th class="col-callsign"><span>📡</span> Позывной</th>
-                                <th class="col-band"><span>📶</span> Диапазон</th>
-                                <th class="col-mode"><span>📟</span> Mode</th>
-                                <th class="col-rst"><span>RST</span></th>
-                                <th class="col-qth"><span>📍</span> QTH</th>
-                                <th class="col-lotw"><span>LoTW</span></th>
-                                <th class="col-propsat"><span>Prop/SAT</span></th>
-                                <th class="col-actions action-column"><span>⚙️</span></th>
-                            </tr>
-                        </thead>
+                <div class="qso-table-container">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover rounded overflow-hidden qso-table logbook-table">
+                            <thead class="qso-table-header">
+                                <tr>
+                                    <th class="col-date"><span>📅</span> Дата</th>
+                                    <th class="col-time"><span>🕐</span> Время</th>
+                                    <th class="col-my-callsign"><span>📻</span> Мой позывной</th>
+                                    <th class="col-callsign"><span>📡</span> Позывной</th>
+                                    <th class="col-band"><span>📶</span> Диапазон</th>
+                                    <th class="col-mode"><span>📟</span> Mode</th>
+                                    <th class="col-rst"><span>RST</span></th>
+                                    <th class="col-qth"><span>📍</span> QTH</th>
+                                    <th class="col-lotw"><span>LoTW</span></th>
+                                    <th class="col-propsat"><span>Prop/SAT</span></th>
+                                    <th class="col-actions"><span>⚙️</span></th>
+                                </tr>
+                            </thead>
                         <tbody>
                             {% for qso in qso_list %}
                             <tr class="qso-row" data-qso-id="{{ qso.id }}">
@@ -237,8 +240,9 @@
                             </tr>
 
                             {% endfor %}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Пагинация -->
