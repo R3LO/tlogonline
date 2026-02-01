@@ -4,11 +4,70 @@
 {% block title %}Заявка на диплом Cosmos - TLog{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/cosmos_diploma.css' %}" rel="stylesheet">
+<!-- CSS стили для диплома Cosmos -->
+<style>
+.my-callsign-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.my-callsign-item .callsign-input {
+    flex: 1;
+}
+
+.btn-remove-callsign {
+    flex-shrink: 0;
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/cosmos_diploma.js' %}"></script>
+<script>
+function addCallsign() {
+    const container = document.getElementById('callsigns-container');
+    const newItem = document.createElement('div');
+    newItem.className = 'my-callsign-item';
+    newItem.innerHTML = `
+        <input type="text" class="form-control callsign-input"
+               name="other_callsigns_names[]"
+               placeholder="Позывной"
+               autocomplete="off">
+        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-callsign">
+            ✕
+        </button>
+    `;
+    container.appendChild(newItem);
+    
+    // Добавляем обработчик для кнопки удаления
+    newItem.querySelector('.btn-remove-callsign').onclick = function() {
+        newItem.remove();
+    };
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчики для существующих кнопок удаления
+    document.querySelectorAll('.btn-remove-callsign').forEach(function(button) {
+        button.onclick = function() {
+            button.closest('.my-callsign-item').remove();
+        };
+    });
+    
+    // Обработчик формы
+    document.getElementById('cosmosForm').onsubmit = function() {
+        // Собираем все позывные в JSON
+        const callsigns = [];
+        document.querySelectorAll('.callsign-input').forEach(function(input) {
+            if (input.value.trim()) {
+                callsigns.push(input.value.trim());
+            }
+        });
+        document.getElementById('other_callsigns_json').value = JSON.stringify(callsigns);
+    };
+});
+</script>
 {% endblock %}
 
 {% block content %}

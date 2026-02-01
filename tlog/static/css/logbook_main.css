@@ -1,0 +1,280 @@
+/* =====================================
+   Logbook Main Styles
+   ===================================== */
+
+/* Специфические стили для страницы журнала */
+.logbook-page {
+    /* Основные стили страницы журнала */
+}
+
+.logbook-table-header {
+    /* Стили для заголовка таблицы журнала */
+    background: var(--dark) !important;
+    color: white;
+}
+
+/* Стили для строк QSO */
+.qso-row {
+    /* Стили для строк таблицы QSO */
+}
+
+.qso-row:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для бейджей */
+.callsign-badge {
+    /* Стили для бейджей позывных */
+    background: var(--primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.band-badge {
+    /* Стили для бейджей диапазонов */
+    background: var(--success);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.mode-badge {
+    /* Стили для бейджей видов связи */
+    background: var(--info);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* Стили для колонок таблицы */
+.col-date { width: 100px; }
+.col-time { width: 80px; }
+.col-my-callsign { width: 120px; }
+.col-callsign { width: 120px; }
+.col-band { width: 100px; }
+.col-mode { width: 80px; }
+.col-rst { width: 80px; }
+.col-qth { width: 100px; }
+.col-lotw { width: 60px; }
+.col-propsat { width: 120px; }
+.col-actions { width: 120px; }
+
+/* Адаптивные стили для таблицы */
+@media (max-width: 768px) {
+    .qso-table thead {
+        display: none;
+    }
+    
+    .qso-table tbody tr {
+        display: block;
+        margin-bottom: var(--padding-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+    }
+    
+    .qso-table tbody td {
+        display: block;
+        text-align: right;
+        padding: var(--padding-sm) var(--padding-md);
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+    
+    .qso-table tbody td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: var(--padding-md);
+        width: calc(50% - var(--padding-md));
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+    
+    .qso-table tbody td:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Стили для кнопок действий */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Стили для сообщений */
+.messages {
+    margin-bottom: var(--padding-lg);
+}
+
+.messages .alert {
+    margin-bottom: var(--padding-sm);
+}
+
+/* Стили для кнопок управления */
+.button-row {
+    margin-bottom: var(--padding-lg);
+}
+
+.button-spacer {
+    flex: 1;
+}
+
+/* Стили для фильтров */
+.filter-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--padding-lg);
+    margin-bottom: var(--padding-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--padding-md);
+    align-items: flex-end;
+}
+
+.filter-group {
+    min-width: 150px;
+    flex: 1;
+}
+
+.filter-actions {
+    display: flex;
+    gap: var(--padding-sm);
+    align-items: flex-end;
+}
+
+/* Стили для статистики */
+.stats-section {
+    margin-bottom: var(--padding-xl);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: var(--padding-md);
+    display: flex;
+    align-items: center;
+    gap: var(--padding-sm);
+}
+
+.stat-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--padding-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: var(--padding-sm);
+    color: var(--primary);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: var(--padding-xs);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+/* Стили для модальных окон */
+.modal-content {
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* Стили пагинации перенесены в base.css */
+/* Стили для btn-link перенесены в base.css */
+
+/* Утилитарные стили */
+.max-width-120px {
+    max-width: 120px;
+}
+
+.icon-small {
+    font-size: 0.75rem;
+}
+
+/* Адаптивные улучшения */
+@media (max-width: 576px) {
+    .filter-controls {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .filter-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .button-row .btn {
+        margin-bottom: var(--padding-xs);
+    }
+    
+    .stat-card {
+        padding: var(--padding-md);
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}

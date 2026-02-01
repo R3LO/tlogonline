@@ -6,26 +6,31 @@
     <p class="mb-2 text-muted small fst-normal">
         <span>💡</span> {% trans "При экспорте в ADIF файл и просмотре учитываются настройки этого фильтра" %}
     </p>
-    <form method="GET" class="d-flex gap-2 flex-wrap w-100">
-        <div style="min-width: 140px; flex: 1;">
+    <form method="GET" class="filter-controls">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "С даты" %}</label>
             <input type="date" class="form-control form-control-sm" name="date_from"
-                   value="{{ date_from }}" title="{% trans 'Дата начиная с' %}" placeholder="{% trans 'С даты' %}">
+                   value="{{ date_from }}" title="{% trans 'Дата начиная с' %}">
         </div>
-        <div style="min-width: 140px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "По дату" %}</label>
             <input type="date" class="form-control form-control-sm" name="date_to"
-                   value="{{ date_to }}" title="{% trans 'Дата до' %}" placeholder="{% trans 'По дату' %}">
+                   value="{{ date_to }}" title="{% trans 'Дата до' %}">
         </div>
-        <div style="min-width: 100px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "Позывной" %}</label>
             <input type="text" class="form-control form-control-sm" name="search_callsign"
                    value="{{ search_callsign }}" placeholder="{% trans 'Позывной' %}">
         </div>
-        <div style="min-width: 100px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">QTH локатор</label>
             <input type="text" class="form-control form-control-sm" name="search_qth"
                    value="{{ search_qth }}" placeholder="QTH локатор">
         </div>
-        <div style="min-width: 110px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "Вид связи" %}</label>
             <select class="form-select form-select-sm" name="mode">
-                <option value="">{% trans "Вид связи" %}</option>
+                <option value="">{% trans "Все" %}</option>
                 {% for mode in available_modes %}
                     <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>
                         {{ mode }}
@@ -33,9 +38,10 @@
                 {% endfor %}
             </select>
         </div>
-        <div style="min-width: 100px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "Диапазон" %}</label>
             <select class="form-select form-select-sm" name="band">
-                <option value="">{% trans "Диапазон" %}</option>
+                <option value="">{% trans "Все" %}</option>
                 {% for band in available_bands %}
                     <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>
                         {{ band }}
@@ -43,7 +49,8 @@
                 {% endfor %}
             </select>
         </div>
-        <div style="min-width: 120px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">{% trans "Спутник" %}</label>
             <select class="form-select form-select-sm" name="sat_name">
                 <option value="">{% trans "Все записи" %}</option>
                 {% for sat in available_sat_names %}
@@ -53,9 +60,10 @@
                 {% endfor %}
             </select>
         </div>
-        <div style="min-width: 100px; flex: 1;">
+        <div class="filter-group">
+            <label class="form-label small">LoTW</label>
             <select class="form-select form-select-sm" name="lotw">
-                <option value="">LoTW</option>
+                <option value="">{% trans "Все" %}</option>
                 <option value="Y" {% if lotw_filter == 'Y' %}selected{% endif %}>{% trans "Да" %}</option>
                 <option value="N" {% if lotw_filter == 'N' %}selected{% endif %}>{% trans "Нет" %}</option>
             </select>
