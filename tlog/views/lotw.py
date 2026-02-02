@@ -480,6 +480,65 @@ def lotw_filter_api(request):
 
 
 @login_required
+def get_qso_details(request):
+    """
+    API endpoint для получения полных данных QSO по ID
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        qso_id = request.GET.get('qso_id')
+        if not qso_id:
+            return JsonResponse({'error': 'ID QSO не указан'}, status=400)
+
+        # Получаем QSO запись
+        try:
+            qso = QSO.objects.get(id=qso_id, user=request.user)
+        except QSO.DoesNotExist:
+            return JsonResponse({'error': 'QSO не найдено'}, status=404)
+
+        # Подготавливаем все данные QSO
+        qso_data = {
+            'id': str(qso.id),
+            'date': qso.date.strftime('%Y-%m-%d') if qso.date else '',
+            'time': qso.time.strftime('%H:%M:%S') if qso.time else '',
+            'my_callsign': qso.my_callsign or '',
+            'callsign': qso.callsign or '',
+            'frequency': str(qso.frequency) if qso.frequency else '',
+            'band': qso.band or '',
+            'mode': qso.mode or '',
+            'rst_sent': qso.rst_sent or '',
+            'rst_rcvd': qso.rst_rcvd or '',
+            'my_gridsquare': qso.my_gridsquare or '',
+            'gridsquare': qso.gridsquare or '',
+            'continent': qso.continent or '',
+            'ru_region': qso.ru_region or '',
+            'prop_mode': qso.prop_mode or '',
+            'sat_name': qso.sat_name or '',
+            'r150s': qso.r150s or '',
+            'dxcc': qso.dxcc or '',
+            'cqz': qso.cqz if qso.cqz is not None else '',
+            'ituz': qso.ituz if qso.ituz is not None else '',
+            'vucc_grids': qso.vucc_grids or '',
+            'iota': qso.iota or '',
+            'lotw': qso.lotw or '',
+            'paper_qsl': qso.paper_qsl or '',
+            'app_lotw_rxqsl': qso.app_lotw_rxqsl.strftime('%Y-%m-%d %H:%M:%S') if qso.app_lotw_rxqsl else '',
+            'created_at': qso.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': qso.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+
+        return JsonResponse({
+            'success': True,
+            'qso_data': qso_data
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
 def delete_lotw_credentials(request):
     """
     Удаление логина и пароля LoTW

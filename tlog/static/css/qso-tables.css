@@ -884,8 +884,81 @@
 .text-info { color: var(--info-color); }
 
 /* =====================================
-   ДОПОЛНИТЕЛЬНЫЕ КОМПОНЕНТЫ QSO
+   КОЛОНКА ДЕЙСТВИЙ QSO
    ===================================== */
+
+/* Стили для колонки действий */
+.qso-table .col-actions,
+.lotw-qso-table .col-actions {
+    min-width: 80px;
+    text-align: center;
+    padding: 0.5rem 0.25rem !important;
+    vertical-align: middle;
+}
+
+/* Кнопки действий */
+.qso-table .view-qso-btn,
+.lotw-qso-table .view-qso-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 0.375rem;
+    border: 1px solid #17a2b8;
+    background: transparent;
+    color: #17a2b8;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+}
+
+.qso-table .view-qso-btn:hover,
+.lotw-qso-table .view-qso-btn:hover {
+    background: #17a2b8;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+}
+
+.qso-table .view-qso-btn:active,
+.lotw-qso-table .view-qso-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(23, 162, 184, 0.3);
+}
+
+/* Адаптивные стили для колонки действий на мобильных устройствах */
+@media (max-width: 768px) {
+    .qso-table .col-actions,
+    .lotw-qso-table .col-actions {
+        min-width: 60px;
+        padding: 0.5rem 0.75rem !important;
+        text-align: right !important;
+    }
+    
+    .qso-table .col-actions:before,
+    .lotw-qso-table .col-actions:before {
+        content: "👁️ Действия";
+        position: absolute;
+        left: 1rem;
+        width: calc(50% - 1rem);
+        text-align: left;
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .qso-table .view-qso-btn,
+    .lotw-qso-table .view-qso-btn {
+        width: 2rem;
+        height: 2rem;
+        padding: 0.25rem;
+        font-size: 0.8rem;
+    }
+}
 
 /* Статистические карточки QSO (включая LoTW) */
 .qso-stats {

@@ -36,6 +36,7 @@ from .lotw import (
     lotw_page,
     verify_lotw_credentials,
     delete_lotw_credentials,
+    get_qso_details,
     lotw_filter_api,
     get_user_callsigns
 )

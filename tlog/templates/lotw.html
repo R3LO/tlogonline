@@ -105,6 +105,7 @@
                                         <th class="col-propsat"><span>📡</span> PROP/SAT</th>
                                         <th class="col-lotw-date"><span>📧</span> LoTW</th>
                                         <th class="col-lotw"><span>LoTW</span></th>
+                                        <th class="col-actions"><span>👁️</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,6 +175,12 @@
                                         </td>
                                         <td class="col-lotw" data-label="LoTW">
                                             <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
+                                        </td>
+                                        <td class="col-actions" data-label="👁️">
+                                            <button type="button" class="btn btn-sm btn-outline-info view-qso-btn" 
+                                                    data-qso-id="{{ qso.id }}" title="{% trans 'Просмотр QSO' %}">
+                                                <span>👁️</span>
+                                            </button>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -359,4 +366,232 @@
         </div>
     </div>
 </div>
+
+<!-- Красивое модальное окно для просмотра QSO -->
+<div class="modal fade" id="viewQSOModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    👁️ Детали QSO
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Основная информация -->
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">ℹ️ Основная информация</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>ID:</strong></td>
+                                        <td><span id="view_id" class="text-mono">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Дата:</strong></td>
+                                        <td><span id="view_date">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Время:</strong></td>
+                                        <td><span id="view_time">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Мой позывной:</strong></td>
+                                        <td><span id="view_my_callsign" class="text-primary">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Позывной корреспондента:</strong></td>
+                                        <td><span id="view_callsign" class="text-success">-</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Техническая информация -->
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">📡 Техническая информация</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Диапазон:</strong></td>
+                                        <td><span id="view_band" class="badge bg-secondary">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Режим:</strong></td>
+                                        <td><span id="view_mode" class="badge bg-info">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Частота:</strong></td>
+                                        <td><span id="view_frequency" class="text-mono">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RST (приём):</strong></td>
+                                        <td><span id="view_rst" class="text-warning">-</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <!-- Локация -->
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">📍 Локация</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Мой локатор:</strong></td>
+                                        <td><span id="view_my_gridsquare" class="text-mono">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Локатор корреспондента:</strong></td>
+                                        <td><span id="view_gridsquare" class="text-mono">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Континент:</strong></td>
+                                        <td><span id="view_continent">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Регион РФ:</strong></td>
+                                        <td><span id="view_ru_region">-</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительная информация -->
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">⭐ Дополнительная информация</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>SAT:</strong></td>
+                                        <td><span id="view_sat_name">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Prop Mode:</strong></td>
+                                        <td><span id="view_prop_mode">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>DXCC:</strong></td>
+                                        <td><span id="view_dxcc">-</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>IOTA:</strong></td>
+                                        <td><span id="view_iota">-</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LoTW статус -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0">🏆 QSL статус</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <span class="badge bg-info fs-6">LoTW: <span id="view_lotw">-</span></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="badge bg-warning fs-6">Paper QSL: <span id="view_paper_qsl">-</span></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="badge bg-success fs-6">R150s: <span id="view_r150s">-</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Метаданные -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card border-light">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">🕐 Метаданные</h6>
+                            </div>
+                            <div class="card-body">
+                                <small class="text-muted">
+                                    <strong>Создано:</strong> <span id="view_created_at">-</span> | 
+                                    <strong>Обновлено:</strong> <span id="view_updated_at">-</span> | 
+                                    <strong>LoTW RXQSL:</strong> <span id="view_app_lotw_rxqsl">-</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    ❌ Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Диагностическая информация -->
+<div class="alert alert-info m-3">
+    <h6>🔧 Диагностика:</h6>
+    <div id="diagnostic-info">
+        Bootstrap: <span id="bootstrap-status">Checking...</span><br>
+        Модальное окно: <span id="modal-status">Checking...</span><br>
+        Кнопки просмотра: <span id="buttons-status">Checking...</span>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== LoTW PAGE DIAGNOSTICS ===');
+    
+    // Проверка Bootstrap
+    const bootstrapStatus = typeof bootstrap !== 'undefined' ? '✅ Загружен' : '❌ Не загружен';
+    document.getElementById('bootstrap-status').textContent = bootstrapStatus;
+    console.log('Bootstrap status:', bootstrapStatus);
+    
+    // Проверка модального окна
+    const modalElement = document.getElementById('viewQSOModal');
+    const modalStatus = modalElement ? '✅ Найдено' : '❌ Не найдено';
+    document.getElementById('modal-status').textContent = modalStatus;
+    console.log('Modal status:', modalStatus);
+    
+    // Проверка кнопок
+    const viewButtons = document.querySelectorAll('.view-qso-btn');
+    const buttonsStatus = viewButtons.length > 0 ? `✅ ${viewButtons.length} кнопок` : '❌ Кнопки не найдены';
+    document.getElementById('buttons-status').textContent = buttonsStatus;
+    console.log('View buttons status:', buttonsStatus);
+    
+    // Тест функции
+    if (typeof window.showSimpleModal === 'function') {
+        console.log('✅ showSimpleModal function exists');
+    } else {
+        console.log('❌ showSimpleModal function missing');
+    }
+    
+    console.log('=== END DIAGNOSTICS ===');
+});
+</script>
 {% endblock %}

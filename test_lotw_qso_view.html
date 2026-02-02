@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoTW QSO View Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .test-success {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        .test-error {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .view-qso-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            border-radius: 0.375rem;
+            border: 1px solid #17a2b8;
+            background: transparent;
+            color: #17a2b8;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+        }
+        .view-qso-btn:hover {
+            background: #17a2b8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1><i class="fas fa-bug"></i> LoTW QSO View Test</h1>
+        
+        <!-- Bootstrap Test -->
+        <div class="test-section" id="bootstrap-test">
+            <h3><i class="fab fa-bootstrap"></i> Bootstrap Test</h3>
+            <p>Проверка загрузки Bootstrap JavaScript</p>
+            <div id="bootstrap-status" class="alert">Testing...</div>
+            <button class="btn btn-primary" onclick="testBootstrap()">Test Bootstrap Modal</button>
+        </div>
+        
+        <!-- Table Test -->
+        <div class="test-section" id="table-test">
+            <h3><i class="fas fa-table"></i> Table Test</h3>
+            <p>Проверка кнопок просмотра в таблице</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Callsign</th>
+                        <th>Date</th>
+                        <th>Band</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TEST1</td>
+                        <td>2024-01-01</td>
+                        <td>20m</td>
+                        <td>
+                            <button class="view-qso-btn" data-qso-id="test-123" title="View QSO">
+                                👁️
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>TEST2</td>
+                        <td>2024-01-02</td>
+                        <td>40m</td>
+                        <td>
+                            <button class="view-qso-btn" data-qso-id="test-456" title="View QSO">
+                                👁️
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Console Output -->
+        <div class="test-section">
+            <h3><i class="fas fa-terminal"></i> Console Output</h3>
+            <div class="console-output" id="console-output">Waiting for output...</div>
+        </div>
+        
+        <!-- Manual Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-hand-pointer"></i> Manual Test</h3>
+            <p>Нажмите на иконку 👁️ в таблице выше или кнопку ниже:</p>
+            <button class="btn btn-success" onclick="testQSOView()">Test QSO View Function</button>
+            <button class="btn btn-warning" onclick="testAPI()">Test API Call</button>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal fade" id="testModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye"></i> Test QSO Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Callsign:</strong> <span id="test-callsign">TEST_CALL</span><br>
+                            <strong>Date:</strong> <span id="test-date">2024-01-01</span><br>
+                            <strong>Band:</strong> <span id="test-band">20m</span><br>
+                            <strong>Mode:</strong> <span id="test-mode">SSB</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Time:</strong> <span id="test-time">12:00</span><br>
+                            <strong>Frequency:</strong> <span id="test-frequency">14.200</span><br>
+                            <strong>RST:</strong> <span id="test-rst">59</span><br>
+                            <strong>QTH:</strong> <span id="test-qth">JN45</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Console output function
+        function logToConsole(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        // Bootstrap test
+        function testBootstrap() {
+            logToConsole('Testing Bootstrap modal...');
+            const modal = new bootstrap.Modal(document.getElementById('testModal'));
+            modal.show();
+        }
+        
+        // Test QSO view function
+        function testQSOView() {
+            logToConsole('Testing QSO view function...');
+            testQSODetails('manual-test-123');
+        }
+        
+        // Test API call
+        async function testAPI() {
+            logToConsole('Testing API call...');
+            try {
+                const response = await fetch('/api/lotw/qso-details/?qso_id=test-123', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                logToConsole(`API Response status: ${response.status}`);
+                if (response.status === 302) {
+                    logToConsole('API requires authentication (normal)');
+                } else {
+                    const data = await response.json();
+                    logToConsole(`API Response: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                logToConsole(`API Error: ${error.message}`);
+            }
+        }
+        
+        // Test QSO details loading
+        async function testQSODetails(qsoId) {
+            logToConsole(`Loading QSO details for ID: ${qsoId}`);
+            
+            try {
+                // Simulate API call with test data
+                setTimeout(() => {
+                    populateTestModal({
+                        id: qsoId,
+                        callsign: 'TEST_CALL',
+                        date: '2024-01-01',
+                        time: '12:00',
+                        band: '20m',
+                        mode: 'SSB',
+                        frequency: '14.200',
+                        rst: '59',
+                        qth: 'JN45'
+                    });
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('testModal'));
+                    modal.show();
+                    logToConsole('Modal shown successfully');
+                }, 500);
+                
+            } catch (error) {
+                logToConsole(`Error: ${error.message}`);
+            }
+        }
+        
+        function populateTestModal(qsoData) {
+            document.getElementById('test-callsign').textContent = qsoData.callsign;
+            document.getElementById('test-date').textContent = qsoData.date;
+            document.getElementById('test-time').textContent = qsoData.time;
+            document.getElementById('test-band').textContent = qsoData.band;
+            document.getElementById('test-mode').textContent = qsoData.mode;
+            document.getElementById('test-frequency').textContent = qsoData.frequency;
+            document.getElementById('test-rst').textContent = qsoData.rst;
+            document.getElementById('test-qth').textContent = qsoData.qth;
+        }
+        
+        // Initialize tests
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('=== LoTW QSO VIEW TEST STARTED ===');
+            
+            // Test Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                document.getElementById('bootstrap-status').className = 'alert alert-success';
+                document.getElementById('bootstrap-status').textContent = '✅ Bootstrap loaded successfully';
+                logToConsole('✅ Bootstrap loaded successfully');
+            } else {
+                document.getElementById('bootstrap-status').className = 'alert alert-danger';
+                document.getElementById('bootstrap-status').textContent = '❌ Bootstrap not loaded';
+                logToConsole('❌ Bootstrap not loaded');
+            }
+            
+            // Test view buttons
+            const viewButtons = document.querySelectorAll('.view-qso-btn');
+            logToConsole(`Found ${viewButtons.length} view buttons`);
+            
+            viewButtons.forEach((button, index) => {
+                logToConsole(`Setting up click handler for button ${index + 1}`);
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const qsoId = this.getAttribute('data-qso-id');
+                    logToConsole(`Button clicked! QSO ID: ${qsoId}`);
+                    testQSODetails(qsoId);
+                });
+            });
+            
+            logToConsole('=== INITIALIZATION COMPLETE ===');
+        });
+    </script>
+</body>
+</html>
