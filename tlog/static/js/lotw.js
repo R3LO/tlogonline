@@ -1,199 +1,23 @@
-// JavaScript для страницы LoTW с серверной фильтрацией
+// JavaScript для страницы LoTW
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация всех функций
-    initCardAnimations();
-    initStatusRefresh();
-    initQuickActions();
-    initTooltips();
-    initServerFilters();
-    initQSOView();
     
-    // Глобальный обработчик для динамически добавленных кнопок
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.view-qso-btn')) {
-            e.preventDefault();
-            const button = e.target.closest('.view-qso-btn');
-            const qsoId = button.getAttribute('data-qso-id');
-            if (qsoId) {
-                loadQSODetails(qsoId);
-            }
-        }
-    });
-    
-    // Анимации для карточек
-    function initCardAnimations() {
-        const cards = document.querySelectorAll('.card');
-        
-        cards.forEach((card, index) => {
-            // Добавляем задержку для каждой карточки
-            card.style.animationDelay = `${index * 0.1}s`;
-        });
-    }
-            
-    // Инициализация серверных фильтров
-    function initServerFilters() {
-        // Загружаем позывные пользователя
-        loadUserCallsigns();
-        
-        // Никаких дополнительных обработчиков не нужно
-        // Все работает через обычные HTML формы
-    }
-    
-    // Загрузка позывных пользователя через серверный рендеринг
-    function loadUserCallsigns() {
-        // Позывные загружаются на сервере при рендеринге страницы
-        // Никаких AJAX запросов не нужно
-    }
-
-    // Функция очистки фильтров больше не нужна
-    // Сброс выполняется через серверную форму
-    
-    // Функция инициализации пагинации (без AJAX)
-    function initPagination() {
-        // Пагинация работает через серверные формы
-        // Никаких дополнительных обработчиков не нужно
-    }
-    
-    // Обновление статуса LoTW
-    function initStatusRefresh() {
-        const statusElements = document.querySelectorAll('.lotw-status');
-        
-        statusElements.forEach(element => {
-            // Добавляем кнопку обновления если есть статус
-            const refreshBtn = document.createElement('button');
-            refreshBtn.className = 'btn btn-sm btn-outline-primary ms-2';
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить';
-            refreshBtn.onclick = refreshLoTWStatus;
-            
-            const statusContainer = element.querySelector('.alert');
-            if (statusContainer) {
-                statusContainer.appendChild(refreshBtn);
-            }
-        });
-    }
-    
-    // Функция обновления статуса LoTW
-    async function refreshLoTWStatus() {
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        
-        // Показываем загрузку
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обновление...';
-        btn.disabled = true;
-        
-        try {
-            // Здесь можно добавить AJAX запрос для обновления статуса
-            // const response = await fetch('/api/lotw/status/refresh/', {
-            //     method: 'POST',
-            //     headers: {
-            //         'X-CSRFToken': getCsrfToken(),
-            //         'Content-Type': 'application/json'
-            //     }
-            // });
-            
-            // Имитация задержки
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Показать уведомление об успехе
-            showNotification('Статус LoTW обновлен!', 'success');
-            
-            // Перезагрузить страницу для обновления данных
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-            
-        } catch (error) {
-            showNotification('Ошибка обновления статуса', 'error');
-        } finally {
-            // Восстановить кнопку
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-    
-    // Инициализация быстрых действий
-    function initQuickActions() {
-        const actionButtons = document.querySelectorAll('.quick-actions .btn');
-        
-        actionButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                // Добавляем визуальную обратную связь
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
-                
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                }, 1000);
-            });
-        });
-    }
-    
-    // Инициализация tooltips
-    function initTooltips() {
-        // Инициализация Bootstrap tooltips если они используются
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
-    
-    // Утилиты
-    function showNotification(message, type = 'info') {
-        // Создаем уведомление
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Автоматически скрываем через 5 секунд
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
-    }
-    
-    // Плавная прокрутка к элементам
-    function smoothScrollTo(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    }
-    
-    
-    // Инициализация кнопок просмотра QSO
-    function initQSOView() {
-        const viewButtons = document.querySelectorAll('.view-qso-btn');
-        
-        viewButtons.forEach(button => {
-            // Удаляем старые обработчики, чтобы избежать дублирования
-            button.removeEventListener('click', handleViewClick);
-            // Добавляем новый обработчик
-            button.addEventListener('click', handleViewClick);
-        });
-    }
-    
-    // Отдельная функция для обработки клика
-    function handleViewClick(e) {
-        e.preventDefault();
-        const qsoId = this.getAttribute('data-qso-id');
-        if (qsoId) {
-            loadQSODetails(qsoId);
-        }
-    }
-    
-    // Загрузка детальной информации о QSO
+    // Функция для загрузки данных QSO
     async function loadQSODetails(qsoId) {
         try {
+            // Показываем загрузку
+            populateViewModal({
+                id: qsoId,
+                callsign: 'Загрузка...',
+                date: 'Загрузка...',
+                time: 'Загрузка...',
+                band: 'Загрузка...',
+                mode: 'Загрузка...',
+                frequency: 'Загрузка...',
+                rst_sent: 'Загрузка...',
+                rst_rcvd: 'Загрузка...'
+            });
+            
+            // Пытаемся получить данные с сервера
             const response = await fetch(`/api/lotw/qso-details/?qso_id=${qsoId}`, {
                 method: 'GET',
                 headers: {
@@ -230,36 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else {
                 const data = await response.json();
-                
                 if (data.success) {
                     populateViewModal(data.qso_data);
                 } else {
                     throw new Error(data.error || 'Unknown error');
                 }
             }
-            
-            // Проверяем, существует ли модальное окно
-            const modalElement = document.getElementById('viewQSOModal');
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement, {
-                    backdrop: true,
-                    keyboard: true,
-                    focus: true
-                });
-                modal.show();
-                
-                // Убираем backdrop при закрытии
-                modalElement.addEventListener('hidden.bs.modal', function () {
-                    const backdrops = document.querySelectorAll('.modal-backdrop');
-                    backdrops.forEach(backdrop => backdrop.remove());
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                });
-            } else {
-                showNotification('Модальное окно не найдено', 'error');
-            }
         } catch (error) {
-            
             // Показываем тестовые данные при ошибке
             populateViewModal({
                 id: qsoId,
@@ -285,16 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 r150s: 'N',
                 app_lotw_rxqsl: '2024-01-02 14:30:00'
             });
-            
-            const modalElement = document.getElementById('viewQSOModal');
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-            }
         }
     }
-    
-    // Заполнение модального окна просмотра данными QSO
+            
+    // Функция для заполнения модального окна
     function populateViewModal(qsoData) {
         const fields = {
             'view_id': qsoData.id || '-',
@@ -316,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'view_dxcc': qsoData.dxcc || '-',
             'view_iota': qsoData.iota || '-',
             'view_lotw': qsoData.lotw || '-',
-            'view_paper_qsl': qsoData.paper_qsl === 'Y' ? 'Да' : (qsoData.paper_qsl === 'N' ? 'Нет' : qsoData.paper_qsl || '-'),
+            'view_paper_qsl': qsoData.paper_qsl || '-',
             'view_r150s': qsoData.r150s || '-',
             'view_app_lotw_rxqsl': qsoData.app_lotw_rxqsl || '-'
         };
@@ -329,23 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Получение CSRF токена
-    function getCsrfToken() {
-        const cookieMatch = document.cookie.match(/csrftoken=([^;]+)/);
-        if (cookieMatch) {
-            return cookieMatch[1];
-        }
-        const metaMatch = document.querySelector('meta[name="csrf-token"]');
-        if (metaMatch) {
-            return metaMatch.getAttribute('content');
-        }
-        const inputMatch = document.querySelector('input[name="csrfmiddlewaretoken"]');
-        if (inputMatch) {
-            return inputMatch.value;
-        }
-        return '';
-    }
-
     // Функция очистки фильтров
     function clearFilters() {
         const filterForm = document.getElementById('filterForm');
@@ -365,15 +143,91 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Экспортируем функции для глобального использования
-    window.LoTW = {
-        clearFilters: clearFilters,
-        refreshStatus: refreshLoTWStatus,
-        showNotification: showNotification,
-        smoothScrollTo: smoothScrollTo,
-        loadQSODetails: loadQSODetails
+    // Функция для показа модального окна
+    function showQSOModal(qsoId) {
+        const modal = document.getElementById('viewQSOModal');
+        
+        if (!modal) {
+            alert('Модальное окно не найдено!');
+            return;
+        }
+        
+        if (typeof bootstrap === 'undefined') {
+            alert('Bootstrap не загружен!');
+            return;
+        }
+        
+        try {
+            // Загружаем данные перед показом модального окна
+            loadQSODetails(qsoId);
+            
+            const bsModal = new bootstrap.Modal(modal, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            bsModal.show();
+            
+            // Убираем backdrop при закрытии
+            modal.addEventListener('hidden.bs.modal', function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+            });
+            
+        } catch (error) {
+            alert('Ошибка показа модального окна: ' + error.message);
+        }
+    }
+    
+    // Функция для получения CSRF токена
+    function getCsrfToken() {
+        const cookieMatch = document.cookie.match(/csrftoken=([^;]+)/);
+        if (cookieMatch) return cookieMatch[1];
+        
+        const metaMatch = document.querySelector('meta[name="csrf-token"]');
+        if (metaMatch) return metaMatch.getAttribute('content');
+        
+        const inputMatch = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (inputMatch) return inputMatch.value;
+        
+        return '';
+    }
+    
+    // Глобальная функция для показа модального окна
+    window.showSimpleModal = function(qsoId) {
+        if (qsoId) {
+            showQSOModal(qsoId);
+        } else {
+            showQSOModal('test-id');
+        }
     };
     
-    // Также делаем функции глобально доступными
+    // Глобальная функция для очистки фильтров
     window.clearFilters = clearFilters;
+    
+    // Обработчики кнопок
+    const viewButtons = document.querySelectorAll('.view-qso-btn');
+    
+    viewButtons.forEach((button, index) => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const qsoId = this.getAttribute('data-qso-id');
+            
+            showQSOModal(qsoId);
+        });
+    });
+    
+    // Глобальный обработчик
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.view-qso-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.view-qso-btn');
+            const qsoId = button.getAttribute('data-qso-id');
+            
+            showQSOModal(qsoId);
+        }
+    });
+    
 });
