@@ -83,7 +83,6 @@ function previewADIFFile(event) {
             previewDiv.style.display = 'block';
             
         } catch (error) {
-            console.error('Ошибка парсинга ADIF:', error);
             showNotification('Ошибка при анализе файла', 'error');
         }
     };
@@ -158,7 +157,6 @@ function handleADIFConversion(event) {
         }
     })
     .catch(error => {
-        console.error('Ошибка конвертации:', error);
         showNotification('Произошла ошибка при конвертации', 'error');
     })
     .finally(() => {
@@ -272,7 +270,6 @@ function applyFilters() {
         updateQSOList(data.qso_list);
     })
     .catch(error => {
-        console.error('Ошибка фильтрации:', error);
     });
 }
 
@@ -314,7 +311,6 @@ function initSatelliteTracking() {
         updateSatelliteInfo(data);
     })
     .catch(error => {
-        console.error('Ошибка получения данных спутника:', error);
     });
     
     // Обновляем данные каждые 30 секунд

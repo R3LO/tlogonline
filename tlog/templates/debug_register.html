@@ -114,10 +114,8 @@
             responseDiv.innerHTML = '<strong>Отправляемые данные:</strong><br>' + JSON.stringify(data, null, 2) + '<br><br>';
 
             try {
-                // console.log removed
 
                 const csrfToken = getCookie('csrftoken');
-                // console.log removed
 
                 const headers = {
                     'Content-Type': 'application/json',
@@ -133,11 +131,7 @@
                     body: JSON.stringify(data)
                 });
 
-                // console.log removed
-                console.log('Заголовки ответа:', Object.fromEntries(response.headers.entries()));
-
                 const result = await response.json();
-                // console.log removed
 
                 responseDiv.innerHTML += '<strong>Статус ответа:</strong> ' + response.status + '<br>';
                 responseDiv.innerHTML += '<strong>Заголовки:</strong><br>' + JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2) + '<br><br>';
@@ -150,7 +144,6 @@
                 }
 
             } catch (error) {
-                console.error('Ошибка сети:', error);
                 responseDiv.innerHTML += '<br><br><span class="error">❌ Ошибка сети: ' + error.message + '</span>';
             }
         });

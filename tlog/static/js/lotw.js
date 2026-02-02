@@ -1,7 +1,5 @@
 // JavaScript для страницы LoTW с серверной фильтрацией
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('LoTW JavaScript loaded');
-    
     // Инициализация всех функций
     initCardAnimations();
     initStatusRefresh();
@@ -10,15 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initServerFilters();
     initQSOView();
     
-    console.log('All LoTW functions initialized');
-    
     // Глобальный обработчик для динамически добавленных кнопок
     document.addEventListener('click', function(e) {
         if (e.target.closest('.view-qso-btn')) {
             e.preventDefault();
             const button = e.target.closest('.view-qso-btn');
             const qsoId = button.getAttribute('data-qso-id');
-            console.log('Global click handler - QSO ID:', qsoId);
             if (qsoId) {
                 loadQSODetails(qsoId);
             }
@@ -42,14 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Никаких дополнительных обработчиков не нужно
         // Все работает через обычные HTML формы
-        console.log('🔧 Серверные фильтры инициализированы');
     }
     
     // Загрузка позывных пользователя через серверный рендеринг
     function loadUserCallsigns() {
         // Позывные загружаются на сервере при рендеринге страницы
         // Никаких AJAX запросов не нужно
-        console.log('📞 Позывные загружаются сервером при рендеринге');
     }
 
     // Функция очистки фильтров больше не нужна
@@ -59,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function initPagination() {
         // Пагинация работает через серверные формы
         // Никаких дополнительных обработчиков не нужно
-        console.log('📄 Пагинация инициализирована (серверная)');
     }
     
     // Обновление статуса LoTW
@@ -180,9 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Инициализация кнопок просмотра QSO
     function initQSOView() {
-        console.log('Initializing QSO view buttons...');
         const viewButtons = document.querySelectorAll('.view-qso-btn');
-        console.log('Found', viewButtons.length, 'view buttons');
         
         viewButtons.forEach(button => {
             // Удаляем старые обработчики, чтобы избежать дублирования
@@ -195,19 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Отдельная функция для обработки клика
     function handleViewClick(e) {
         e.preventDefault();
-        console.log('View button clicked');
         const qsoId = this.getAttribute('data-qso-id');
-        console.log('QSO ID:', qsoId);
         if (qsoId) {
             loadQSODetails(qsoId);
-        } else {
-            console.error('QSO ID not found on button');
         }
     }
     
     // Загрузка детальной информации о QSO
     async function loadQSODetails(qsoId) {
-        console.log('Loading QSO details for ID:', qsoId);
         try {
             const response = await fetch(`/api/lotw/qso-details/?qso_id=${qsoId}`, {
                 method: 'GET',
@@ -217,11 +202,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            console.log('Response status:', response.status);
-            
             if (response.status === 302) {
                 // Требуется авторизация - показываем тестовые данные
-                console.log('API requires authentication, showing test data');
                 populateViewModal({
                     id: qsoId,
                     callsign: 'TEST_CALL',
@@ -250,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else {
                 const data = await response.json();
-                console.log('Response data:', data);
                 
                 if (data.success) {
                     populateViewModal(data.qso_data);
@@ -262,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Проверяем, существует ли модальное окно
             const modalElement = document.getElementById('viewQSOModal');
             if (modalElement) {
-                console.log('Modal found, showing...');
                 const modal = new bootstrap.Modal(modalElement, {
                     backdrop: true,
                     keyboard: true,
@@ -272,19 +252,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Убираем backdrop при закрытии
                 modalElement.addEventListener('hidden.bs.modal', function () {
-                    console.log('Modal hidden, removing backdrop');
                     const backdrops = document.querySelectorAll('.modal-backdrop');
                     backdrops.forEach(backdrop => backdrop.remove());
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';
                 });
             } else {
-                console.error('Modal element not found!');
                 showNotification('Модальное окно не найдено', 'error');
             }
         } catch (error) {
-            console.error('Ошибка загрузки QSO:', error);
-            console.log('Showing test data due to error');
             
             // Показываем тестовые данные при ошибке
             populateViewModal({
@@ -324,8 +300,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Заполнение модального окна просмотра данными QSO
     function populateViewModal(qsoData) {
-        console.log('Populating modal with data:', qsoData);
-        
         const fields = {
             'view_id': qsoData.id || '-',
             'view_callsign': qsoData.callsign || '-',
@@ -356,8 +330,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById(fieldId);
             if (element) {
                 element.textContent = fields[fieldId];
-            } else {
-                console.warn('Field not found:', fieldId);
             }
         });
     }
@@ -381,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция очистки фильтров
     function clearFilters() {
-        console.log('Clearing filters');
         const filterForm = document.getElementById('filterForm');
         if (filterForm) {
             // Очищаем все поля формы

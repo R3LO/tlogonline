@@ -111,7 +111,6 @@ function initEditButtons() {
                 }
             })
             .catch(function(error) {
-                console.error('Error:', error);
                 showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
             });
         });
@@ -175,7 +174,6 @@ function initViewButtons() {
                 }
             })
             .catch(function(error) {
-                console.error('Error:', error);
                 showAlert('danger', 'Ошибка при загрузке данных QSO: ' + error.message);
             });
         });
@@ -244,7 +242,6 @@ function initSaveEditQSO() {
         .catch(function(error) {
             this.disabled = false;
             this.innerHTML = '<span>💾</span> Сохранить';
-            console.error('Error:', error);
             showAlert('danger', 'Ошибка при сохранении: ' + error.message);
         }.bind(this));
     });
@@ -293,7 +290,6 @@ function initDeleteButtons() {
                 modal.show();
             })
             .catch(function(error) {
-                console.error('Error:', error);
                 showAlert('danger', 'Ошибка при проверке статуса LoTW');
             });
         });
@@ -348,7 +344,6 @@ function initConfirmDeleteQSO() {
         .catch(function(error) {
             this.disabled = false;
             this.innerHTML = '<span>🗑️</span> Удалить';
-            console.error('Error:', error);
             showAlert('danger', 'Ошибка при удалении: ' + error.message);
         }.bind(this));
     });
@@ -392,7 +387,6 @@ function initClearLog() {
             }
         })
         .catch(function(error) {
-            console.error('Error:', error);
             showAlert('danger', 'Ошибка при удалении лога: ' + error.message);
 
             // Восстанавливаем кнопку

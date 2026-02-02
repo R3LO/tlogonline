@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Если script тега нет, используем input поле
             const jsonField = document.getElementById('my_callsigns_json');
             if (!jsonField) {
-                console.error('Neither script tag nor input field found!');
                 return;
             }
             rawData = jsonField.value.trim();
@@ -79,12 +78,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Не добавляем пустое поле автоматически
                 }
             } else {
-                console.error('Invalid callsigns data format:', callsigns);
                 // Не добавляем пустое поле при ошибке
             }
             
         } catch (error) {
-            console.error('Error loading profile data:', error);
             // Не добавляем пустое поле при ошибке
         }
     }
@@ -175,7 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
             jsonField.value = jsonValue;
             // console.log removed
         } else {
-            console.error('my_callsigns_json field not found!');
         }
     }
     
@@ -184,7 +180,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function initEventHandlers() {
         const form = document.getElementById('profile-edit-form');
         if (!form) {
-            console.error('Profile form not found!');
             return;
         }
         
@@ -198,7 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Debug: проверим данные формы
             const formData = new FormData(this);
-            console.log('Form data my_callsigns_json:', formData.get('my_callsigns_json'));
             
             // Показываем сообщение пользователю
             const submitBtn = form.querySelector('button[type="submit"]');
@@ -450,7 +444,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const form = document.getElementById('profile-edit-form');
         if (!form) {
-            console.error('Profile form not found!');
             window.lotwAutoSaving = false;
             return;
         }
@@ -485,12 +478,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.reload();
                 }, 1000);
             } else {
-                console.error('❌ Failed to auto-save LoTW data');
             }
         })
         .catch(error => {
             window.lotwAutoSaving = false; // Сбрасываем флаг даже при ошибке
-            console.error('Error auto-saving LoTW data:', error);
         });
     }
     

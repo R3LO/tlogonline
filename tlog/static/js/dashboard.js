@@ -96,7 +96,6 @@ function handleProfileUpdate(event) {
         }
     })
     .catch(error => {
-        console.error('Ошибка:', error);
         showNotification('Произошла ошибка', 'error');
     })
     .finally(() => {
@@ -134,7 +133,6 @@ function autoSaveSettings(event) {
                 }
             })
             .catch(error => {
-                console.error('Ошибка автосохранения:', error);
             });
         }, 1000);
     }
@@ -171,7 +169,6 @@ function updateStatistics() {
         updateStatValues(data);
     })
     .catch(error => {
-        console.error('Ошибка обновления статистики:', error);
     });
 }
 

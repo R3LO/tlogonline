@@ -1,26 +1,9 @@
 // Простая версия для диагностики
-console.log('Simple LoTW JavaScript loaded');
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - Simple version');
-    
-    // Проверяем загрузку модального окна
-    const modal = document.getElementById('viewQSOModal');
-    console.log('Modal element found:', modal);
-    if (modal) {
-        console.log('Modal HTML:', modal.innerHTML.substring(0, 200) + '...');
-    }
-    
-    // Проверяем Bootstrap
-    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
-    if (typeof bootstrap !== 'undefined') {
-        console.log('Bootstrap Modal available:', typeof bootstrap.Modal !== 'undefined');
-    }
     
     // Функция для загрузки данных QSO
     async function loadQSODetails(qsoId) {
-        console.log('Loading QSO details for ID:', qsoId);
-        
         try {
             // Показываем загрузку
             populateViewModal({
@@ -45,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (response.status === 302) {
                 // Требуется авторизация - показываем тестовые данные
-                console.log('API requires authentication, showing test data');
                 populateViewModal({
                     id: qsoId,
                     callsign: 'TEST_CALL',
@@ -80,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } catch (error) {
-            console.log('Error loading data, showing test data:', error.message);
             // Показываем тестовые данные при ошибке
             populateViewModal({
                 id: qsoId,
@@ -112,8 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция для заполнения модального окна
     function populateViewModal(qsoData) {
-        console.log('Populating modal with data:', qsoData);
-        
         const fields = {
             'view_id': qsoData.id || '-',
             'view_callsign': qsoData.callsign || '-',
@@ -144,15 +123,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById(fieldId);
             if (element) {
                 element.textContent = fields[fieldId];
-            } else {
-                console.warn('Field not found:', fieldId);
             }
         });
     }
     
     // Функция очистки фильтров
     function clearFilters() {
-        console.log('Clearing filters');
         const filterForm = document.getElementById('filterForm');
         if (filterForm) {
             // Очищаем все поля формы
@@ -172,18 +148,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция для показа модального окна
     function showQSOModal(qsoId) {
-        console.log('showQSOModal called with ID:', qsoId);
         const modal = document.getElementById('viewQSOModal');
-        console.log('Modal in showQSOModal:', modal);
         
         if (!modal) {
-            console.error('Modal not found!');
             alert('Модальное окно не найдено!');
             return;
         }
         
         if (typeof bootstrap === 'undefined') {
-            console.error('Bootstrap not loaded!');
             alert('Bootstrap не загружен!');
             return;
         }
@@ -197,13 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 keyboard: true,
                 focus: true
             });
-            console.log('Bootstrap Modal created:', bsModal);
             bsModal.show();
-            console.log('Modal should be shown now');
             
             // Убираем backdrop при закрытии
             modal.addEventListener('hidden.bs.modal', function () {
-                console.log('Modal hidden, removing backdrop');
                 const backdrops = document.querySelectorAll('.modal-backdrop');
                 backdrops.forEach(backdrop => backdrop.remove());
                 document.body.classList.remove('modal-open');
@@ -211,7 +180,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
         } catch (error) {
-            console.error('Error showing modal:', error);
             alert('Ошибка показа модального окна: ' + error.message);
         }
     }
@@ -244,15 +212,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Обработчики кнопок
     const viewButtons = document.querySelectorAll('.view-qso-btn');
-    console.log('Found', viewButtons.length, 'view buttons');
     
     viewButtons.forEach((button, index) => {
-        console.log('Adding click handler to button', index);
         button.addEventListener('click', function(e) {
-            console.log('Button clicked! Index:', index);
             e.preventDefault();
             const qsoId = this.getAttribute('data-qso-id');
-            console.log('QSO ID:', qsoId);
             
             showQSOModal(qsoId);
         });
@@ -261,15 +225,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Глобальный обработчик
     document.addEventListener('click', function(e) {
         if (e.target.closest('.view-qso-btn')) {
-            console.log('Global click handler triggered');
             e.preventDefault();
             const button = e.target.closest('.view-qso-btn');
             const qsoId = button.getAttribute('data-qso-id');
-            console.log('Global - QSO ID:', qsoId);
             
             showQSOModal(qsoId);
         }
     });
     
-    console.log('Simple initialization complete');
 });

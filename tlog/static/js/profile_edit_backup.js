@@ -17,8 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
             });
         });
-        
-        console.log('Initialized callsign inputs:', document.querySelectorAll('.callsign-input').length); // Debug log
     }
 
     // Add new callsign input
@@ -101,15 +99,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Дополнительная проверка
                 // console.log removed // Debug log
             } else {
-                console.error('my_callsigns_json field not found!'); // Debug log
             }
             
             // Проверяем, что данные попали в форму
             const formData = new FormData(this);
-            console.log('Form data my_callsigns_json:', formData.get('my_callsigns_json')); // Debug log
         });
     } else {
-        console.error('Profile form not found!'); // Debug log
     }
 
     // ========== Success Message Handling ==========

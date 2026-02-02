@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     suggestionsBox.style.display = 'none';
                 });
         }, 300);

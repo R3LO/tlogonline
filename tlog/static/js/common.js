@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .catch(error => {
-                console.error('AJAX Error:', error);
                 window.TLog.showNotification('Произошла ошибка при выполнении запроса', 'danger');
                 throw error;
             });
@@ -148,13 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Обработка ошибок JavaScript
     window.addEventListener('error', function(e) {
-        console.error('JavaScript Error:', e.error);
         // В продакшене здесь можно отправлять ошибки на сервер
     });
     
     // Обработка ошибок Promise
     window.addEventListener('unhandledrejection', function(e) {
-        console.error('Unhandled Promise Rejection:', e.reason);
         // В продакшене здесь можно отправлять ошибки на сервер
     });
 });

@@ -27,7 +27,6 @@
         
         const jsonField = document.getElementById('my_callsigns_json');
         if (!jsonField) {
-            console.error('my_callsigns_json field not found!');
             return;
         }
         
@@ -84,12 +83,10 @@
                     // Не добавляем пустое поле автоматически
                 }
             } else {
-                console.error('Invalid callsigns data format:', callsigns);
                 // Не добавляем пустое поле при ошибке
             }
             
         } catch (error) {
-            console.error('Error loading profile data:', error);
             // Не добавляем пустое поле при ошибке
         }
     }
@@ -156,7 +153,6 @@
     function initEventHandlers() {
         const form = document.getElementById('profile-edit-form');
         if (!form) {
-            console.error('Profile form not found!');
             return;
         }
         
@@ -197,12 +193,10 @@
                 // Debug: проверим, что данные действительно попали в поле
                 // console.log removed
             } else {
-                console.error('my_callsigns_json field not found!');
             }
             
             // Debug: проверим данные формы
             const formData = new FormData(form);
-            console.log('Form data my_callsigns_json:', formData.get('my_callsigns_json'));
             
             // Показываем сообщение пользователю
             const submitBtn = form.querySelector('button[type="submit"]');
