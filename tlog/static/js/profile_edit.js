@@ -214,4 +214,62 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleLotwSettings();
         });
     }
+
+    // ========== Password Change ==========
+    window.changePassword = function() {
+        const oldPassword = document.getElementById('old_password')?.value.trim();
+        const newPassword = document.getElementById('new_password')?.value.trim();
+        const confirmPassword = document.getElementById('confirm_password')?.value.trim();
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            alert('Пожалуйста, заполните все поля для смены пароля');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Новый пароль и подтверждение пароля не совпадают');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            alert('Пароль должен содержать минимум 8 символов');
+            return;
+        }
+
+        // Создаем форму для отправки данных смены пароля
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/profile/change-password/';
+        form.style.display = 'none';
+
+        // Добавляем CSRF токен
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Добавляем поля паролей
+        const oldPasswordInput = document.createElement('input');
+        oldPasswordInput.type = 'hidden';
+        oldPasswordInput.name = 'old_password';
+        oldPasswordInput.value = oldPassword;
+        form.appendChild(oldPasswordInput);
+
+        const newPasswordInput = document.createElement('input');
+        newPasswordInput.type = 'hidden';
+        newPasswordInput.name = 'new_password';
+        newPasswordInput.value = newPassword;
+        form.appendChild(newPasswordInput);
+
+        const confirmPasswordInput = document.createElement('input');
+        confirmPasswordInput.type = 'hidden';
+        confirmPasswordInput.name = 'confirm_password';
+        confirmPasswordInput.value = confirmPassword;
+        form.appendChild(confirmPasswordInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    };
 });
