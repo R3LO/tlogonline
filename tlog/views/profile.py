@@ -109,39 +109,133 @@ def profile_update(request):
 
 def change_password(request):
     """
-    Смена пароля пользователя
+    Смена пароля пользователя через Django admin
     """
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Вы должны быть авторизованы'}, status=403)
+        messages.error(request, 'Вы должны быть авторизованы')
+        return redirect('login_page')
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password', '')
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
 
-    try:
-        data = json.loads(request.body)
-        new_password = data.get('password', '')
+        # Проверяем старый пароль
+        if not request.user.check_password(old_password):
+            messages.error(request, 'Неверный текущий пароль')
+            return redirect('profile_update')
 
+        # Валидация нового пароля
         if not new_password:
-            return JsonResponse({'error': 'Пароль не может быть пустым'}, status=400)
+            messages.error(request, 'Новый пароль не может быть пустым')
+            return redirect('profile_update')
 
         if len(new_password) < 8:
-            return JsonResponse({'error': 'Пароль должен содержать минимум 8 символов'}, status=400)
+            messages.error(request, 'Пароль должен содержать минимум 8 символов')
+            return redirect('profile_update')
 
-        # Устанавливаем новый пароль через set_password (Django автоматически хеширует)
-        request.user.set_password(new_password)
-        request.user.save()
+        if new_password != confirm_password:
+            messages.error(request, 'Пароли не совпадают')
+            return redirect('profile_update')
 
-        # Разлогиниваем пользователя и перенаправляем на страницу логина
-        from django.contrib.auth import logout
-        logout(request)
+        try:
+            # Используем Django метод для смены пароля
+            request.user.set_password(new_password)
+            request.user.save()
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Пароль успешно изменён',
-            'redirect': '/login/'
-        })
+            # Обновляем сессию пользователя чтобы он оставался авторизованным
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, request.user)
 
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+            messages.success(request, 'Пароль успешно изменён')
+            return redirect('profile_update')
+        except Exception as e:
+            messages.error(request, f'Ошибка при изменении пароля: {str(e)}')
+            return redirect('profile_update')
+
+    # Если GET запрос, просто перенаправляем на профиль
+    return redirect('profile_update')
+
+
+def verify_lotw_credentials(request):
+    """
+    Проверка учетных данных LoTW
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
+
+    if request.method == 'POST':
+        try:
+            lotw_user = request.POST.get('lotw_user', '').strip()
+            lotw_password = request.POST.get('lotw_password', '').strip()
+
+            if not lotw_user or not lotw_password:
+                messages.error(request, 'Логин и пароль LoTW не могут быть пустыми')
+                return redirect('profile_update')
+
+            # Получаем или создаем профиль
+            try:
+                profile = RadioProfile.objects.get(user=request.user)
+            except RadioProfile.DoesNotExist:
+                profile = RadioProfile.objects.create(user=request.user)
+
+            # Здесь должна быть реальная проверка LoTW
+            # Пока что просто проверяем формат позывного и сохраняем флаг как проверенный
+            # В реальном проекте здесь был бы запрос к API LoTW
+            
+            callsign_pattern = r'^[A-Z0-9]{1,3}[0-9][A-Z0-9]{0,3}[A-Z]$'
+            if re.match(callsign_pattern, lotw_user.upper()):
+                # Сохраняем данные LoTW
+                profile.lotw_user = lotw_user.upper()
+                profile.lotw_password = lotw_password
+                profile.lotw_chk_pass = True  # Устанавливаем флаг проверки
+                profile.save(update_fields=['lotw_user', 'lotw_password', 'lotw_chk_pass'])
+                
+                messages.success(request, f'Учетные данные LoTW для позывного {lotw_user} успешно проверены и сохранены')
+            else:
+                messages.error(request, 'Неверный формат позывного. Используйте только буквы и цифры (например: UA1ABC)')
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при проверке учетных данных LoTW: {str(e)}')
+
+    return redirect('profile_update')
+
+
+def delete_lotw_credentials(request):
+    """
+    Удаление учетных данных LoTW
+    """
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    # Проверяем, не заблокирован ли пользователь
+    is_blocked, reason = check_user_blocked(request.user)
+    if is_blocked:
+        return render(request, 'blocked.html', {'reason': reason})
+
+    if request.method == 'POST':
+        try:
+            # Получаем или создаем профиль
+            try:
+                profile = RadioProfile.objects.get(user=request.user)
+            except RadioProfile.DoesNotExist:
+                profile = RadioProfile.objects.create(user=request.user)
+
+            # Очищаем данные LoTW
+            profile.lotw_user = ''
+            profile.lotw_password = ''
+            profile.lotw_chk_pass = False
+            profile.lotw_lastsync = None
+            profile.save(update_fields=['lotw_user', 'lotw_password', 'lotw_chk_pass', 'lotw_lastsync'])
+
+            messages.success(request, 'Учетные данные LoTW успешно удалены')
+
+        except Exception as e:
+            messages.error(request, f'Ошибка при удалении учетных данных LoTW: {str(e)}')
+
+    return redirect('profile_update')

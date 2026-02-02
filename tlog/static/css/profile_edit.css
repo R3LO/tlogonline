@@ -1,0 +1,210 @@
+/* Profile Edit Styles - Компактная версия */
+/* ============================================== */
+
+/* Основные стили */
+.form-card {
+    background: var(--white);
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-lg);
+    padding: var(--padding-lg);
+    margin-bottom: var(--padding-md);
+}
+
+.section-title {
+    color: var(--dark);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--padding-sm);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: var(--padding-xs);
+}
+
+.section-title span {
+    margin-right: var(--padding-xs);
+}
+
+/* Стили для позывных */
+.my-callsign-item {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-xs);
+    margin-bottom: var(--padding-xs);
+}
+
+.callsign-input {
+    text-transform: uppercase;
+    font-family: var(--font-family-mono);
+}
+
+/* Стили для LoTW секции */
+#lotw_settings {
+    background: rgba(var(--primary-rgb), 0.05);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--padding-md);
+    margin-top: var(--padding-xs);
+}
+
+/* Стили для кнопок */
+.btn {
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--success);
+    color: var(--white);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger);
+    color: var(--white);
+}
+
+/* Стили для бейджей */
+.badge {
+    padding: var(--padding-xs) var(--padding-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+.badge.bg-success {
+    background: var(--success) !important;
+    color: var(--white);
+}
+
+.badge.bg-danger {
+    background: var(--danger) !important;
+    color: var(--white);
+}
+
+/* Стили для формы */
+.form-control {
+    border: 1px solid var(--light-border);
+    border-radius: var(--radius-md);
+    padding: var(--padding-sm) var(--padding-md);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--dark);
+    margin-bottom: var(--padding-xs);
+}
+
+.form-text {
+    font-size: var(--font-size-sm);
+    color: var(--muted);
+    margin-top: var(--padding-xs);
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .form-card {
+        padding: var(--padding-md);
+    }
+    
+    .my-callsign-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .my-callsign-item .btn {
+        margin-top: var(--padding-xs);
+        width: 100%;
+    }
+}
+
+/* Стили для карточки смены пароля */
+#password_change_section .card {
+    background: rgba(var(--warning-rgb), 0.1);
+    border: 1px solid rgba(var(--warning-rgb), 0.3);
+}
+
+/* Стили для уведомлений */
+.alert {
+    border-radius: var(--radius-md);
+    padding: var(--padding-sm) var(--padding-md);
+    margin-bottom: var(--padding-sm);
+}
+
+.alert-success {
+    background: rgba(var(--success-rgb), 0.1);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}
+
+.alert-danger {
+    background: rgba(var(--danger-rgb), 0.1);
+    color: var(--danger);
+    border-left: 4px solid var(--danger);
+}
+
+/* Утилиты */
+.text-muted {
+    color: var(--muted) !important;
+}
+
+.mb-4 {
+    margin-bottom: var(--padding-lg) !important;
+}
+
+.mt-3 {
+    margin-top: var(--padding-md) !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.gap-2 {
+    gap: var(--padding-sm) !important;
+}
+
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+.btn-sm {
+    padding: var(--padding-xs) var(--padding-sm);
+    font-size: var(--font-size-sm);
+}
+
+/* Стили для коллапса */
+.collapse {
+    transition: all 0.3s ease;
+}
+
+.collapse.show {
+    opacity: 1;
+}
+
+.d-none {
+    display: none !important;
+}

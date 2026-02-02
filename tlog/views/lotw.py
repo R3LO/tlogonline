@@ -3,9 +3,10 @@ Views для LoTW (Logbook of the World)
 """
 import json
 import requests
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.translation import gettext as _
 
 from ..models import QSO, RadioProfile, check_user_blocked
@@ -189,16 +190,17 @@ def verify_lotw_credentials(request):
     Проверка логина и пароля LoTW
     """
     if request.method != 'POST':
-        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+        messages.error(request, 'Метод не поддерживается')
+        return redirect('profile_update')
 
     try:
         # Получаем логин и пароль из POST данных
-        data = json.loads(request.body)
-        login = data.get('login', '').strip()
-        password = data.get('password', '').strip()
+        login = request.POST.get('lotw_user', '').strip()
+        password = request.POST.get('lotw_password', '').strip()
 
         if not login or not password:
-            return JsonResponse({'error': 'Логин и пароль обязательны'}, status=400)
+            messages.error(request, 'Логин и пароль обязательны')
+            return redirect('profile_update')
 
         # Функция проверки
         def check_lotw_pass(login, password):
@@ -228,19 +230,19 @@ def verify_lotw_credentials(request):
                 profile.lotw_user = login
                 profile.lotw_password = password
             profile.save()
+            
+            if is_valid:
+                messages.success(request, 'Логин и пароль проверены и сохранены успешно')
+            else:
+                messages.error(request, 'Логин или пароль неверны. Проверьте данные и попробуйте снова.')
         except RadioProfile.DoesNotExist:
-            pass
+            messages.error(request, 'Профиль пользователя не найден')
+            
+        return redirect('profile_update')
 
-        return JsonResponse({
-            'success': True,
-            'is_valid': is_valid,
-            'message': 'Логин и пароль верны' if is_valid else 'Логин или пароль неверны'
-        })
-
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        messages.error(request, f'Ошибка при проверке: {str(e)}')
+        return redirect('profile_update')
 
 
 @login_required
@@ -544,7 +546,8 @@ def delete_lotw_credentials(request):
     Удаление логина и пароля LoTW
     """
     if request.method != 'POST':
-        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+        messages.error(request, 'Метод не поддерживается')
+        return redirect('profile_update')
 
     try:
         profile = RadioProfile.objects.get(user=request.user)
@@ -553,9 +556,12 @@ def delete_lotw_credentials(request):
         profile.lotw_chk_pass = False
         profile.save()
 
-        return JsonResponse({'success': True})
+        messages.success(request, 'Логин и пароль LoTW удалены успешно')
+        return redirect('profile_update')
 
     except RadioProfile.DoesNotExist:
-        return JsonResponse({'error': 'Профиль не найден'}, status=404)
+        messages.error(request, 'Профиль пользователя не найден')
+        return redirect('profile_update')
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        messages.error(request, f'Ошибка при удалении: {str(e)}')
+        return redirect('profile_update')

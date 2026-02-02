@@ -235,9 +235,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========== Password Change ==========
-    document.getElementById('change_password_btn').addEventListener('click', function() {
-        document.getElementById('password_change_section').style.display = 'block';
-    });
+    const changePasswordBtn = document.getElementById('change_password_btn');
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            const passwordSection = document.getElementById('password_change_section');
+            if (passwordSection) {
+                if (passwordSection.style.display === 'none' || passwordSection.style.display === '') {
+                    passwordSection.style.display = 'block';
+                    this.innerHTML = '<span>🔒</span> Скрыть форму';
+                } else {
+                    passwordSection.style.display = 'none';
+                    this.innerHTML = '<span>🔑</span> Сменить пароль';
+                }
+            }
+        });
+    }
 
     document.getElementById('cancel_password_btn').addEventListener('click', function() {
         document.getElementById('password_change_section').style.display = 'none';
