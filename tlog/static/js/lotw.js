@@ -212,8 +212,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     band: '20m',
                     mode: 'SSB',
                     frequency: '14.200 MHz',
-                    rst_rcvd: '59',
                     rst_sent: '59',
+                    rst_rcvd: '59',
                     my_callsign: 'MY_CALL',
                     my_gridsquare: 'JN45',
                     gridsquare: 'LO01',
@@ -226,8 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     lotw: 'Y',
                     paper_qsl: 'N',
                     r150s: 'N',
-                    created_at: '2024-01-01 12:00:00',
-                    updated_at: '2024-01-01 12:00:00',
                     app_lotw_rxqsl: '2024-01-02 14:30:00'
                 });
             } else {
@@ -271,8 +269,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 band: '20m',
                 mode: 'SSB',
                 frequency: '14.200 MHz',
-                rst_rcvd: '59',
                 rst_sent: '59',
+                rst_rcvd: '59',
                 my_callsign: 'MY_CALL',
                 my_gridsquare: 'JN45',
                 gridsquare: 'LO01',
@@ -285,8 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 lotw: 'Y',
                 paper_qsl: 'N',
                 r150s: 'N',
-                created_at: '2024-01-01 12:00:00',
-                updated_at: '2024-01-01 12:00:00',
                 app_lotw_rxqsl: '2024-01-02 14:30:00'
             });
             
@@ -308,7 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'view_band': qsoData.band || '-',
             'view_mode': qsoData.mode || '-',
             'view_frequency': qsoData.frequency || '-',
-            'view_rst': qsoData.rst_rcvd || qsoData.rst || '-',
+            'view_rst_sent': qsoData.rst_sent || '-',
+            'view_rst_rcvd': qsoData.rst_rcvd || '-',
             'view_my_callsign': qsoData.my_callsign || '-',
             'view_my_gridsquare': qsoData.my_gridsquare || '-',
             'view_gridsquare': qsoData.gridsquare || '-',
@@ -321,8 +318,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'view_lotw': qsoData.lotw || '-',
             'view_paper_qsl': qsoData.paper_qsl === 'Y' ? 'Да' : (qsoData.paper_qsl === 'N' ? 'Нет' : qsoData.paper_qsl || '-'),
             'view_r150s': qsoData.r150s || '-',
-            'view_created_at': qsoData.created_at || '-',
-            'view_updated_at': qsoData.updated_at || '-',
             'view_app_lotw_rxqsl': qsoData.app_lotw_rxqsl || '-'
         };
         
