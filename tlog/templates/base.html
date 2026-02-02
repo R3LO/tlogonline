@@ -38,23 +38,23 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">{% trans "Главная" %}</a>
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">{% trans "Главная" %}</a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">{% trans "Журнал" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/lotw/">LoTW</a>
+                        <a class="nav-link {% if request.path == '/lotw/' or 'lotw' in request.path %}active{% endif %}" href="/lotw/">LoTW</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/qth-loc.html" target="_blank">Grid map</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="/dashboard/">{% trans "Profile" %}</a>
+                        <a class="nav-link {% if request.path == '/dashboard/' or '/dashboard/' in request.path %}active{% endif %}" href="/dashboard/">{% trans "Dashboard" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/achievements/">{% trans "Achievements" %}</a>
+                        <a class="nav-link {% if '/achievements/' in request.path %}active{% endif %}" href="/achievements/">{% trans "Achievements" %}</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -81,7 +81,7 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/profile/">{{ user.username }}</a>
+                        <a class="nav-link {% if request.path == '/profile/' %}active{% endif %}" href="/profile/">{{ user.username }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout/">{% trans "Logout" %}</a>
@@ -105,7 +105,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4">
+    <footer class="bg-dark text-light py-4 mt-5">
         <div class="container text-center">
             <p class="mb-0"><small>Copyright © Vladimir Pavlenko R3LO</small></p>
         </div>

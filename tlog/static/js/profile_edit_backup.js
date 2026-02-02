@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             button.disabled = true;
             button.innerHTML = '<span>⏳</span> Проверка...';
 
-            fetch('/dashboard/profile/verify-lotw/', {
+            fetch('/profile/verify-lotw/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lotwBlock.style.display = 'none';
             document.cookie = `use_lotw=false; path=/; max-age=${30 * 24 * 60 * 60}`;
 
-            fetch('/dashboard/profile/delete-lotw/', {
+            fetch('/profile/delete-lotw/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = true;
         btn.innerHTML = '<span>⏳</span> Сохранение...';
 
-        fetch('/dashboard/profile/change-password/', {
+        fetch('/profile/change-password/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

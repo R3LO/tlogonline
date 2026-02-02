@@ -12,19 +12,12 @@
     background: transparent !important;
 }
 
-/* Отступы для body */
-body {
-    padding: var(--padding-md) 0 0 0;
-}
-
 /* =====================================
    ГЛАВНЫЙ КОНТЕНТ
    ===================================== */
 
 main {
     min-height: calc(100vh - 200px);
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
 }
 
 /* =====================================
@@ -36,7 +29,6 @@ footer {
     color: var(--white) !important;
     padding: var(--padding-lg) 0 !important;
     margin-top: auto;
-    margin-bottom: 0 !important;
 }
 
 /* =====================================
