@@ -1,121 +1,145 @@
-<!DOCTYPE html>
-<html lang="ru">
+{% extends 'base.html' %}
 {% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - TLog</title>
-    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="main-container">
-            <!-- Header -->
-            <div class="page-header text-center">
-                <h2><span>📝</span> Регистрация</h2>
-                <p class="mb-0">Присоединяйтесь к сообществу радиолюбителей</p>
-            </div>
+{% load i18n %}
+{% block title %}TLog - {% trans "Регистрация" %}{% endblock %}
 
-            <div class="p-4">
-                <!-- Сообщения Django -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags|default:"info" }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
+{% block content %}
+<!-- Центрирование по центру видимого экрана -->
+<div class="d-flex align-items-center justify-content-center flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
+                <div class="card shadow-lg border-0">
+                    <!-- Header -->
+                    <div class="card-header bg-gradient text-center border-0 py-4">
+                        <h2 class="mb-0 text-white">
+                            <span class="me-3">📝</span> 
+                            {% trans "Регистрация" %}
+                            <span class="ms-3">🚀</span>
+                        </h2>
+                        <p class="mb-0 mt-2 text-light">
+                            {% trans "Присоединяйтесь к сообществу радиолюбителей" %}
+                        </p>
+                    </div>
 
-                <form id="registerForm" method="POST" action="{% url 'register_page' %}">
-                    {% csrf_token %}
-
-                    <div class="row">
-                        <!-- Левая колонка -->
-                        <div class="col-lg-6">
-                            <!-- Учётная запись -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>🔐</span> Учётная запись</h5>
-
-                                <div class="mb-3">
-                                    <label for="callsign" class="form-label">📡 Ваш позывной (используется как логин) *</label>
-                                    <input type="text" class="form-control" id="callsign" name="callsign"
-                                           maxlength="10" required
-                                           placeholder="">
-                                    <div class="form-text">Ваш позывной будет использоваться для входа в систему</div>
+                    <div class="card-body p-5">
+                        <!-- Сообщения Django -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:"info" }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
+                            {% endfor %}
+                        {% endif %}
 
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">📧 Email *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required
-                                           placeholder="email@example.com" autocomplete="off">
-                                </div>
+                        <form id="registerForm" method="POST" action="{% url 'register_page' %}">
+                            {% csrf_token %}
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">🔒 Пароль *</label>
-                                        <input type="password" class="form-control" id="password" name="password" required
-                                               placeholder="Минимум 8 символов">
+                            <div class="row">
+                                <!-- Левая колонка -->
+                                <div class="col-lg-6">
+                                    <!-- Учётная запись -->
+                                    <div class="form-card mb-4">
+                                        <h5 class="section-title"><span>🔐</span> {% trans "Учётная запись" %}</h5>
+
+                                        <div class="mb-3">
+                                            <label for="callsign" class="form-label">📡 {% trans "Ваш позывной (используется как логин)" %} *</label>
+                                            <input type="text" class="form-control text-uppercase" id="callsign" name="callsign"
+                                                   maxlength="10" required
+                                                   placeholder="">
+                                            <div class="form-text">{% trans "Ваш позывной будет использоваться для входа в систему" %}</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">📧 {% trans "Email" %} *</label>
+                                            <input type="email" class="form-control" id="email" name="email" required
+                                                   placeholder="{% trans 'email@example.com' %}" autocomplete="off">
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="password" class="form-label">🔒 {% trans "Пароль" %} *</label>
+                                                <input type="password" class="form-control" id="password" name="password" required
+                                                       placeholder="{% trans 'Минимум 8 символов' %}">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="password_confirm" class="form-label">🔒 {% trans "Подтвердите пароль" %} *</label>
+                                                <input type="password" class="form-control" id="password_confirm" name="password_confirm" required
+                                                       placeholder="{% trans 'Повторите пароль' %}">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password_confirm" class="form-label">🔒 Подтвердите пароль *</label>
-                                        <input type="password" class="form-control" id="password_confirm" name="password_confirm" required
-                                               placeholder="Повторите пароль">
+                                </div>
+
+                                <!-- Правая колонка -->
+                                <div class="col-lg-6">
+                                    <!-- Личная информация -->
+                                    <div class="form-card mb-4">
+                                        <h5 class="section-title">
+                                            <span>👤</span>{% trans "Личная информация" %}
+                                        </h5>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="first_name" class="form-label">👤 {% trans "Имя" %}</label>
+                                                <input type="text" class="form-control" id="first_name" name="first_name">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="last_name" class="form-label">👤 {% trans "Фамилия" %}</label>
+                                                <input type="text" class="form-control" id="last_name" name="last_name">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="qth" class="form-label">📍 QTH ({% trans "населённый пункт" %})<span class="ms-1">🌍</span></label>
+                                            <input type="text" class="form-control" id="qth" name="qth">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="qth_locator" class="form-label">🗺️ QTH {% trans "локатор" %}<span class="ms-1">📍</span></label>
+                                            <input type="text" class="form-control" id="qth_locator" name="qth_locator"
+                                                   maxlength="6">
+                                            <div class="form-text">
+                                                <span class="me-1">💡</span>{% trans "Например: KO85UU для Москвы" %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Правая колонка -->
-                        <div class="col-lg-6">
-                            <!-- Личная информация -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>👤</span> Личная информация</h5>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="first_name" class="form-label">👤 Имя</label>
-                                        <input type="text" class="form-control" id="first_name" name="first_name"
-                                               placeholder="Иван">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="last_name" class="form-label">👤 Фамилия</label>
-                                        <input type="text" class="form-control" id="last_name" name="last_name"
-                                               placeholder="Петров">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="qth" class="form-label">📍 QTH (населённый пункт)</label>
-                                    <input type="text" class="form-control" id="qth" name="qth"
-                                           placeholder="г. Москва, Россия">
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="qth_locator" class="form-label">🗺️ QTH локатор</label>
-                                    <input type="text" class="form-control" id="qth_locator" name="qth_locator"
-                                           maxlength="6" placeholder="KO85UU">
-                                    <div class="form-text">Например: KO85UU для Москвы</div>
-                                </div>
+                            <!-- Кнопки -->
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">                                    
+                                    <span class="me-2">✅</span>{% trans "Зарегистрироваться" %}                                    
+                                </button>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Кнопки -->
-                    <div class="d-flex flex-wrap gap-2 gap-md-3 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1 flex-md-grow-0">
-                            <span class="me-1">✅</span>Зарегистрироваться
-                        </button>
-                        <a href="/login/" class="btn btn-outline-secondary btn-lg flex-grow-1 flex-md-grow-0">
-                            <span class="me-1">🔙</span>Назад
-                        </a>
+                            <hr class="my-4">
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">                                    
+                                    {% trans "Уже есть аккаунт?" %}
+                                    <a href="/login/" class="text-decoration-none fw-bold">
+                                        <span class="me-1">🔐</span>{% trans "Войти" %}
+                                        
+                                    </a>
+                                </p>
+                            </div>
+
+
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/register.js' %}"></script>
-{% include 'cookie_banner.html' %}
-</body>
-</html>
+<script>
+// Автоматическое преобразование позывного в верхний регистр
+document.getElementById('callsign')?.addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+</script>
+{% endblock %}

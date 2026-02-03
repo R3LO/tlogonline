@@ -27,24 +27,24 @@ def register_page(request):
         # Валидация
         if not all([callsign, email, password, password_confirm]):
             messages.error(request, 'Все обязательные поля должны быть заполнены')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
         if password != password_confirm:
             messages.error(request, 'Пароли не совпадают')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
         if len(password) < 8:
             messages.error(request, 'Пароль должен содержать минимум 8 символов')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
         # Проверяем уникальность позывного (как username)
         if User.objects.filter(username=callsign).exists():
             messages.error(request, 'Пользователь с таким позывным уже существует')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Пользователь с таким email уже существует')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
         # Создаем пользователя (позывной = username)
         try:
@@ -71,9 +71,9 @@ def register_page(request):
 
         except Exception as e:
             messages.error(request, f'Ошибка при регистрации: {str(e)}')
-            return render(request, 'register_base.html')
+            return render(request, 'register.html')
 
-    return render(request, 'register_base.html')
+    return render(request, 'register.html')
 
 
 def login_page(request):

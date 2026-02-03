@@ -4,30 +4,37 @@
 {% block title %}TLog - {% trans "Регистрация" %}{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="logbook-header text-center">
-    <h2><span>📝</span> {% trans "Регистрация" %}</h2>
-    <p class="mb-0">{% trans "Присоединяйтесь к сообществу радиолюбителей" %}</p>
-</div>
-
-<div class="container mt-4">
-    <div class="row">
-        <!-- Основной контент -->
-        <div class="col-lg-8 mx-auto">
-            <!-- Сообщения Django -->
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:"info" }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- Центрирование по центру видимого экрана -->
+<div class="d-flex align-items-center justify-content-center flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
+                <div class="card shadow-lg border-0">
+                    <!-- Header -->
+                    <div class="card-header bg-gradient text-center border-0 py-4">
+                        <h2 class="mb-0 text-white">
+                            <span class="me-3">📝</span> 
+                            {% trans "Регистрация" %}
+                            <span class="ms-3">🚀</span>
+                        </h2>
+                        <p class="mb-0 mt-2 text-light">
+                            {% trans "Присоединяйтесь к сообществу радиолюбителей" %}
+                        </p>
                     </div>
-                {% endfor %}
-            {% endif %}
 
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <form id="registerForm" method="POST" action="{% url 'register_page' %}">
-                        {% csrf_token %}
+                    <div class="card-body p-5">
+                        <!-- Сообщения Django -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:"info" }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form id="registerForm" method="POST" action="{% url 'register_page' %}">
+                            {% csrf_token %}
 
                         <!-- Учётная запись -->
                         <div class="row mb-4">

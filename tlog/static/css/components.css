@@ -12,8 +12,6 @@
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: sticky;
-    top: 0;
     z-index: var(--z-sticky);
 }
 
@@ -193,6 +191,7 @@
     box-shadow: var(--shadow-lg);
     margin-top: var(--padding-xs);
     min-width: 200px;
+    z-index: 1050;
 }
 
 .navbar .dropdown-item {
@@ -251,6 +250,10 @@
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
     margin-top: var(--padding-xs);
+    z-index: 1050;
+    position: absolute;
+    top: 100%;
+    left: 0;
 }
 
 .navbar .dropdown-item {
@@ -834,6 +837,10 @@
     box-shadow: var(--shadow-lg);
     margin-top: var(--padding-xs);
     min-width: 180px;
+    z-index: 1050;
+    position: absolute;
+    top: 100%;
+    left: 0;
 }
 
 .dropdown-item {
@@ -871,9 +878,7 @@
 /* Исправление для dropdown на мобильных */
 @media (max-width: 576px) {
     .dropdown-menu {
-        position: absolute;
-        right: 0;
-        left: auto;
+        z-index: 1050;
     }
 }
 

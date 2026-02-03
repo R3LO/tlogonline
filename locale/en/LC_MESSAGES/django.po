@@ -168,8 +168,14 @@ msgstr "Sign In"
 msgid "Нет аккаунта?"
 msgstr "No account?"
 
+msgid "Регистрация"
+msgstr "Register"
+
 msgid "Зарегистрироваться"
 msgstr "Register"
+
+msgid "населённый пункт"
+msgstr "city, town"
 
 msgid "Зарегистрированных пользователей"
 msgstr "Registered users"
@@ -222,3 +228,55 @@ msgstr "Dashboard"
 
 msgid "Achievements"
 msgstr "Achievements"
+
+# Register page
+msgid "Присоединяйтесь к сообществу радиолюбителей"
+msgstr "Join the amateur radio community"
+
+msgid "Учётная запись"
+msgstr "Account"
+
+msgid "Ваш позывной (используется как логин)"
+msgstr "Your callsign (used as login)"
+
+msgid "Ваш позывной будет использоваться для входа в систему"
+msgstr "Your callsign will be used for system login"
+
+msgid "Минимум 8 символов"
+msgstr "Minimum 8 characters"
+
+msgid "Подтвердите пароль"
+msgstr "Confirm password"
+
+msgid "Повторите пароль"
+msgstr "Repeat password"
+
+msgid "Личная информация"
+msgstr "Personal information"
+
+msgid "Имя"
+msgstr "First name"
+
+msgid "Фамилия"
+msgstr "Last name"
+
+msgid "QTH (населённый пункт)"
+msgstr "QTH (location)"
+
+msgid "г. Москва, Россия"
+msgstr "Moscow, Russia"
+
+msgid "QTH локатор"
+msgstr "QTH locator"
+
+msgid "KO85UU"
+msgstr "KO85UU"
+
+msgid "Например: KO85UU для Москвы"
+msgstr "For example: KO85UU for Moscow"
+
+msgid "Уже есть аккаунт?"
+msgstr "Already have an account?"
+
+msgid "Главная"
+msgstr "Home"
