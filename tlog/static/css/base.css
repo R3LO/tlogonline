@@ -254,6 +254,73 @@ a.nav-link.active {
     left: 0;
 }
 
+/* Dropdown-menu-end - раскрывается вправо */
+.dropdown-menu.dropdown-menu-end {
+    left: auto;
+    right: 0;
+}
+
+/* Исправление для dropdown на больших экранах */
+@media (min-width: 992px) {
+    .dropdown-menu.dropdown-menu-end {
+        right: 0;
+        left: auto;
+        transform: translateX(0);
+        max-width: 200px;
+    }
+    
+    /* Обеспечиваем, что dropdown не выходит за границы экрана */
+    .dropdown-menu.dropdown-menu-end {
+        overflow: visible;
+    }
+}
+
+/* Специальные стили для dropdown языка */
+@media (min-width: 1200px) {
+    .dropdown-menu.dropdown-menu-end {
+        right: 0;
+        left: auto;
+        margin-right: 0;
+        margin-left: auto;
+    }
+}
+
+/* Исправление для очень больших экранов */
+@media (min-width: 1400px) {
+    .dropdown-menu.dropdown-menu-end {
+        right: 0;
+        left: auto;
+        transform: translateX(-20%);
+    }
+}
+
+/* Мобильное меню - должно быть закрыто по умобильном */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        margin-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1rem;
+        display: none !important;
+    }
+    
+    .navbar-collapse.show {
+        display: block !important;
+    }
+    
+    .navbar-nav {
+        text-align: center;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Принудительно скрываем navbar-collapse по умолчанию */
+    .navbar:not(.show) .navbar-collapse {
+        display: none !important;
+    }
+}
+    
 .dropdown-item {
     color: var(--dark);
     padding: var(--padding-sm) var(--padding-md);
