@@ -127,3 +127,98 @@ msgstr "Total QSOs"
 
 msgid "Countries"
 msgstr "Countries"
+
+# Index page strings
+msgid "Вход"
+msgstr "Sign In"
+
+msgid "Вход в систему"
+msgstr "Sign In to System"
+
+msgid "Добро пожаловать в TLog"
+msgstr "Welcome to TLog - True personal  logbook for hams"
+
+msgid "Позывной"
+msgstr "Callsign"
+
+msgid "Введите позывной"
+msgstr "Enter callsign"
+
+msgid "Пожалуйста, введите позывной."
+msgstr "Please enter callsign."
+
+msgid "Пароль"
+msgstr "Password"
+
+msgid "Введите пароль"
+msgstr "Enter password"
+
+msgid "Показать/скрыть пароль"
+msgstr "Show/hide password"
+
+msgid "Пожалуйста, введите пароль."
+msgstr "Please enter password."
+
+msgid "Запомнить меня"
+msgstr "Remember me"
+
+msgid "Войти"
+msgstr "Sign In"
+
+msgid "Нет аккаунта?"
+msgstr "No account?"
+
+msgid "Зарегистрироваться"
+msgstr "Register"
+
+msgid "Зарегистрированных пользователей"
+msgstr "Registered users"
+
+msgid "QSO в системе"
+msgstr "QSOs in system"
+
+msgid "Записей QSO"
+msgstr "QSO records"
+
+msgid "Безопасный вход"
+msgstr "Secure login"
+
+msgid "Радиолюбительский журнал"
+msgstr "Amateur radio logbook"
+
+msgid "Сохранение QSO"
+msgstr "QSO saving"
+
+msgid "LoTW синхронизация"
+msgstr "LoTW synchronization"
+
+msgid "Мобильная версия"
+msgstr "Mobile version"
+
+msgid "Быстрый доступ"
+msgstr "Quick access"
+
+msgid "Дипломы"
+msgstr "Awards"
+
+msgid "QTH карты"
+msgstr "QTH maps"
+
+msgid "Статистика"
+msgstr "Statistics"
+
+msgid "Соревнования"
+msgstr "Contests"
+
+msgid "ADIF импорт"
+msgstr "ADIF import"
+
+msgid "Облачная синхронизация"
+msgstr "Cloud synchronization"
+
+# Dashboard and Achievements
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Achievements"
+msgstr "Achievements"

@@ -4,17 +4,25 @@
 {% block title %}TLog - {% trans "Вход" %}{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="logbook-header text-center">
-    <h2><span>🔐</span> {% trans "Вход" %}</h2>
-    <p class="mb-0">{% trans "Войдите в свой аккаунт" %}</p>
-</div>
-
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8 col-sm-10">
+<!-- Центрирование по центру видимого экрана -->
+<div class="d-flex align-items-center justify-content-center flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
             <div class="card shadow-lg border-0">
-                <div class="card-body p-4">
+                <!-- Header -->
+                <div class="card-header bg-gradient text-center border-0 py-4">
+                    <h2 class="mb-0 text-white">
+                        <span class="me-3">🔐</span> 
+                        {% trans "Вход в систему" %}
+                        <span class="ms-3">🚀</span>
+                    </h2>
+                    <p class="mb-0 mt-2 text-light">
+                        {% trans "Добро пожаловать в TLog - ваш персональный журнал радиосвязей" %}
+                    </p>
+                </div>
+                
+                <div class="card-body p-5">
                     {% if messages %}
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -100,21 +108,57 @@
             </div>
 
             <!-- Дополнительная информация -->
-            <div class="text-center mt-4">
+            <div class="text-center mt-5">
                 <div class="row">
                     <div class="col-12">
-                        <div class="d-flex justify-content-center gap-4 text-muted small">
+                        <div class="d-flex justify-content-center flex-wrap gap-4 text-muted small">
                             <div class="d-flex align-items-center">
                                 <span class="me-2">🔒</span>
-                                <span>{% trans "Безопасность" %}</span>
+                                <span>{% trans "Безопасный вход" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">📡</span>
+                                <span>{% trans "Радиолюбительский журнал" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">💾</span>
+                                <span>{% trans "Сохранение QSO" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🌐</span>
+                                <span>{% trans "LoTW синхронизация" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">📱</span>
+                                <span>{% trans "Мобильная версия" %}</span>
                             </div>
                             <div class="d-flex align-items-center">
                                 <span class="me-2">⚡</span>
                                 <span>{% trans "Быстрый доступ" %}</span>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="me-2">📱</span>
-                                <span>{% trans "Мобильная версия" %}</span>
+                                <span class="me-2">🏆</span>
+                                <span>{% trans "Дипломы" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🗺️</span>
+                                <span>{% trans "QTH карты" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">📊</span>
+                                <span>{% trans "Статистика" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🎯</span>
+                                <span>{% trans "Соревнования" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🔄</span>
+                                <span>{% trans "ADIF импорт" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">☁️</span>
+                                <span>{% trans "Облачная синхронизация" %}</span>
                             </div>
                         </div>
                     </div>
@@ -122,6 +166,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script>

@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from django.utils import timezone
 from datetime import timedelta
 import json
@@ -15,10 +16,44 @@ from ..models import QSO, RadioProfile, ADIFUpload, check_user_blocked, ChatMess
 
 def home(request):
     """
-    Главная страница
+    Главная страница с формой входа
     """
+    # Если пользователь уже аутентифицирован, перенаправляем на dashboard
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
     total_users = User.objects.count()
     total_qso = QSO.objects.count()
+
+    # Обработка формы входа
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember_me = request.POST.get('rememberMe')
+
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                is_blocked, reason = check_user_blocked(user)
+                if is_blocked:
+                    # Перенаправляем на страницу блокировки
+                    return redirect('blocked_page', reason=reason or 'Доступ заблокирован администратором')
+                else:
+                    login(request, user)
+                    
+                    # Обработка "Запомнить меня"
+                    if remember_me:
+                        request.session.set_expiry(30 * 24 * 60 * 60)  # 30 дней
+                    else:
+                        request.session.set_expiry(0)  # До закрытия браузера
+                    
+                    messages.success(request, f'Добро пожаловать, {user.username}!')
+                    return redirect('dashboard')
+            else:
+                messages.error(request, 'Неверный логин или пароль.')
+        else:
+            messages.error(request, 'Пожалуйста, заполните все поля.')
 
     return render(request, 'index.html', {
         'total_users': total_users,

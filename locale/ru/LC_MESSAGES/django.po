@@ -164,3 +164,98 @@ msgstr "Неверные учетные данные"
 
 msgid "Your account is blocked. Reason:"
 msgstr "Ваш аккаунт заблокирован. Причина:"
+
+# Index page strings
+msgid "Вход"
+msgstr "Вход"
+
+msgid "Вход в систему"
+msgstr "Вход в систему"
+
+msgid "Добро пожаловать в TLog"
+msgstr "Добро пожаловать в TLog - Твой персональный лог"
+
+msgid "Позывной"
+msgstr "Позывной"
+
+msgid "Введите позывной"
+msgstr "Введите позывной"
+
+msgid "Пожалуйста, введите позывной."
+msgstr "Пожалуйста, введите позывной."
+
+msgid "Пароль"
+msgstr "Пароль"
+
+msgid "Введите пароль"
+msgstr "Введите пароль"
+
+msgid "Показать/скрыть пароль"
+msgstr "Показать/скрыть пароль"
+
+msgid "Пожалуйста, введите пароль."
+msgstr "Пожалуйста, введите пароль."
+
+msgid "Запомнить меня"
+msgstr "Запомнить меня"
+
+msgid "Войти"
+msgstr "Войти"
+
+msgid "Нет аккаунта?"
+msgstr "Нет аккаунта?"
+
+msgid "Зарегистрироваться"
+msgstr "Зарегистрироваться"
+
+msgid "Зарегистрированных пользователей"
+msgstr "Зарегистрированных пользователей"
+
+msgid "QSO в системе"
+msgstr "QSO в системе"
+
+msgid "Записей QSO"
+msgstr "Записей QSO"
+
+msgid "Безопасный вход"
+msgstr "Безопасный вход"
+
+msgid "Радиолюбительский журнал"
+msgstr "Радиолюбительский журнал"
+
+msgid "Сохранение QSO"
+msgstr "Сохранение QSO"
+
+msgid "LoTW синхронизация"
+msgstr "LoTW синхронизация"
+
+msgid "Мобильная версия"
+msgstr "Мобильная версия"
+
+msgid "Быстрый доступ"
+msgstr "Быстрый доступ"
+
+msgid "Дипломы"
+msgstr "Дипломы"
+
+msgid "QTH карты"
+msgstr "QTH карты"
+
+msgid "Статистика"
+msgstr "Статистика"
+
+msgid "Соревнования"
+msgstr "Соревнования"
+
+msgid "ADIF импорт"
+msgstr "ADIF импорт"
+
+msgid "Облачная синхронизация"
+msgstr "Облачная синхронизация"
+
+# Dashboard and Achievements
+msgid "Dashboard"
+msgstr "Панель управления"
+
+msgid "Achievements"
+msgstr "Достижения"

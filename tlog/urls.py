@@ -15,7 +15,8 @@ from .views import (
     qo100_regions, qo100_r150s, qo100_grids, qo100_unique_callsigns,
     qo100_dxcc, qo100_converter, qo100_converter_download,
     cosmos_diploma, cosmos_download,
-    lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details
+    lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
+    blocked_page
 )
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path('register/', register_page, name='register_page'),
     path('debug-register/', register_page, name='debug_register'),
     path('login/', login_page, name='login_page'),
+    path('blocked/', blocked_page, name='blocked_page'),
     path('dashboard/', dashboard, name='dashboard'),
     path('profile/', profile_update, name='profile_update'),
     path('dashboard/profile/', profile_update, name='profile_update_legacy'),

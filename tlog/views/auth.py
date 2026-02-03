@@ -98,8 +98,8 @@ def login_page(request):
             try:
                 profile = user.radio_profile
                 if profile.is_blocked:
-                    messages.error(request, _('Ваш аккаунт заблокирован. Причина: ') + (profile.blocked_reason or ''))
-                    return render(request, 'login_base.html')
+                    # Перенаправляем на страницу блокировки с причиной
+                    return redirect('blocked_page', reason=profile.blocked_reason or 'Доступ заблокирован администратором')
             except RadioProfile.DoesNotExist:
                 pass  # Профиля нет - считаем пользователя незаблокированным
 
@@ -121,6 +121,15 @@ def login_page(request):
             return render(request, 'login_base.html')
 
     return render(request, 'login_base.html')
+
+
+def blocked_page(request, reason=''):
+    """
+    Страница блокировки пользователя
+    """
+    return render(request, 'blocked.html', {
+        'reason': reason
+    })
 
 
 def logout_view(request):

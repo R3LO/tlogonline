@@ -10,6 +10,10 @@
     <title>{% block title %}TLog - {% trans "Welcome to Ham Radio Logbook" %}{% endblock %}</title>
     <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -37,9 +41,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    {% if request.path != '/' %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">{% trans "Главная" %}</a>
                     </li>
+                    {% endif %}
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">{% trans "Журнал" %}</a>
@@ -59,10 +65,10 @@
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
-                    <!-- Language Switcher -->
-                    <li class="nav-item dropdown">
+                    <!-- Language Switcher - Always at the right -->
+                    <li class="nav-item dropdown ms-auto">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {% trans "Language" %}
+                            {% if LANGUAGE_CODE == 'ru' %}Language{% else %}Язык{% endif %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% for lang_code, lang_name in LANGUAGES %}
@@ -87,6 +93,7 @@
                         <a class="nav-link" href="/logout/">{% trans "Logout" %}</a>
                     </li>
                     {% else %}
+                    {% if request.path != '/' %}
                     <li class="nav-item">
                         <a class="nav-link" href="/login/">{% trans "Login" %}</a>
                     </li>
@@ -94,18 +101,19 @@
                         <a class="nav-link" href="/register/">{% trans "Register" %}</a>
                     </li>
                     {% endif %}
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main class="flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <footer class="bg-dark text-light py-3 mt-auto">
         <div class="container text-center">
             <p class="mb-0"><small>Copyright © Vladimir Pavlenko R3LO</small></p>
         </div>
