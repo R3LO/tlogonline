@@ -329,9 +329,9 @@
     <!-- Боковая панель -->
     <div class="col-lg-3">
         <!-- Статус LoTW -->
-        <div class="card mb-4 fade-in lotw-status">
+        <div class="card mb-4 fade-in lotw-statistics">
             <div class="card-header">
-                <h6 class="mb-0"><span>📊</span> {% trans "Your LoTW Status" %}</h6>
+                <h6 class="mb-0"><span>📊</span> {% trans "Статус LoTW" %}</h6>
             </div>
             <div class="card-body">
                 {% if profile.lotw_user and profile.lotw_password %}
@@ -382,31 +382,37 @@
                 <h6 class="mb-0"><span>📈</span> {% trans "Статистика" %}</h6>
             </div>
             <div class="card-body">
-                <div class="row g-2 text-center">
-                    <div class="col-12 mb-3">
-                        <div class="stat-item">
-                            <div class="stat-number text-primary fw-bold h4 mb-1">{{ dxcc_entities|default:0 }}</div>
+                <div class="row g-3">
+                    <!-- DXCC стран -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
                             <div class="stat-label small text-muted">
-                                <span class="me-1">🌍</span>Стран DXCC
+                                <span class="me-2">🌍</span>
+                                <span class="fw-medium">Стран DXCC</span>
                             </div>
+                            <div class="stat-number text-primary fw-bold h5 mb-0">{{ dxcc_entities|default:0 }}</div>
                         </div>
                     </div>
 
-                    <div class="col-12 mb-3">
-                        <div class="stat-item">
-                            <div class="stat-number text-success fw-bold h4 mb-1">{{ r150s_entities|default:0 }}</div>
+                    <!-- Р-150-С стран -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
                             <div class="stat-label small text-muted">
-                                <span class="me-1">🏆</span>Стран Р-150-С
+                                <span class="me-2">🏆</span>
+                                <span class="fw-medium">Стран Р-150-С</span>
                             </div>
+                            <div class="stat-number text-success fw-bold h5 mb-0">{{ r150s_entities|default:0 }}</div>
                         </div>
                     </div>
                     
+                    <!-- Регионов России -->
                     <div class="col-12">
-                        <div class="stat-item">
-                            <div class="stat-number text-warning fw-bold h4 mb-1">{{ ru_regions|default:0 }}</div>
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
                             <div class="stat-label small text-muted">
-                                <span class="me-1">🇷🇺</span>Регионов Росси
+                                <span class="me-2">🇷🇺</span>
+                                <span class="fw-medium">Регионов Росси</span>
                             </div>
+                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ ru_regions|default:0 }}</div>
                         </div>
                     </div>
                 </div>
@@ -420,41 +426,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Быстрые действия -->
-        <div class="card mb-4 fade-in quick-actions">
-            <div class="card-header">
-                <h6 class="mb-0"><span>⚡</span> {% trans "Quick Actions" %}</h6>
-            </div>
-            <div class="card-body">
-                <a href="/profile/" class="btn btn-primary w-100 mb-2">
-                    <span>⚙️</span> {% trans "Configure LoTW" %}
-                </a>
-                <a href="/dashboard/" class="btn btn-outline-primary w-100 mb-2">
-                    <span>📊</span> {% trans "View Dashboard" %}
-                </a>
-                <a href="/logbook/" class="btn btn-outline-secondary w-100">
-                    <span>📋</span> {% trans "Manage Logbook" %}
-                </a>
-            </div>
-        </div>
-
-        <!-- Поддерживаемые программы -->
-        <div class="card mb-4 fade-in">
-            <div class="card-header">
-                <h6 class="mb-0"><span>💻</span> {% trans "Supported Software" %}</h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "TQSL (ARRL's official LoTW software)" %}</small></li>
-                    <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "DXToolbox" %}</small></li>
-                    <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "QSO Log" %}</small></li>
-                    <li class="mb-2"><span class="text-primary">📱</span> <small>{% trans "LoTW Mobile" %}</small></li>
-                    <li class="mb-0"><span class="text-primary">📱</span> <small>{% trans "And many more..." %}</small></li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Компактное модальное окно для просмотра QSO -->
