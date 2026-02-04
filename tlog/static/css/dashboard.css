@@ -868,6 +868,10 @@
     .dashboard-title-icon {
         font-size: 2rem;
     }
+    
+    .main-dashboard-container {
+        min-height: calc(100vh - 140px);
+    }
 }
 
 @media (max-width: 768px) {
@@ -886,8 +890,38 @@
     .dashboard-subtitle {
         font-size: 0.9rem;
     }
+    
+    .main-dashboard-container {
+        min-height: calc(100vh - 160px);
+    }
 }
 
 /* =====================================
    Компактные стили для dashboard
    ===================================== */
+
+/* Основной контейнер до футера */
+.main-dashboard-container {
+    min-height: calc(100vh - 120px); /* вычитаем высоту хедера и футера */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* Центрированная панель утилит */
+.utilities-dashboard-centered {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1; /* растягивается на всю доступную высоту */
+    padding: 1rem 0;
+}
+
+.utilities-grid-centered {
+    max-width: 900px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-content: start; /* контент начинается сверху */
+}
