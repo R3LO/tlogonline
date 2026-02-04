@@ -421,3 +421,37 @@ if (document.readyState === 'loading') {
 } else {
     initLogbookPage();
 }
+
+// Функция для удаления ADIF загрузки
+function deleteAdifUpload(uploadId, fileName) {
+    if (confirm(`Вы уверены, что хотите удалить файл "${fileName}" и все связанные с ним QSO?`)) {
+        fetch(`/dashboard/adif-delete/${uploadId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                showAlert('success', 'Файл и связанные QSO успешно удалены');
+                // Перезагружаем страницу через 1 секунду
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                throw new Error(data.error || 'Неизвестная ошибка');
+            }
+        })
+        .catch(function(error) {
+            showAlert('danger', 'Ошибка при удалении файла: ' + error.message);
+        });
+    }
+}

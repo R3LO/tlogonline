@@ -22,128 +22,131 @@
 
         <!-- Content -->
         <div class="p-4">
-            <!-- Заголовок и кнопки управления -->
-            <div class="mb-4">
-                <div class="d-flex gap-2 flex-wrap button-row">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQSOModal">
-                        <span>➕</span> Добавить QSO
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#adifUploadModal">
-                        <span>📤</span> Загрузить ADIF
-                    </button>
-                    {% if total_count > 0 %}
-                    <form action="{% url 'export_adif' %}" method="get" id="adifExportForm">
-                        <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
-                        <input type="hidden" name="date_from" value="{{ date_from }}">
-                        <input type="hidden" name="date_to" value="{{ date_to }}">
-                        <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
-                        <input type="hidden" name="search_qth" value="{{ search_qth }}">
-                        <input type="hidden" name="mode" value="{{ mode_filter }}">
-                        <input type="hidden" name="band" value="{{ band_filter }}">
-                        <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
-                        <input type="hidden" name="lotw" value="{{ lotw_filter }}">
-                        <button type="submit" class="btn btn-secondary" title="Экспорт лога в ADIF файл по фильтру" id="exportAdifBtn">
-                            <span>📦</span> Экспорт ADIF
-                        </button>
-                    </form>
-                    <button type="button" class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#clearLogModal">
-                        <span>🗑️</span> Удалить весь лог
-                    </button>
-                    <div class="button-spacer"></div>
+            <div class="row">
+                <!-- Основной контент -->
+                <div class="col-lg-9">
+                    <!-- Заголовок и кнопки управления -->
+                    <div class="mb-4">
+                        <div class="d-flex gap-2 flex-wrap button-row">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQSOModal">
+                                <span>➕</span> Добавить QSO
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#adifUploadModal">
+                                <span>📤</span> Загрузить ADIF
+                            </button>
+                            {% if total_count > 0 %}
+                            <form action="{% url 'export_adif' %}" method="get" id="adifExportForm">
+                                <input type="hidden" name="my_callsign" value="{{ my_callsign_filter }}">
+                                <input type="hidden" name="date_from" value="{{ date_from }}">
+                                <input type="hidden" name="date_to" value="{{ date_to }}">
+                                <input type="hidden" name="search_callsign" value="{{ search_callsign }}">
+                                <input type="hidden" name="search_qth" value="{{ search_qth }}">
+                                <input type="hidden" name="mode" value="{{ mode_filter }}">
+                                <input type="hidden" name="band" value="{{ band_filter }}">
+                                <input type="hidden" name="sat_name" value="{{ sat_name_filter }}">
+                                <input type="hidden" name="lotw" value="{{ lotw_filter }}">
+                                <button type="submit" class="btn btn-secondary" title="Экспорт лога в ADIF файл по фильтру" id="exportAdifBtn">
+                                    <span>📦</span> Экспорт ADIF
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#clearLogModal">
+                                <span>🗑️</span> Удалить весь лог
+                            </button>
+                            <div class="button-spacer"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Сообщения Django -->
+                    {% if messages %}
+                    <div class="messages mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                            <span>ℹ️</span> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
-                </div>
-            </div>
 
-            <!-- Сообщения Django -->
-            {% if messages %}
-            <div class="messages mb-4">
-                {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
-                    <span>ℹ️</span> {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+                    <!-- Фильтры -->
+                    <div class="filter-card mb-4">
+                        <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
+                        <form method="POST" class="filter-controls">
+                            {% csrf_token %}
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
+                                <select class="form-select form-select-sm" name="my_callsign">
+                                    <option value="">{% trans "Все" %}</option>
+                                    {% for my_call in my_callsigns %}
+                                        <option value="{{ my_call }}" {% if my_call == my_callsign_filter %}selected{% endif %}>{{ my_call }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Дата от" %}</label>
+                                <input type="date" class="form-control form-control-sm" name="date_from" value="{{ date_from }}">
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Дата до" %}</label>
+                                <input type="date" class="form-control form-control-sm" name="date_to" value="{{ date_to }}">
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Позывной" %}</label>
+                                <input type="text" class="form-control form-control-sm" name="search_callsign" value="{{ search_callsign }}" placeholder="{% trans 'Позывной' %}">
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">QTH локатор</label>
+                                <input type="text" class="form-control form-control-sm" name="search_qth" value="{{ search_qth }}" placeholder="QTH локатор">
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Диапазон" %}</label>
+                                <select class="form-select form-select-sm" name="band">
+                                    <option value="">{% trans "Все" %}</option>
+                                    {% for band in available_bands %}
+                                        <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>{{ band }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Вид связи" %}</label>
+                                <select class="form-select form-select-sm" name="mode">
+                                    <option value="">{% trans "Все" %}</option>
+                                    {% for mode in available_modes %}
+                                        <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>{{ mode }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">{% trans "Спутник" %}</label>
+                                <select class="form-select form-select-sm" name="sat_name">
+                                    <option value="">{% trans "Все" %}</option>
+                                    {% for sat in available_sat_names %}
+                                        <option value="{{ sat }}" {% if sat == sat_name_filter %}selected{% endif %}>{{ sat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="form-label small mb-1">LoTW</label>
+                                <select class="form-select form-select-sm" name="lotw">
+                                    <option value="">{% trans "Все" %}</option>
+                                    <option value="Y" {% if lotw_filter == 'Y' %}selected{% endif %}>{% trans "Да" %}</option>
+                                    <option value="N" {% if lotw_filter == 'N' %}selected{% endif %}>{% trans "Нет" %}</option>
+                                </select>
+                            </div>
+                            <div class="filter-actions">
+                                <button type="submit" class="btn btn-primary btn-sm" title="{% trans 'Применить фильтры' %}">
+                                    <span>🔍</span>
+                                </button>
+                                <a href="{% url 'logbook' %}" class="btn btn-secondary btn-sm" title="{% trans 'Сбросить фильтры' %}">
+                                    <span>🔄</span>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
 
-            <!-- Фильтры -->
-            <div class="filter-card mb-4">
-                <h5 class="section-title"><span>🔍</span> {% trans "Фильтры" %}</h5>
-                <form method="POST" class="filter-controls">
-                    {% csrf_token %}
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Мой позывной" %}</label>
-                        <select class="form-select form-select-sm" name="my_callsign">
-                            <option value="">{% trans "Все" %}</option>
-                            {% for my_call in my_callsigns %}
-                                <option value="{{ my_call }}" {% if my_call == my_callsign_filter %}selected{% endif %}>{{ my_call }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Дата от" %}</label>
-                        <input type="date" class="form-control form-control-sm" name="date_from" value="{{ date_from }}">
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Дата до" %}</label>
-                        <input type="date" class="form-control form-control-sm" name="date_to" value="{{ date_to }}">
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Позывной" %}</label>
-                        <input type="text" class="form-control form-control-sm" name="search_callsign" value="{{ search_callsign }}" placeholder="{% trans 'Позывной' %}">
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">QTH локатор</label>
-                        <input type="text" class="form-control form-control-sm" name="search_qth" value="{{ search_qth }}" placeholder="QTH локатор">
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Диапазон" %}</label>
-                        <select class="form-select form-select-sm" name="band">
-                            <option value="">{% trans "Все" %}</option>
-                            {% for band in available_bands %}
-                                <option value="{{ band }}" {% if band == band_filter %}selected{% endif %}>{{ band }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Вид связи" %}</label>
-                        <select class="form-select form-select-sm" name="mode">
-                            <option value="">{% trans "Все" %}</option>
-                            {% for mode in available_modes %}
-                                <option value="{{ mode }}" {% if mode == mode_filter %}selected{% endif %}>{{ mode }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">{% trans "Спутник" %}</label>
-                        <select class="form-select form-select-sm" name="sat_name">
-                            <option value="">{% trans "Все" %}</option>
-                            {% for sat in available_sat_names %}
-                                <option value="{{ sat }}" {% if sat == sat_name_filter %}selected{% endif %}>{{ sat }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="form-label small mb-1">LoTW</label>
-                        <select class="form-select form-select-sm" name="lotw">
-                            <option value="">{% trans "Все" %}</option>
-                            <option value="Y" {% if lotw_filter == 'Y' %}selected{% endif %}>{% trans "Да" %}</option>
-                            <option value="N" {% if lotw_filter == 'N' %}selected{% endif %}>{% trans "Нет" %}</option>
-                        </select>
-                    </div>
-                    <div class="filter-actions">
-                        <button type="submit" class="btn btn-primary btn-sm" title="{% trans 'Применить фильтры' %}">
-                            <span>🔍</span>
-                        </button>
-                        <a href="{% url 'logbook' %}" class="btn btn-secondary btn-sm" title="{% trans 'Сбросить фильтры' %}">
-                            <span>🔄</span>
-                        </a>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Статистика -->
-            {% include 'includes/qso_stats.html' %}
+                    <!-- Статистика -->
+                    {% include 'includes/qso_stats.html' %}
 
             <!-- Список QSO -->
             {% if qso_list %}
@@ -335,6 +338,51 @@
                     <p class="text-muted">Добавьте свою первую радиосвязь, нажав кнопку "Добавить QSO" выше</p>
                 </div>
             {% endif %}
+                </div>
+
+                <!-- Сайдбар -->
+                <div class="col-lg-3">
+                    <!-- Загруженные ADIF файлы -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">📁 {% trans "My Recent Uploads" %}</h6>
+                        </div>
+                        <div class="card-body p-2">
+                            {% if adif_uploads %}
+                                <div class="list-group list-group-flush">
+                                    {% for upload in adif_uploads %}
+                                        <div class="list-group-item px-2 py-2">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <small class="text-truncate fw-bold max-width-120px">{{ upload.file_name }}</small>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span class="badge {% if upload.processed %}bg-success{% else %}bg-warning{% endif %} py-1">
+                                                        {{ upload.qso_count|default:0 }} QSO
+                                                    </span>
+                                                    <button type="button"
+                                                            class="btn btn-outline-danger btn-sm p-1"
+                                                            title="{% trans "Delete related QSO" %}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-backdrop="false"
+                                                            onclick="deleteAdifUpload('{{ upload.id }}', '{{ upload.file_name }}')"
+                                                            {% if upload.qso_count|default:0 == 0 %}disabled{% endif %}>
+                                                        <span class="icon-small">🗑️</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted d-block">{{ upload.upload_date|date:"d.m.Y H:i" }}</small>
+                                            {% if upload.error_message %}
+                                                <small class="text-danger">{{ upload.error_message|truncatechars:30 }}</small>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted small mb-0">{% trans "No uploaded files" %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

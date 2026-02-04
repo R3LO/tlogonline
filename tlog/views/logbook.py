@@ -149,6 +149,9 @@ def logbook(request):
     except RadioProfile.DoesNotExist:
         user_callsign = request.user.username
 
+    # Получаем загруженные ADIF файлы для сайдбара
+    adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:10]
+
     context = {
         'user': request.user,
         'user_callsign': user_callsign,
@@ -174,6 +177,7 @@ def logbook(request):
         'filtered_stats': filtered_stats,
         'band_stats': band_stats,
         'get_band_from_frequency': get_band_from_frequency,
+        'adif_uploads': adif_uploads,
     }
 
     return render(request, 'logbook_base.html', context)
