@@ -165,3 +165,12 @@
         {% endif %}
     </div>
 {% endblock dashboard_content %}
+
+{% block extra_css %}
+<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/achievements.js' %}"></script>
+{% endblock %}
