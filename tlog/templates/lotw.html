@@ -309,15 +309,16 @@
                 
                 {% else %}
                 <!-- Пустое состояние для аутентифицированных пользователей без QSO -->
-                <div class="qso-table-empty">
-                    <div class="qso-table-empty-icon">📡</div>
-                    <div class="qso-table-empty-title">{% trans "No LoTW QSOs Yet" %}</div>
-                    <div class="qso-table-empty-text">
-                        {% trans "Start logging your QSOs to see them here with LoTW confirmation status." %}
+                <div class="qso-table-empty text-center">
+                    <div class="qso-table-empty-title mb-3">
+                        <span class="display-4 d-block mb-3">📋</span>
+                        <h4 class="text-primary fw-bold">LoTW QSL еще не загружены</h4>
                     </div>
-                    <a href="/logbook/" class="btn btn-primary">
-                        <span>📝</span> {% trans "Add Your First QSO" %}
-                    </a>
+                    <div class="qso-table-empty-text">
+                        <p class="lead text-muted mb-0">
+                            Настройте LoTW синхронизацию с LoTW в вашем профиле.
+                        </p>
+                    </div>
                 </div>
                 {% endif %}
             </div>
