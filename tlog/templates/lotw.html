@@ -347,7 +347,7 @@
                         {% if profile.lotw_lastsync %}
                             <p class="mb-0">
                                 <span class="me-2">📅</span>
-                                <small>{% trans "Last sync:" %} <strong>{{ profile.lotw_lastsync|date:"d.m.Y H:i" }}</strong></small>
+                                <small>{% trans "Last sync:" %} <strong>{{ profile.lotw_lastsync|date:"d.m.Y" }}</strong></small>
                             </p>
                         {% else %}
                             <p class="mb-0 text-muted">
@@ -356,10 +356,14 @@
                             </p>
                         {% endif %}
                     {% else %}
-                        <div class="alert alert-warning py-2">
-                            <span class="me-2">⚠️</span>
-                            <strong>{% trans "LoTW Authentication Failed" %}</strong>
+                        <div class="alert alert-danger py-2">
+                            <span class="me-2">❌</span>
+                            <strong>{% trans "Disconnected" %}</strong>
                         </div>
+                        <p class="mb-2">
+                            <span class="me-2">👤</span>
+                            <small>{% trans "Username:" %} <strong>{{ profile.lotw_user }}</strong></small>
+                        </p>
                         <p class="mb-0 text-muted">
                             <small>{% trans "Please check your LoTW login credentials" %}</small>
                         </p>
