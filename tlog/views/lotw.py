@@ -162,12 +162,27 @@ def lotw_page(request):
     context['total_pages'] = total_pages
     context['page_size'] = page_size
     
-    # Уникальные DXCC entities для отфильтрованных записей
+    # Статистика для отфильтрованных записей
     try:
+        # Уникальные DXCC entities
         dxcc_entities = lotw_qso_sorted.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
         context['dxcc_entities'] = dxcc_entities
+        
+        # Уникальные R150S entities (страны Р-150-С)
+        r150s_entities = lotw_qso_sorted.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+        context['r150s_entities'] = r150s_entities
+        
+        # Уникальные регионы России
+        ru_regions = lotw_qso_sorted.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+        context['ru_regions'] = ru_regions
+        
+        print(f"📊 Статистика для {request.user.username}: DXCC={dxcc_entities}, R150S={r150s_entities}, RU регионы={ru_regions}")
+        
     except Exception as e:
+        print(f"❌ Ошибка расчета статистики: {e}")
         context['dxcc_entities'] = 0
+        context['r150s_entities'] = 0
+        context['ru_regions'] = 0
     
     # Award credits
     award_credits = lotw_confirmed_count
@@ -463,7 +478,6 @@ def lotw_filter_api(request):
             'total_count': lotw_confirmed_count,
             'current_page': page,
             'total_pages': total_pages,
-            'dxcc_entities': dxcc_entities,
             'award_credits': lotw_confirmed_count,
             'filters': {
                 'my_callsign': my_callsign_filter,

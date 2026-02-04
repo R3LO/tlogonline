@@ -376,6 +376,51 @@
             </div>
         </div>
 
+        <!-- Статистика -->
+        <div class="card mb-4 fade-in lotw-statistics">
+            <div class="card-header">
+                <h6 class="mb-0"><span>📈</span> {% trans "Статистика" %}</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 text-center">
+                    <div class="col-12 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-primary fw-bold h4 mb-1">{{ dxcc_entities|default:0 }}</div>
+                            <div class="stat-label small text-muted">
+                                <span class="me-1">🌍</span>Стран DXCC
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-success fw-bold h4 mb-1">{{ r150s_entities|default:0 }}</div>
+                            <div class="stat-label small text-muted">
+                                <span class="me-1">🏆</span>Стран Р-150-С
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="stat-item">
+                            <div class="stat-number text-warning fw-bold h4 mb-1">{{ ru_regions|default:0 }}</div>
+                            <div class="stat-label small text-muted">
+                                <span class="me-1">🇷🇺</span>Регионов Росси
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-3">
+                
+                <div class="text-center">
+                    <small class="text-muted">
+                        <span class="me-1">🔍</span>С учетом фильтров
+                    </small>
+                </div>
+            </div>
+        </div>
+
         <!-- Быстрые действия -->
         <div class="card mb-4 fade-in quick-actions">
             <div class="card-header">
