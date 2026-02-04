@@ -1,133 +1,178 @@
 {% extends 'base_dashboard.html' %}
 {% load i18n %}
 {% load static %}
-{% block title %}TLog - {% trans "Profile" %}{% endblock %}
+{% block title %}TLog - {% trans "Dashboard" %}{% endblock %}
 
 {% block dashboard_content %}
         <!-- Header -->
         <div class="logbook-header text-center">
-            <h2><span>📊</span> {% trans "Profile" %}</h2>
+            <h2><span>📊</span> {% trans "Dashboard" %}</h2>
             <p class="mb-0">{% trans "Manage your QSO and statistics" %}</p>
         </div>
 
         <div class="p-4">
-            <div class="row">
-                <!-- Основной контент -->
-                <div class="col-lg-9">
-         
-            
-        </div>
-
-        <!-- Боковая панель -->
-        <div class="col-lg-3">
-            <!-- Утилиты -->
-            <div class="utility-card mb-3">
-                <div class="utility-header">
-                    <div class="utility-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 0a.5.5 0 0 1 .5.5v.93l4.387 4.388a.5.5 0 0 1-.707.707L8.5 7.03V.5h.5a.5.5 0 0 1 .5.5zM6 8.793 1.354 4.207a.5.5 0 1 1 .708-.708L6 7.586l4.646 4.646a.5.5 0 0 1-.708.708L6 8.793z"/>
-                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-                        </svg>
+            <!-- Главная панель утилит на всю ширину -->
+            <div class="utilities-dashboard">
+                <div class="utilities-header text-center mb-5">
+                    <h1 class="utilities-title">
+                        <span class="utilities-icon">🛠️</span>
+                        Радиолюбительские инструменты
+                    </h1>
+                    <p class="utilities-subtitle">Полезные инструменты и сервисы для вашей радиолюбительской деятельности</p>
+                </div>
+                
+                <div class="utilities-grid">
+                    <!-- Утилиты - 3 карточки -->
+                    <div class="utility-card-main utility-card-highlight">
+                        <div class="utility-card-inner">
+                            <div class="utility-icon-main">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 0a.5.5 0 0 1 .5.5v.93l4.387 4.388a.5.5 0 0 1-.707.707L8.5 7.03V.5h.5a.5.5 0 0 1 .5.5zM6 8.793 1.354 4.207a.5.5 0 1 1 .708-.708L6 7.586l4.646 4.646a.5.5 0 0 1-.708.708L6 8.793z"/>
+                                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="utility-title-main">Полезные инструменты</h3>
+                            <p class="utility-description">Основные инструменты для работы</p>
+                            
+                            <div class="utility-links">
+                                <a href="/dashboard/qo100/converter/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-primary">
+                                        <span>🛰️</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">QO-100 Конвертер</span>
+                                        <span class="utility-link-subtitle">Преобразование логов QO-100</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/dashboard/cosmos/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-secondary">
+                                        <span>🚀</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">Космическая диплома</span>
+                                        <span class="utility-link-subtitle">Заявка на космические дипломы</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/user-awards/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-info">
+                                        <span>🏆</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">Достижения</span>
+                                        <span class="utility-link-subtitle">Награды и достижения</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <h6 class="utility-title">{% trans "This is useful!" %}</h6>
-                </div>
-                <div class="utility-body">
-                    <a href="/dashboard/qo100/converter/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-primary">
-                            <span>🛰️</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "QO-100 Log Converter" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/dashboard/cosmos/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-secondary">
-                            <span>🚀</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "Space Diploma Application" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/user-awards/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-info">
-                            <span>🏆</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "User Awards" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
 
-            <!-- QO-100 рейтинги -->
-            <div class="utility-card mb-3">
-                <div class="utility-header">
-                    <div class="utility-icon" style="background: #264653;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.25-14.75v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zm0 12v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zM4.5 8a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1 0-.5h1.5A.25.25 0 0 1 4.5 8zm9.75.25h-1.5a.25.25 0 0 1 0-.5h1.5a.25.25 0 0 1 0 .5z"/>
-                        </svg>
+                    <!-- QO-100 рейтинги - 5 карточек -->
+                    <div class="utility-card-main utility-card-ratings">
+                        <div class="utility-card-inner">
+                            <div class="utility-icon-main ratings-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.25-14.75v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zm0 12v1.5a.25.25 0 0 1-.5 0v-1.5a.25.25 0 0 1 .5 0zM4.5 8a.25.25 0 0 1-.25.25h-1.5a.25.25 0 0 1 0-.5h1.5A.25.25 0 0 1 4.5 8zm9.75.25h-1.5a.25.25 0 0 1 0-.5h1.5a.25.25 0 0 1 0 .5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="utility-title-main">QO-100 Рейтинги</h3>
+                            <p class="utility-description">Рейтинги и статистика QO-100</p>
+                            
+                            <div class="utility-links">
+                                <a href="/dashboard/qo100/regions/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-warning">
+                                        <span>🗺️</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">RF Регионы</span>
+                                        <span class="utility-link-subtitle">Рейтинг по регионам</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/dashboard/qo100/r150s/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-success">
+                                        <span>🌍</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">Р-150-С Страны</span>
+                                        <span class="utility-link-subtitle">Рейтинг стран Р-150-С</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/dashboard/qo100/dxcc/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-danger">
+                                        <span>🌐</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">DXCC Страны</span>
+                                        <span class="utility-link-subtitle">Рейтинг DXCC стран</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/dashboard/qo100/grids/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-purple">
+                                        <span>📍</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">Локаторы</span>
+                                        <span class="utility-link-subtitle">Рейтинг по локаторам</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                                
+                                <a href="/dashboard/qo100/unique-callsigns/" class="utility-link-main">
+                                    <div class="utility-link-icon-main bg-gradient-orange">
+                                        <span>📡</span>
+                                    </div>
+                                    <div class="utility-link-content">
+                                        <span class="utility-link-title">Уникальные позывные</span>
+                                        <span class="utility-link-subtitle">Рейтинг уникальных позывных</span>
+                                    </div>
+                                    <svg class="utility-link-arrow-main" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <h6 class="utility-title">QO-100 {% trans "Ratings" %}</h6>
-                </div>
-                <div class="utility-body">
-                    <a href="/dashboard/qo100/regions/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-warning">
-                            <span>🗺️</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "RF Regions" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/dashboard/qo100/r150s/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-success">
-                            <span>🌍</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "R-150-S Countries" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/dashboard/qo100/dxcc/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-danger">
-                            <span>🌐</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "DXCC Countries" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/dashboard/qo100/grids/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-purple">
-                            <span>📍</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "Locators" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
-                    <a href="/dashboard/qo100/unique-callsigns/" class="utility-link">
-                        <div class="utility-link-icon bg-gradient-orange">
-                            <span>📡</span>
-                        </div>
-                        <span class="utility-link-text">{% trans "Unique Callsigns" %}</span>
-                        <svg class="utility-link-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                    </a>
                 </div>
             </div>
 
-            
-
-            </div>
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
 {% endblock dashboard_content %}
 
 {% block extra_css %}
+<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block extra_js %}
