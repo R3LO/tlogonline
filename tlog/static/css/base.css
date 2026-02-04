@@ -216,18 +216,75 @@ button {
     transform: translateY(-1px);
 }
 
-/* Активные ссылки навигации */
-.navbar-nav .nav-link.active,
-.nav-link.active,
-.navbar .nav-link.active,
-a.nav-link.active {
+/* Активные ссылки навигации - максимальная специфичность */
+body .navbar-nav .nav-link.active,
+body .nav-link.active,
+body .navbar .nav-link.active,
+body a.nav-link.active,
+html body .navbar-nav .nav-link.active {
     color: var(--white) !important;
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
     font-weight: var(--font-weight-semibold) !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     border-radius: var(--radius-sm) !important;
-    transform: scale(1.02) !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    transform: scale(1.05) !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    position: relative;
+    z-index: 10;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* Дополнительная подсветка для активного состояния */
+.navbar-nav .nav-link.active::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border-radius: var(--radius-sm);
+    z-index: -1;
+}
+
+/* Усиленная подсветка для основных разделов */
+.navbar-nav .nav-link[href*="/logbook"].active,
+.navbar-nav .nav-link[href*="/dashboard"].active,
+.navbar-nav .nav-link[href*="/achievements"].active,
+.navbar-nav .nav-link[href*="/lotw"].active {
+    background: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+    transform: scale(1.07) !important;
+    border: 3px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Дополнительные стили для всех навигационных ссылок */
+.navbar-nav .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    margin: 0 0.125rem !important;
+    border-radius: 0.375rem !important;
+    transition: all 0.3s ease !important;
+    white-space: nowrap !important;
+    max-width: none !important;
+}
+
+/* Специальная ширина для длинных названий на больших экранах */
+@media (min-width: 992px) {
+    .navbar-nav .nav-link[href*="/dashboard"] {
+        min-width: 120px !important;
+        text-align: center !important;
+    }
+    
+    .navbar-nav .nav-link[href*="/achievements"] {
+        min-width: 130px !important;
+        text-align: center !important;
+    }
+    
+    .navbar-nav .nav-link[href*="/lotw"] {
+        min-width: 80px !important;
+        text-align: center !important;
+    }
 }
 
 /* Принудительная подсветка активного меню */
@@ -235,10 +292,12 @@ a.nav-link.active {
 .navbar-nav .nav-link[href*="logbook"].active,
 .navbar-nav .nav-link[href*="lotw"].active,
 .navbar-nav .nav-link[href*="dashboard"].active,
-.navbar-nav .nav-link[href*="achievements"].active {
+.navbar-nav .nav-link[href*="achievements"].active,
+.navbar-nav .nav-link[href*="profile"].active {
     background: rgba(255, 255, 255, 0.3) !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
     transform: scale(1.05) !important;
+    color: var(--white) !important;
 }
 
 /* Dropdown стили */
@@ -358,7 +417,10 @@ a.nav-link.active {
     .navbar-nav .nav-link {
         font-size: 0.8rem !important;
         padding: var(--padding-xs) var(--padding-sm) !important;
-        max-width: 100px !important;
+        max-width: 140px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .navbar-brand {
@@ -369,20 +431,32 @@ a.nav-link.active {
         white-space: nowrap;
     }
     
-    /* Сокращаем длинные тексты на мобильных */
+    /* Сокращаем длинные тексты на мобильных, но оставляем видимыми */
     .navbar-nav .nav-link[href*="register"],
     .navbar-nav .nav-link[href*="login"] {
         font-size: 0.75rem !important;
         padding: 0.25rem 0.5rem !important;
         max-width: 80px !important;
     }
+    
+    /* Увеличиваем ширину для важных пунктов меню с длинными названиями */
+    .navbar-nav .nav-link[href*="/logbook"],
+    .navbar-nav .nav-link[href*="/dashboard"],
+    .navbar-nav .nav-link[href*="/achievements"],
+    .navbar-nav .nav-link[href*="/lotw"] {
+        max-width: 130px !important;
+        font-size: 0.85rem !important;
+    }
 }
 
 @media (max-width: 400px) {
     .navbar-nav .nav-link {
-        font-size: 0.7rem !important;
-        padding: 0.25rem 0.4rem !important;
-        max-width: 70px !important;
+        font-size: 0.75rem !important;
+        padding: 0.3rem 0.5rem !important;
+        max-width: 100px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .navbar-brand {
@@ -390,12 +464,21 @@ a.nav-link.active {
         max-width: 60px !important;
     }
     
-    /* Еще больше сокращаем для очень маленьких экранов */
+    /* Еще больше сокращаем для очень маленьких экранов, но сохраняем читаемость */
     .navbar-nav .nav-link[href*="register"],
     .navbar-nav .nav-link[href*="login"] {
         font-size: 0.65rem !important;
         padding: 0.2rem 0.3rem !important;
         max-width: 60px !important;
+    }
+    
+    /* Важные пункты меню оставляем более читаемыми */
+    .navbar-nav .nav-link[href*="/logbook"],
+    .navbar-nav .nav-link[href*="/dashboard"],
+    .navbar-nav .nav-link[href*="/achievements"],
+    .navbar-nav .nav-link[href*="/lotw"] {
+        max-width: 90px !important;
+        font-size: 0.75rem !important;
     }
 }
 
