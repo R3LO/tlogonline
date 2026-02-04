@@ -103,6 +103,76 @@
     color: #0c5460;
 }
 
+/* Уведомления о применённых фильтрах */
+.filter-notifications {
+    animation: slideDown 0.3s ease-out;
+}
+
+.filter-notifications .alert {
+    border-radius: var(--radius-lg);
+    border: none;
+    padding: var(--padding-md) var(--padding-lg);
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-sm);
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(88, 196, 214, 0.1));
+    color: #0c5460;
+    border-left: 4px solid var(--info);
+}
+
+.filter-notifications .badge {
+    font-weight: var(--font-weight-semibold);
+    padding: var(--padding-sm) var(--padding-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--padding-xs);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-notifications .badge:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.filter-notifications .badge.bg-primary {
+    background: var(--bg-gradient) !important;
+}
+
+.filter-notifications .badge.bg-success {
+    background: linear-gradient(135deg, var(--success), #20c997) !important;
+}
+
+.filter-notifications .badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1) !important;
+    color: white !important;
+}
+
+.filter-notifications .badge.bg-warning {
+    background: linear-gradient(135deg, var(--warning), #fd7e14) !important;
+    color: var(--dark) !important;
+}
+
+.filter-notifications .badge.bg-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057) !important;
+}
+
+.filter-notifications .badge.bg-dark {
+    background: linear-gradient(135deg, #343a40, #212529) !important;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+    
 /* Адаптивность для фильтров */
 @media (max-width: 768px) {
     .filter-card {

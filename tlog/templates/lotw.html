@@ -85,6 +85,50 @@
             
             <div class="card-body pt-0">
                 
+                <!-- Уведомления о применённых фильтрах -->
+                {% if my_callsign_filter or search_callsign or search_qth or band_filter or mode_filter or sat_name_filter %}
+                <div class="filter-notifications mb-4">
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">🔍</span>
+                            <strong>Применены фильтры:</strong>
+                        </div>
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            {% if my_callsign_filter %}
+                                <span class="badge bg-primary">
+                                    <span class="me-1">👤</span>Мой позывной: {{ my_callsign_filter }}
+                                </span>
+                            {% endif %}
+                            {% if search_callsign %}
+                                <span class="badge bg-success">
+                                    <span class="me-1">📡</span>Позывной: {{ search_callsign }}
+                                </span>
+                            {% endif %}
+                            {% if search_qth %}
+                                <span class="badge bg-info">
+                                    <span class="me-1">📍</span>QTH: {{ search_qth }}
+                                </span>
+                            {% endif %}
+                            {% if band_filter %}
+                                <span class="badge bg-warning text-dark">
+                                    <span class="me-1">📶</span>Диапазон: {{ band_filter }}
+                                </span>
+                            {% endif %}
+                            {% if mode_filter %}
+                                <span class="badge bg-secondary">
+                                    <span class="me-1">📟</span>Режим: {{ mode_filter }}
+                                </span>
+                            {% endif %}
+                            {% if sat_name_filter %}
+                                <span class="badge bg-dark">
+                                    <span class="me-1">🛰️</span>Спутник: {{ sat_name_filter }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Последние QSO с LoTW подтверждением -->                
                 {% if recent_lotw_qso %}
                 <div class="qso-table-container">
@@ -389,7 +433,7 @@
                                 <div class="row g-2 small">
                                     <div class="col-5 text-muted">🆔 ID QSO:</div>
                                     <div class="col-7"><span id="view_id" class="badge bg-dark text-light">-</span></div>
-                                    
+
                                     <div class="col-5 text-muted">📅 Дата:</div>
                                     <div class="col-7"><span id="view_date">-</span></div>
                                     
