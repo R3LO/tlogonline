@@ -230,4 +230,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Обработчик для отправки формы по нажатию Enter во всех полях ввода
+    function setupEnterKeyFormSubmission() {
+        const filterForm = document.querySelector('.filter-controls');
+        if (!filterForm) return;
+        
+        // Находим все поля ввода в форме (кроме кнопок)
+        const formInputs = filterForm.querySelectorAll('input:not([type="hidden"]), select');
+        
+        formInputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Имитируем клик по кнопке поиска
+                    const searchButton = filterForm.querySelector('button[name="action"][value="search"]');
+                    if (searchButton) {
+                        searchButton.click();
+                    }
+                }
+            });
+        });
+    }
+    
+    // Инициализируем обработчик после загрузки DOM
+    setupEnterKeyFormSubmission();
+    
 });

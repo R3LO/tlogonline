@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест LoTW модального окна</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .debug-info h5 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .debug-output {
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .test-button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">🧪 Тест модального окна LoTW</h1>
+        
+        <!-- Информация для тестирования -->
+        <div class="debug-info">
+            <h5>📋 Инструкции для тестирования:</h5>
+            <ol>
+                <li>Откройте консоль браузера (F12 → Console)</li>
+                <li>Нажмите кнопки ниже для тестирования</li>
+                <li>Проверьте сообщения в консоли</li>
+            </ol>
+        </div>
+
+        <!-- Кнопки тестирования -->
+        <div class="mb-4">
+            <h5>🔧 Тестовые функции:</h5>
+            <button type="button" class="btn btn-primary test-button" onclick="testModal()">
+                🎯 Тест модального окна
+            </button>
+            <button type="button" class="btn btn-secondary test-button" onclick="checkElements()">
+                🔍 Проверить элементы
+            </button>
+            <button type="button" class="btn btn-info test-button" onclick="testShowQSOModal()">
+                📡 Тест showQSOModal()
+            </button>
+            <button type="button" class="btn btn-warning test-button" onclick="showDebugInfo()">
+                📊 Показать отладку
+            </button>
+        </div>
+
+        <!-- Пример кнопки как в таблице -->
+        <div class="mb-4">
+            <h5>👁️ Пример кнопки из таблицы:</h5>
+            <button type="button" class="btn btn-sm btn-outline-info view-qso-btn" 
+                    data-qso-id="TEST_QSO_123" title="Просмотр QSO">
+                <span>👁️</span>
+            </button>
+            <small class="text-muted ms-2">(Нажмите на эту кнопку для тестирования)</small>
+        </div>
+
+        <!-- Информация отладки -->
+        <div class="debug-info">
+            <h5>📊 Информация отладки:</h5>
+            <div id="debug-output" class="debug-output">
+                Ожидание действий...
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно из lotw.html -->
+    <div class="modal fade" id="viewQSOModalLotw" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        📋 Детали QSO (LoTW)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="row g-3">
+                        <!-- Основная информация -->
+                        <div class="col-md-6">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white py-2">
+                                    <h6 class="mb-0">📊 Основная информация</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-5 text-muted">🆔 ID QSO:</div>
+                                        <div class="col-7"><span id="view_id" class="badge bg-dark text-light">-</span></div>
+
+                                        <div class="col-5 text-muted">📅 Дата:</div>
+                                        <div class="col-7"><span id="view_date">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🕐 Время:</div>
+                                        <div class="col-7"><span id="view_time">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">👤 Мой позывной:</div>
+                                        <div class="col-7"><span id="view_my_callsign" class="badge bg-primary">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📡 Позывной:</div>
+                                        <div class="col-7"><span id="view_callsign" class="badge bg-success">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📶 Диапазон:</div>
+                                        <div class="col-7"><span id="view_band" class="badge bg-secondary">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📟 Режим:</div>
+                                        <div class="col-7"><span id="view_mode" class="badge bg-info">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Техническая информация -->
+                        <div class="col-md-6">
+                            <div class="card border-info h-100">
+                                <div class="card-header bg-info text-white py-2">
+                                    <h6 class="mb-0">🔧 Техническая информация</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-5 text-muted">📈 Частота:</div>
+                                        <div class="col-7"><span id="view_frequency" class="text-mono">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📤 RST переданный:</div>
+                                        <div class="col-7"><span id="view_rst_sent" class="badge bg-warning">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📥 RST принятый:</div>
+                                        <div class="col-7"><span id="view_rst_rcvd" class="badge bg-warning">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🛰️ Спутник:</div>
+                                        <div class="col-7"><span id="view_sat_name">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📡 Prop Mode:</div>
+                                        <div class="col-7"><span id="view_prop_mode">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🌍 DXCC:</div>
+                                        <div class="col-7"><span id="view_dxcc" class="badge bg-primary">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🏝️ IOTA:</div>
+                                        <div class="col-7"><span id="view_iota">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <!-- Локация -->
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white py-2">
+                                    <h6 class="mb-0">📍 Локация</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-5 text-muted">🎯 Мой локатор:</div>
+                                        <div class="col-7"><span id="view_my_gridsquare" class="badge bg-success">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🎯 Локатор:</div>
+                                        <div class="col-7"><span id="view_gridsquare" class="badge bg-success">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🌎 Континент:</div>
+                                        <div class="col-7"><span id="view_continent">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🇷🇺 Регион РФ:</div>
+                                        <div class="col-7"><span id="view_ru_region" class="badge bg-warning">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QSL статус -->
+                        <div class="col-md-6">
+                            <div class="card border-warning h-100">
+                                <div class="card-header bg-warning text-dark py-2">
+                                    <h6 class="mb-0">🏆 QSL статус</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-5 text-muted">📧 LoTW:</div>
+                                        <div class="col-7"><span id="view_lotw" class="badge bg-info">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📮 Paper QSL:</div>
+                                        <div class="col-7"><span id="view_paper_qsl" class="badge bg-warning">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">🏆 R150s:</div>
+                                        <div class="col-7"><span id="view_r150s" class="badge bg-success">-</span></div>
+                                        
+                                        <div class="col-5 text-muted">📅 LoTW RXQSL:</div>
+                                        <div class="col-7"><span id="view_app_lotw_rxqsl">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        ❌ Закрыть
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Функции для отладки
+        function debug(msg) {
+            const output = document.getElementById('debug-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<div>[${timestamp}] ${msg}</div>`;
+            console.log(msg);
+        }
+
+        function clearDebug() {
+            document.getElementById('debug-output').innerHTML = '';
+        }
+
+        // Функция для заполнения модального окна (упрощенная версия)
+        function populateViewModal(qsoData) {
+            const fields = {
+                'view_id': qsoData.id || '-',
+                'view_callsign': qsoData.callsign || '-',
+                'view_date': qsoData.date || '-',
+                'view_time': qsoData.time || '-',
+                'view_band': qsoData.band || '-',
+                'view_mode': qsoData.mode || '-',
+                'view_frequency': qsoData.frequency || '-',
+                'view_rst_sent': qsoData.rst_sent || '-',
+                'view_rst_rcvd': qsoData.rst_rcvd || '-',
+                'view_my_callsign': qsoData.my_callsign || '-',
+                'view_my_gridsquare': qsoData.my_gridsquare || '-',
+                'view_gridsquare': qsoData.gridsquare || '-',
+                'view_continent': qsoData.continent || '-',
+                'view_ru_region': qsoData.ru_region || '-',
+                'view_sat_name': qsoData.sat_name || '-',
+                'view_prop_mode': qsoData.prop_mode || '-',
+                'view_dxcc': qsoData.dxcc || '-',
+                'view_iota': qsoData.iota || '-',
+                'view_lotw': qsoData.lotw || '-',
+                'view_paper_qsl': qsoData.paper_qsl || '-',
+                'view_r150s': qsoData.r150s || '-',
+                'view_app_lotw_rxqsl': qsoData.app_lotw_rxqsl || '-'
+            };
+            
+            Object.keys(fields).forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.textContent = fields[fieldId];
+                    debug(`✅ Поле ${fieldId} заполнено: ${fields[fieldId]}`);
+                } else {
+                    debug(`❌ Поле ${fieldId} НЕ НАЙДЕНО!`);
+                }
+            });
+        }
+
+        // Глобальная функция для показа модального окна
+        window.showQSOModal = function(qsoId) {
+            debug('=== ПОПЫТКА ПОКАЗАТЬ МОДАЛЬНОЕ ОКНО ===');
+            debug(`QSO ID: ${qsoId}`);
+            
+            if (!qsoId) {
+                debug('❌ QSO ID не указан');
+                alert('QSO ID не указан');
+                return;
+            }
+            
+            const modal = document.getElementById('viewQSOModalLotw');
+            debug(`Модальное окно найдено: ${modal !== null}`);
+            
+            if (!modal) {
+                debug('❌ Модальное окно viewQSOModalLotw не найдено!');
+                alert('Модальное окно не найдено!');
+                return;
+            }
+            
+            debug(`Bootstrap доступен: ${typeof bootstrap !== 'undefined'}`);
+            
+            if (typeof bootstrap === 'undefined') {
+                debug('❌ Bootstrap не загружен!');
+                alert('Bootstrap не загружен!');
+                return;
+            }
+            
+            try {
+                // Заполняем тестовыми данными
+                const testData = {
+                    id: qsoId,
+                    callsign: 'TEST_CALL',
+                    date: '2024-01-01',
+                    time: '12:00',
+                    band: '20m',
+                    mode: 'SSB',
+                    frequency: '14.200 MHz',
+                    rst_sent: '59',
+                    rst_rcvd: '59',
+                    my_callsign: 'MY_CALL',
+                    my_gridsquare: 'JN45',
+                    gridsquare: 'LO01',
+                    continent: 'EU',
+                    ru_region: 'Московская область',
+                    sat_name: 'AO-91',
+                    prop_mode: 'SAT',
+                    dxcc: '297',
+                    iota: 'EU-015',
+                    lotw: 'Y',
+                    paper_qsl: 'N',
+                    r150s: 'N',
+                    app_lotw_rxqsl: '2024-01-02 14:30:00'
+                };
+                
+                populateViewModal(testData);
+                
+                const bsModal = new bootstrap.Modal(modal, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                bsModal.show();
+                debug('✅ Модальное окно показано успешно!');
+                
+            } catch (error) {
+                debug(`❌ Ошибка: ${error.message}`);
+                alert('Ошибка показа модального окна: ' + error.message);
+            }
+        };
+
+        // Обработчик кликов по кнопкам просмотра QSO
+        function handleQSOViewClick(event) {
+            debug(`Клик по элементу: ${event.target.tagName}`);
+            
+            const button = event.target.closest('.view-qso-btn');
+            if (button) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const qsoId = button.getAttribute('data-qso-id');
+                debug(`Клик по кнопке QSO, ID: ${qsoId}`);
+                
+                if (qsoId) {
+                    window.showQSOModal(qsoId);
+                } else {
+                    debug('❌ QSO ID не найден в кнопке');
+                }
+                
+                return false;
+            }
+        }
+
+        // Тестовые функции
+        function testModal() {
+            debug('=== ТЕСТ МОДАЛЬНОГО ОКНА ===');
+            window.showQSOModal('TEST_123');
+        }
+
+        function checkElements() {
+            debug('=== ПРОВЕРКА ЭЛЕМЕНТОВ ===');
+            
+            const elements = [
+                'viewQSOModalLotw',
+                'view_id', 
+                'view_date',
+                'view_time',
+                'view_my_callsign',
+                'view_callsign',
+                'view_band',
+                'view_mode'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                debug(`${element ? '✅' : '❌'} Элемент ${id}: ${element !== null ? 'НАЙДЕН' : 'НЕ НАЙДЕН'}`);
+            });
+            
+            const buttons = document.querySelectorAll('.view-qso-btn');
+            debug(`👁️ Кнопки просмотра: найдено ${buttons.length}`);
+        }
+
+        function testShowQSOModal() {
+            debug('=== ТЕСТ showQSOModal() ===');
+            window.showQSOModal('DIRECT_TEST');
+        }
+
+        function showDebugInfo() {
+            debug('=== ИНФОРМАЦИЯ О СИСТЕМЕ ===');
+            debug(`Bootstrap: ${typeof bootstrap !== 'undefined' ? '✅ Загружен' : '❌ Не загружен'}`);
+            debug(`Функция showQSOModal: ${typeof window.showQSOModal !== 'undefined' ? '✅ Определена' : '❌ Не определена'}`);
+            
+            const modal = document.getElementById('viewQSOModalLotw');
+            debug(`Модальное окно: ${modal !== null ? '✅ Присутствует в DOM' : '❌ Отсутствует в DOM'}`);
+            
+            if (modal) {
+                const style = window.getComputedStyle(modal);
+                debug(`Модальное окно видимо: ${style.display !== 'none' ? '✅ Да' : '❌ Нет'}`);
+            }
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            debug('🚀 Страница загружена');
+            
+            // Добавляем обработчик кликов
+            document.addEventListener('click', handleQSOViewClick);
+            
+            // Показываем информацию о системе
+            showDebugInfo();
+            
+            // Проверяем элементы
+            checkElements();
+        });
+
+        // Автоматический тест через 2 секунды
+        setTimeout(() => {
+            debug('🔄 Автоматический тест...');
+            showDebugInfo();
+        }, 2000);
+    </script>
+</body>
+</html>
