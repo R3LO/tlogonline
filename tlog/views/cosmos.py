@@ -159,7 +159,7 @@ def cosmos_diploma(request):
                                 date, band, time, mode, callsign,
                                 rst_sent, rst_rcvd
                             FROM tlog_qso
-                            WHERE user_id = %s AND my_callsign IN ({placeholders}) AND prop_mode = 'SAT'
+                            WHERE user_id = %s AND my_callsign IN ({placeholders}) and (prop_mode = 'SAT' OR band = '13CM')
                             ORDER BY callsign, date, time
                         ) AS distinct_qsos
                         ORDER BY date, time
