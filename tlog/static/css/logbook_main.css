@@ -62,9 +62,10 @@
 .col-mode { width: 80px; }
 .col-rst { width: 80px; }
 .col-qth { width: 100px; }
+.col-r150s { width: 80px; }
 .col-lotw { width: 60px; }
 .col-propsat { width: 120px; }
-.col-actions { width: 120px; }
+.col-actions { width: auto; min-width: 80px; }
 
 /* Адаптивные стили для таблицы */
 @media (max-width: 768px) {
@@ -100,18 +101,34 @@
     .qso-table tbody td:last-child {
         border-bottom: none;
     }
+    
+    .col-r150s {
+        min-width: 80px;
+    }
 }
 
 /* Стили для кнопок действий */
-.action-buttons {
-    display: flex;
-    gap: 0.25rem;
-    justify-content: center;
+.qso-table .col-actions .action-buttons,
+.lotw-qso-table .col-actions .action-buttons,
+.col-actions .action-buttons {
+    display: flex !important;
+    gap: 0.25rem !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    flex-direction: row !important;
 }
 
-.action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+.qso-table .col-actions .action-buttons .btn,
+.lotw-qso-table .col-actions .action-buttons .btn,
+.col-actions .action-buttons .btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    white-space: nowrap !important;
 }
 
 /* Стили для сообщений */
@@ -253,8 +270,13 @@
         justify-content: flex-end;
     }
     
-    .action-buttons {
-        flex-direction: column;
+    .qso-table .col-actions .action-buttons,
+    .lotw-qso-table .col-actions .action-buttons,
+    .col-actions .action-buttons {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0.125rem !important;
+        justify-content: center !important;
     }
     
     .button-row {
@@ -276,5 +298,10 @@
     
     .stat-value {
         font-size: 1.5rem;
+    }
+    
+    .col-r150s {
+        min-width: 70px;
+        font-size: 0.75rem;
     }
 }

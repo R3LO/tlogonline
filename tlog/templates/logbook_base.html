@@ -163,6 +163,7 @@
                                     <th class="col-mode"><span>📟</span> Mode</th>
                                     <th class="col-rst"><span>RST</span></th>
                                     <th class="col-qth"><span>📍</span> QTH</th>
+                                    <th class="col-r150s"><span>🎯</span> Р-150-С</th>
                                     <th class="col-region"><span>🇷🇺</span> RU</th>
                                     <th class="col-lotw"><span>LoTW</span></th>
                                     <th class="col-propsat"><span>Prop/SAT</span></th>
@@ -179,7 +180,7 @@
                                     <small>{{ qso.time|date:"H:i" }}</small>
                                 </td>
                                 <td class="col-my-callsign" data-label="📻 Мой">
-                                    <span class="badge bg-primary">{{ qso.my_callsign|default:"-" }}</span>
+                                    <small>{{ qso.my_callsign|default:"-" }}</small>
                                 </td>
                                 <td class="col-callsign" data-label="📡 Позывной">
                                     <span class="callsign-badge">{{ qso.callsign }}</span>
@@ -208,6 +209,9 @@
                                     {% else %}
                                         <small class="text-muted">-</small>
                                     {% endif %}
+                                </td>
+                                <td class="col-r150s" data-label="🎯 Р-150-С">
+                                    <small>{{ qso.r150s|default:"-" }}</small>
                                 </td>
                                 <td class="col-region" data-label="🇷🇺 RU">
                                     {% if qso.ru_region %}

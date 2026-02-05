@@ -181,6 +181,7 @@
     font-size: 0.9rem;
     font-weight: 700;
     color: #000000;
+    text-align: center;
 }
 
 .qso-table .col-my-callsign,
@@ -779,6 +780,12 @@
         letter-spacing: 0.5px;
     }
     
+    /* Центрирование колонки позывного на мобильных */
+    .qso-table .col-callsign,
+    .lotw-qso-table .col-callsign {
+        text-align: center !important;
+    }
+    
     .qso-counter {
         font-size: 0.8rem;
         padding: 0.5rem 0.75rem;
@@ -798,7 +805,7 @@
         line-height: 1.2 !important;
     }
 }
-    
+
 @media (max-width: 480px) {
     .qso-table-container {
         margin: 0.5rem 0;
@@ -896,6 +903,39 @@
     vertical-align: middle;
 }
 
+/* Контейнер кнопок действий */
+.qso-table .col-actions .action-buttons,
+.lotw-qso-table .col-actions .action-buttons {
+    display: flex !important;
+    gap: 0.25rem !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    flex-direction: row !important;
+}
+
+.qso-table .col-actions .action-buttons .btn,
+.lotw-qso-table .col-actions .action-buttons .btn {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.qso-table .col-actions .action-buttons .btn span,
+.lotw-qso-table .col-actions .action-buttons .btn span {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
 /* Кнопки действий */
 .qso-table .view-qso-btn,
 .lotw-qso-table .view-qso-btn {
@@ -910,8 +950,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: auto;
+    height: auto;
+    min-width: auto;
+    min-height: auto;
 }
 
 .qso-table .view-qso-btn:hover,
@@ -932,9 +974,9 @@
 @media (max-width: 768px) {
     .qso-table .col-actions,
     .lotw-qso-table .col-actions {
-        min-width: 60px;
+        min-width: 80px;
         padding: 0.5rem 0.75rem !important;
-        text-align: right !important;
+        text-align: center !important;
     }
     
     .qso-table .col-actions:before,
@@ -951,12 +993,20 @@
         letter-spacing: 0.5px;
     }
     
-    .qso-table .view-qso-btn,
-    .lotw-qso-table .view-qso-btn {
-        width: 2rem;
-        height: 2rem;
-        padding: 0.25rem;
-        font-size: 0.8rem;
+    .qso-table .col-actions .action-buttons,
+    .lotw-qso-table .col-actions .action-buttons {
+        flex-wrap: nowrap !important;
+        gap: 0.125rem !important;
+        justify-content: center !important;
+    }
+    
+    .qso-table .col-actions .action-buttons .btn,
+    .lotw-qso-table .col-actions .action-buttons .btn {
+        width: auto !important;
+        height: auto !important;
+        padding: 0.25rem 0.4rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
     }
 }
 
