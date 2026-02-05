@@ -76,12 +76,16 @@ function initAddQSOModal() {
 
         // Показываем/скрываем поля SAT в зависимости от чекбокса
         const satFields = document.getElementById('sat_fields');
+        const satPlaceholder = document.getElementById('sat_fields_placeholder');
+        
         if (savedSatQSO === 'true') {
             document.getElementById('add_sat_qso').checked = true;
-            satFields.style.display = 'flex';
+            satFields.style.display = 'block';
+            satPlaceholder.style.display = 'none';
         } else {
             document.getElementById('add_sat_qso').checked = false;
             satFields.style.display = 'none';
+            satPlaceholder.style.display = 'flex';
             // Очищаем SAT поля если Sat QSO не отмечен
             document.getElementById('add_sat_prop_mode').value = '';
             document.getElementById('add_sat_name').value = '';
@@ -112,7 +116,18 @@ function initAddQSOModal() {
 function initSatQSOCheckbox() {
     document.getElementById('add_sat_qso').addEventListener('change', function() {
         const satFields = document.getElementById('sat_fields');
-        satFields.style.display = this.checked ? 'flex' : 'none';
+        const satPlaceholder = document.getElementById('sat_fields_placeholder');
+        
+        if (this.checked) {
+            satFields.style.display = 'block';
+            satPlaceholder.style.display = 'none';
+        } else {
+            satFields.style.display = 'none';
+            satPlaceholder.style.display = 'flex';
+            // Очищаем поля при выключении
+            document.getElementById('add_sat_prop_mode').value = '';
+            document.getElementById('add_sat_name').value = '';
+        }
     });
 }
 
@@ -153,8 +168,18 @@ function resetAddQSOForm() {
 
     // Сбрасываем чекбокс Sat QSO но оставляем сохраненные настройки
     const satQSO = getCookie('add_qso_sat_qso') === 'true';
+    const satFields = document.getElementById('sat_fields');
+    const satPlaceholder = document.getElementById('sat_fields_placeholder');
+    
     document.getElementById('add_sat_qso').checked = satQSO;
-    document.getElementById('sat_fields').style.display = satQSO ? 'flex' : 'none';
+    
+    if (satQSO) {
+        satFields.style.display = 'block';
+        satPlaceholder.style.display = 'none';
+    } else {
+        satFields.style.display = 'none';
+        satPlaceholder.style.display = 'flex';
+    }
 
     // Очищаем SAT поля
     if (satQSO) {
