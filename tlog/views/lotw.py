@@ -103,10 +103,8 @@ def lotw_page(request):
         
         context['my_callsigns'] = all_callsigns
         
-        print(f"📞 Загружено позывных для {request.user.username}: {len(all_callsigns)}")
         
     except Exception as e:
-        print(f"❌ Ошибка загрузки позывных: {e}")
         context['my_callsigns'] = [request.user.username] if request.user.username else []
     
     # Получаем доступные значения для фильтров (из всех QSO пользователя с LoTW)
@@ -176,10 +174,8 @@ def lotw_page(request):
         ru_regions = lotw_qso_sorted.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
         context['ru_regions'] = ru_regions
         
-        print(f"📊 Статистика для {request.user.username}: DXCC={dxcc_entities}, R150S={r150s_entities}, RU регионы={ru_regions}")
         
     except Exception as e:
-        print(f"❌ Ошибка расчета статистики: {e}")
         context['dxcc_entities'] = 0
         context['r150s_entities'] = 0
         context['ru_regions'] = 0
@@ -352,7 +348,6 @@ def get_user_callsigns(request):
             my_callsign__exact=''
         )
         
-        print(f"📝 Записей с my_callsign: {my_callsigns_query.count()}")
         
         # Получаем уникальные позывные
         my_callsigns = list(my_callsigns_query.values_list('my_callsign', flat=True).distinct())
