@@ -74,13 +74,13 @@ class QSO(models.Model):
     continent = models.CharField(max_length=2, help_text="Континент", blank=True, null=True)
 
     # Дополнительные поля
-    ru_region = models.CharField(max_length=100, help_text="RU область/регион", blank=True, null=True)
+    state = models.CharField(max_length=100, help_text="Регион/штат", blank=True, null=True)
 
     # Дополнительные поля для спутниковой связи и соревнований
     prop_mode = models.CharField(max_length=50, help_text="Режим распространения", blank=True, null=True)
     sat_name = models.CharField(max_length=50, help_text="Название спутника", blank=True, null=True)
     r150s = models.CharField(max_length=100, help_text="R150S", blank=True, null=True)
-    dxcc = models.CharField(max_length=10, help_text="DXCC", blank=True, null=True)
+    dxcc = models.CharField(max_length=100, help_text="DXCC", blank=True, null=True)
     cqz = models.IntegerField(help_text="CQ зона", null=True, blank=True)
     ituz = models.IntegerField(help_text="ITU зона", null=True, blank=True)
 

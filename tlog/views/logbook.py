@@ -122,7 +122,7 @@ def logbook(request):
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
         'unique_dxcc': qso_queryset.filter(dxcc__isnull=False).exclude(dxcc='').values('dxcc').distinct().count(),
         'unique_r150s': qso_queryset.filter(r150s__isnull=False).exclude(r150s='').values('r150s').distinct().count(),
-        'unique_ru_regions': qso_queryset.filter(ru_region__isnull=False).exclude(ru_region='').values('ru_region').distinct().count(),
+        'unique_states': qso_queryset.filter(state__isnull=False).exclude(state='').values('state').distinct().count(),
     }
 
     # Статистика по диапазонам
@@ -377,7 +377,7 @@ def edit_qso(request, qso_id):
         # Получаем callsign для пересчёта
         callsign = qso.callsign
 
-        # Если lotw = N, принимаем cqz, ituz, continent, r150s, dxcc, ru_region из формы
+        # Если lotw = N, принимаем cqz, ituz, continent, r150s, dxcc, state из формы
         # Если lotw = Y, оставляем их без изменений (они заблокированы на клиенте)
         if qso.lotw != 'Y':
             # Сохраняем как есть - пустые значения будут None
@@ -388,12 +388,12 @@ def edit_qso(request, qso_id):
             qso.continent = (data.get('continent') or '').upper()[:10] or None
             qso.r150s = (data.get('r150s') or '').upper()[:100] or None
             qso.dxcc = (data.get('dxcc') or '').upper()[:10] or None
-            qso.ru_region = (data.get('ru_region') or '').upper()[:10] or None
+            qso.state = (data.get('state') or '').upper()[:10] or None
         else:
             # lotw = Y - поля заблокированы на клиенте, оставляем как есть
             pass
 
-        # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному ТОЛЬКО если они пустые в форме
+        # Пересчитываем cqz, ituz, continent, r150s, dxcc, state по позывному ТОЛЬКО если они пустые в форме
         # и lotw != 'Y'
         if qso.lotw != 'Y' and callsign and not data.get('cqz') and not data.get('ituz'):
             # Инициализируем базы данных CTY и R150
@@ -421,12 +421,12 @@ def edit_qso(request, qso_id):
                     qso.dxcc = dxcc.upper()[:10] if dxcc else None
 
                 # Определяем код региона России только для российских позывных (UA, UA9, UA2)
-                if qso.dxcc and qso.dxcc.upper() in ('UA', 'UA9', 'UA2') and not data.get('ru_region'):
+                if qso.dxcc and qso.dxcc.upper() in ('UA', 'UA9', 'UA2') and not data.get('state'):
                     exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
                     region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
-                    qso.ru_region = region_finder.get_region_code(callsign)
-                elif not data.get('ru_region'):
-                    qso.ru_region = None
+                    qso.state = region_finder.get_region_code(callsign)
+                elif not data.get('state'):
+                    qso.state = None
 
         qso.save()
 
@@ -488,7 +488,7 @@ def get_qso(request, qso_id):
                 'continent': qso.continent or '',
                 'r150s': qso.r150s or '',
                 'dxcc': qso.dxcc or '',
-                'ru_region': qso.ru_region or '',
+                'state': qso.state or '',
                 'paper_qsl': qso.paper_qsl or 'N',
             }
         })
@@ -626,7 +626,7 @@ def achievements(request):
             unique_callsigns = qso_queryset.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
             r150s_count = qso_queryset.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
             dxcc_count = qso_queryset.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
-            ru_region_count = qso_queryset.filter(ru_region__isnull=False, ru_region__gt='').values('ru_region').distinct().count()
+            state_count = qso_queryset.filter(state__isnull=False, state__gt='').values('state').distinct().count()
             cqz_count = qso_queryset.filter(cqz__isnull=False).values('cqz').distinct().count()
             ituz_count = qso_queryset.filter(ituz__isnull=False).values('ituz').distinct().count()
             grids_count = qso_queryset.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
@@ -701,7 +701,7 @@ def achievements(request):
             # QO-100 с LoTW
             qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
             qo100_lotw_stats = qo100_lotw_qsos.aggregate(
-                ru_regions=Count('ru_region', filter=Q(ru_region__isnull=False, ru_region__gt='')),
+                states=Count('state', filter=Q(state__isnull=False, state__gt='')),
                 countries=Count('r150s', filter=Q(r150s__isnull=False, r150s__gt='')),
                 grids=Count('gridsquare', filter=Q(gridsquare__isnull=False, gridsquare__gt='')),
                 callsigns=Count('callsign', filter=Q(callsign__isnull=False, callsign__gt=''))
@@ -711,7 +711,7 @@ def achievements(request):
             qo100_all_callsigns = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
 
             # Награды QO-100
-            if qo100_lotw_stats['ru_regions'] >= 25:
+            if qo100_lotw_stats['states'] >= 25:
                 achievements.append({
                     'title': 'W-QO100-R',
                     'description': '25+ регионов РФ через QO-100 (LoTW)',
@@ -719,7 +719,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            if qo100_lotw_stats['ru_regions'] >= 30:
+            if qo100_lotw_stats['states'] >= 30:
                 achievements.append({
                     'title': 'W-QO100-PROFI',
                     'description': '30+ регионов РФ через QO-100 (LoTW)',
@@ -796,7 +796,7 @@ def achievements(request):
                 'unique_callsigns': unique_callsigns,
                 'dxcc_count': dxcc_count,
                 'r150s_count': r150s_count,
-                'ru_region_count': ru_region_count,
+                'state_count': state_count,
                 'cqz_count': cqz_count,
                 'ituz_count': ituz_count,
                 'grids_count': grids_count,
@@ -834,7 +834,7 @@ def achievements(request):
             'unique_callsigns': 0,
             'r150s_count': 0,
             'dxcc_count': 0,
-            'ru_region_count': 0,
+            'state_count': 0,
             'cqz_count': 0,
             'ituz_count': 0,
             'grids_count': 0,
@@ -868,7 +868,7 @@ def achievements(request):
     unique_callsigns = user_qsos.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
     r150s_count = user_qsos.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
     dxcc_count = user_qsos.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
-    ru_region_count = user_qsos.filter(ru_region__isnull=False, ru_region__gt='').values('ru_region').distinct().count()
+    state_count = user_qsos.filter(state__isnull=False, state__gt='').values('state').distinct().count()
     cqz_count = user_qsos.filter(cqz__isnull=False).values('cqz').distinct().count()
     ituz_count = user_qsos.filter(ituz__isnull=False).values('ituz').distinct().count()
     grids_count = user_qsos.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
@@ -988,7 +988,7 @@ def achievements(request):
     # === Награды QO-100 (оптимизировано) ===
     # QO-100 статистика с LoTW (оптимизированный запрос)
     qo100_lotw_stats = user_qsos.filter(sat_name='QO-100', lotw='Y').aggregate(
-        ru_regions=Count('ru_region', filter=Q(ru_region__isnull=False, ru_region__gt='')),
+        states=Count('state', filter=Q(state__isnull=False, state__gt='')),
         countries=Count('r150s', filter=Q(r150s__isnull=False, r150s__gt='')),
         grids=Count('gridsquare', filter=Q(gridsquare__isnull=False, gridsquare__gt='')),
         callsigns=Count('callsign', filter=Q(callsign__isnull=False, callsign__gt=''))
@@ -998,7 +998,7 @@ def achievements(request):
     qo100_all_callsigns = user_qsos.filter(sat_name='QO-100').values('callsign').distinct().count()
 
     # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
-    if qo100_lotw_stats['ru_regions'] >= 25:
+    if qo100_lotw_stats['states'] >= 25:
         achievements.append({
             'title': 'W-QO100-R',
             'description': '25+ регионов РФ через QO-100 (LoTW)',
@@ -1007,7 +1007,7 @@ def achievements(request):
         })
 
     # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
-    if qo100_lotw_stats['ru_regions'] >= 30:
+    if qo100_lotw_stats['states'] >= 30:
         achievements.append({
             'title': 'W-QO100-PROFI',
             'description': '30+ регионов РФ через QO-100 (LoTW)',
@@ -1061,7 +1061,7 @@ def achievements(request):
         'unique_callsigns': unique_callsigns,
         'r150s_count': r150s_count,
         'dxcc_count': dxcc_count,
-        'ru_region_count': ru_region_count,
+        'state_count': state_count,
         'cqz_count': cqz_count,
         'ituz_count': ituz_count,
         'grids_count': grids_count,
@@ -1384,12 +1384,12 @@ def add_qso(request):
             dxcc = None
 
         # Определяем код региона России только для российских позывных (UA, UA9, UA2)
-        ru_region = None
+        state = None
         if callsign and dxcc:
             if dxcc.upper() in ('UA', 'UA9', 'UA2'):
                 exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
                 region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
-                ru_region = region_finder.get_region_code(callsign)
+                state = region_finder.get_region_code(callsign)
 
         # Создаем QSO
         qso = QSO.objects.create(
@@ -1414,7 +1414,7 @@ def add_qso(request):
             r150s=r150s_country if r150s_country else None,
             dxcc=dxcc if dxcc else None,
             continent=continent if continent else None,
-            ru_region=ru_region
+            state=state
         )
 
         return JsonResponse({
@@ -1473,7 +1473,7 @@ def user_achievements(request):
         r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
 
         # Регионы России
-        ru_regions = QSO.objects.filter(user=user).exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+        states = QSO.objects.filter(user=user).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
 
         # LoTW подтверждения
         lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
@@ -1532,7 +1532,7 @@ def user_achievements(request):
             'bands': bands,
             'modes': modes,
             'r150s_count': r150s_count,
-            'ru_regions': ru_regions,
+            'states': states,
             'lotw_count': lotw_count,
             'qo100_all': qo100_all,
             'qo100_lotw': qo100_lotw,

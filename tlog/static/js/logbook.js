@@ -95,12 +95,12 @@ function initEditButtons() {
                     document.getElementById('edit_continent').value = qso.continent || '';
                     document.getElementById('edit_r150s').value = qso.r150s || '';
                     document.getElementById('edit_dxcc').value = qso.dxcc || '';
-                    document.getElementById('edit_ru_region').value = qso.ru_region || '';
+                    document.getElementById('edit_state').value = qso.state || '';
                     document.getElementById('edit_paper_qsl').value = qso.paper_qsl || 'N';
 
                     // Блокируем поля если QSO подтверждено в LoTW
                     const lotwConfirmed = qso.lotw === 'Y';
-                    const lockedFields = ['edit_cqz', 'edit_ituz', 'edit_continent', 'edit_r150s', 'edit_dxcc', 'edit_ru_region'];
+                    const lockedFields = ['edit_cqz', 'edit_ituz', 'edit_continent', 'edit_r150s', 'edit_dxcc', 'edit_state'];
                     lockedFields.forEach(function(fieldId) {
                         const field = document.getElementById(fieldId);
                         field.disabled = lotwConfirmed;
@@ -184,7 +184,7 @@ function initViewButtons() {
                     setText('view_sat_name', qso.sat_name || '-');
                     setText('view_prop_mode', qso.prop_mode || '-');
                     setText('view_continent', qso.continent || '-');
-                    setText('view_ru_region', qso.ru_region || '-');
+                    setText('view_state', qso.state || '-');
                     setText('view_dxcc', qso.dxcc || '-');
                     setText('view_r150s', qso.r150s || '-');
                     setText('view_lotw', qso.lotw || '-');
@@ -218,7 +218,7 @@ function initSaveEditQSO() {
         // Преобразуем текстовые поля в верхний регистр
         const textFields = ['my_callsign', 'callsign', 'band', 'mode', 'rst_rcvd', 'rst_sent',
                            'gridsquare', 'my_gridsquare', 'sat_name', 'prop_mode',
-                           'continent', 'r150s', 'dxcc', 'ru_region'];
+                           'continent', 'r150s', 'dxcc', 'state'];
         textFields.forEach(function(fieldName) {
             const field = form.querySelector('[name="' + fieldName + '"]');
             if (field && field.value) {

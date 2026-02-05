@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalElements.length > 1) totalElements[1].textContent = data.unique_callsigns;
         if (totalElements.length > 2) totalElements[2].textContent = data.dxcc_count || 0;
         if (totalElements.length > 3) totalElements[3].textContent = data.r150s_count;
-        if (totalElements.length > 4) totalElements[4].textContent = data.ru_region_count || 0;
+        if (totalElements.length > 4) totalElements[4].textContent = data.state_count || 0;
 
         const statQso = document.getElementById('stat_qso');
         if (statQso) statQso.textContent = data.total_qso;
@@ -91,8 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const statR150s = document.getElementById('stat_r150s');
         if (statR150s) statR150s.textContent = data.r150s_count;
 
-        const statRuRegion = document.getElementById('stat_ru_region');
-        if (statRuRegion) statRuRegion.textContent = data.ru_region_count || 0;
+        const statState = document.getElementById('stat_state');
+        if (statState) statState.textContent = data.state_count || 0;
 
         const statCqz = document.getElementById('stat_cqz');
         if (statCqz) statCqz.textContent = data.cqz_count || 0;

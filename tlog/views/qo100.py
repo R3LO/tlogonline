@@ -22,8 +22,8 @@ def qo100_regions(request):
     # Получаем уникальные пары my_callsign + регион + callsign для QSO с lotw = 'Y'
     qso_filtered = QSO.objects.filter(
         lotw='Y',
-        ru_region__isnull=False
-    ).exclude(ru_region='').values('my_callsign', 'ru_region', 'callsign').distinct()
+        state__isnull=False
+    ).exclude(state='').values('my_callsign', 'state', 'callsign').distinct()
 
     # Группируем по my_callsign, затем по региону
     from collections import defaultdict
@@ -31,7 +31,7 @@ def qo100_regions(request):
 
     for item in qso_filtered:
         my_call = item['my_callsign']
-        region_code = item['ru_region']
+        region_code = item['state']
         call = item['callsign']
         callsign_data[my_call][region_code].add(call)
 

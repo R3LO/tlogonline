@@ -171,14 +171,14 @@ def lotw_page(request):
         context['r150s_entities'] = r150s_entities
         
         # Уникальные регионы России
-        ru_regions = lotw_qso_sorted.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
-        context['ru_regions'] = ru_regions
+        states = lotw_qso_sorted.exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['states'] = states
         
         
     except Exception as e:
         context['dxcc_entities'] = 0
         context['r150s_entities'] = 0
-        context['ru_regions'] = 0
+        context['states'] = 0
     
     # Award credits
     award_credits = lotw_confirmed_count
@@ -455,7 +455,7 @@ def lotw_filter_api(request):
                 'mode': qso.mode or '',
                 'gridsquare': qso.gridsquare or '',
                 'r150s': qso.r150s or '',
-                'ru_region': qso.ru_region or '',
+                'state': qso.state or '',
                 'prop_mode': qso.prop_mode or '',
                 'sat_name': qso.sat_name or '',
                 'lotw_date': qso.app_lotw_rxqsl.strftime('%d.%m.%Y') if qso.app_lotw_rxqsl else '',
@@ -524,7 +524,7 @@ def get_qso_details(request):
             'my_gridsquare': qso.my_gridsquare or '',
             'gridsquare': qso.gridsquare or '',
             'continent': qso.continent or '',
-            'ru_region': qso.ru_region or '',
+            'state': qso.state or '',
             'prop_mode': qso.prop_mode or '',
             'sat_name': qso.sat_name or '',
             'r150s': qso.r150s or '',

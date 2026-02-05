@@ -49,8 +49,8 @@ def dashboard(request):
     # Статистика по Р-150-С (регионы России)
     r150s_count = user_qso.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
 
-    # Статистика по регионам России (ru_region)
-    ru_region_count = user_qso.exclude(ru_region__isnull=True).exclude(ru_region='').values('ru_region').distinct().count()
+    # Статистика по регионам России (state)
+    state_count = user_qso.exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
 
     # Статистика по видам модуляции
     mode_stats = {}
@@ -73,7 +73,7 @@ def dashboard(request):
         'unique_callsigns': unique_callsigns,
         'dxcc_count': dxcc_count,
         'r150s_count': r150s_count,
-        'ru_region_count': ru_region_count,
+        'state_count': state_count,
         'recent_qso': recent_qso,
         'mode_statistics': mode_stats,
         'adif_uploads': adif_uploads,
@@ -101,7 +101,7 @@ def handle_add_qso(request):
         rst_sent = request.POST.get('rst_sent', '').strip().upper()
         gridsquare = request.POST.get('his_gridsquare', '').strip().upper()
         my_gridsquare = request.POST.get('my_gridsquare', '').strip().upper()
-        ru_region = request.POST.get('ru_region', '').strip().upper()
+        state = request.POST.get('state', '').strip().upper()
         sat_qso = 'sat_qso' in request.POST
         prop_mode = request.POST.get('prop_mode', '').strip().upper() if sat_qso else ''
         sat_name = request.POST.get('sat_name', '').strip().upper() if sat_qso else ''
@@ -143,13 +143,13 @@ def handle_add_qso(request):
             messages.warning(request, 'QSO с такими данными уже существует в логе')
             return redirect('dashboard')
 
-        # Пересчитываем cqz, ituz, continent, r150s, dxcc, ru_region по позывному
+        # Пересчитываем cqz, ituz, continent, r150s, dxcc, state по позывному
         cqz = None
         ituz = None
         continent = None
         r150s_country = None
         dxcc = None
-        ru_region_val = None
+        state_val = None
 
         if callsign:
             db_path = os.path.join(settings.BASE_DIR, 'tlog', 'r150cty.dat')
@@ -174,7 +174,7 @@ def handle_add_qso(request):
             if dxcc and dxcc.upper() in ('UA', 'UA9', 'UA2'):
                 exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
                 region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
-                ru_region_val = region_finder.get_region_code(callsign)
+                state_val = region_finder.get_region_code(callsign)
 
         # Создание записи QSO
         try:
@@ -190,7 +190,7 @@ def handle_add_qso(request):
                 rst_sent=rst_sent if rst_sent else None,
                 gridsquare=gridsquare if gridsquare else None,
                 my_gridsquare=my_gridsquare if my_gridsquare else None,
-                ru_region=ru_region_val,
+                state=state_val,
                 cqz=cqz,
                 ituz=ituz,
                 continent=continent if continent else None,

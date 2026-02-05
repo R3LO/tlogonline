@@ -326,9 +326,9 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             continue
 
                         # Определяем код региона России только для российских позывных (UA, UA9, UA2)
-                        ru_region = None
+                        state = None
                         if dxcc and dxcc.upper() in ('UA', 'UA9', 'UA2'):
-                            ru_region = region_finder.get_region_code(callsign)
+                            state = region_finder.get_region_code(callsign)
 
                         qso_obj = QSO(
                             user=user,
@@ -353,7 +353,7 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             lotw='N',
                             paper_qsl='N',
                             adif_upload_id=adif_upload_id,
-                            ru_region=ru_region
+                            state=state
                         )
 
                         if not qso_obj.callsign or not qso_obj.date or not qso_obj.time:

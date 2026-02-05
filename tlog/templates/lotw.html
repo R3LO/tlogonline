@@ -197,8 +197,8 @@
                                             {% endif %}
                                         </td>
                                         <td class="col-region" data-label="🇷🇺 RU">
-                                            {% if qso.ru_region %}
-                                                <span class="region-badge" title="{{ qso.ru_region }}">{{ qso.ru_region }}</span>
+                                            {% if qso.state %}
+                                                <span class="region-badge" title="{{ qso.state }}">{{ qso.state }}</span>
                                             {% else %}
                                                 <small class="text-muted">-</small>
                                             {% endif %}
@@ -416,7 +416,7 @@
                                 <span class="me-2">🇷🇺</span>
                                 <span class="fw-medium">Регионов Росси</span>
                             </div>
-                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ ru_regions|default:0 }}</div>
+                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ states|default:0 }}</div>
                         </div>
                     </div>
                 </div>
@@ -530,7 +530,7 @@
                                     <div class="col-7"><span id="view_continent">-</span></div>
                                     
                                     <div class="col-5 text-muted">🇷🇺 Регион РФ:</div>
-                                    <div class="col-7"><span id="view_ru_region" class="badge bg-warning">-</span></div>
+                                    <div class="col-7"><span id="view_state" class="badge bg-warning">-</span></div>
                                 </div>
                             </div>
                         </div>

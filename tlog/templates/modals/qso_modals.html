@@ -460,7 +460,7 @@
                                         
                                         <div class="col-4 text-muted">🇷🇺 {% trans "Регион РФ" %}:</div>
                                         <div class="col-8">
-                                            <input type="text" class="form-control form-control-sm" id="edit_ru_region" name="ru_region" placeholder="{% trans 'Двухбуквенный код региона' %}" maxlength="2" {% if qso.lotw == 'Y' %}readonly{% endif %}>
+                                            <input type="text" class="form-control form-control-sm" id="edit_state" name="state" placeholder="{% trans 'Двухбуквенный код региона' %}" maxlength="2" {% if qso.lotw == 'Y' %}readonly{% endif %}>
                                         </div>
                                     </div>
                                 </div>
@@ -614,7 +614,7 @@
                                     <div class="col-7"><span id="view_continent">-</span></div>
                                     
                                     <div class="col-5 text-muted">🇷🇺 {% trans "Регион РФ" %}:</div>
-                                    <div class="col-7"><span id="view_ru_region" class="badge bg-warning">-</span></div>
+                                    <div class="col-7"><span id="view_state" class="badge bg-warning">-</span></div>
                                 </div>
                             </div>
                         </div>
