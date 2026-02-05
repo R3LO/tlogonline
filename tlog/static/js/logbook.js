@@ -161,29 +161,35 @@ function initViewButtons() {
                 if (data.success) {
                     const qso = data.qso;
 
-                    // Заполняем форму данными из базы (только для чтения)
-                    document.getElementById('view_id').value = qso.id || '';
-                    document.getElementById('view_date').value = qso.date || '';
-                    document.getElementById('view_time').value = qso.time ? qso.time.substring(0, 5) : '';
-                    document.getElementById('view_my_callsign').value = qso.my_callsign || '';
-                    document.getElementById('view_callsign').value = qso.callsign || '';
+                    // Заполняем модальное окно данными из базы (только для чтения)
+                    const setText = (id, value) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = value || '-';
+                        }
+                    };
 
-                    document.getElementById('view_band').value = qso.band || '';
-                    document.getElementById('view_mode').value = qso.mode || 'SSB';
-                    document.getElementById('view_frequency').value = qso.frequency || '';
-                    document.getElementById('view_rst_rcvd').value = qso.rst_rcvd || '';
-                    document.getElementById('view_rst_sent').value = qso.rst_sent || '';
-                    document.getElementById('view_my_gridsquare').value = qso.my_gridsquare || '';
-                    document.getElementById('view_gridsquare').value = qso.gridsquare || '';
-                    document.getElementById('view_sat_name').value = qso.sat_name || '';
-                    document.getElementById('view_prop_mode').value = qso.prop_mode || '';
-                    document.getElementById('view_cqz').value = qso.cqz || '';
-                    document.getElementById('view_ituz').value = qso.ituz || '';
-                    document.getElementById('view_continent').value = qso.continent || '';
-                    document.getElementById('view_r150s').value = qso.r150s || '';
-                    document.getElementById('view_dxcc').value = qso.dxcc || '';
-                    document.getElementById('view_ru_region').value = qso.ru_region || '';
-                    document.getElementById('view_paper_qsl').value = qso.paper_qsl || 'N';
+                    setText('view_id', qso.id || '-');
+                    setText('view_date', qso.date || '-');
+                    setText('view_time', qso.time ? qso.time.substring(0, 5) : '-');
+                    setText('view_my_callsign', qso.my_callsign || '-');
+                    setText('view_callsign', qso.callsign || '-');
+                    setText('view_band', qso.band || '-');
+                    setText('view_mode', qso.mode || '-');
+                    setText('view_frequency', qso.frequency || '-');
+                    setText('view_rst_rcvd', qso.rst_rcvd || '-');
+                    setText('view_rst_sent', qso.rst_sent || '-');
+                    setText('view_my_gridsquare', qso.my_gridsquare || '-');
+                    setText('view_gridsquare', qso.gridsquare || '-');
+                    setText('view_sat_name', qso.sat_name || '-');
+                    setText('view_prop_mode', qso.prop_mode || '-');
+                    setText('view_continent', qso.continent || '-');
+                    setText('view_ru_region', qso.ru_region || '-');
+                    setText('view_dxcc', qso.dxcc || '-');
+                    setText('view_r150s', qso.r150s || '-');
+                    setText('view_lotw', qso.lotw || '-');
+                    setText('view_paper_qsl', qso.paper_qsl || '-');
+                    setText('view_app_lotw_rxqsl', qso.app_lotw_rxqsl || '-');
 
                     // Открываем модальное окно просмотра
                     const modal = new bootstrap.Modal(document.getElementById('viewQSOModal'));

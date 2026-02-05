@@ -464,120 +464,136 @@
 
 <!-- Модальное окно просмотра QSO (для LoTW подтверждённых записей) -->
 <div class="modal fade" id="viewQSOModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <span>👁️</span> {% trans "Просмотр QSO" %}
+                    📋 {% trans "Детали QSO" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <form id="viewQSOForm">
-                    <input type="hidden" id="view_id" name="id">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Дата" %}</label>
-                            <input type="date" class="form-control" id="view_date" name="date" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Время" %}</label>
-                            <input type="time" class="form-control" id="view_time" name="time" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Мой позывной" %}</label>
-                            <input type="text" class="form-control" id="view_my_callsign" name="my_callsign" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Позывной корреспондента" %}</label>
-                            <input type="text" class="form-control" id="view_callsign" name="callsign" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Диапазон" %}</label>
-                            <input type="text" class="form-control" id="view_band" name="band" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Вид связи" %}</label>
-                            <input type="text" class="form-control" id="view_mode" name="mode" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Частота (МГц)" %}</label>
-                            <input type="text" class="form-control" id="view_frequency" name="frequency" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "RST принятый" %}</label>
-                            <input type="text" class="form-control" id="view_rst_rcvd" name="rst_rcvd" readonly>
+            <div class="modal-body p-3">
+                <div class="row g-3">
+                    <!-- Основная информация -->
+                    <div class="col-md-6">
+                        <div class="card border-primary h-100">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0">📊 {% trans "Основная информация" %}</h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2 small">
+                                    <div class="col-5 text-muted">🆔 ID QSO:</div>
+                                    <div class="col-7"><span id="view_id" class="badge bg-dark text-light">-</span></div>
+
+                                    <div class="col-5 text-muted">📅 {% trans "Дата" %}:</div>
+                                    <div class="col-7"><span id="view_date">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🕐 {% trans "Время" %}:</div>
+                                    <div class="col-7"><span id="view_time">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">👤 {% trans "Мой позывной" %}:</div>
+                                    <div class="col-7"><span id="view_my_callsign" class="badge bg-primary">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📡 {% trans "Позывной" %}:</div>
+                                    <div class="col-7"><span id="view_callsign" class="badge bg-success">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📶 {% trans "Диапазон" %}:</div>
+                                    <div class="col-7"><span id="view_band" class="badge bg-secondary">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📟 {% trans "Режим" %}:</div>
+                                    <div class="col-7"><span id="view_mode" class="badge bg-info">-</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "RST переданный" %}</label>
-                            <input type="text" class="form-control" id="view_rst_sent" name="rst_sent" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Бумажная QSL" %}</label>
-                            <input type="text" class="form-control" id="view_paper_qsl" name="paper_qsl" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Мой QTH локатор" %}</label>
-                            <input type="text" class="form-control" id="view_my_gridsquare" name="my_gridsquare" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "QTH локатор корреспондента" %}</label>
-                            <input type="text" class="form-control" id="view_gridsquare" name="gridsquare" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">SAT NAME</label>
-                            <input type="text" class="form-control" id="view_sat_name" name="sat_name" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Режим распространения (PROP_MODE)" %}</label>
-                            <input type="text" class="form-control" id="view_prop_mode" name="prop_mode" readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label">{% trans "CQ зона" %}</label>
-                            <input type="text" class="form-control" id="view_cqz" name="cqz" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">{% trans "ITU зона" %}</label>
-                            <input type="text" class="form-control" id="view_ituz" name="ituz" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">{% trans "Континент" %}</label>
-                            <input type="text" class="form-control" id="view_continent" name="continent" readonly>
+
+                    <!-- Техническая информация -->
+                    <div class="col-md-6">
+                        <div class="card border-info h-100">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0">🔧 {% trans "Техническая информация" %}</h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2 small">
+                                    <div class="col-5 text-muted">📈 {% trans "Частота" %}:</div>
+                                    <div class="col-7"><span id="view_frequency" class="text-mono">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📤 RST {% trans "переданный" %}:</div>
+                                    <div class="col-7"><span id="view_rst_sent" class="badge bg-warning">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📥 RST {% trans "принятый" %}:</div>
+                                    <div class="col-7"><span id="view_rst_rcvd" class="badge bg-warning">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🛰️ {% trans "Спутник" %}:</div>
+                                    <div class="col-7"><span id="view_sat_name">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📡 Prop Mode:</div>
+                                    <div class="col-7"><span id="view_prop_mode">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🌍 DXCC:</div>
+                                    <div class="col-7"><span id="view_dxcc" class="badge bg-primary">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🏝️ IOTA:</div>
+                                    <div class="col-7"><span id="view_iota">-</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label">{% trans "Страна (R-150)" %}</label>
-                            <input type="text" class="form-control" id="view_r150s" name="r150s" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">DXCC</label>
-                            <input type="text" class="form-control" id="view_dxcc" name="dxcc" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">{% trans "RU область/регион" %}</label>
-                            <input type="text" class="form-control" id="view_ru_region" name="ru_region" readonly>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <!-- Локация -->
+                    <div class="col-md-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success text-white py-2">
+                                <h6 class="mb-0">📍 {% trans "Локация" %}</h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2 small">
+                                    <div class="col-5 text-muted">🎯 {% trans "Мой локатор" %}:</div>
+                                    <div class="col-7"><span id="view_my_gridsquare" class="badge bg-success">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🎯 {% trans "Локатор" %}:</div>
+                                    <div class="col-7"><span id="view_gridsquare" class="badge bg-success">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🌎 {% trans "Континент" %}:</div>
+                                    <div class="col-7"><span id="view_continent">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🇷🇺 {% trans "Регион РФ" %}:</div>
+                                    <div class="col-7"><span id="view_ru_region" class="badge bg-warning">-</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </form>
+
+                    <!-- QSL статус -->
+                    <div class="col-md-6">
+                        <div class="card border-warning h-100">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0">🏆 {% trans "QSL статус" %}</h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2 small">
+                                    <div class="col-5 text-muted">📧 LoTW:</div>
+                                    <div class="col-7"><span id="view_lotw" class="badge bg-info">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📮 Paper QSL:</div>
+                                    <div class="col-7"><span id="view_paper_qsl" class="badge bg-warning">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">🏆 R150s:</div>
+                                    <div class="col-7"><span id="view_r150s" class="badge bg-success">-</span></div>
+                                    
+                                    <div class="col-5 text-muted">📅 LoTW RXQSL:</div>
+                                    <div class="col-7"><span id="view_app_lotw_rxqsl">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer py-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <span>✖</span> {% trans "Закрыть" %}
+                    ❌ {% trans "Закрыть" %}
                 </button>
             </div>
         </div>
