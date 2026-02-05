@@ -30,6 +30,25 @@ function showAlert(type, message) {
     }, 5000);
 }
 
+// Обработка чекбокса "Добавить дополнительные теги" в модальном окне ADIF
+function initAdifExtraTagsCheckbox() {
+    const checkbox = document.getElementById('adif_add_extra_tags');
+    const optionsDiv = document.getElementById('adif-options');
+    const satOptionsDiv = document.getElementById('adif-options-sat');
+    
+    if (!checkbox || !optionsDiv || !satOptionsDiv) return;
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            optionsDiv.style.display = 'flex';
+            satOptionsDiv.style.display = 'flex';
+        } else {
+            optionsDiv.style.display = 'none';
+            satOptionsDiv.style.display = 'none';
+        }
+    });
+}
+
 // Обработка кнопок редактирования
 function initEditButtons() {
     document.querySelectorAll('.btn-edit').forEach(function(button) {
@@ -404,6 +423,7 @@ function initLogbookPage() {
     initSaveEditQSO();
     initDeleteButtons();
     initConfirmDeleteQSO();
+    initAdifExtraTagsCheckbox();
 
     // Сбрасываем бейдж LoTW при закрытии модального окна редактирования
     const editModal = document.getElementById('editQSOModal');
