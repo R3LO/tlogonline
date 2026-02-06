@@ -129,13 +129,13 @@
 
 /* Modified card-header */
 .profile-card-compact .card-header-compact {
-    background: #f8f9fa !important; /* Светло-серый фон с !important */
-    color: #343a40; /* Темный текст для контраста */
+    background: #eaeaea !important; /* Темно-серый фон с !important */
+    color: white; /* Белый текст для контраста */
     border: none;
     padding: 1rem 1.25rem;
     font-weight: 600;
     position: relative;
-    border-bottom: 1px solid #e9ecef; /* Разделитель */
+    border-bottom: 1px solid #4a4e55; /* Разделитель, также темно-серый */
 }
 
 .profile-card-compact .card-header-compact h5 {
@@ -147,13 +147,13 @@
 }
 
 .profile-card-compact .card-header-compact h5 span {
-    color: #6c757d; /* Цвет иконок в заголовке */
+    color: #ced4da; /* Светло-серый цвет иконок в заголовке */
     filter: none; /* Убираем тень, чтобы не мешала светлому фону */
 }
 
 /* ========== КОМПАКТНАЯ ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ========== */
-.user-info-compact {
-    text-align: center;
+.user-info-left-aligned {
+    /* Убираем центрирование для левого выравнивания */
 }
 
 .user-callsign-compact {
@@ -166,9 +166,9 @@
     flex-direction: column;
     align-items: center;
     padding: 1.25rem;
-    background: var(--secondary-gradient);
+    background: #3a7bbb !important; /* Светло-серый, нейтральный фон с !important */
     border-radius: var(--border-radius);
-    color: white;
+    color: #495057; /* Темный текст для контраста */
     margin-bottom: 0.75rem;
 }
 
@@ -177,15 +177,16 @@
     font-weight: 700;
     font-family: 'Courier New', monospace;
     margin-bottom: 0.25rem;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    text-shadow: none; /* Убираем тень текста */
 }
 
 .callsign-label-compact {
     font-size: 0.75rem;
-    opacity: 0.9;
-    font-weight: 300;
+    opacity: 0.8; /* Немного уменьшаем прозрачность */
+    font-weight: 400; /* Более легкий шрифт */
 }
 
+/* Поля ввода выровнены по левому краю */
 .user-details-left-aligned {
     text-align: left; /* Явно указываем левое выравнивание */
 }
