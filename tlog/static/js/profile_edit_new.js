@@ -387,12 +387,18 @@ function updateCallsignsData() {
     const inputs = document.querySelectorAll('.callsign-input');
     callsignsData = [];
     
-    inputs.forEach(input => {
+    console.log(`📡 Найдено ${inputs.length} полей позывных`);
+    
+    inputs.forEach((input, index) => {
         const value = input.value.trim().toUpperCase();
+        console.log(`   Поле ${index}: "${value}"`);
         if (value) {
             // Проверяем на дубликаты
             if (!callsignsData.includes(value)) {
                 callsignsData.push(value);
+                console.log(`   ✅ Добавлен: ${value}`);
+            } else {
+                console.log(`   ⚠️ Дубликат пропущен: ${value}`);
             }
         }
     });
@@ -400,91 +406,64 @@ function updateCallsignsData() {
     // Сохраняем в скрытое поле
     const jsonField = document.getElementById('my_callsigns_json');
     if (jsonField) {
-        jsonField.value = JSON.stringify(callsignsData);
-        console.log('💾 Обновлены данные позывных:', callsignsData);
+        const jsonValue = JSON.stringify(callsignsData);
+        jsonField.value = jsonValue;
+        console.log('💾 Обновлены данные позывных:', jsonValue);
+    } else {
+        console.error('❌ Скрытое поле my_callsigns_json не найдено!');
     }
     
     return callsignsData;
 }
 
-// ========== УПРАВЛЕНИЕ LOTW ==========
-
-function initializeLoTW() {
-    // Валидация полей LoTW (без чекбокса активации)
-    const lotwInputs = document.querySelectorAll('input[name="lotw_user"], input[name="lotw_password"]');
-    lotwInputs.forEach(input => {
-        input.addEventListener('input', updateLoTWValidation);
-        input.addEventListener('blur', updateLoTWValidation);
-    });
-    
-    // Сразу настраиваем поля как необязательные
-    updateLoTWValidation();
-    
-    console.log('🌐 LoTW инициализирован - поля не обязательны');
+function initializeFormValidation() {
+    const profileForm = document.getElementById('profile-edit-form');
+    if (profileForm) {
+        // НЕ блокируем отправку формы - позволяем сохранить основную информацию
+        profileForm.addEventListener('submit', function(event) {
+            console.log('📝 Отправка формы профиля (LoTW поля не обязательны)');
+            
+            // ===== ВАЖНО: Принудительно обновляем данные позывных =====
+            updateCallsignsData();
+            
+            // Проверяем, что данные попали в скрытое поле
+            const jsonField = document.getElementById('my_callsigns_json');
+            if (jsonField) {
+                console.log('📡 Данные позывных для отправки:', jsonField.value);
+            }
+            
+            // Очищаем любые блокировки от валидации LoTW
+            const lotwUserInput = document.querySelector('input[name="lotw_user"]');
+            const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
+            
+            if (lotwUserInput) {
+                lotwUserInput.setCustomValidity('');
+                clearValidationMessage(lotwUserInput);
+                lotwUserInput.required = false; // Гарантируем, что поле не обязательно
+            }
+            if (lotwPasswordInput) {
+                lotwPasswordInput.setCustomValidity('');
+                clearValidationMessage(lotwPasswordInput);
+                lotwPasswordInput.required = false; // Гарантируем, что поле не обязательно
+            }
+            
+            // Форма отправляется без блокировок
+            console.log('✅ Форма готова к отправке - сохранение возможно без LoTW данных');
+            
+            // Показываем уведомление пользователю
+            setTimeout(() => {
+                showNotification('💾 Форма отправляется. Основная информация и позывные будут сохранены.', 'info');
+            }, 100);
+        });
+    }
 }
 
-// ==== Новая реализация функции updateLoTWValidation ====
-function updateLoTWValidation() {
-    const lotwUserInput = document.querySelector('input[name="lotw_user"]');
-    const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
-    
-    // Поля LoTW НЕ обязательны - убираем required и блокировки
-    if (lotwUserInput) {
-        lotwUserInput.required = false;
-        lotwUserInput.setCustomValidity(''); // Убираем блокировки
-        clearValidationMessage(lotwUserInput);
-        lotwUserInput.addEventListener('input', validateLoTWUser);
-    }
-    if (lotwPasswordInput) {
-        lotwPasswordInput.required = false;
-        lotwPasswordInput.setCustomValidity(''); // Убираем блокировки
-        clearValidationMessage(lotwPasswordInput);
-    }
-    
-    console.log('🔓 LoTW поля освобождены от обязательности');
-}
-// ==== Конец новой реализации ====
+// ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========
 
-function validateLoTWUser() {
-    const input = document.querySelector('input[name="lotw_user"]');
-    if (!input) return;
-    
-    const callsign = input.value.trim();
-    
-    // Если поле пустое - не показываем ошибку (поле не обязательно)
-    if (!callsign) {
-        clearValidationMessage(input);
-        input.setCustomValidity(''); // Убираем любые блокировки
-        return true;
-    }
-    
-    // Если есть значение - проверяем только разрешенные символы (включая строчные буквы)
-    const allowedPattern = /^[A-Za-z0-9\/]*$/;
-    if (!allowedPattern.test(callsign)) {
-        // Для LoTW полей НЕ блокируем отправку формы - только визуальная подсказка
-        input.setCustomValidity(''); // Убираем блокировку
-        input.style.borderColor = '#dc3545';
-        
-        // Показываем подсказку без блокировки
-        clearValidationMessage(input);
-        const feedback = document.createElement('div');
-        feedback.className = 'invalid-feedback';
-        feedback.textContent = 'Используйте только латинские буквы, цифры и символ /';
-        feedback.style.display = 'block';
-        input.parentNode.appendChild(feedback);
-        
-        return false;
-    }
-    
-    clearValidationMessage(input);
-    input.setCustomValidity(''); // Убираем любые блокировки
-    return true;
-}
-
-// ==== Новая реализация функции verifyLotwCredentials ====
+// Делаем функции глобально доступными для onclick атрибутов
+window.addCallsign = addCallsign;
+window.removeCallsign = removeCallsign;
 window.verifyLotwCredentials = function() {
-    console.log('🔍 Проверяем учетные данные LoTW...');
-    
     const lotwUser = document.querySelector('input[name="lotw_user"]')?.value.trim();
     const lotwPassword = document.querySelector('input[name="lotw_password"]')?.value.trim();
     
@@ -527,63 +506,6 @@ window.verifyLotwCredentials = function() {
     // НЕ восстанавливаем кнопку автоматически - пусть пользователь сам решает
     // Кнопка восстановится после перезагрузки страницы
 };
-// ==== Конец новой реализации ====
-
-window.deleteLotwCredentials = function() {
-    if (confirm('🗑️ Вы уверены, что хотите удалить сохраненные логин и пароль LoTW?')) {
-        console.log('🗑️ Удаляем учетные данные LoTW');
-        
-        const form = createCSRFProtectedForm('/profile/delete-lotw/');
-        document.body.appendChild(form);
-        form.submit();
-    }
-};
-
-// ========== ВАЛИДАЦИЯ ФОРМЫ ==========
-
-// Updated function to reflect new validation logic
-function initializeFormValidation() {
-    const profileForm = document.getElementById('profile-edit-form');
-    if (profileForm) {
-        // НЕ блокируем отправку формы - позволяем сохранить основную информацию
-        profileForm.addEventListener('submit', function(event) {
-            console.log('📝 Отправка формы профиля (LoTW поля не обязательны)');
-            
-            // Обновляем данные позывных
-            updateCallsignsData();
-            
-            // Очищаем любые блокировки от валидации LoTW
-            const lotwUserInput = document.querySelector('input[name="lotw_user"]');
-            const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
-            
-            if (lotwUserInput) {
-                lotwUserInput.setCustomValidity('');
-                clearValidationMessage(lotwUserInput);
-                lotwUserInput.required = false; // Гарантируем, что поле не обязательно
-            }
-            if (lotwPasswordInput) {
-                lotwPasswordInput.setCustomValidity('');
-                clearValidationMessage(lotwPasswordInput);
-                lotwPasswordInput.required = false; // Гарантируем, что поле не обязательно
-            }
-            
-            // Форма отправляется без блокировок
-            console.log('✅ Форма готова к отправке - сохранение возможно без LoTW данных');
-            
-            // Показываем уведомление пользователю
-            setTimeout(() => {
-                showNotification('💾 Форма отправляется. Основная информация и позывные будут сохранены.', 'info');
-            }, 100);
-        });
-    }
-}
-
-// ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========
-
-// Делаем функции глобально доступными для onclick атрибутов
-window.addCallsign = addCallsign;
-window.removeCallsign = removeCallsign;
-window.verifyLotwCredentials = verifyLotwCredentials;
 window.deleteLotwCredentials = deleteLotwCredentials;
 
 // Вспомогательные функции

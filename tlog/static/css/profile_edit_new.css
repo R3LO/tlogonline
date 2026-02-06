@@ -127,27 +127,28 @@
     background: var(--primary-gradient);
 }
 
+/* Modified card-header */
 .profile-card-compact .card-header-compact {
-    background: var(--primary-gradient);
-    color: white;
+    background: #f8f9fa !important; /* Светло-серый фон с !important */
+    color: #343a40; /* Темный текст для контраста */
     border: none;
     padding: 1rem 1.25rem;
     font-weight: 600;
     position: relative;
+    border-bottom: 1px solid #e9ecef; /* Разделитель */
 }
 
 .profile-card-compact .card-header-compact h5 {
-    font-size: 0.95rem;
+    font-size: 0.95rem; /* Немного уменьшен размер заголовка */
     margin: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.profile-card-compact .card-body-compact {
-    padding: 1.25rem;
-    position: relative;
-    z-index: 1;
+.profile-card-compact .card-header-compact h5 span {
+    color: #6c757d; /* Цвет иконок в заголовке */
+    filter: none; /* Убираем тень, чтобы не мешала светлому фону */
 }
 
 /* ========== КОМПАКТНАЯ ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ========== */
@@ -257,6 +258,10 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+}
+
+.lotw-status-compact {
+    margin-top: 0.75rem;
 }
 
 /* ========== КОМПАКТНЫЕ КНОПКИ ДЕЙСТВИЙ ========== */
@@ -512,7 +517,7 @@
     padding: 0.75rem;
     border-radius: 8px;
     border: 1px solid rgba(23, 162, 184, 0.2);
-    text-align: center;
+    text-align: left; /* Изменено на left */
 }
 
 .lotw-info-notice .small {
@@ -520,4 +525,84 @@
     line-height: 1.3;
     margin: 0;
     color: #17a2b8;
+}
+
+/* ========== КОМПАКТНЫЕ ПОЛЯ ВВОДА ========== */
+.lotw-credentials-compact .form-floating-compact {
+    margin-bottom: 0.75rem;
+}
+
+.lotw-actions-compact {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* ========== КОМПАКТНАЯ СЕКЦИЯ LOTW ========== */
+.lotw-status-compact {
+    margin-top: 0.75rem;
+}
+
+/* ========== СТАТУСНЫЕ ЭЛЕМЕНТЫ ========== */
+.status-item {
+    padding: 0.6rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.status-item.success {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-item.success::before {
+    content: '✅';
+    font-size: 1rem;
+}
+
+.status-item.warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #fd7e14;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-item.warning::before {
+    content: '⚠️';
+    font-size: 1rem;
+}
+
+.status-item.info {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.status-item.info::before {
+    content: 'ℹ️';
+    font-size: 1rem;
+}
+
+.status-item.error {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.status-item.error::before {
+    content: '❌';
+    font-size: 1rem;
+}
+
+/* ========== СИНК-ИНФОРМАЦИЯ ========== */
+.sync-info {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.8rem;
 }

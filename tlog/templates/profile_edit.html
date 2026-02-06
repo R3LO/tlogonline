@@ -108,7 +108,7 @@
                     <div class="card-body-compact">
                         <div class="lotw-info-notice mb-3">
                             <p class="text-muted small">
-                                <span>ℹ️</span> LoTW настройки не обязательны - основная информация сохранится в любом случае
+                                <span>ℹ️</span> LoTW логин и пароль для входа на сайт
                             </p>
                         </div>
 
@@ -125,6 +125,44 @@
                                 <label><span>🔒</span> Пароль LoTW</label>
                             </div>
                         </div>
+
+                        <div class="lotw-actions-compact mb-2">
+                            <button type="button" class="btn btn-primary btn-sm me-2" onclick="verifyLotwCredentials()">
+                                <span>🔍</span> Проверить
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteLotwCredentials()">
+                                <span>🗑️</span> Удалить
+                            </button>
+                        </div>
+
+                        <div class="lotw-status-compact" id="lotw_status_container">
+                            {% if profile.lotw_user and profile.lotw_password %}
+                                {% if profile.lotw_chk_pass %}
+                                    <div class="status-item success">
+                                        LoTW настроен и проверен
+                                    </div>
+                                {% else %}
+                                    <div class="status-item warning">
+                                        Логин или пароль не верные
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="status-item info">
+                                    ℹ️ Введите логин и пароль LoTW
+                                </div>
+                            {% endif %}
+                            
+                            <div class="sync-info">
+                                <small class="text-muted">
+                                    <strong>Последняя синхронизация:</strong>
+                                    {% if profile.lotw_lastsync %}
+                                        {{ profile.lotw_lastsync|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                        не проводилась
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,7 +176,7 @@
                     <div class="card-body-compact">
                         <div class="callsigns-info-compact mb-2">
                             <p class="text-muted small">
-                                <span>ℹ️</span> Добавьте позывные (латинские буквы, можно строчные, цифры, "/")
+                                <span>ℹ️</span> Добавьте сюда позывные, добавленные в LoTW
                             </p>
                         </div>
 

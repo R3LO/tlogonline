@@ -31,3 +31,17 @@ from .views.adif import (
     parse_adif_record,
     delete_adif_uploads,
 )
+
+# Импорты из модуля основных страниц
+from .views.main import (
+    home,
+    dashboard,
+    profile_update,
+    lotw_page,
+)
+
+# Импорты из модуля профиля
+from .views.profile import (
+    verify_lotw_credentials,
+    delete_lotw_credentials,
+)

@@ -68,23 +68,29 @@ def profile_update(request):
                 request.user.save(update_fields=['email'])
 
             # Обработка настроек LoTW
-            use_lotw = 'use_lotw' in request.POST
-            if use_lotw:
-                profile.lotw_user = request.POST.get('lotw_user', '').strip()
-                profile.lotw_password = request.POST.get('lotw_password', '').strip()
+            lotw_user = request.POST.get('lotw_user', '').strip()
+            lotw_password = request.POST.get('lotw_password', '').strip()
+            
+            # Сохраняем данные LoTW если они введены
+            if lotw_user or lotw_password:
+                profile.lotw_user = lotw_user
+                profile.lotw_password = lotw_password
                 # lotw_chk_pass сохраняется как есть (обновляется при проверке)
             else:
-                # Очищаем данные LoTW если чекбокс не выбран
+                # Очищаем данные LoTW если поля пустые
                 profile.lotw_user = ''
                 profile.lotw_password = ''
                 profile.lotw_chk_pass = False
 
             # Обрабатываем my_callsigns из JSON (новый формат: простой список строк)
             my_callsigns_json = request.POST.get('my_callsigns_json', '[]')
+            print(f"📡 Получены данные позывных JSON: {my_callsigns_json}")
+            
             try:
                 new_my_callsigns = json.loads(my_callsigns_json)
+                print(f"📡 Распарсенные позывные: {new_my_callsigns}")
                 
-                # Нормализуем данные позывных
+                # Нормализуем данные позывных - простая очистка без строгой валидации
                 if new_my_callsigns and isinstance(new_my_callsigns, list):
                     # Убираем дубликаты и пустые значения, приводим к верхнему регистру
                     normalized_callsigns = []
@@ -92,34 +98,35 @@ def profile_update(request):
                         if isinstance(callsign, str) and callsign.strip():
                             callsign_clean = callsign.strip().upper()
                             if callsign_clean not in normalized_callsigns:
-                                # Простая валидация позывного
-                                pattern = r'^[A-Z0-9]{1,3}[0-9][A-Z0-9]{0,3}[A-Z]$'
-                                if re.match(pattern, callsign_clean):
+                                # Базовая проверка - только латинские буквы, цифры и слеш
+                                if re.match(r'^[A-Z0-9\/]+$', callsign_clean):
                                     normalized_callsigns.append(callsign_clean)
                     
                     new_my_callsigns = normalized_callsigns
+                    print(f"✅ Нормализованные позывные: {new_my_callsigns}")
+                else:
+                    new_my_callsigns = []
+                    print(f"ℹ️ Позывные пустые или не список")
                     
             except json.JSONDecodeError as e:
-                print(f"Ошибка парсинга JSON позывных: {e}")
+                print(f"❌ Ошибка парсинга JSON позывных: {e}")
                 new_my_callsigns = []
 
             # Устанавливаем данные профиля
             profile.lotw_lastsync = None
             profile.my_callsigns = new_my_callsigns
 
+            print(f"💾 Сохраняем позывные в профиль: {new_my_callsigns}")
+
             # Сохраняем профиль с основными полями
             profile.save()
+
+            print(f"✅ Профиль сохранён. Позывные в базе: {profile.my_callsigns}")
 
             # Обновляем User модель с данными из формы
             request.user.first_name = first_name
             request.user.last_name = last_name
             request.user.save(update_fields=['first_name', 'last_name'])
-
-            print(f"✅ Сохранено в профиль:")
-            print(f"   profile.first_name: '{profile.first_name}'")
-            print(f"   profile.last_name: '{profile.last_name}'")
-            print(f"   user.first_name: '{request.user.first_name}'")
-            print(f"   user.last_name: '{request.user.last_name}'")
 
             messages.success(request, 'Профиль успешно обновлён')
             return redirect('profile_update')
@@ -295,15 +302,15 @@ def verify_lotw_credentials(request):
                 messages.success(request, '✅ Логин и пароль проверены и сохранены успешно')
                 
             else:
-                # Неверная проверка - очищаем данные и показываем ошибку
+                # Неверная проверка - сохраняем данные, но сбрасываем флаг проверки
                 profile.lotw_chk_pass = False
-                profile.lotw_user = ""
-                profile.lotw_password = ""
+                profile.lotw_user = login  # Сохраняем введенные данные
+                profile.lotw_password = password  # Сохраняем введенные данные
                 profile.save(update_fields=['lotw_chk_pass', 'lotw_user', 'lotw_password'])
                 
                 # Разные сообщения в зависимости от типа ошибки
                 if error_type == "invalid_credentials":
-                    messages.error(request, '❌ ЛОТW: Логин или пароль неверны. Проверьте данные и попробуйте снова.')
+                    messages.error(request, '❌ LoTW: Логин или пароль неверны. Проверьте данные и попробуйте снова.')
                 elif error_type == "http_error":
                     messages.error(request, '❌ LoTW: Ошибка сервера. Попробуйте позже.')
                 elif error_type == "network_error":
