@@ -234,3 +234,233 @@
     }
     
 })(jQuery);
+
+/**
+ * Улучшенный JavaScript для страницы редактирования профиля
+ * Исправлены проблемы с добавлением позывных и улучшен UX
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Profile edit JS initialized');
+    
+    // Инициализация
+    initializeLoTW();
+    initializePasswordChange();
+
+    // ========== LoTW Management ==========
+    function initializeLoTW() {
+        const useLotwCheckbox = document.getElementById('use_lotw');
+        const consentCheckbox = document.getElementById('lotw_consent');
+        
+        if (useLotwCheckbox && consentCheckbox) {
+            // Синхронизация чекбоксов
+            useLotwCheckbox.addEventListener('change', function() {
+                consentCheckbox.checked = this.checked;
+                toggleLotwSettings();
+            });
+            
+            consentCheckbox.addEventListener('change', function() {
+                useLotwCheckbox.checked = this.checked;
+                toggleLotwSettings();
+            });
+        }
+    }
+
+    /**
+     * Показать/скрыть настройки LoTW
+     */
+    window.toggleLotwSettings = function() {
+        const checkbox = document.getElementById('use_lotw');
+        const settings = document.getElementById('lotw_settings');
+        
+        if (checkbox && settings) {
+            settings.style.display = checkbox.checked ? 'block' : 'none';
+            console.log('LoTW settings display:', settings.style.display);
+        }
+    };
+
+    /**
+     * Проверка учетных данных LoTW
+     */
+    window.verifyLotwCredentials = function() {
+        console.log('Verifying LoTW credentials');
+        
+        const lotwUser = document.querySelector('input[name="lotw_user"]')?.value.trim();
+        const lotwPassword = document.querySelector('input[name="lotw_password"]')?.value.trim();
+        
+        if (!lotwUser || !lotwPassword) {
+            alert('Пожалуйста, введите логин и пароль LoTW');
+            return;
+        }
+
+        // Валидация позывного
+        const callsignPattern = /^[A-Z0-9]{1,3}[0-9][A-Z0-9]{0,3}[A-Z]$/;
+        if (!callsignPattern.test(lotwUser.toUpperCase())) {
+            alert('Неверный формат позывного. Используйте только буквы и цифры (например: UA1ABC)');
+            return;
+        }
+
+        // Показываем индикатор загрузки
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<span>⏳</span> Проверяем...';
+        button.disabled = true;
+
+        // Создаем форму для отправки данных проверки
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/profile/verify-lotw/';
+        form.style.display = 'none';
+
+        // Добавляем CSRF токен
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+        if (!csrfToken) {
+            alert('Ошибка: CSRF токен не найден');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            return;
+        }
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Добавляем поля логина и пароля
+        const userInput = document.createElement('input');
+        userInput.type = 'hidden';
+        userInput.name = 'lotw_user';
+        userInput.value = lotwUser;
+        form.appendChild(userInput);
+
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'hidden';
+        passwordInput.name = 'lotw_password';
+        passwordInput.value = lotwPassword;
+        form.appendChild(passwordInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    /**
+     * Удаление учетных данных LoTW
+     */
+    window.deleteLotwCredentials = function() {
+        if (confirm('Вы уверены, что хотите удалить сохраненные логин и пароль LoTW?')) {
+            console.log('Deleting LoTW credentials');
+            
+            // Создаем форму для отправки данных удаления
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/profile/delete-lotw/';
+            form.style.display = 'none';
+
+            // Добавляем CSRF токен
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+            if (!csrfToken) {
+                alert('Ошибка: CSRF токен не найден');
+                return;
+            }
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    // ========== Password Management ==========
+    function initializePasswordChange() {
+        const profileForm = document.getElementById('profile-edit-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function(event) {
+                console.log('Form submit triggered');
+                updateCallsignsData();
+                // Форма отправится естественным образом
+            });
+        }
+    }
+
+    /**
+     * Смена пароля пользователя
+     */
+    window.changePassword = function() {
+        console.log('Changing password');
+        
+        const oldPassword = document.getElementById('old_password')?.value.trim();
+        const newPassword = document.getElementById('new_password')?.value.trim();
+        const confirmPassword = document.getElementById('confirm_password')?.value.trim();
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            alert('Пожалуйста, заполните все поля для смены пароля');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Новый пароль и подтверждение пароля не совпадают');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            alert('Пароль должен содержать минимум 8 символов');
+            return;
+        }
+
+        // Показываем индикатор загрузки
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<span>⏳</span> Сохраняем...';
+        button.disabled = true;
+
+        // Создаем форму для отправки данных смены пароля
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/profile/change-password/';
+        form.style.display = 'none';
+
+        // Добавляем CSRF токен
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+        if (!csrfToken) {
+            alert('Ошибка: CSRF токен не найден');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            return;
+        }
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Добавляем поля паролей
+        const oldPasswordInput = document.createElement('input');
+        oldPasswordInput.type = 'hidden';
+        oldPasswordInput.name = 'old_password';
+        oldPasswordInput.value = oldPassword;
+        form.appendChild(oldPasswordInput);
+
+        const newPasswordInput = document.createElement('input');
+        newPasswordInput.type = 'hidden';
+        newPasswordInput.name = 'new_password';
+        newPasswordInput.value = newPassword;
+        form.appendChild(newPasswordInput);
+
+        const confirmPasswordInput = document.createElement('input');
+        confirmPasswordInput.type = 'hidden';
+        confirmPasswordInput.name = 'confirm_password';
+        confirmPasswordInput.value = confirmPassword;
+        form.appendChild(confirmPasswordInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    console.log('Profile edit JS initialization complete');
+});

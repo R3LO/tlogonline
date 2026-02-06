@@ -1,278 +1,619 @@
 {% extends 'base_dashboard.html' %}
 {% load i18n %}
 {% load static %}
-{% block title %}TLog - {% trans "Редактирование профиля" %}{% endblock %}
+{% block title %}TLog - {% trans "Настройки профиля" %}{% endblock %}
 
 {% block dashboard_content %}
-<!-- филяHeader -->
-<div class="logbook-header text-center">
-    <h2><span>✏️</span> {% trans "Редактирование профиля" %}</h2>
-    <p class="mb-0">{% trans "Управление вашими настройками и профилем для синхронизации с LoTW" %}</p>
+<!-- Заголовок -->
+<div class="profile-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="profile-avatar">
+                    <span>👨‍💼</span>
+                </div>
+            </div>
+            <div class="col">
+                <h2 class="profile-title mb-1">⚙️ Настройки профиля</h2>
+                <p class="profile-subtitle mb-0">Управление персональными данными и интеграцией с LoTW</p>
+            </div>
+            <div class="col-auto">
+                <div class="profile-status">
+                    {% if profile.lotw_chk_pass %}
+                        <span class="badge bg-success">LoTW активен</span>
+                    {% else %}
+                        <span class="badge bg-warning">LoTW не настроен</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="p-4">
-                <!-- Сообщения -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+<!-- Сообщения -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
 
-                <form method="post" action="{% url 'profile_update' %}" id="profile-edit-form">
-                    {% csrf_token %}
+<form method="post" action="{% url 'profile_update' %}" id="profile-edit-form">
+    {% csrf_token %}
 
-                    <div class="row">
-                        <!-- Левая колонка -->
-                        <div class="col-lg-6">
-                            <!-- Информация о пользователе -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>🔐</span> Информация о пользователе</h5>
-
-                                <div class="mb-3">
-                                    <label class="form-label">📡 {% trans "Позывной (Username)" %}</label>
-                                    <input type="text" class="form-control" name="username"
-                                           value="{{ user.username }}" readonly
-                                           readonly>
-                                    <div class="form-text">{% trans "Позывной = Username, используется для входа" %}</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">{% trans "Email" %}</label>
-                                    <input type="email" class="form-control" name="email"
-                                           value="{{ user.email }}" placeholder="email@example.com" required
-                                           autocomplete="off">
-                                    <div class="invalid-feedback" id="email-error"></div>
-                                </div>
-
-                                <div class="mb-2">
-                                    <strong>{% trans "Дата регистрации:" %}</strong> {{ user.date_joined|date:"d.m.Y" }}
-                                </div>
-                                <div class="mb-3">
-                                    <strong>{% trans "Последний вход:" %}</strong> {{ user.last_login|date:"d.m.Y H:i" }}
-                                </div>
-
-                                <button type="button" class="btn btn-outline-primary btn-sm"
-                                        data-bs-toggle="collapse" data-bs-target="#password_change_section" 
-                                        aria-expanded="false" aria-controls="password_change_section">
-                                    <span>🔑</span> {% trans "Сменить пароль" %}
-                                </button>
-
-                                <div class="collapse mt-3" id="password_change_section">
-                                    <div class="card card-body">
-                                        <h6 class="mb-3">{% trans "Смена пароля" %}</h6>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">{% trans "Текущий пароль" %}</label>
-                                            <input type="password" class="form-control" id="old_password"
-                                                   required autocomplete="current-password">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">{% trans "Новый пароль" %}</label>
-                                            <input type="password" class="form-control" id="new_password"
-                                                   placeholder="{% trans 'Минимум 8 символов' %}" required
-                                                   autocomplete="new-password" minlength="8">
-                                            <div class="form-text">{% trans "Пароль должен содержать минимум 8 символов" %}</div>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">{% trans "Подтверждение пароля" %}</label>
-                                            <input type="password" class="form-control" id="confirm_password"
-                                                   placeholder="{% trans 'Повторите новый пароль' %}" required
-                                                   autocomplete="new-password" minlength="8">
-                                        </div>
-
-                                        <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-warning btn-sm" onclick="changePassword()">
-                                                <span>💾</span> {% trans "Сохранить пароль" %}
-                                            </button>
-                                            <button type="button" class="btn btn-secondary btn-sm" 
-                                                    data-bs-toggle="collapse" data-bs-target="#password_change_section">
-                                                <span>✖</span> {% trans "Отмена" %}
-                                            </button>
-                                        </div>
-                                    </div>
+    <div class="container-fluid">
+        <div class="row g-4">
+            <!-- Основная информация -->
+            <div class="col-xl-4">
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><span>👤</span> Основная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="user-info">
+                            <div class="user-callsign">
+                                <div class="callsign-display">
+                                    <span class="callsign-text">{{ user.username }}</span>
+                                    <span class="callsign-label">Позывной (неизменяемый)</span>
                                 </div>
                             </div>
-
-                            <!-- Настройки LoTW -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>🌐</span> Настройки LoTW</h5>
-                                <p class="text-muted small">Учётные данные для ARRL Logbook of the World</p>
-
-                                <div class="mb-0">
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="use_lotw"
-                                               name="use_lotw" {% if profile.lotw_user or profile.lotw_password %}checked{% endif %}
-                                               onchange="toggleLotwSettings()">
-                                        <label class="form-check-label" for="use_lotw">
-                                            Даю свое согласие на использование моих персональных данных для автоматической синхронизации лога с LoTW
-                                        </label>
-                                    </div>
-
-                                    <div id="lotw_settings" {% if profile.lotw_user or profile.lotw_password %}style="display: block;"{% else %}style="display: none;"{% endif %}>
-                                        <div class="mb-3">
-                                            <label class="form-label">Логин LoTW (позывной)</label>
-                                            <input type="text" class="form-control" name="lotw_user"
-                                                   value="{{ profile.lotw_user|default:'' }}"
-                                                   placeholder="UA1ABC" maxlength="50"
-                                                   autocomplete="off">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Пароль LoTW (должен быть проверен, иначе не сохранится!)</label>
-                                            <input type="password" class="form-control" name="lotw_password"
-                                                   value="{{ profile.lotw_password|default:'' }}"
-                                                   placeholder="Пароль от LoTW" maxlength="128"
-                                                   autocomplete="current-password">
-                                        </div>
-
-                                        <div class="mb-3" id="lotw_status">
-                                            {% if profile.lotw_chk_pass %}
-                                                <span class="badge bg-success">✓ Логин и пароль верны и сохранены</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">⚠ Требуется проверка логина и пароля</span>
-                                            {% endif %}
-                                        </div>
-
-                                        <div class="d-flex align-items-center gap-2 mb-3">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                    onclick="verifyLotwCredentials()">
-                                                <span>🔍</span> Проверить логин и пароль
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger btn-sm"
-                                                    onclick="deleteLotwCredentials()">
-                                                <span>🗑️</span> Удалить логин и пароль
-                                            </button>
-                                        </div>
-
-                                        <div class="mt-3">
-                                            <strong>Последняя синхронизация с LoTW:</strong>
-                                            {% if profile.lotw_lastsync %}
-                                                {{ profile.lotw_lastsync|date:"d.m.Y H:i" }}
-                                            {% else %}
-                                                синхронизация еще не проводилась
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                            
+                            <div class="user-details">
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" name="email" 
+                                           value="{{ user.email }}" placeholder="email@example.com" required>
+                                    <label><span>📧</span> Email адрес</label>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Правая колонка -->
-                        <div class="col-lg-6">
-                            <!-- Основная информация -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>👤</span> Основная информация</h5>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Имя</label>
-                                        <input type="text" class="form-control" name="first_name"
-                                               value="{{ profile.first_name|default:user.first_name }}"
-                                               placeholder="Иван" maxlength="100"
-                                               autocomplete="off">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Фамилия</label>
-                                        <input type="text" class="form-control" name="last_name"
-                                               value="{{ profile.last_name|default:user.last_name }}"
-                                               placeholder="Петров" maxlength="100"
-                                               autocomplete="off">
-                                    </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="first_name"
+                                           value="{{ user.first_name|default:profile.first_name }}"
+                                           placeholder="Иван">
+                                    <label><span>👤</span> Имя</label>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">QTH (место расположения)</label>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="last_name"
+                                           value="{{ user.last_name|default:profile.last_name }}"
+                                           placeholder="Петров">
+                                    <label><span>👤</span> Фамилия</label>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
                                     <input type="text" class="form-control" name="qth"
-                                           value="{{ profile.qth|default:'' }}"
-                                           placeholder="г. Москва, Россия" maxlength="100"
-                                           autocomplete="off">
+                                           value="{{ profile.qth|default:'' }}" placeholder="г. Москва, Россия">
+                                    <label><span>📍</span> QTH (место расположения)</label>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Мой QTH локатор</label>
+                                
+                                <div class="form-floating">
                                     <input type="text" class="form-control" name="my_gridsquare"
-                                           value="{{ profile.my_gridsquare|default:'' }}"
-                                           placeholder="KO85UU" maxlength="10"
-                                           autocomplete="off">
-                                    <div class="form-text">Например: KO85UU для Москвы</div>
+                                           value="{{ profile.my_gridsquare|default:'' }}" placeholder="KO85UU">
+                                    <label><span>🗺️</span> Мой QTH локатор</label>
                                 </div>
-                            </div>
-
-                            <!-- Мои позывные в LoTW -->
-                            <div class="form-card mb-4">
-                                <h5 class="section-title"><span>📡</span> Мои позывные в LoTW</h5>
-                                <p class="text-muted small">Добавьте свои позывные (действующие, бывшие, спецпозывные) для синхронизации с LoTW. Позывной должен быть в вашем аккаунте LoTW. Указывайте только те позывные, которые вы хотите синхронизировать с LoTW.</p>
-
-                                <div id="callsigns-container">
-                                    {% if profile.my_callsigns %}
-                                        {% for callsign_item in profile.my_callsigns %}
-                                            <div class="my-callsign-item">
-                                                {% if callsign_item.name %}
-                                                    <input type="text" class="form-control name-input callsign-input"
-                                                           name="my_callsigns_names[]"
-                                                           value="{{ callsign_item.name }}"
-                                                           placeholder="Позывной"
-                                                           autocomplete="off">
-                                                {% elif callsign_item %}
-                                                    <input type="text" class="form-control name-input callsign-input"
-                                                           name="my_callsigns_names[]"
-                                                           value="{{ callsign_item }}"
-                                                           placeholder="Позывной"
-                                                           autocomplete="off">
-                                                {% else %}
-                                                    <input type="text" class="form-control name-input callsign-input"
-                                                           name="my_callsigns_names[]"
-                                                           value=""
-                                                           placeholder="Позывной"
-                                                           autocomplete="off">
-                                                {% endif %}
-                                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                                        onclick="removeCallsign(this)">
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        {% endfor %}
-                                    {% endif %}
-                                </div>
-
-                                <button type="button" class="btn btn-outline-primary btn-sm"
-                                        onclick="addCallsign()">
-                                    <span>+</span> Добавить позывной
-                                </button>
-
-                                <!-- Скрытые поля для JSON -->
-                                <script id="callsigns-data" type="application/json">
-                                    {{ profile_json|safe }}
-                                </script>
-                                <input type="hidden" name="my_callsigns_json" id="my_callsigns_json" value='{{ profile_json|safe }}'>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Кнопки -->
-                    <div class="d-flex flex-wrap gap-2 gap-md-3 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg flex-grow-1 flex-md-grow-0">
-                            <span class="me-1">💾</span>Сохранить профиль
-                        </button>
-                        <a href="/dashboard/" class="btn btn-secondary btn-lg flex-grow-1 flex-md-grow-0">
-                            <span class="me-1">✖</span>Отмена
-                        </a>
+            <!-- LoTW настройки -->
+            <div class="col-xl-4">
+                <div class="profile-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><span>🌐</span> Настройки LoTW</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="use_lotw"
+                                       name="use_lotw" {% if profile.lotw_user or profile.lotw_password %}checked{% endif %}
+                                       onchange="toggleLotwSettings()">
+                                <label class="form-check-label" for="use_lotw">
+                                    Активировать
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                    <div class="card-body">
+                        <div class="consent-section mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lotw_consent"
+                                       name="lotw_consent" {% if profile.lotw_user or profile.lotw_password %}checked{% endif %}>
+                                <label class="form-check-label" for="lotw_consent">
+                                    <span>📋</span> Даю согласие на использование моих персональных данных для автоматической синхронизации с LoTW
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="lotw_settings" {% if profile.lotw_user or profile.lotw_password %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                            <div class="lotw-credentials">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="lotw_user"
+                                           value="{{ profile.lotw_user|default:'' }}" placeholder="UA1ABC">
+                                    <label><span>👤</span> Логин LoTW</label>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="password" class="form-control" name="lotw_password"
+                                           value="{{ profile.lotw_password|default:'' }}" placeholder="Пароль от LoTW">
+                                    <label><span>🔒</span> Пароль LoTW</label>
+                                </div>
+                            </div>
+
+                            <div class="lotw-actions mb-3">
+                                <button type="button" class="btn btn-primary btn-sm me-2" onclick="verifyLotwCredentials()">
+                                    <span>🔍</span> Проверить
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteLotwCredentials()">
+                                    <span>🗑️</span> Удалить
+                                </button>
+                            </div>
+
+                            <div class="lotw-status" id="lotw_status_container">
+                                {% if profile.lotw_user and profile.lotw_password %}
+                                    {% if profile.lotw_chk_pass %}
+                                        <div class="status-item success">
+                                            <span>✅</span> LoTW настроен и проверен
+                                        </div>
+                                    {% else %}
+                                        <div class="status-item warning">
+                                            <span>⚠️</span> Требуется проверка пароля
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="status-item info">
+                                        <span>ℹ️</span> Настройте логин и пароль LoTW
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="sync-info">
+                                    <small class="text-muted">
+                                        <strong>Последняя синхронизация:</strong>
+                                        {% if profile.lotw_lastsync %}
+                                            {{ profile.lotw_lastsync|date:"d.m.Y H:i" }}
+                                        {% else %}
+                                            не проводилась
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Мои позывные -->
+            <div class="col-xl-4">
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><span>📡</span> Мои позывные для LoTW</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="callsigns-info mb-3">
+                            <p class="text-muted small">
+                                <span>ℹ️</span> Добавьте свои позывные (действующие, бывшие, спецпозывные) для синхронизации с LoTW. 
+                                Разрешены только латинские буквы, цифры и символ "/".
+                            </p>
+                        </div>
+
+                        <div id="callsigns-container" class="callsigns-container">
+                            <!-- Позывные будут добавлены динамически -->
+                        </div>
+
+                        <div class="callsigns-actions">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addCallsign()">
+                                <span>➕</span> Добавить позывной
+                            </button>
+                        </div>
+
+                        <!-- Скрытые поля -->
+                        <input type="hidden" name="my_callsigns_json" id="my_callsigns_json" value='{{ profile_json|safe }}'>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Смена пароля -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="profile-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><span>🔑</span> Смена пароля</h5>
+                            <button type="button" class="btn btn-warning btn-sm" 
+                                    data-bs-toggle="collapse" data-bs-target="#password_change_section" 
+                                    aria-expanded="false" aria-controls="password_change_section">
+                                <span>⚡</span> Изменить пароль
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="collapse" id="password_change_section">
+                            <div class="password-change-form">
+                                <div class="password-info mb-3">
+                                    <small class="text-muted">
+                                        <span>💡</span> Если вы не хотите менять пароль, оставьте все поля пустыми
+                                    </small>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input type="password" class="form-control" id="old_password" 
+                                                   placeholder="Текущий пароль" autocomplete="current-password">
+                                            <label><span>🔒</span> Текущий пароль</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input type="password" class="form-control" id="new_password" 
+                                                   placeholder="Новый пароль" autocomplete="new-password" minlength="8">
+                                            <label><span>🆕</span> Новый пароль (опционально)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input type="password" class="form-control" id="confirm_password" 
+                                                   placeholder="Подтверждение" autocomplete="new-password" minlength="8">
+                                            <label><span>✅</span> Подтверждение (опционально)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-warning" onclick="changePassword()">
+                                        <span>💾</span> Изменить пароль
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="profile-actions mt-4">
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    <span class="me-2">💾</span>Сохранить изменения
+                </button>
+                <a href="/dashboard/" class="btn btn-secondary btn-lg px-5">
+                    <span class="me-2">🏠</span>На главную
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
 {% endblock dashboard_content %}
 
 {% block extra_css %}
-<link href="{% static 'css/profile_edit.css' %}" rel="stylesheet">
-<!-- Bootstrap CSS для collapse -->
+<link href="{% static 'css/profile_edit_new.css' %}" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* Основные стили профиля */
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.profile-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.profile-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.profile-status .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Карточки профиля */
+.profile-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.profile-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+.profile-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Информация о пользователе */
+.user-info {
+    text-align: center;
+}
+
+.user-callsign {
+    margin-bottom: 1.5rem;
+}
+
+.callsign-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.callsign-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 0.5rem;
+}
+
+.callsign-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Поля ввода */
+.form-floating > label {
+    font-weight: 500;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* LoTW секция */
+.consent-section {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.lotw-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.status-item.success {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+}
+
+.status-item.warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #fd7e14;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-item.error {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.sync-info {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Позывные */
+.callsigns-info {
+    background: rgba(108, 117, 125, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.callsigns-container {
+    min-height: 120px;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 1rem;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.callsigns-container:empty::before {
+    content: "Нажмите 'Добавить позывной' для начала";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+    height: 80px;
+}
+
+.callsign-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.callsign-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.callsign-input {
+    flex: 1;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.remove-callsign-btn {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-callsign-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* Смена пароля */
+.password-change-form {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+/* Кнопки действий */
+.profile-actions {
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .profile-header {
+        padding: 1.5rem 0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .profile-title {
+        font-size: 1.4rem;
+    }
+    
+    .callsign-text {
+        font-size: 1.4rem;
+    }
+    
+    .profile-card .card-body {
+        padding: 1rem;
+    }
+    
+    .lotw-actions {
+        flex-direction: column;
+    }
+    
+    .callsign-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .remove-callsign-btn {
+        width: 100%;
+        border-radius: 6px;
+        height: auto;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.profile-card:nth-child(1) { animation-delay: 0.1s; }
+.profile-card:nth-child(2) { animation-delay: 0.2s; }
+.profile-card:nth-child(3) { animation-delay: 0.3s; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/profile_edit.js' %}"></script>
-{% endblock %}
+<script src="{% static 'js/profile_edit_new.js' %}"></script>
+<script>
+console.log('🔧 Дополнительная инициализация страницы профиля...');
 
+// Дополнительная проверка инициализации
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Страница профиля полностью загружена');
+    
+    // Проверяем, что основной скрипт загрузился
+    if (typeof ProfileEditor !== 'undefined') {
+        console.log('✅ ProfileEditor доступен');
+    } else {
+        console.warn('⚠️ ProfileEditor не найден - возможна ошибка загрузки основного скрипта');
+    }
+});
+</script>
+{% endblock %}
