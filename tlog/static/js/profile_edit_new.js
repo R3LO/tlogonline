@@ -1,11 +1,10 @@
 /**
- * Улучшенный JavaScript для страницы редактирования профиля
- * Исправлены все проблемы с добавлением позывных и улучшен UX
+ * Компактный JavaScript для страницы редактирования профиля
+ * Убрана функциональность смены пароля, сохранены остальные возможности
  * 
  * Функции:
  * - Добавление/удаление позывных для LoTW
  * - Проверка учетных данных LoTW
- * - Смена пароля
  * - Валидация форм
  * - Улучшенный UX с анимациями
  */
@@ -16,7 +15,7 @@ let isInitialized = false;
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Инициализация страницы профиля...');
+    console.log('🔧 Инициализация компактной страницы профиля...');
     
     if (isInitialized) return;
     isInitialized = true;
@@ -24,10 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         initializeProfile();
         initializeLoTW();
-        initializePasswordChange();
         initializeFormValidation();
         
-        console.log('✅ Страница профиля успешно инициализирована');
+        console.log('✅ Компактная страница профиля успешно инициализирована');
     } catch (error) {
         console.error('❌ Ошибка инициализации:', error);
     }
@@ -87,25 +85,10 @@ function checkLoTWErrorMessages() {
         return;
     }
 
-    // Если есть ошибка LoTW, обновляем статус и показываем вкладку
+    // Если есть ошибка LoTW, обновляем статус
     if (hasLoTWError) {
         console.log('🔧 Обновляем статус LoTW из-за ошибки');
         updateLoTWStatus('error', errorMessage);
-        
-        // Принудительно показываем вкладку
-        const settings = document.getElementById('lotw_settings');
-        const useLotwCheckbox = document.getElementById('use_lotw');
-        const consentCheckbox = document.getElementById('lotw_consent');
-        
-        if (settings) {
-            settings.style.display = 'block';
-        }
-        if (useLotwCheckbox) {
-            useLotwCheckbox.checked = true;
-        }
-        if (consentCheckbox) {
-            consentCheckbox.checked = true;
-        }
     }
 }
         
@@ -166,7 +149,7 @@ function loadCallsignsFromDatabase() {
         // Парсим JSON
         const parsedData = JSON.parse(rawData);
         
-        // Нормализуем данные
+        // Нормализуем данные (приводим к верхнему регистру)
         if (Array.isArray(parsedData)) {
             callsignsData = parsedData.map(callsign => {
                 if (typeof callsign === 'string') {
@@ -229,7 +212,7 @@ function addCallsign() {
     
     // Анимация появления
     item.style.opacity = '0';
-    item.style.transform = 'translateY(20px)';
+    item.style.transform = 'translateY(15px)';
     setTimeout(() => {
         item.style.transition = 'all 0.3s ease';
         item.style.opacity = '1';
@@ -250,6 +233,7 @@ function addCallsignToUI(callsignValue) {
     return item;
 }
 
+// ==== Новая реализация функции createCallsignItem ====
 function createCallsignItem(callsignValue) {
     const item = document.createElement('div');
     item.className = 'callsign-item';
@@ -257,7 +241,7 @@ function createCallsignItem(callsignValue) {
         <input type="text" class="form-control callsign-input"
                name="my_callsigns_names[]"
                value="${callsignValue || ''}"
-               placeholder="Позывной (латинские буквы, цифры, /)"
+               placeholder="Позывной (латинские буквы, цифры, /) - можно строчные"
                autocomplete="off"
                maxlength="20">
         <button type="button" class="btn remove-callsign-btn"
@@ -272,6 +256,7 @@ function createCallsignItem(callsignValue) {
     
     return item;
 }
+// ==== Конец новой реализации ====
 
 function removeCallsign(button) {
     console.log('🗑️ Удаляем позывной');
@@ -281,13 +266,13 @@ function removeCallsign(button) {
         // Анимация удаления
         item.style.transition = 'all 0.3s ease';
         item.style.opacity = '0';
-        item.style.transform = 'translateX(20px)';
+        item.style.transform = 'translateX(15px)';
         
         setTimeout(() => {
             item.remove();
             updateCallsignsData();
             console.log('✅ Позывной удален');
-        }, 300);
+        }, 250);
     }
 }
 
@@ -298,6 +283,7 @@ function initializeCallsignInput(input) {
     input.addEventListener('input', function() {
         const oldLength = this.value.length;
         
+        // Разрешаем строчные и заглавные латинские буквы, цифры и слеш
         // Применяем фильтрацию и приводим к верхнему регистру
         this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
         
@@ -325,7 +311,7 @@ function initializeCallsignInput(input) {
         }, 0);
     });
     
-    // Разрешенные символы при вводе
+    // Разрешенные символы при вводе (включая строчные буквы)
     input.addEventListener('keypress', function(e) {
         const char = String.fromCharCode(e.which);
         
@@ -339,8 +325,8 @@ function initializeCallsignInput(input) {
             return;
         }
         
-        // Разрешаем только латинские буквы, цифры и слеш
-        if (!/^[A-Z0-9\/]$/.test(char)) {
+        // Разрешаем латинские буквы (строчные и заглавные), цифры и слеш
+        if (!/^[A-Za-z0-9\/]$/.test(char)) {
             e.preventDefault();
             return;
         }
@@ -412,151 +398,29 @@ function updateCallsignsData() {
 // ========== УПРАВЛЕНИЕ LOTW ==========
 
 function initializeLoTW() {
-    const useLotwCheckbox = document.getElementById('use_lotw');
-    const consentCheckbox = document.getElementById('lotw_consent');
-    
-    if (useLotwCheckbox && consentCheckbox) {
-        // Синхронизация чекбоксов с умной логикой
-        useLotwCheckbox.addEventListener('change', function() {
-            console.log('🔄 Изменение use_lotw чекбокса:', this.checked);
-            
-            // Синхронизируем согласие
-            consentCheckbox.checked = this.checked;
-            
-            // Всегда вызываем toggleLotwSettings для обновления отображения
-            toggleLotwSettings();
-            updateLoTWValidation();
-        });
-        
-        consentCheckbox.addEventListener('change', function() {
-            console.log('🔄 Изменение consent чекбокса:', this.checked);
-            
-            // Синхронизируем основной чекбокс
-            useLotwCheckbox.checked = this.checked;
-            
-            // Всегда вызываем toggleLotwSettings для обновления отображения
-            toggleLotwSettings();
-            updateLoTWValidation();
-        });
-        
-        // Валидация полей LoTW
-        const lotwInputs = document.querySelectorAll('input[name="lotw_user"], input[name="lotw_password"]');
-        lotwInputs.forEach(input => {
-            input.addEventListener('input', updateLoTWValidation);
-            input.addEventListener('blur', updateLoTWValidation);
-        });
-        
-        // Инициализация состояния при загрузке
-        toggleLotwSettings();
-    }
-}
-
-// Проверяем есть ли сохраненные данные LoTW
-function hasLoTWData() {
-    const lotwUser = document.querySelector('input[name="lotw_user"]')?.value.trim();
-    const lotwPassword = document.querySelector('input[name="lotw_password"]')?.value.trim();
-    
-    // Проверяем поля ввода
-    const hasInputData = (lotwUser && lotwUser.length > 0) || (lotwPassword && lotwPassword.length > 0);
-    
-    // Проверяем статусные элементы
-    const hasSuccessStatus = document.querySelector('.status-item.success');
-    const hasWarningStatus = document.querySelector('.status-item.warning');
-    const hasInfoStatus = document.querySelector('.status-item.info');
-    
-    // Есть данные если есть поля ввода или любой статус LoTW
-    const hasStatusData = hasSuccessStatus || hasWarningStatus || hasInfoStatus;
-    
-    const result = hasInputData || hasStatusData;
-    console.log('🔍 Проверка данных LoTW:', {
-        lotwUser: !!lotwUser,
-        lotwPassword: !!lotwPassword,
-        hasInputData,
-        hasStatusData,
-        result
+    // Валидация полей LoTW (без чекбокса активации)
+    const lotwInputs = document.querySelectorAll('input[name="lotw_user"], input[name="lotw_password"]');
+    lotwInputs.forEach(input => {
+        input.addEventListener('input', updateLoTWValidation);
+        input.addEventListener('blur', updateLoTWValidation);
     });
-    
-    return result;
-}
-    
-function toggleLotwSettings() {
-    const checkbox = document.getElementById('use_lotw');
-    const settings = document.getElementById('lotw_settings');
-    const consentCheckbox = document.getElementById('lotw_consent');
-    
-    if (checkbox && settings) {
-        const isChecked = checkbox.checked;
-        
-        // Определяем, нужно ли показывать настройки
-        let shouldShow = false;
-        
-        // Показываем если:
-        // 1. Чекбокс "Активировать" включен ИЛИ
-        // 2. Согласие дано ИЛИ  
-        // 3. Есть сохраненные данные LoTW (включая неверные)
-        if (isChecked) {
-            shouldShow = true;
-        } else if (consentCheckbox && consentCheckbox.checked) {
-            shouldShow = true;
-        } else if (hasLoTWData()) {
-            shouldShow = true;
-        }
-        
-        // Синхронизируем чекбоксы, но только если пользователь явно не снял галочку
-        if (consentCheckbox && shouldShow && !consentCheckbox.checked) {
-            consentCheckbox.checked = true;
-        }
-        
-        settings.style.display = shouldShow ? 'block' : 'none';
-        
-        // Анимация появления
-        if (shouldShow) {
-            settings.style.opacity = '0';
-            settings.style.transform = 'translateY(-10px)';
-            setTimeout(() => {
-                settings.style.transition = 'all 0.3s ease';
-                settings.style.opacity = '1';
-                settings.style.transform = 'translateY(0)';
-            }, 10);
-        }
-        
-        console.log('🌐 LoTW настройки:', shouldShow ? 'показаны' : 'скрыты', 
-                   '| checked:', isChecked, '| consent:', consentCheckbox?.checked, '| hasData:', hasLoTWData());
-    }
 }
 
+// ==== Новая реализация функции updateLoTWValidation ====
 function updateLoTWValidation() {
-    const useLotwCheckbox = document.getElementById('use_lotw');
-    const consentCheckbox = document.getElementById('lotw_consent');
     const lotwUserInput = document.querySelector('input[name="lotw_user"]');
     const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
     
-    if (!useLotwCheckbox || !consentCheckbox) return;
-    
-    const isEnabled = useLotwCheckbox.checked;
-    
-    if (isEnabled) {
-        // Включаем валидацию полей LoTW
-        if (lotwUserInput) {
-            lotwUserInput.required = true;
-            lotwUserInput.addEventListener('input', validateLoTWUser);
-        }
-        if (lotwPasswordInput) {
-            lotwPasswordInput.required = true;
-        }
-    } else {
-        // Отключаем валидацию
-        if (lotwUserInput) {
-            lotwUserInput.required = false;
-            lotwUserInput.removeEventListener('input', validateLoTWUser);
-            clearValidationMessage(lotwUserInput);
-        }
-        if (lotwPasswordInput) {
-            lotwPasswordInput.required = false;
-            clearValidationMessage(lotwPasswordInput);
-        }
+    // Простая валидация полей LoTW (всегда включена)
+    if (lotwUserInput) {
+        lotwUserInput.required = true;
+        lotwUserInput.addEventListener('input', validateLoTWUser);
+    }
+    if (lotwPasswordInput) {
+        lotwPasswordInput.required = true;
     }
 }
+// ==== Конец новой реализации ====
 
 function validateLoTWUser() {
     const input = document.querySelector('input[name="lotw_user"]');
@@ -564,13 +428,13 @@ function validateLoTWUser() {
     
     const callsign = input.value.trim().toUpperCase();
     
-    // Простая проверка - только не пустой и содержит только разрешенные символы
+    // Простая проверка - только не пустой и содержит только разрешенные символы (включая строчные буквы)
     if (!callsign) {
         showValidationMessage(input, 'Логин LoTW не может быть пустым');
         return false;
     }
     
-    // Проверяем только разрешенные символы
+    // Проверяем только разрешенные символы (включая строчные буквы)
     const allowedPattern = /^[A-Z0-9\/]*$/;
     if (!allowedPattern.test(callsign)) {
         showValidationMessage(input, 'Используйте только латинские буквы, цифры и символ /');
@@ -581,6 +445,7 @@ function validateLoTWUser() {
     return true;
 }
 
+// ==== Новая реализация функции verifyLotwCredentials ====
 window.verifyLotwCredentials = function() {
     console.log('🔍 Проверяем учетные данные LoTW...');
     
@@ -592,9 +457,9 @@ window.verifyLotwCredentials = function() {
         return;
     }
 
-    // Убираем строгую валидацию - разрешаем любые символы кроме запрещенных
-    const allowedPattern = /^[A-Z0-9\/]*$/;
-    if (!allowedPattern.test(lotwUser.toUpperCase())) {
+    // Разрешаем строчные и заглавные латинские буквы
+    const allowedPattern = /^[A-Za-z0-9\/]*$/;
+    if (!allowedPattern.test(lotwUser)) {
         showNotification('❌ Используйте только латинские буквы, цифры и символ /', 'error');
         return;
     }
@@ -627,6 +492,8 @@ window.verifyLotwCredentials = function() {
     // Кнопка восстановится после перезагрузки страницы
 };
 
+// ==== Конец новой реализации ====
+
 window.deleteLotwCredentials = function() {
     if (confirm('🗑️ Вы уверены, что хотите удалить сохраненные логин и пароль LoTW?')) {
         console.log('🗑️ Удаляем учетные данные LoTW');
@@ -637,9 +504,9 @@ window.deleteLotwCredentials = function() {
     }
 };
 
-// ========== УПРАВЛЕНИЕ ПАРОЛЕМ ==========
+// ========== ВАЛИДАЦИЯ ФОРМЫ ==========
 
-function initializePasswordChange() {
+function initializeFormValidation() {
     const profileForm = document.getElementById('profile-edit-form');
     if (profileForm) {
         profileForm.addEventListener('submit', function(event) {
@@ -648,173 +515,12 @@ function initializePasswordChange() {
             updateFormValidation();
         });
     }
-    
-    // Валидация полей пароля в реальном времени
-    const passwordFields = ['old_password', 'new_password', 'confirm_password'];
-    passwordFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (field) {
-            field.addEventListener('input', validatePasswordFields);
-            field.addEventListener('blur', validatePasswordFields);
-        }
-    });
 }
-
-function validatePasswordFields() {
-    const oldPassword = document.getElementById('old_password');
-    const newPassword = document.getElementById('new_password');
-    const confirmPassword = document.getElementById('confirm_password');
     
-    // Очищаем все ошибки
-    [oldPassword, newPassword, confirmPassword].forEach(field => {
-        if (field) clearValidationMessage(field);
-    });
-    
-    let isValid = true;
-    
-    // Проверяем, хочет ли пользователь менять пароль
-    const wantsToChangePassword = newPassword && newPassword.value.trim().length > 0;
-    
-    if (wantsToChangePassword) {
-        // Если пользователь хочет менять пароль, проверяем все поля
-        
-        // Проверяем длину нового пароля
-        if (newPassword.value.length < 8) {
-            showValidationMessage(newPassword, 'Пароль должен содержать минимум 8 символов');
-            isValid = false;
-        }
-        
-        // Проверяем совпадение паролей
-        if (confirmPassword && newPassword.value !== confirmPassword.value) {
-            showValidationMessage(confirmPassword, 'Пароли не совпадают');
-            isValid = false;
-        }
-        
-        // Проверяем, что введен текущий пароль
-        if (oldPassword && !oldPassword.value.trim()) {
-            showValidationMessage(oldPassword, 'Введите текущий пароль');
-            isValid = false;
-        }
-    }
-    
-    return isValid;
-}
-
-window.changePassword = function() {
-    console.log('🔑 Смена пароля');
-    
-    const oldPassword = document.getElementById('old_password')?.value.trim();
-    const newPassword = document.getElementById('new_password')?.value.trim();
-    const confirmPassword = document.getElementById('confirm_password')?.value.trim();
-
-    // Проверяем, хочет ли пользователь менять пароль
-    const wantsToChangePassword = newPassword && newPassword.length > 0;
-    
-    if (!wantsToChangePassword) {
-        showNotification('ℹ️ Поля пароля не заполнены. Пароль не изменен.', 'info');
-        return;
-    }
-
-    if (!validatePasswordFields()) {
-        showNotification('❌ Исправьте ошибки в полях пароля', 'error');
-        return;
-    }
-    
-    if (!oldPassword) {
-        showNotification('⚠️ Введите текущий пароль', 'warning');
-        return;
-    }
-
-    // Показываем индикатор загрузки
-    const button = event.target;
-    const originalText = button.innerHTML;
-    button.innerHTML = '<span>⏳</span> Сохраняем...';
-    button.disabled = true;
-
-    const form = createCSRFProtectedForm('/profile/change-password/');
-    
-    const oldPasswordInput = document.createElement('input');
-    oldPasswordInput.type = 'hidden';
-    oldPasswordInput.name = 'old_password';
-    oldPasswordInput.value = oldPassword;
-    form.appendChild(oldPasswordInput);
-
-    const newPasswordInput = document.createElement('input');
-    newPasswordInput.type = 'hidden';
-    newPasswordInput.name = 'new_password';
-    newPasswordInput.value = newPassword;
-    form.appendChild(newPasswordInput);
-
-    const confirmPasswordInput = document.createElement('input');
-    confirmPasswordInput.type = 'hidden';
-    confirmPasswordInput.name = 'confirm_password';
-    confirmPasswordInput.value = confirmPassword;
-    form.appendChild(confirmPasswordInput);
-
-    document.body.appendChild(form);
-    form.submit();
-    
-    // Восстанавливаем кнопку через 10 секунд
-    setTimeout(() => {
-        button.innerHTML = originalText;
-        button.disabled = false;
-    }, 10000);
-};
-
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-
-function createCSRFProtectedForm(action) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = action;
-    form.style.display = 'none';
-
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
-    if (!csrfToken) {
-        showNotification('❌ Ошибка: CSRF токен не найден', 'error');
-        throw new Error('CSRF токен не найден');
-    }
-
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = csrfToken;
-    form.appendChild(csrfInput);
-
-    return form;
-}
-
-function showNotification(message, type = 'info') {
-    // Создаем уведомление
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-    alertDiv.style.position = 'fixed';
-    alertDiv.style.top = '20px';
-    alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.style.minWidth = '300px';
-    
-    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
-    alertDiv.innerHTML = `
-        ${icon} ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Автоматически удаляем через 5 секунд
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
 function updateFormValidation() {
     // Обновляем валидацию всей формы
     updateCallsignsData();
     updateLoTWValidation();
-    validatePasswordFields();
 }
 
 // ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========
@@ -822,10 +528,56 @@ function updateFormValidation() {
 // Делаем функции глобально доступными для onclick атрибутов
 window.addCallsign = addCallsign;
 window.removeCallsign = removeCallsign;
-window.toggleLotwSettings = toggleLotwSettings;
 window.verifyLotwCredentials = verifyLotwCredentials;
 window.deleteLotwCredentials = deleteLotwCredentials;
-window.changePassword = changePassword;
+
+// Вспомогательные функции
+function createCSRFProtectedForm(action) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = action;
+    form.style.display = 'none';
+
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+    }
+
+    return form;
+}
+
+function showNotification(message, type = 'info') {
+    // Создаем уведомление
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    
+    const icon = type === 'success' ? '✅' : 
+                 type === 'error' ? '❌' : 
+                 type === 'warning' ? '⚠️' : 'ℹ️';
+    
+    alertDiv.innerHTML = `
+        <span>${icon}</span> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    // Вставляем в начало формы
+    const form = document.getElementById('profile-edit-form');
+    if (form) {
+        form.insertBefore(alertDiv, form.firstChild);
+        
+        // Автоматически скрываем через 5 секунд
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+}
 
 // Экспорт для отладки
 window.ProfileEditor = {
@@ -837,4 +589,4 @@ window.ProfileEditor = {
     showNotification
 };
 
-console.log('🚀 Улучшенный скрипт страницы профиля загружен');
+console.log('🚀 Компактный скрипт страницы профиля загружен');

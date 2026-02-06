@@ -141,49 +141,78 @@ def change_password(request):
     """
     Смена пароля пользователя через Django admin
     """
+    print(f"🔐 Функция change_password вызвана. Method: {request.method}")
+    
     if not request.user.is_authenticated:
+        print(f"❌ Пользователь не авторизован")
         messages.error(request, 'Вы должны быть авторизованы')
         return redirect('login_page')
+
+    print(f"✅ Пользователь авторизован: {request.user.username}")
 
     if request.method == 'POST':
         old_password = request.POST.get('old_password', '')
         new_password = request.POST.get('new_password', '')
         confirm_password = request.POST.get('confirm_password', '')
 
+        print(f"📝 Получены данные для смены пароля:")
+        print(f"   old_password: {'*' * len(old_password) if old_password else 'ПУСТОЙ'}")
+        print(f"   new_password: {'*' * len(new_password) if new_password else 'ПУСТОЙ'}")
+        print(f"   confirm_password: {'*' * len(confirm_password) if confirm_password else 'ПУСТОЙ'}")
+
         # Проверяем старый пароль
+        if not old_password:
+            print(f"❌ Текущий пароль не введен")
+            messages.error(request, 'Введите текущий пароль')
+            return redirect('profile_update')
+
         if not request.user.check_password(old_password):
+            print(f"❌ Неверный текущий пароль")
             messages.error(request, 'Неверный текущий пароль')
             return redirect('profile_update')
 
+        print(f"✅ Текущий пароль верный")
+
         # Валидация нового пароля
         if not new_password:
+            print(f"❌ Новый пароль не введен")
             messages.error(request, 'Новый пароль не может быть пустым')
             return redirect('profile_update')
 
         if len(new_password) < 8:
+            print(f"❌ Слишком короткий пароль: {len(new_password)} символов")
             messages.error(request, 'Пароль должен содержать минимум 8 символов')
             return redirect('profile_update')
 
         if new_password != confirm_password:
+            print(f"❌ Пароли не совпадают")
             messages.error(request, 'Пароли не совпадают')
             return redirect('profile_update')
+
+        print(f"✅ Валидация пройдена, сохраняем новый пароль...")
 
         try:
             # Используем Django метод для смены пароля
             request.user.set_password(new_password)
             request.user.save()
+            print(f"✅ Пароль успешно сохранен в базе данных")
 
             # Обновляем сессию пользователя чтобы он оставался авторизованным
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
+            print(f"✅ Сессия пользователя обновлена")
 
-            messages.success(request, 'Пароль успешно изменён')
+            messages.success(request, '✅ Пароль успешно изменён')
             return redirect('profile_update')
         except Exception as e:
+            print(f"❌ Ошибка при изменении пароля: {e}")
+            import traceback
+            traceback.print_exc()
             messages.error(request, f'Ошибка при изменении пароля: {str(e)}')
             return redirect('profile_update')
 
     # Если GET запрос, просто перенаправляем на профиль
+    print(f"ℹ️ GET запрос, перенаправляем на профиль")
     return redirect('profile_update')
 
 
