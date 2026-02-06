@@ -1,11 +1,15 @@
 /**
  * Компактный JavaScript для страницы редактирования профиля
- * Убрана функциональность смены пароля, сохранены остальные возможности
+ * 
+ * ВАЖНО: Поля LoTW НЕ обязательны для сохранения формы
+ * - Основная информация и позывные сохраняются всегда
+ * - LoTW данные сохраняются только если заполнены
+ * - Валидация LoTW не блокирует отправку формы
  * 
  * Функции:
  * - Добавление/удаление позывных для LoTW
  * - Проверка учетных данных LoTW
- * - Валидация форм
+ * - Валидация форм (без блокировки LoTW)
  * - Улучшенный UX с анимациями
  */
 
@@ -23,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         initializeProfile();
         initializeLoTW();
-        initializeFormValidation();
+        updateFormValidation();
         
         console.log('✅ Компактная страница профиля успешно инициализирована');
     } catch (error) {
@@ -37,6 +41,14 @@ function initializeProfile() {
     loadCallsignsFromDatabase();
     renderCallsignsInUI();
     updateCallsignsData();
+    
+    // Сразу убираем блокировки с полей LoTW при инициализации
+    updateFormValidation();
+    
+    // Показываем информационное сообщение пользователю
+    setTimeout(() => {
+        showNotification('💡 LoTW поля не обязательны - основная информация сохранится в любом случае', 'info');
+    }, 500);
     
     // Отладочная информация о полях формы
     console.log('📋 Отладочная информация о полях формы:');
@@ -54,7 +66,7 @@ function initializeProfile() {
     // Периодически проверяем сообщения для обновления статуса
     setInterval(checkLoTWErrorMessages, 1000);
 }
-
+        
 // Проверяем наличие сообщений об ошибке LoTW и сохраняем вкладку открытой
 function checkLoTWErrorMessages() {
     const alerts = document.querySelectorAll('.alert');
@@ -135,7 +147,7 @@ function loadCallsignsFromDatabase() {
         callsignsData = [];
         return;
     }
-
+    
     try {
         const rawData = jsonField.value.trim();
         console.log('📡 Загружаем данные позывных:', rawData);
@@ -249,7 +261,7 @@ function createCallsignItem(callsignValue) {
             ✖
         </button>
     `;
-    
+
     // Инициализируем обработчики
     const input = item.querySelector('.callsign-input');
     initializeCallsignInput(input);
@@ -404,6 +416,11 @@ function initializeLoTW() {
         input.addEventListener('input', updateLoTWValidation);
         input.addEventListener('blur', updateLoTWValidation);
     });
+    
+    // Сразу настраиваем поля как необязательные
+    updateLoTWValidation();
+    
+    console.log('🌐 LoTW инициализирован - поля не обязательны');
 }
 
 // ==== Новая реализация функции updateLoTWValidation ====
@@ -411,14 +428,20 @@ function updateLoTWValidation() {
     const lotwUserInput = document.querySelector('input[name="lotw_user"]');
     const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
     
-    // Простая валидация полей LoTW (всегда включена)
+    // Поля LoTW НЕ обязательны - убираем required и блокировки
     if (lotwUserInput) {
-        lotwUserInput.required = true;
+        lotwUserInput.required = false;
+        lotwUserInput.setCustomValidity(''); // Убираем блокировки
+        clearValidationMessage(lotwUserInput);
         lotwUserInput.addEventListener('input', validateLoTWUser);
     }
     if (lotwPasswordInput) {
-        lotwPasswordInput.required = true;
+        lotwPasswordInput.required = false;
+        lotwPasswordInput.setCustomValidity(''); // Убираем блокировки
+        clearValidationMessage(lotwPasswordInput);
     }
+    
+    console.log('🔓 LoTW поля освобождены от обязательности');
 }
 // ==== Конец новой реализации ====
 
@@ -426,22 +449,35 @@ function validateLoTWUser() {
     const input = document.querySelector('input[name="lotw_user"]');
     if (!input) return;
     
-    const callsign = input.value.trim().toUpperCase();
+    const callsign = input.value.trim();
     
-    // Простая проверка - только не пустой и содержит только разрешенные символы (включая строчные буквы)
+    // Если поле пустое - не показываем ошибку (поле не обязательно)
     if (!callsign) {
-        showValidationMessage(input, 'Логин LoTW не может быть пустым');
-        return false;
+        clearValidationMessage(input);
+        input.setCustomValidity(''); // Убираем любые блокировки
+        return true;
     }
     
-    // Проверяем только разрешенные символы (включая строчные буквы)
-    const allowedPattern = /^[A-Z0-9\/]*$/;
+    // Если есть значение - проверяем только разрешенные символы (включая строчные буквы)
+    const allowedPattern = /^[A-Za-z0-9\/]*$/;
     if (!allowedPattern.test(callsign)) {
-        showValidationMessage(input, 'Используйте только латинские буквы, цифры и символ /');
+        // Для LoTW полей НЕ блокируем отправку формы - только визуальная подсказка
+        input.setCustomValidity(''); // Убираем блокировку
+        input.style.borderColor = '#dc3545';
+        
+        // Показываем подсказку без блокировки
+        clearValidationMessage(input);
+        const feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = 'Используйте только латинские буквы, цифры и символ /';
+        feedback.style.display = 'block';
+        input.parentNode.appendChild(feedback);
+        
         return false;
     }
     
     clearValidationMessage(input);
+    input.setCustomValidity(''); // Убираем любые блокировки
     return true;
 }
 
@@ -470,7 +506,7 @@ window.verifyLotwCredentials = function() {
     button.innerHTML = '<span>⏳</span> Проверяем...';
     button.disabled = true;
 
-    // Создаем форму для отправки данных проверки
+    // Создаем отдельную форму для проверки LoTW (не влияет на основную форму)
     const form = createCSRFProtectedForm('/profile/verify-lotw/');
     
     const userInput = document.createElement('input');
@@ -491,7 +527,6 @@ window.verifyLotwCredentials = function() {
     // НЕ восстанавливаем кнопку автоматически - пусть пользователь сам решает
     // Кнопка восстановится после перезагрузки страницы
 };
-
 // ==== Конец новой реализации ====
 
 window.deleteLotwCredentials = function() {
@@ -506,21 +541,41 @@ window.deleteLotwCredentials = function() {
 
 // ========== ВАЛИДАЦИЯ ФОРМЫ ==========
 
+// Updated function to reflect new validation logic
 function initializeFormValidation() {
     const profileForm = document.getElementById('profile-edit-form');
     if (profileForm) {
+        // НЕ блокируем отправку формы - позволяем сохранить основную информацию
         profileForm.addEventListener('submit', function(event) {
-            console.log('📝 Отправка формы профиля');
+            console.log('📝 Отправка формы профиля (LoTW поля не обязательны)');
+            
+            // Обновляем данные позывных
             updateCallsignsData();
-            updateFormValidation();
+            
+            // Очищаем любые блокировки от валидации LoTW
+            const lotwUserInput = document.querySelector('input[name="lotw_user"]');
+            const lotwPasswordInput = document.querySelector('input[name="lotw_password"]');
+            
+            if (lotwUserInput) {
+                lotwUserInput.setCustomValidity('');
+                clearValidationMessage(lotwUserInput);
+                lotwUserInput.required = false; // Гарантируем, что поле не обязательно
+            }
+            if (lotwPasswordInput) {
+                lotwPasswordInput.setCustomValidity('');
+                clearValidationMessage(lotwPasswordInput);
+                lotwPasswordInput.required = false; // Гарантируем, что поле не обязательно
+            }
+            
+            // Форма отправляется без блокировок
+            console.log('✅ Форма готова к отправке - сохранение возможно без LoTW данных');
+            
+            // Показываем уведомление пользователю
+            setTimeout(() => {
+                showNotification('💾 Форма отправляется. Основная информация и позывные будут сохранены.', 'info');
+            }, 100);
         });
     }
-}
-    
-function updateFormValidation() {
-    // Обновляем валидацию всей формы
-    updateCallsignsData();
-    updateLoTWValidation();
 }
 
 // ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========

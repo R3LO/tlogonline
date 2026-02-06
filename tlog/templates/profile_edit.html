@@ -103,19 +103,15 @@
             <div class="col-lg-4">
                 <div class="profile-card-compact">
                     <div class="card-header-compact">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><span>🌐</span> LoTW</h5>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="use_lotw"
-                                       name="use_lotw" {% if profile.lotw_user or profile.lotw_password %}checked{% endif %}
-                                       onchange="toggleLotwSettings()">
-                                <label class="form-check-label" for="use_lotw">
-                                    Активировать
-                                </label>
-                            </div>
-                        </div>
+                        <h5 class="mb-0"><span>🌐</span> LoTW</h5>
                     </div>
                     <div class="card-body-compact">
+                        <div class="lotw-info-notice mb-3">
+                            <p class="text-muted small">
+                                <span>ℹ️</span> LoTW настройки не обязательны - основная информация сохранится в любом случае
+                            </p>
+                        </div>
+
                         <div class="lotw-credentials-compact">
                             <div class="form-floating-compact mb-2">
                                 <input type="text" class="form-control-compact" name="lotw_user"
@@ -127,44 +123,6 @@
                                 <input type="password" class="form-control-compact" name="lotw_password"
                                        value="{{ profile.lotw_password|default:'' }}" placeholder="Пароль от LoTW">
                                 <label><span>🔒</span> Пароль LoTW</label>
-                            </div>
-                        </div>
-
-                        <div class="lotw-actions-compact mb-2">
-                            <button type="button" class="btn btn-primary btn-sm me-2" onclick="verifyLotwCredentials()">
-                                <span>🔍</span> Проверить
-                            </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteLotwCredentials()">
-                                <span>🗑️</span> Удалить
-                            </button>
-                        </div>
-
-                        <div class="lotw-status-compact" id="lotw_status_container">
-                            {% if profile.lotw_user and profile.lotw_password %}
-                                {% if profile.lotw_chk_pass %}
-                                    <div class="status-item success">
-                                        LoTW настроен и проверен
-                                    </div>
-                                {% else %}
-                                    <div class="status-item warning">
-                                        Требуется проверка пароля
-                                    </div>
-                                {% endif %}
-                            {% else %}
-                                <div class="status-item info">
-                                    Настройте логин и пароль LoTW
-                                </div>
-                            {% endif %}
-                            
-                            <div class="sync-info">
-                                <small class="text-muted">
-                                    <strong>Последняя синхронизация:</strong>
-                                    {% if profile.lotw_lastsync %}
-                                        {{ profile.lotw_lastsync|date:"d.m.Y H:i" }}
-                                    {% else %}
-                                        не проводилась
-                                    {% endif %}
-                                </small>
                             </div>
                         </div>
                     </div>
