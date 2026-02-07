@@ -359,11 +359,14 @@ html body .navbar-nav .nav-link.active {
         margin-top: 1rem;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         padding-top: 1rem;
-        display: none !important;
+    }
+    
+    .navbar-collapse:not(.show) {
+        display: none;
     }
     
     .navbar-collapse.show {
-        display: block !important;
+        display: block;
     }
     
     .navbar-nav {
@@ -372,11 +375,6 @@ html body .navbar-nav .nav-link.active {
     
     .navbar-nav .nav-link {
         padding: 0.75rem 1rem;
-    }
-    
-    /* Принудительно скрываем navbar-collapse по умолчанию */
-    .navbar:not(.show) .navbar-collapse {
-        display: none !important;
     }
 }
     

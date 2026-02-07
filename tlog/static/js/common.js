@@ -12,17 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Добавляем класс для анимаций загрузки
         document.body.classList.add('js-loaded');
         
-        // Инициализация dropdown меню
-        const dropdowns = document.querySelectorAll('.dropdown-toggle');
-        dropdowns.forEach(dropdown => {
-            new bootstrap.Dropdown(dropdown);
-        });
-        
-        // Инициализация collapse элементов
-        const collapses = document.querySelectorAll('.collapse');
-        collapses.forEach(collapse => {
-            new bootstrap.Collapse(collapse);
-        });
+        // Bootstrap 5 автоматически обрабатывает dropdown и collapse через data-атрибуты
+        // Ручная инициализация не требуется
     }
     
     // Инициализация tooltips
@@ -191,26 +182,5 @@ window.throttle = function(func, limit) {
 };
 
 // Специальная инициализация мобильного меню
-document.addEventListener('DOMContentLoaded', function() {
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    const navbarCollapse = document.querySelector('.navbar-collapse');
-    
-    if (navbarToggler && navbarCollapse) {
-        // Обеспечиваем правильную инициализацию мобильного меню
-        const collapse = new bootstrap.Collapse(navbarCollapse, {
-            toggle: false
-        });
-        
-        // Принудительно скрываем меню при загрузке на мобильных
-        if (window.innerWidth <= 991) {
-            collapse.hide();
-        }
-        
-        // Обработчик изменения размера окна
-        window.addEventListener('resize', window.debounce(function() {
-            if (window.innerWidth > 991) {
-                collapse.hide();
-            }
-        }, 250));
-    }
-});
+// Bootstrap 5 автоматически обрабатывает navbar через data-bs-toggle,
+// дополнительная инициализация не требуется
