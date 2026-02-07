@@ -419,8 +419,63 @@
                             <div class="stat-number text-warning fw-bold h5 mb-0">{{ states|default:0 }}</div>
                         </div>
                     </div>
+
+                    <!-- Штатов USA -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🇺🇸</span>
+                                <span class="fw-medium">Штатов USA</span>
+                            </div>
+                            <div class="stat-number text-info fw-bold h5 mb-0">{{ usa_states|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Провинций Китая -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🇨🇳</span>
+                                <span class="fw-medium">Провинций Китая</span>
+                            </div>
+                            <div class="stat-number text-danger fw-bold h5 mb-0">{{ china_states|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Префектур Японии -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🇯🇵</span>
+                                <span class="fw-medium">Префектур Японии</span>
+                            </div>
+                            <div class="stat-number text-secondary fw-bold h5 mb-0">{{ japan_states|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Районов Австралии -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🇦🇺</span>
+                                <span class="fw-medium">Районов Австралии</span>
+                            </div>
+                            <div class="stat-number text-success fw-bold h5 mb-0">{{ australia_states|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Провинций Канады -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🇨🇦</span>
+                                <span class="fw-medium">Провинций Канады</span>
+                            </div>
+                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ canada_states|default:0 }}</div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <hr class="my-3">
                 
                 <div class="text-center">

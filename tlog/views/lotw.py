@@ -170,9 +170,35 @@ def lotw_page(request):
         r150s_entities = lotw_qso_sorted.exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
         context['r150s_entities'] = r150s_entities
         
-        # Уникальные регионы России
-        states = lotw_qso_sorted.exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        # Уникальные регионы России (только для российских DXCC)
+        russian_dxcc = ['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD']
+        states = lotw_qso_sorted.filter(dxcc__in=russian_dxcc).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
         context['states'] = states
+        
+        # Уникальные штаты USA (только для американских DXCC)
+        usa_dxcc = ['UNITED STATES OF AMERICA', 'ALASKA', 'HAWAII', 'GUAM']
+        usa_states = lotw_qso_sorted.filter(dxcc__in=usa_dxcc).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['usa_states'] = usa_states
+        
+        # Уникальные провинции Китая (только для китайского DXCC)
+        china_states = lotw_qso_sorted.filter(dxcc='CHINA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['china_states'] = china_states
+
+        # Уникальные префектуры Японии (только для японского DXCC)
+        japan_states = lotw_qso_sorted.filter(dxcc='JAPAN').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['japan_states'] = japan_states
+        
+        # Уникальные районы Австралии (только для австралийского DXCC)
+        australia_states = lotw_qso_sorted.filter(dxcc='AUSTRALIA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['australia_states'] = australia_states
+
+        # Уникальные провинции Канады (только для канадского DXCC)
+        canada_states = lotw_qso_sorted.filter(dxcc='CANADA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['canada_states'] = canada_states
+        
+        # Уникальные штаты США
+        usa_states = lotw_qso_sorted.filter(dxcc='UNITED STATES OF AMERICA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['usa_states'] = usa_states
         
         
     except Exception as e:
