@@ -16,7 +16,7 @@ from .views import (
     qo100_dxcc, qo100_converter, qo100_converter_download,
     cosmos_diploma, cosmos_download,
     lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
-    blocked_page
+    export_lotw_adif, blocked_page
 )
 
 urlpatterns = [
@@ -40,6 +40,7 @@ urlpatterns = [
     path('profile/change-password/', change_password, name='change_password'),
     path('dashboard/profile/change-password/', change_password, name='change_password_legacy'),
     path('lotw/', lotw_page, name='lotw_page'),
+    path('lotw/export/', export_lotw_adif, name='export_lotw_adif'),
     path('dashboard/adif-upload/', adif_upload, name='adif_upload'),
     path('dashboard/adif-delete/<uuid:upload_id>/', delete_adif_uploads, name='delete_adif_uploads'),
     path('dashboard/chat/list/', chat_list, name='chat_list'),

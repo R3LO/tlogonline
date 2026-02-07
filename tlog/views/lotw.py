@@ -3,9 +3,10 @@ Views для LoTW (Logbook of the World)
 """
 import json
 import requests
+from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.translation import gettext as _
 
@@ -631,6 +632,167 @@ def get_qso_details(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def export_lotw_adif(request):
+    """
+    Экспорт только LoTW подтвержденных QSO в ADIF файл с учетом фильтров
+    """
+    try:
+        # Получаем параметры фильтрации (те же что в lotw view)
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(user=request.user, lotw='Y', app_lotw_rxqsl__isnull=False)
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+        
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+        
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+        
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+        
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+        
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+        
+        # Сортируем по дате LoTW подтверждения
+        lotw_qso = lotw_qso.order_by('-app_lotw_rxqsl', '-date', '-time')
+
+        # Формируем ADIF файл (используем существующую функцию из logbook)
+        adif_content = generate_lotw_adif_content(lotw_qso)
+
+        # Получаем позывной пользователя для имени файла
+        try:
+            user_callsign = request.user.radio_profile.callsign or request.user.username
+        except:
+            user_callsign = request.user.username
+
+        # Формируем имя файла с указанием LoTW
+        filename = f"{user_callsign}_LoTW.adi"
+
+        response = HttpResponse(adif_content, content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    except Exception as e:
+        messages.error(request, f'Ошибка при формировании ADIF файла: {str(e)}')
+        return redirect('lotw_page')
+
+
+def generate_lotw_adif_content(qso_queryset):
+    """
+    Генерирует содержимое ADIF файла для LoTW записей с дополнительными полями LoTW
+    """
+    lines = []
+
+    # Заголовок ADIF для LoTW
+    lines.append('ADIF Export from TLog - LoTW Records Only')
+    lines.append('Copyright 2025-2026 by Vladimir Pavlenko R3LO')
+    lines.append('ADIF_VER:5 3.1.0')
+    lines.append(f'PROGRAMID: TLog')
+    lines.append(f'CREATED_TIMESTAMP:{datetime.now().strftime("%Y%m%d %H%M%S")}')
+    lines.append('<EOH>')
+
+    # Записи QSO
+    for qso in qso_queryset:
+        record_parts = []
+
+        # Обязательные поля
+        if qso.callsign:
+            record_parts.append(f'<CALL:{len(qso.callsign)}>{qso.callsign}')
+
+        if qso.date:
+            date_str = qso.date.strftime('%Y%m%d')
+            record_parts.append(f'<QSO_DATE:8>{date_str}')
+
+        if qso.time:
+            time_str = qso.time.strftime('%H%M%S')
+            record_parts.append(f'<TIME_ON:6>{time_str}')
+
+        if qso.my_callsign:
+            record_parts.append(f'<STATION_CALLSIGN:{len(qso.my_callsign)}>{qso.my_callsign}')
+            record_parts.append(f'<MY_CALLSIGN:{len(qso.my_callsign)}>{qso.my_callsign}')
+
+        if qso.mode:
+            record_parts.append(f'<MODE:{len(qso.mode)}>{qso.mode}')
+
+        if qso.band:
+            record_parts.append(f'<BAND:{len(qso.band)}>{qso.band}')
+
+        if qso.frequency and qso.frequency > 0:
+            freq_str = f"{qso.frequency:.6f}".rstrip('0').rstrip('.')
+            record_parts.append(f'<FREQ:{len(freq_str)}>{freq_str}')
+
+        if qso.rst_sent:
+            record_parts.append(f'<RST_SENT:{len(qso.rst_sent)}>{qso.rst_sent}')
+
+        if qso.rst_rcvd:
+            record_parts.append(f'<RST_RCVD:{len(qso.rst_rcvd)}>{qso.rst_rcvd}')
+
+        if qso.gridsquare:
+            record_parts.append(f'<GRIDSQUARE:{len(qso.gridsquare)}>{qso.gridsquare}')
+
+        if qso.my_gridsquare:
+            record_parts.append(f'<MY_GRIDSQUARE:{len(qso.my_gridsquare)}>{qso.my_gridsquare}')
+
+        if qso.sat_name:
+            record_parts.append(f'<SAT_NAME:{len(qso.sat_name)}>{qso.sat_name}')
+
+        if qso.prop_mode:
+            record_parts.append(f'<PROP_MODE:{len(qso.prop_mode)}>{qso.prop_mode}')
+
+        if qso.cqz:
+            record_parts.append(f'<CQZ:{len(str(qso.cqz))}>{qso.cqz}')
+
+        if qso.ituz:
+            record_parts.append(f'<ITUZ:{len(str(qso.ituz))}>{qso.ituz}')
+
+        if qso.continent:
+            record_parts.append(f'<CONT:{len(qso.continent)}>{qso.continent}')
+
+        if qso.r150s:
+            record_parts.append(f'<COUNTRY:{len(qso.r150s)}>{qso.r150s}')
+
+        if qso.dxcc:
+            record_parts.append(f'<DXCC:{len(qso.dxcc)}>{qso.dxcc}')
+
+        if qso.state:
+            record_parts.append(f'<STATE:{len(qso.state)}>{qso.state}')
+
+        if qso.iota:
+            record_parts.append(f'<IOTA:{len(qso.iota)}>{qso.iota}')
+
+        if qso.vucc_grids:
+            record_parts.append(f'<VUCC_GRIDS:{len(qso.vucc_grids)}>{qso.vucc_grids}')
+
+        # LoTW специфичные поля
+        if qso.lotw == 'Y':
+            record_parts.append(f'<LOTW_RXQSL:1>Y')
+            
+        if qso.app_lotw_rxqsl:
+            lotw_date_str = qso.app_lotw_rxqsl.strftime('%Y%m%d')
+            record_parts.append(f'<LOTW_QSLRDATE:8>{lotw_date_str}')
+
+        # Добавляем запись
+        if record_parts:
+            lines.append(' '.join(record_parts) + ' <EOR>')
+
+    return '\n'.join(lines)
 
 
 @login_required

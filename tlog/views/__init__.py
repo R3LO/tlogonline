@@ -38,7 +38,8 @@ from .lotw import (
     delete_lotw_credentials,
     get_qso_details,
     lotw_filter_api,
-    get_user_callsigns
+    get_user_callsigns,
+    export_lotw_adif
 )
 
 from .qo100 import (
