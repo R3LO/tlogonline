@@ -143,7 +143,7 @@
                             <button type="button" class="btn btn-primary btn-sm me-2" onclick="verifyLotwCredentials()">
                                 <span>🔍</span> Проверить
                             </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteLotwCredentials()">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteLotwCredentials(event)">
                                 <span>🗑️</span> Удалить
                             </button>
                         </div>
@@ -205,6 +205,8 @@
 
                         <!-- Скрытые поля -->
                         <input type="hidden" name="my_callsigns_json" id="my_callsigns_json" value='{{ profile_json|safe }}'>
+                        <!-- Информация о статусе LoTW для валидации -->
+                        <input type="hidden" id="lotw_verified" value="{{ profile.lotw_chk_pass|yesno:'true,false' }}">
                     </div>
                 </div>
             </div>
@@ -419,7 +421,7 @@
 /* Индикатор защищенного поля */
 .password-field[data-ignore-autofill="true"]::placeholder {
     color: #6c757d;
-    font-style: italic;
+    font-style: normal;
 }
 
 /* Состояния для парольного поля */

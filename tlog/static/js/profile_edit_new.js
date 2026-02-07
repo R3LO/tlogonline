@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         initializeProfile();
         initializeLoTW();
-        updateFormValidation();
         
         console.log('✅ Компактная страница профиля успешно инициализирована');
     } catch (error) {
@@ -42,8 +41,8 @@ function initializeProfile() {
     renderCallsignsInUI();
     updateCallsignsData();
     
-    // Сразу убираем блокировки с полей LoTW при инициализации
-    updateFormValidation();
+    // Инициализируем валидацию формы с проверкой LoTW + позывные
+    initializeFormValidation();
     
     // Инициализируем состояние пароля LoTW
     initializePasswordToggle();
@@ -422,12 +421,44 @@ function updateCallsignsData() {
 function initializeFormValidation() {
     const profileForm = document.getElementById('profile-edit-form');
     if (profileForm) {
-        // НЕ блокируем отправку формы - позволяем сохранить основную информацию
         profileForm.addEventListener('submit', function(event) {
-            console.log('📝 Отправка формы профиля (LoTW поля не обязательны)');
+            console.log('📝 Отправка формы профиля');
+            
+            // ===== ПРОВЕРКА: Если это удаление LoTW - не блокируем =====
+            if (event.submitter && event.submitter.onclick && 
+                event.submitter.onclick.toString().includes('deleteLotwCredentials')) {
+                console.log('✅ Обнаружено удаление LoTW - пропускаем валидацию');
+                return; // Пропускаем валидацию для удаления LoTW
+            }
             
             // ===== ВАЖНО: Принудительно обновляем данные позывных =====
             updateCallsignsData();
+            
+            // ===== НОВАЯ ВАЛИДАЦИЯ: Проверка LoTW с позывными =====
+            const lotwVerified = document.getElementById('lotw_verified')?.value === 'true';
+            const hasCallsigns = callsignsData.length > 0;
+            
+            console.log(`🔍 Проверка валидации LoTW:`);
+            console.log(`   lotw_verified: ${lotwVerified}`);
+            console.log(`   callsigns_count: ${callsignsData.length}`);
+            console.log(`   has_callsigns: ${hasCallsigns}`);
+            
+            // Если LoTW настроен (проверен), но нет позывных - блокируем отправку
+            if (lotwVerified && !hasCallsigns) {
+                event.preventDefault();
+                
+                // Показываем сообщение об ошибке
+                showNotification('❌ Добавьте хотя бы один позывной синхронизации для LoTW', 'error');
+                
+                // Прокручиваем к секции позывных
+                const callsignsSection = document.querySelector('.callsigns-container-compact');
+                if (callsignsSection) {
+                    callsignsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                console.log('❌ Отправка формы заблокирована: LoTW настроен без позывных');
+                return false;
+            }
             
             // Проверяем, что данные попали в скрытое поле
             const jsonField = document.getElementById('my_callsigns_json');
@@ -442,20 +473,24 @@ function initializeFormValidation() {
             if (lotwUserInput) {
                 lotwUserInput.setCustomValidity('');
                 clearValidationMessage(lotwUserInput);
-                lotwUserInput.required = false; // Гарантируем, что поле не обязательно
+                lotwUserInput.required = false; // Гарантируем, что поле не обязано
             }
             if (lotwPasswordInput) {
                 lotwPasswordInput.setCustomValidity('');
                 clearValidationMessage(lotwPasswordInput);
-                lotwPasswordInput.required = false; // Гарантируем, что поле не обязательно
+                lotwPasswordInput.required = false; // Гарантируем, что поле не обязано
             }
             
-            // Форма отправляется без блокировок
-            console.log('✅ Форма готова к отправке - сохранение возможно без LoTW данных');
+            // Форма отправляется без блокировок (если прошла валидацию)
+            console.log('✅ Форма готова к отправке');
             
             // Показываем уведомление пользователю
             setTimeout(() => {
-                showNotification('💾 Форма отправляется. Основная информация и позывные будут сохранены.', 'info');
+                if (lotwVerified && hasCallsigns) {
+                    showNotification('💾 Форма отправляется. LoTW и позывные настроены корректно.', 'success');
+                } else {
+                    showNotification('💾 Форма отправляется. Основная информация и позывные будут сохранены.', 'info');
+                }
             }, 100);
         });
     }
@@ -509,7 +544,45 @@ window.verifyLotwCredentials = function() {
     // НЕ восстанавливаем кнопку автоматически - пусть пользователь сам решает
     // Кнопка восстановится после перезагрузки страницы
 };
-window.deleteLotwCredentials = deleteLotwCredentials;
+/**
+ * Удаление учетных данных LoTW
+ */
+window.deleteLotwCredentials = function(event) {
+    // Предотвращаем всплытие и默认行为
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    if (confirm('Вы уверены, что хотите удалить сохраненные логин и пароль LoTW?')) {
+        console.log('🗑️ Удаление учетных данных LoTW');
+        
+        // Создаем форму для отправки данных удаления
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/profile/delete-lotw/';
+        form.style.display = 'none';
+
+        // Добавляем CSRF токен
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+        if (!csrfToken) {
+            showNotification('❌ Ошибка: CSRF токен не найден', 'error');
+            return;
+        }
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        // Показываем индикатор загрузки
+        showNotification('⏳ Удаление учетных данных LoTW...', 'info');
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+};
 
 // Вспомогательные функции
 function createCSRFProtectedForm(action) {

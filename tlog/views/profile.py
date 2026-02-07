@@ -112,6 +112,15 @@ def profile_update(request):
                 print(f"❌ Ошибка парсинга JSON позывных: {e}")
                 new_my_callsigns = []
 
+            # ===== ВАЛИДАЦИЯ: Если LoTW настроен (проверен), должны быть позывные =====
+            # Проверяем: если lotw_chk_pass=True (уже проверен ранее) и нет позывных - ошибка
+            if profile.lotw_chk_pass and (not new_my_callsigns or len(new_my_callsigns) == 0):
+                messages.error(request, '❌ Добавьте хотя бы один позывной синхронизации для LoTW')
+                return render(request, 'profile_edit.html', {
+                    'profile': profile,
+                    'profile_json': json.dumps(profile.my_callsigns, ensure_ascii=False),
+                })
+
             # Устанавливаем данные профиля
             profile.lotw_lastsync = None
             profile.my_callsigns = new_my_callsigns
