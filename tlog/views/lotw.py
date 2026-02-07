@@ -172,11 +172,11 @@ def lotw_page(request):
         
         # Уникальные регионы России (только для российских DXCC)
         russian_dxcc = ['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD']
-        states = lotw_qso_sorted.filter(dxcc__in=russian_dxcc).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
-        context['states'] = states
+        ru_states = lotw_qso_sorted.filter(dxcc__in=russian_dxcc).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        context['ru_states'] = ru_states
         
         # Уникальные штаты USA (только для американских DXCC)
-        usa_dxcc = ['UNITED STATES OF AMERICA', 'ALASKA', 'HAWAII', 'GUAM']
+        usa_dxcc = ['UNITED STATES OF AMERICA', 'ALASKA', 'HAWAII']
         usa_states = lotw_qso_sorted.filter(dxcc__in=usa_dxcc).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
         context['usa_states'] = usa_states
         
@@ -196,15 +196,15 @@ def lotw_page(request):
         canada_states = lotw_qso_sorted.filter(dxcc='CANADA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
         context['canada_states'] = canada_states
         
-        # Уникальные штаты США
-        usa_states = lotw_qso_sorted.filter(dxcc='UNITED STATES OF AMERICA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
-        context['usa_states'] = usa_states
-        
-        
     except Exception as e:
         context['dxcc_entities'] = 0
         context['r150s_entities'] = 0
-        context['states'] = 0
+        context['ru_states'] = 0
+        context['usa_states'] = 0
+        context['china_states'] = 0
+        context['japan_states'] = 0
+        context['australia_states'] = 0
+        context['canada_states'] = 0
     
     # Award credits
     award_credits = lotw_confirmed_count
