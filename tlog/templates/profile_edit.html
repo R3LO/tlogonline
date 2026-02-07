@@ -121,8 +121,16 @@
                             
                             <div class="form-floating-compact mb-2">
                                 <div class="password-input-container">
-                                    <input type="password" class="form-control-compact password-field" name="lotw_password"
-                                           value="{{ profile.lotw_password|default:'' }}" placeholder="Пароль от LoTW" id="lotw_password_field">
+                                    <input type="password" class="form-control-compact password-field" 
+                                           name="lotw_password" 
+                                           value="{{ profile.lotw_password|default:'' }}" 
+                                           placeholder="Пароль от LoTW" 
+                                           id="lotw_password_field"
+                                           autocomplete="new-password"
+                                           autocapitalize="off"
+                                           autocorrect="off"
+                                           spellcheck="false"
+                                           data-ignore-autofill="true">
                                     <label><span>🔒</span> Пароль LoTW</label>
                                     <button type="button" class="password-toggle" onclick="togglePasswordVisibility('lotw_password_field', this)">
                                         <span class="toggle-icon">👁️</span>
@@ -398,6 +406,20 @@
 
 .password-toggle.visible .toggle-icon {
     opacity: 1;
+}
+
+/* Защита от автозаполнения */
+.password-field[data-ignore-autofill="true"] {
+    background-image: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+/* Индикатор защищенного поля */
+.password-field[data-ignore-autofill="true"]::placeholder {
+    color: #6c757d;
+    font-style: italic;
 }
 
 /* Состояния для парольного поля */
@@ -687,6 +709,58 @@ function togglePasswordVisibility(fieldId, button) {
 
 // Делаем функцию глобально доступной
 window.togglePasswordVisibility = togglePasswordVisibility;
+
+// ========== ЗАЩИТА ОТ АВТОЗАПОЛНЕНИЯ БРАУЗЕРА ==========
+
+/**
+ * Обрабатывает автозаполнение браузера для поля LoTW пароля
+ */
+function handleBrowserAutofill() {
+    const lotwPasswordField = document.getElementById('lotw_password_field');
+    const originalValue = "{{ profile.lotw_password|default:'' }}";
+    
+    if (lotwPasswordField && originalValue) {
+        // Сохраняем оригинальное значение из базы
+        let databaseValue = originalValue;
+        
+        // Обработчик фокуса - проверяем, не изменилось ли значение
+        lotwPasswordField.addEventListener('focus', function() {
+            console.log('🔍 Проверка автозаполнения для поля LoTW пароля');
+            
+            // Если поле изменилось и не пустое, возможно это автозаполнение
+            if (this.value !== databaseValue && this.value.length > 0) {
+                console.log('⚠️ Обнаружено возможное автозаполнение браузера');
+                
+                // Показываем уведомление пользователю
+                setTimeout(() => {
+                    if (confirm('🔒 Браузер предлагает автозаполнение. Хотите очистить поле и ввести пароль вручную?')) {
+                        this.value = '';
+                        this.focus();
+                    } else {
+                        // Пользователь выбрал оставить автозаполненное значение
+                        databaseValue = this.value;
+                    }
+                }, 100);
+            }
+        });
+        
+        // Обработчик изменения значения
+        lotwPasswordField.addEventListener('input', function() {
+            // Если поле стало пустым, восстанавливаем из базы
+            if (this.value === '' && databaseValue) {
+                this.value = databaseValue;
+                console.log('🔄 Восстановлено значение из базы данных');
+            }
+        });
+        
+        console.log('🛡️ Защита от автозаполнения LoTW пароля активирована');
+    }
+}
+
+// Инициализация защиты от автозаполнения
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(handleBrowserAutofill, 500); // Небольшая задержка для стабилизации DOM
+});
 
 console.log('🔒 Функция переключения пароля загружена');
 </script>
