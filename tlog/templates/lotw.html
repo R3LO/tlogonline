@@ -387,6 +387,15 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
+                    <!-- Информация о фильтрах -->
+                    <div class="col-12">
+                        <div class="text-center mb-2">
+                            <small class="text-muted">
+                                <span class="me-1">🔍</span>С учетом фильтров
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Всего QSO CFM -->
                     <div class="col-12">
                         <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
@@ -397,7 +406,7 @@
                             <div class="stat-number text-dark fw-bold h5 mb-0">{{ total_qso_count|default:0 }}</div>
                         </div>
                     </div>
-                    
+
                     <!-- Уникальных позывных -->
                     <div class="col-12">
                         <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
@@ -584,13 +593,8 @@
                         </div>
                         {% endif %}
                     </div>
-                </div>
+                </div>               
                 
-                <div class="text-center mt-3">
-                    <small class="text-muted">
-                        <span class="me-1">🔍</span>С учетом фильтров
-                    </small>
-                </div>
             </div>
         </div>
 </div>
