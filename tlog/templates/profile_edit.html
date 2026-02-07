@@ -120,9 +120,14 @@
                             </div>
                             
                             <div class="form-floating-compact mb-2">
-                                <input type="password" class="form-control-compact" name="lotw_password"
-                                       value="{{ profile.lotw_password|default:'' }}" placeholder="Пароль от LoTW">
-                                <label><span>🔒</span> Пароль LoTW</label>
+                                <div class="password-input-container">
+                                    <input type="password" class="form-control-compact password-field" name="lotw_password"
+                                           value="{{ profile.lotw_password|default:'' }}" placeholder="Пароль от LoTW" id="lotw_password_field">
+                                    <label><span>🔒</span> Пароль LoTW</label>
+                                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('lotw_password_field', this)">
+                                        <span class="toggle-icon">👁️</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -341,6 +346,62 @@
 .form-floating-compact.mb-2 {
     margin-bottom: 0.75rem !important;
 }
+
+/* Контейнер для поля пароля с иконкой */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.password-input-container .form-control-compact {
+    padding-right: 45px !important;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+}
+
+.password-toggle:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.password-toggle:active {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.toggle-icon {
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+/* Состояния кнопки переключения */
+.password-toggle.hidden .toggle-icon {
+    opacity: 0.6;
+}
+
+.password-toggle.visible .toggle-icon {
+    opacity: 1;
+}
+
+/* Состояния для парольного поля */
+/* Используем стандартное поведение браузера - переключение type между 'password' и 'text' */
 
 /* Компактная LoTW секция */
 .consent-section-compact {
@@ -580,5 +641,53 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('⚠️ ProfileEditor не найден');
     }
 });
+
+// ========== ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ВИДИМОСТИ ПАРОЛЯ ==========
+
+/**
+ * Переключает видимость пароля для поля с указанным ID
+ * @param {string} fieldId - ID поля пароля
+ * @param {HTMLElement} button - Кнопка переключения
+ */
+function togglePasswordVisibility(fieldId, button) {
+    const passwordField = document.getElementById(fieldId);
+    if (!passwordField || !button) {
+        console.error('❌ Поле пароля или кнопка не найдены');
+        return;
+    }
+    
+    const toggleIcon = button.querySelector('.toggle-icon');
+    
+    if (passwordField.type === 'password') {
+        // Показываем пароль
+        passwordField.type = 'text';
+        button.classList.remove('hidden');
+        button.classList.add('visible');
+        toggleIcon.textContent = '🙈';
+        
+        // Стилизуем кнопку как активную
+        button.style.background = 'rgba(102, 126, 234, 0.1)';
+        button.style.color = '#667eea';
+        
+        console.log('👁️ Пароль показан');
+    } else {
+        // Скрываем пароль
+        passwordField.type = 'password';
+        button.classList.remove('visible');
+        button.classList.add('hidden');
+        toggleIcon.textContent = '👁️';
+        
+        // Возвращаем кнопку к исходному состоянию
+        button.style.background = 'transparent';
+        button.style.color = '';
+        
+        console.log('🙈 Пароль скрыт');
+    }
+}
+
+// Делаем функцию глобально доступной
+window.togglePasswordVisibility = togglePasswordVisibility;
+
+console.log('🔒 Функция переключения пароля загружена');
 </script>
 {% endblock %}

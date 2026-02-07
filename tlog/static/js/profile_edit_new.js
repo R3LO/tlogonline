@@ -45,6 +45,9 @@ function initializeProfile() {
     // Сразу убираем блокировки с полей LoTW при инициализации
     updateFormValidation();
     
+    // Инициализируем состояние пароля LoTW
+    initializePasswordToggle();
+    
     // Показываем информационное сообщение пользователю
     setTimeout(() => {
         showNotification('💡 LoTW поля не обязательны - основная информация сохранится в любом случае', 'info');
@@ -556,6 +559,72 @@ function showNotification(message, type = 'info') {
     }
 }
 
+// ========== ПЕРЕКЛЮЧЕНИЕ ВИДИМОСТИ ПАРОЛЯ ==========
+
+/**
+ * Переключает видимость пароля для поля с указанным ID
+ * @param {string} fieldId - ID поля пароля
+ * @param {HTMLElement} button - Кнопка переключения
+ */
+function togglePasswordVisibility(fieldId, button) {
+    const passwordField = document.getElementById(fieldId);
+    if (!passwordField || !button) {
+        console.error('❌ Поле пароля или кнопка не найдены');
+        return;
+    }
+    
+    const toggleIcon = button.querySelector('.toggle-icon');
+    
+    if (passwordField.type === 'password') {
+        // Показываем пароль
+        passwordField.type = 'text';
+        button.classList.remove('hidden');
+        button.classList.add('visible');
+        toggleIcon.textContent = '🙈';
+        
+        // Стилизуем кнопку как активную
+        button.style.background = 'rgba(102, 126, 234, 0.1)';
+        button.style.color = '#667eea';
+        
+        console.log('👁️ Пароль показан');
+    } else {
+        // Скрываем пароль
+        passwordField.type = 'password';
+        button.classList.remove('visible');
+        button.classList.add('hidden');
+        toggleIcon.textContent = '👁️';
+        
+        // Возвращаем кнопку к исходному состоянию
+        button.style.background = 'transparent';
+        button.style.color = '';
+        
+        console.log('🙈 Пароль скрыт');
+    }
+}
+
+// Делаем функцию глобально доступной для onclick атрибутов
+window.togglePasswordVisibility = togglePasswordVisibility;
+
+/**
+ * Инициализирует состояние переключателя пароля
+ */
+function initializePasswordToggle() {
+    const passwordField = document.getElementById('lotw_password_field');
+    const toggleButton = document.querySelector('.password-toggle');
+    
+    if (passwordField && toggleButton) {
+        // Устанавливаем начальное состояние - пароль скрыт (type="password")
+        toggleButton.classList.add('hidden');
+        
+        console.log('🔒 Переключатель пароля LoTW инициализирован');
+    } else {
+        console.warn('⚠️ Элементы переключения пароля не найдены');
+    }
+}
+
+// Делаем функцию доступной глобально
+window.initializePasswordToggle = initializePasswordToggle;
+
 // Экспорт для отладки
 window.ProfileEditor = {
     callsignsData,
@@ -563,7 +632,9 @@ window.ProfileEditor = {
     removeCallsign,
     updateCallsignsData,
     validateCallsign,
-    showNotification
+    showNotification,
+    togglePasswordVisibility,
+    initializePasswordToggle
 };
 
 console.log('🚀 Компактный скрипт страницы профиля загружен');
