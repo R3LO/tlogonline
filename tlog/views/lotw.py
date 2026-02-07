@@ -57,11 +57,8 @@ def lotw_page(request):
         sat_name_filter = request.GET.get('sat_name', '').strip()
         page = int(request.GET.get('page', 1))
         
-    # Общая статистика QSO
-    total_qso_count = QSO.objects.filter(user=request.user).count()
-    context['total_qso_count'] = total_qso_count
-    
     # Базовый QuerySet для QSO с LoTW подтверждением
+    # Базовый запрос для LoTW подтвержденных QSO
     lotw_qso = QSO.objects.filter(user=request.user, lotw='Y', app_lotw_rxqsl__isnull=False)
     
     # Применяем фильтры
@@ -162,6 +159,14 @@ def lotw_page(request):
     
     # Статистика для отфильтрованных записей
     try:
+        # Всего QSO CFM с учетом фильтров
+        total_qso_count = lotw_qso_sorted.count()
+        context['total_qso_count'] = total_qso_count
+        
+        # Уникальные позывные с учетом фильтров
+        unique_callsigns_count = lotw_qso_sorted.exclude(callsign__isnull=True).exclude(callsign='').values('callsign').distinct().count()
+        context['unique_callsigns_count'] = unique_callsigns_count
+        
         # Уникальные DXCC entities
         dxcc_entities = lotw_qso_sorted.exclude(dxcc__isnull=True).exclude(dxcc='').values('dxcc').distinct().count()
         context['dxcc_entities'] = dxcc_entities
@@ -196,23 +201,63 @@ def lotw_page(request):
         canada_states = lotw_qso_sorted.filter(dxcc='CANADA').exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
         context['canada_states'] = canada_states
         
+        # Уникальные зоны CQ и ITU (исправленный запрос)
+        from django.db.models import IntegerField
+        from django.db.models.functions import Coalesce
+        
+        # CQ зоны
+        cq_zones = lotw_qso_sorted.exclude(cqz__isnull=True).values('cqz').distinct().count()
+        context['cq_zones'] = cq_zones
+        
+        # ITU зоны
+        itu_zones = lotw_qso_sorted.exclude(ituz__isnull=True).values('ituz').distinct().count()
+        context['itu_zones'] = itu_zones
+        
+        # Уникальные QTH локаторы (оптимизированная версия)
+        from django.db.models.functions import Substr
+        
+        # Получаем уникальные первые 4 символа из gridsquare
+        gridsquare_locators = set(
+            lotw_qso_sorted.exclude(gridsquare__isnull=True).exclude(gridsquare='').annotate(
+                locator_4=Substr('gridsquare', 1, 4)
+            ).values_list('locator_4', flat=True).distinct()
+        )
+        
+        # Оптимизированная обработка vucc_grids через генератор
+        vucc_qsos = lotw_qso_sorted.exclude(vucc_grids__isnull=True).exclude(vucc_grids='').values_list('vucc_grids', flat=True)
+        vucc_locators = set()
+        
+        # Используем генератор вместо цикла для экономии памяти
+        for vucc_grids in vucc_qsos:
+            if vucc_grids:
+                # Разбиваем и берем первые 4 символа эффективно
+                locators = (loc.strip()[:4] for loc in vucc_grids.split(',') if loc.strip() and len(loc.strip()) >= 4)
+                vucc_locators.update(locators)
+        
+        # Объединяем результаты
+        all_locators = gridsquare_locators.union(vucc_locators)
+        context['qth_locators'] = len(all_locators)
+        
+        # Уникальные IOTA
+        iota_count = lotw_qso_sorted.exclude(iota__isnull=True).exclude(iota='').values('iota').distinct().count()
+        context['iota_count'] = iota_count
+        
     except Exception as e:
-        context['dxcc_entities'] = 0
-        context['r150s_entities'] = 0
-        context['ru_states'] = 0
-        context['usa_states'] = 0
-        context['china_states'] = 0
-        context['japan_states'] = 0
-        context['australia_states'] = 0
-        context['canada_states'] = 0
+        # Устанавливаем все значения в 0 при ошибке
+        context.update({
+            'dxcc_entities': 0, 'r150s_entities': 0, 'ru_states': 0, 'usa_states': 0,
+            'china_states': 0, 'japan_states': 0, 'australia_states': 0, 'canada_states': 0,
+            'cq_zones': 0, 'itu_zones': 0, 'qth_locators': 0, 'iota_count': 0,
+            'total_qso_count': 0, 'unique_callsigns_count': 0
+        })
     
     # Award credits
     award_credits = lotw_confirmed_count
     context['award_credits'] = award_credits
     
-    # Получаем профиль пользователя
+    # Получаем профиль пользователя (оптимизировано с select_related)
     try:
-        profile = RadioProfile.objects.get(user=request.user)
+        profile = RadioProfile.objects.select_related('user').get(user=request.user)
         context['profile'] = profile
     except RadioProfile.DoesNotExist:
         # Создаем пустой профиль если его нет
@@ -364,18 +409,18 @@ def get_user_callsigns(request):
         user_id = user.id
         username = user.username
         
-        # Получаем уникальные позывные пользователя из базы данных QSO
-        qsos_for_user = QSO.objects.filter(user=user_id)
+        # Получаем уникальные позывные пользователя (оптимизировано)
+        # Используем только нужные поля и индексы
+        qsos_for_user = QSO.objects.filter(user=user_id).only('my_callsign')
         
-        # Фильтруем записи с непустыми my_callsign
+        # Фильтруем записи с непустыми my_callsign (используем быстрые запросы)
         my_callsigns_query = qsos_for_user.exclude(
             my_callsign__isnull=True
         ).exclude(
             my_callsign__exact=''
         )
         
-        
-        # Получаем уникальные позывные
+        # Получаем уникальные позывные (оптимизировано)
         my_callsigns = list(my_callsigns_query.values_list('my_callsign', flat=True).distinct())
         my_callsigns.sort()
         
@@ -421,8 +466,16 @@ def lotw_filter_api(request):
         sat_name_filter = data.get('sat_name', '').strip()
         page = int(data.get('page', 1))
 
-        # Базовый QuerySet для QSO с LoTW подтверждением
-        lotw_qso = QSO.objects.filter(user=request.user, lotw='Y', app_lotw_rxqsl__isnull=False)
+        # Базовый QuerySet для QSO с LoTW подтверждением (оптимизировано)
+        # Используем только нужные поля для минимизации передачи данных
+        lotw_qso = QSO.objects.filter(
+            user=request.user, 
+            lotw='Y', 
+            app_lotw_rxqsl__isnull=False
+        ).only(
+            'id', 'date', 'time', 'my_callsign', 'callsign', 'band', 'frequency', 
+            'mode', 'gridsquare', 'r150s', 'state', 'prop_mode', 'sat_name', 'app_lotw_rxqsl'
+        )
         
         # Применяем фильтры
         if my_callsign_filter:
@@ -529,9 +582,14 @@ def get_qso_details(request):
         if not qso_id:
             return JsonResponse({'error': 'ID QSO не указан'}, status=400)
 
-        # Получаем QSO запись
+        # Получаем QSO запись (оптимизировано - только нужные поля)
         try:
-            qso = QSO.objects.get(id=qso_id, user=request.user)
+            qso = QSO.objects.only(
+                'id', 'date', 'time', 'my_callsign', 'callsign', 'frequency', 'band', 'mode',
+                'rst_sent', 'rst_rcvd', 'my_gridsquare', 'gridsquare', 'continent', 'state',
+                'prop_mode', 'sat_name', 'r150s', 'dxcc', 'cqz', 'ituz', 'vucc_grids', 
+                'iota', 'lotw', 'paper_qsl', 'app_lotw_rxqsl', 'created_at', 'updated_at'
+            ).get(id=qso_id, user=request.user)
         except QSO.DoesNotExist:
             return JsonResponse({'error': 'QSO не найдено'}, status=404)
 

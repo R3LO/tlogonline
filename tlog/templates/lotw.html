@@ -387,6 +387,28 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
+                    <!-- Всего QSO CFM -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">📊</span>
+                                <span class="fw-medium">Всего QSO CFM</span>
+                            </div>
+                            <div class="stat-number text-dark fw-bold h5 mb-0">{{ total_qso_count|default:0 }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Уникальных позывных -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">📻</span>
+                                <span class="fw-medium">Уникальных позывных</span>
+                            </div>
+                            <div class="stat-number text-success fw-bold h5 mb-0">{{ unique_callsigns_count|default:0 }}</div>
+                        </div>
+                    </div>
+
                     <!-- DXCC стран -->
                     <div class="col-12">
                         <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
@@ -408,7 +430,7 @@
                             <div class="stat-number text-success fw-bold h5 mb-0">{{ r150s_entities|default:0 }}</div>
                         </div>
                     </div>
-                    
+
                     <!-- Регионов России -->
                     <div class="col-12">
                         <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
@@ -472,6 +494,50 @@
                                 <span class="fw-medium">Провинций Канады</span>
                             </div>
                             <div class="stat-number text-warning fw-bold h5 mb-0">{{ canada_states|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Зон CQ -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🌍</span>
+                                <span class="fw-medium">Зон CQ</span>
+                            </div>
+                            <div class="stat-number text-primary fw-bold h5 mb-0">{{ cq_zones|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Зон ITU -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">📡</span>
+                                <span class="fw-medium">Зон ITU</span>
+                            </div>
+                            <div class="stat-number text-info fw-bold h5 mb-0">{{ itu_zones|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- QTH локаторов -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">📍</span>
+                                <span class="fw-medium">QTH локаторов</span>
+                            </div>
+                            <div class="stat-number text-success fw-bold h5 mb-0">{{ qth_locators|default:0 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- IOTA -->
+                    <div class="col-12">
+                        <div class="stat-item p-3 border rounded bg-light d-flex align-items-center justify-content-between">
+                            <div class="stat-label small text-muted">
+                                <span class="me-2">🏝️</span>
+                                <span class="fw-medium">IOTA</span>
+                            </div>
+                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ iota_count|default:0 }}</div>
                         </div>
                     </div>
                 </div>
