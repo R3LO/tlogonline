@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <style>
 /* Стили для иконки просмотра */
 .stat-view-icon {
@@ -156,9 +157,9 @@
                 <!-- Последние QSO с LoTW подтверждением -->                
                 {% if recent_lotw_qso %}
                 <div class="qso-table-container">
-                    <div class="lotw-qso-table">
+                    <div class="lotw-qso-table-wrapper">
                         <div class="table-responsive">
-                            <table class="table table-striped qso-table">
+                            <table class="table table-striped rounded overflow-hidden qso-table">
                                 <thead class="qso-table-header">
                                     <tr>
                                         <th class="col-date"><span>📅</span> {% trans "Date" %}</th>
@@ -178,7 +179,7 @@
                                 </thead>
                                 <tbody>
                                     {% for qso in recent_lotw_qso %}
-                                    <tr>
+                                    <tr class="qso-row">
                                         <td class="col-date" data-label="📅 {% trans "Date" %}">
                                             <small>{{ qso.date|date:"d.m.Y" }}</small>
                                         </td>
@@ -215,7 +216,7 @@
                                         </td>
                                         <td class="col-r150s" data-label="🏆 Р-150-С">
                                             {% if qso.r150s %}
-                                                {{ qso.r150s }}
+                                                <small>{{ qso.r150s }}</small>
                                             {% else %}
                                                 <small class="text-muted">-</small>
                                             {% endif %}
@@ -245,10 +246,12 @@
                                             <span class="lotw-confirmed" title="{% trans 'LoTW Confirmed' %}">✅</span>
                                         </td>
                                         <td class="col-actions" data-label="👁️">
-                                            <button type="button" class="btn btn-sm btn-outline-info view-qso-btn" 
-                                                    data-qso-id="{{ qso.id }}" title="{% trans 'Просмотр QSO' %}">
-                                                <span>👁️</span>
-                                            </button>
+                                            <div class="action-buttons">
+                                                <button type="button" class="btn btn-sm btn-outline-info view-qso-btn" 
+                                                        data-qso-id="{{ qso.id }}" title="{% trans 'Просмотр QSO' %}">
+                                                    <span>👁️</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -629,6 +632,7 @@
                 
             </div>
         </div>
+    </div>
 </div>
 
 <!-- Компактное модальное окно для просмотра QSO -->
@@ -767,9 +771,6 @@
             </div>
         </div>
     </div>
-</div>
-
-
 </div>
 
 <!-- Модальное окно регионов России LoTW -->

@@ -270,23 +270,27 @@
                     <div class="collapse qso-table-container" id="qsoTable">
                         {% if qso_list %}
                         <div class="table-responsive">
-                            <table class="table table-striped rounded overflow-hidden qso-table table-dark-gradient">
-                                <thead class="table-dark">
+                            <table class="table table-striped rounded overflow-hidden qso-table">
+                                <thead class="qso-table-header">
                                     <tr>
-                                        <th><span>📅</span> Дата</th>
-                                        <th><span>📻</span> Позывной</th>
-                                        <th><span>📡</span> Диапазон</th>
-                                        <th><span>📶</span> Вид</th>
-                                        <th><span>📡</span> RST</th>
-                                        <th><span>📍</span> QTH</th>
+                                        <th class="col-date"><span>📅</span> Дата</th>
+                                        <th class="col-callsign"><span>📻</span> Позывной</th>
+                                        <th class="col-band"><span>📡</span> Диапазон</th>
+                                        <th class="col-mode"><span>📶</span> Вид</th>
+                                        <th class="col-rst"><span>📡</span> RST</th>
+                                        <th class="col-qth"><span>📍</span> QTH</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for qso in qso_list %}
                                     <tr class="qso-row">
-                                        <td><small>{{ qso.date|date:"d.m.Y" }}</small></td>
-                                        <td><span class="callsign-badge">{{ qso.callsign }}</span></td>
-                                        <td>
+                                        <td class="col-date" data-label="📅 Дата">
+                                            <small>{{ qso.date|date:"d.m.Y" }}</small>
+                                        </td>
+                                        <td class="col-callsign" data-label="📻 Позывной">
+                                            <span class="callsign-badge">{{ qso.callsign }}</span>
+                                        </td>
+                                        <td class="col-band" data-label="📡 Диапазон">
                                             {% if qso.band %}
                                                 <span class="band-badge">{{ qso.band }}</span>
                                             {% elif qso.frequency %}
@@ -297,9 +301,15 @@
                                                 <span class="text-muted">-</span>
                                             {% endif %}
                                         </td>
-                                        <td><span class="mode-badge">{{ qso.mode }}</span></td>
-                                        <td>{% if qso.rst_rcvd %}{{ qso.rst_rcvd }}{% else %}-{% endif %}</td>
-                                        <td>{% if qso.gridsquare %}{{ qso.gridsquare }}{% else %}<small class="text-muted">-</small>{% endif %}</td>
+                                        <td class="col-mode" data-label="📶 Вид">
+                                            <span class="mode-badge">{{ qso.mode }}</span>
+                                        </td>
+                                        <td class="col-rst" data-label="📡 RST">
+                                            {% if qso.rst_rcvd %}{{ qso.rst_rcvd }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="col-qth" data-label="📍 QTH">
+                                            {% if qso.gridsquare %}{{ qso.gridsquare }}{% else %}<small class="text-muted">-</small>{% endif %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

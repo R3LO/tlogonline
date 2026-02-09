@@ -511,9 +511,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <table class="table table-hover table-striped">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;">№</th>
+                            <th class="col-num">№</th>
                             <th>Позывной</th>
-                            <th style="width: 150px; text-align: center;">Регионов</th>
+                            <th class="col-regions-count">Регионов</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${index + 1}</td>
                     <td><span class="callsign-badge">${item.callsign}</span></td>
-                    <td style="text-align: center;">
+                    <td class="col-regions-count">
                         <button type="button" class="btn btn-link count-link p-0 fw-bold"
                                 data-callsign="${item.callsign}"
                                 data-regions='${JSON.stringify(item.regions).replace(/'/g, "&#39;")}'>

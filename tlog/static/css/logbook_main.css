@@ -3,127 +3,7 @@
    ===================================== */
 
 /* Специфические стили для страницы журнала */
-
-
-.logbook-table-header {
-    /* Стили для заголовка таблицы журнала */
-    background: var(--dark) !important;
-    color: white;
-}
-
-
-.qso-row:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Стили для бейджей */
-.callsign-badge {
-    /* Стили для бейджей позывных */
-    background: var(--primary);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
-.band-badge {
-    /* Стили для бейджей диапазонов */
-    background: var(--success);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
-.mode-badge {
-    /* Стили для бейджей видов связи */
-    background: var(--info);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
-/* Стили для колонок таблицы */
-.col-date { width: 100px; }
-.col-time { width: 80px; }
-.col-my-callsign { width: 120px; }
-.col-callsign { width: 120px; }
-.col-band { width: 100px; }
-.col-mode { width: 80px; }
-.col-rst { width: 80px; }
-.col-qth { width: 100px; }
-.col-r150s { width: 80px; }
-.col-lotw { width: 60px; }
-.col-propsat { width: 120px; }
-.col-actions { width: auto; min-width: 80px; }
-
-/* Адаптивные стили для таблицы */
-@media (max-width: 768px) {
-    .qso-table thead {
-        display: none;
-    }
-    
-    .qso-table tbody tr {
-        display: block;
-        margin-bottom: var(--padding-md);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-    }
-    
-    .qso-table tbody td {
-        display: block;
-        text-align: right;
-        padding: var(--padding-sm) var(--padding-md);
-        border-bottom: 1px solid var(--border-color);
-        position: relative;
-    }
-    
-    .qso-table tbody td:before {
-        content: attr(data-label);
-        position: absolute;
-        left: var(--padding-md);
-        width: calc(50% - var(--padding-md));
-        text-align: left;
-        font-weight: 600;
-        color: var(--text-muted);
-    }
-    
-    .qso-table tbody td:last-child {
-        border-bottom: none;
-    }
-    
-    .col-r150s {
-        min-width: 80px;
-    }
-}
-
-/* Стили для кнопок действий */
-.qso-table .col-actions .action-buttons,
-.lotw-qso-table .col-actions .action-buttons,
-.col-actions .action-buttons {
-    display: flex !important;
-    gap: 0.25rem !important;
-    justify-content: center !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    flex-direction: row !important;
-}
-
-.qso-table .col-actions .action-buttons .btn,
-.lotw-qso-table .col-actions .action-buttons .btn,
-.col-actions .action-buttons .btn {
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    display: inline-flex !important;
-    flex: 0 0 auto !important;
-    width: auto !important;
-    height: auto !important;
-    white-space: nowrap !important;
-}
+/* Все стили таблиц QSO перенесены в qso-tables.css для единообразия */
 
 /* Стили для сообщений */
 .messages {
@@ -265,7 +145,6 @@
     }
     
     .qso-table .col-actions .action-buttons,
-    .lotw-qso-table .col-actions .action-buttons,
     .col-actions .action-buttons {
         flex-direction: row !important;
         flex-wrap: nowrap !important;

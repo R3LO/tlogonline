@@ -541,31 +541,8 @@
 }
 
 /* =====================================
-   ТАБЛИЦЫ
+   ТАБЛИЦЫ - базовые стили Bootstrap
    ===================================== */
-
-.table {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    background: var(--white);
-}
-
-.table thead th {
-    background: var(--bg-gradient);
-    color: var(--white);
-    border: none;
-    font-weight: var(--font-weight-semibold);
-    padding: var(--padding-md) var(--padding-sm);
-}
-
-.table tbody td {
-    padding: var(--padding-md) var(--padding-sm);
-    border-color: var(--light-border);
-    vertical-align: middle;
-}
-
-/* Hover эффекты для таблиц убраны */
 
 /* =====================================
    ФИЛЬТРЫ
@@ -916,14 +893,6 @@
     margin-bottom: 0;
 }
 
-/* Улучшенные бейджи для таблиц */
-.table .badge {
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-xs);
-    padding: var(--padding-xs) var(--padding-sm);
-    border-radius: var(--radius-sm);
-}
-
 /* Стили для статуса в карточках */
 .card-body .alert {
     margin-bottom: var(--padding-md);
@@ -1026,37 +995,6 @@
     display: flex;
     gap: var(--padding-sm);
     flex-wrap: wrap;
-}
-
-.qso-table .col-actions .action-buttons .btn,
-.lotw-qso-table .col-actions .action-buttons .btn,
-.col-actions .action-buttons .btn {
-    flex: 0 0 auto !important;
-    min-width: auto !important;
-    width: auto !important;
-    height: auto !important;
-    white-space: nowrap !important;
-}
-
-@media (max-width: 576px) {
-    .qso-table .col-actions .action-buttons,
-    .lotw-qso-table .col-actions .action-buttons,
-    .col-actions .action-buttons {
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 0.125rem !important;
-        justify-content: center !important;
-    }
-    
-    .qso-table .col-actions .action-buttons .btn,
-    .lotw-qso-table .col-actions .action-buttons .btn,
-    .col-actions .action-buttons .btn {
-        flex: 0 0 auto !important;
-        min-width: auto !important;
-        width: auto !important;
-        height: auto !important;
-        white-space: nowrap !important;
-    }
 }
 
 /* Матрица QSO */
