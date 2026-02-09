@@ -50,12 +50,13 @@ def lotw_page(request):
             sat_name_filter = request.POST.get('sat_name', '').strip()
             page = int(request.POST.get('page', 1))
     else:
-        my_callsign_filter = request.GET.get('my_callsign', '').strip()
-        search_callsign = request.GET.get('search_callsign', '').strip()
-        search_qth = request.GET.get('search_qth', '').strip()
-        band_filter = request.GET.get('band', '').strip()
-        mode_filter = request.GET.get('mode', '').strip()
-        sat_name_filter = request.GET.get('sat_name', '').strip()
+        # GET запрос - берем из параметров URL или из кук
+        my_callsign_filter = request.GET.get('my_callsign', '').strip() or request.COOKIES.get('lotw_filter_my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip() or request.COOKIES.get('lotw_filter_search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip() or request.COOKIES.get('lotw_filter_search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip() or request.COOKIES.get('lotw_filter_band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip() or request.COOKIES.get('lotw_filter_mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip() or request.COOKIES.get('lotw_filter_sat_name', '').strip()
         page = int(request.GET.get('page', 1))
         
     # Базовый QuerySet для QSO с LoTW подтверждением

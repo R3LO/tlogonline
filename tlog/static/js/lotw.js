@@ -1,6 +1,127 @@
-// JavaScript для страницы LoTW
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Функция для получения значения из куки
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Функция для установки куки
+    function setCookie(name, value, days) {
+        let expires = '';
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = '; expires=' + date.toUTCString();
+        }
+        document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
+    }
+
+    // Функция для удаления куки
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    }
+
+    // Сохранение фильтров в куки
+    function saveFiltersToCookies() {
+        const filterForm = document.querySelector('.filter-controls');
+        if (!filterForm) return;
+        
+        // Сохраняем значения полей фильтра
+        const myCallsign = filterForm.querySelector('[name="my_callsign"]')?.value || '';
+        const searchCallsign = filterForm.querySelector('[name="search_callsign"]')?.value || '';
+        const searchQth = filterForm.querySelector('[name="search_qth"]')?.value || '';
+        const band = filterForm.querySelector('[name="band"]')?.value || '';
+        const mode = filterForm.querySelector('[name="mode"]')?.value || '';
+        const satName = filterForm.querySelector('[name="sat_name"]')?.value || '';
+
+        // Сохраняем в куки (на 30 дней)
+        setCookie('lotw_filter_my_callsign', myCallsign, 30);
+        setCookie('lotw_filter_search_callsign', searchCallsign, 30);
+        setCookie('lotw_filter_search_qth', searchQth, 30);
+        setCookie('lotw_filter_band', band, 30);
+        setCookie('lotw_filter_mode', mode, 30);
+        setCookie('lotw_filter_sat_name', satName, 30);
+    }
+
+    // Восстановление фильтров из кук
+    function restoreFiltersFromCookies() {
+        const filterForm = document.querySelector('.filter-controls');
+        if (!filterForm) return;
+
+        // Восстанавливаем значения полей фильтра
+        const myCallsignInput = filterForm.querySelector('[name="my_callsign"]');
+        const searchCallsignInput = filterForm.querySelector('[name="search_callsign"]');
+        const searchQthInput = filterForm.querySelector('[name="search_qth"]');
+        const bandInput = filterForm.querySelector('[name="band"]');
+        const modeInput = filterForm.querySelector('[name="mode"]');
+        const satNameInput = filterForm.querySelector('[name="sat_name"]');
+
+        if (myCallsignInput) {
+            const value = getCookie('lotw_filter_my_callsign') || '';
+            myCallsignInput.value = value;
+        }
+        if (searchCallsignInput) {
+            const value = getCookie('lotw_filter_search_callsign') || '';
+            searchCallsignInput.value = value;
+        }
+        if (searchQthInput) {
+            const value = getCookie('lotw_filter_search_qth') || '';
+            searchQthInput.value = value;
+        }
+        if (bandInput) {
+            const value = getCookie('lotw_filter_band') || '';
+            bandInput.value = value;
+        }
+        if (modeInput) {
+            const value = getCookie('lotw_filter_mode') || '';
+            modeInput.value = value;
+        }
+        if (satNameInput) {
+            const value = getCookie('lotw_filter_sat_name') || '';
+            satNameInput.value = value;
+        }
+    }
+
+    // Инициализация фильтров
+    function initFilters() {
+        const filterForm = document.querySelector('.filter-controls');
+        if (!filterForm) return;
+
+        // Восстанавливаем фильтры из кук при загрузке страницы
+        restoreFiltersFromCookies();
+
+        // Сохраняем фильтры при отправке формы
+        filterForm.addEventListener('submit', function(e) {
+            const action = e.submitter?.value;
+            if (action === 'reset') {
+                // Удаляем куки фильтров при сбросе
+                deleteCookie('lotw_filter_my_callsign');
+                deleteCookie('lotw_filter_search_callsign');
+                deleteCookie('lotw_filter_search_qth');
+                deleteCookie('lotw_filter_band');
+                deleteCookie('lotw_filter_mode');
+                deleteCookie('lotw_filter_sat_name');
+            } else {
+                // Сохраняем фильтры при поиске
+                saveFiltersToCookies();
+            }
+        });
+    }
+
+    // Инициализируем фильтры
+    initFilters();
+
     // Функция для загрузки данных QSO
     async function loadQSODetails(qsoId) {
         try {
@@ -206,6 +327,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Глобальная функция для очистки фильтров
     window.clearFilters = clearFilters;
+    
+    // Инициализируем фильтры
+    initFilters();
     
     // Обработчики кнопок
     const viewButtons = document.querySelectorAll('.view-qso-btn');

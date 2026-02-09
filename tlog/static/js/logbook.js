@@ -16,6 +16,141 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Функция для установки куки
+function setCookie(name, value, days) {
+    let expires = '';
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
+}
+
+// Функция для удаления куки
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+}
+
+// Сохранение фильтров в куки
+function saveFiltersToCookies() {
+    const filterForm = document.querySelector('.filter-controls');
+    if (!filterForm) return;
+
+    const myCallsign = filterForm.querySelector('[name="my_callsign"]')?.value || '';
+    const dateFrom = filterForm.querySelector('[name="date_from"]')?.value || '';
+    const dateTo = filterForm.querySelector('[name="date_to"]')?.value || '';
+    const searchCallsign = filterForm.querySelector('[name="search_callsign"]')?.value || '';
+    const searchQth = filterForm.querySelector('[name="search_qth"]')?.value || '';
+    const band = filterForm.querySelector('[name="band"]')?.value || '';
+    const mode = filterForm.querySelector('[name="mode"]')?.value || '';
+    const satName = filterForm.querySelector('[name="sat_name"]')?.value || '';
+    const lotw = filterForm.querySelector('[name="lotw"]')?.value || '';
+
+    setCookie('logbook_filter_my_callsign', myCallsign, 30);
+    setCookie('logbook_filter_date_from', dateFrom, 30);
+    setCookie('logbook_filter_date_to', dateTo, 30);
+    setCookie('logbook_filter_search_callsign', searchCallsign, 30);
+    setCookie('logbook_filter_search_qth', searchQth, 30);
+    setCookie('logbook_filter_band', band, 30);
+    setCookie('logbook_filter_mode', mode, 30);
+    setCookie('logbook_filter_sat_name', satName, 30);
+    setCookie('logbook_filter_lotw', lotw, 30);
+}
+
+// Восстановление фильтров из кук
+function restoreFiltersFromCookies() {
+    const filterForm = document.querySelector('.filter-controls');
+    if (!filterForm) return;
+
+    const myCallsignInput = filterForm.querySelector('[name="my_callsign"]');
+    const dateFromInput = filterForm.querySelector('[name="date_from"]');
+    const dateToInput = filterForm.querySelector('[name="date_to"]');
+    const searchCallsignInput = filterForm.querySelector('[name="search_callsign"]');
+    const searchQthInput = filterForm.querySelector('[name="search_qth"]');
+    const bandInput = filterForm.querySelector('[name="band"]');
+    const modeInput = filterForm.querySelector('[name="mode"]');
+    const satNameInput = filterForm.querySelector('[name="sat_name"]');
+    const lotwInput = filterForm.querySelector('[name="lotw"]');
+
+    if (myCallsignInput) {
+        const value = getCookie('logbook_filter_my_callsign') || '';
+        myCallsignInput.value = value;
+    }
+    if (dateFromInput) {
+        const value = getCookie('logbook_filter_date_from') || '';
+        dateFromInput.value = value;
+    }
+    if (dateToInput) {
+        const value = getCookie('logbook_filter_date_to') || '';
+        dateToInput.value = value;
+    }
+    if (searchCallsignInput) {
+        const value = getCookie('logbook_filter_search_callsign') || '';
+        searchCallsignInput.value = value;
+    }
+    if (searchQthInput) {
+        const value = getCookie('logbook_filter_search_qth') || '';
+        searchQthInput.value = value;
+    }
+    if (bandInput) {
+        const value = getCookie('logbook_filter_band') || '';
+        bandInput.value = value;
+    }
+    if (modeInput) {
+        const value = getCookie('logbook_filter_mode') || '';
+        modeInput.value = value;
+    }
+    if (satNameInput) {
+        const value = getCookie('logbook_filter_sat_name') || '';
+        satNameInput.value = value;
+    }
+    if (lotwInput) {
+        const value = getCookie('logbook_filter_lotw') || '';
+        lotwInput.value = value;
+    }
+}
+
+// Инициализация фильтров
+function initFilters() {
+    const filterForm = document.querySelector('.filter-controls');
+    if (!filterForm) return;
+
+    // Восстанавливаем фильтры из кук при загрузке страницы
+    restoreFiltersFromCookies();
+
+    // Сохраняем фильтры при отправке формы (независимо от метода)
+    filterForm.addEventListener('submit', function(e) {
+        // Сохраняем фильтры в куки перед отправкой
+        saveFiltersToCookies();
+    });
+
+    // Обработка кнопки сброса фильтров
+    const resetButton = filterForm.querySelector('a[href="/logbook/"]');
+    if (resetButton) {
+        resetButton.addEventListener('click', function(e) {
+            // Удаляем куки фильтров при сбросе
+            deleteCookie('logbook_filter_my_callsign');
+            deleteCookie('logbook_filter_date_from');
+            deleteCookie('logbook_filter_date_to');
+            deleteCookie('logbook_filter_search_callsign');
+            deleteCookie('logbook_filter_search_qth');
+            deleteCookie('logbook_filter_band');
+            deleteCookie('logbook_filter_mode');
+            deleteCookie('logbook_filter_sat_name');
+            deleteCookie('logbook_filter_lotw');
+        });
+    }
+
+    // Также сохраняем фильтры при изменении полей (для автосохранения)
+    const filterInputs = filterForm.querySelectorAll('select, input[type="text"], input[type="date"]');
+    filterInputs.forEach(function(input) {
+        input.addEventListener('change', function() {
+            saveFiltersToCookies();
+        });
+    });
+}
+
 // Функция для показа уведомлений
 function showAlert(type, message) {
     const alertDiv = document.createElement('div');
@@ -430,6 +565,7 @@ function initLogbookPage() {
     initDeleteButtons();
     initConfirmDeleteQSO();
     initAdifExtraTagsCheckbox();
+    initFilters();  // Добавлена инициализация фильтров
 
     // Сбрасываем бейдж LoTW при закрытии модального окна редактирования
     const editModal = document.getElementById('editQSOModal');

@@ -45,15 +45,27 @@ def logbook(request):
         return render(request, 'blocked.html', {'reason': reason})
 
     # Получаем параметры фильтрации
-    my_callsign_filter = request.POST.get('my_callsign', '').strip()
-    search_callsign = request.POST.get('search_callsign', '').strip()
-    search_qth = request.POST.get('search_qth', '').strip()
-    date_from = request.POST.get('date_from', '').strip()
-    date_to = request.POST.get('date_to', '').strip()
-    mode_filter = request.POST.get('mode', '').strip()
-    band_filter = request.POST.get('band', '').strip()
-    sat_name_filter = request.POST.get('sat_name', '').strip()
-    lotw_filter = request.POST.get('lotw', '').strip()
+    if request.method == 'POST':
+        my_callsign_filter = request.POST.get('my_callsign', '').strip()
+        search_callsign = request.POST.get('search_callsign', '').strip()
+        search_qth = request.POST.get('search_qth', '').strip()
+        date_from = request.POST.get('date_from', '').strip()
+        date_to = request.POST.get('date_to', '').strip()
+        mode_filter = request.POST.get('mode', '').strip()
+        band_filter = request.POST.get('band', '').strip()
+        sat_name_filter = request.POST.get('sat_name', '').strip()
+        lotw_filter = request.POST.get('lotw', '').strip()
+    else:
+        # GET запрос - берем из параметров URL или из кук
+        my_callsign_filter = request.GET.get('my_callsign', '').strip() or request.COOKIES.get('logbook_filter_my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip() or request.COOKIES.get('logbook_filter_search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip() or request.COOKIES.get('logbook_filter_search_qth', '').strip()
+        date_from = request.GET.get('date_from', '').strip() or request.COOKIES.get('logbook_filter_date_from', '').strip()
+        date_to = request.GET.get('date_to', '').strip() or request.COOKIES.get('logbook_filter_date_to', '').strip()
+        mode_filter = request.GET.get('mode', '').strip() or request.COOKIES.get('logbook_filter_mode', '').strip()
+        band_filter = request.GET.get('band', '').strip() or request.COOKIES.get('logbook_filter_band', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip() or request.COOKIES.get('logbook_filter_sat_name', '').strip()
+        lotw_filter = request.GET.get('lotw', '').strip() or request.COOKIES.get('logbook_filter_lotw', '').strip()
 
     # Базовый QuerySet для QSO пользователя
     qso_queryset = QSO.objects.filter(user=request.user)
@@ -406,7 +418,7 @@ def edit_qso(request, qso_id):
 
             dxcc_info = r150s.get_dxcc_info(callsign, db_path)
             if dxcc_info:
-                # Пересчитываем только если пользователь не заполнил эти поля вручную
+                # Заполняем cqz, ituz и continent если не указаны в форме
                 if not data.get('cqz'):
                     qso.cqz = dxcc_info.get('cq_zone')
                 if not data.get('ituz'):
@@ -623,13 +635,17 @@ def achievements(request):
                                .values('mode').annotate(count=Count('id')).values_list('mode', 'count'))
 
             # Уникальные значения (оптимизированные запросы)
-            unique_callsigns = qso_queryset.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
-            r150s_count = qso_queryset.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
-            dxcc_count = qso_queryset.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
-            state_count = qso_queryset.filter(state__isnull=False, state__gt='').values('state').distinct().count()
-            cqz_count = qso_queryset.filter(cqz__isnull=False).values('cqz').distinct().count()
-            ituz_count = qso_queryset.filter(ituz__isnull=False).values('ituz').distinct().count()
-            grids_count = qso_queryset.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
+            unique_callsigns = user_qsos.filter(callsign__isnull=False, callsign__gt='').values('callsign').distinct().count()
+            r150s_count = user_qsos.filter(r150s__isnull=False, r150s__gt='').values('r150s').distinct().count()
+            dxcc_count = user_qsos.filter(dxcc__isnull=False, dxcc__gt='').values('dxcc').distinct().count()
+            state_count = user_qsos.filter(state__isnull=False, state__gt='').values('state').distinct().count()
+            cqz_count = user_qsos.filter(cqz__isnull=False).values('cqz').distinct().count()
+            ituz_count = user_qsos.filter(ituz__isnull=False).values('ituz').distinct().count()
+            grids_count = user_qsos.filter(gridsquare__isnull=False, gridsquare__gt='').values('gridsquare').distinct().count()
+            
+            # Уникальные мои позывные
+            my_callsigns = list(user_qsos.filter(my_callsign__isnull=False, my_callsign__gt='')
+                               .values_list('my_callsign', flat=True).distinct().order_by('my_callsign'))
 
             # Достижения (awards)
             achievements = []
@@ -940,7 +956,7 @@ def achievements(request):
             'unlocked': True
         })
 
-    # 5 видов модуляции
+    # 5 видов модуляций
     if len(mode_counts) >= 5:
         achievements.append({
             'title': 'Универсал',
@@ -997,7 +1013,7 @@ def achievements(request):
     # QO-100 общая статистика
     qo100_all_callsigns = user_qsos.filter(sat_name='QO-100').values('callsign').distinct().count()
 
-    # W-QO100-R: 25+ уникальных регионов России (QO-100, LoTW)
+    # Награды QO-100
     if qo100_lotw_stats['states'] >= 25:
         achievements.append({
             'title': 'W-QO100-R',
@@ -1006,7 +1022,6 @@ def achievements(request):
             'unlocked': True
         })
 
-    # W-QO100-PROFI: 30+ уникальных регионов России (QO-100, LoTW)
     if qo100_lotw_stats['states'] >= 30:
         achievements.append({
             'title': 'W-QO100-PROFI',
@@ -1015,7 +1030,6 @@ def achievements(request):
             'unlocked': True
         })
 
-    # W-QO100-C: 100+ стран (QO-100, LoTW)
     if qo100_lotw_stats['countries'] >= 100:
         achievements.append({
             'title': 'W-QO100-C',
@@ -1024,7 +1038,6 @@ def achievements(request):
             'unlocked': True
         })
 
-    # W-QO100-L: 500+ уникальных QTH локаторов (QO-100, LoTW)
     if qo100_lotw_stats['grids'] >= 500:
         achievements.append({
             'title': 'W-QO100-L',
@@ -1033,7 +1046,6 @@ def achievements(request):
             'unlocked': True
         })
 
-    # W-QO100-U: 1000+ уникальных позывных (QO-100, LoTW)
     if qo100_lotw_stats['callsigns'] >= 1000:
         achievements.append({
             'title': 'W-QO100-U',
@@ -1042,7 +1054,6 @@ def achievements(request):
             'unlocked': True
         })
 
-    # W-QO100-B: 1000+ связей (QO-100)
     if qo100_all_callsigns >= 1000:
         achievements.append({
             'title': 'W-QO100-B',
@@ -1165,7 +1176,7 @@ def generate_adif_content(qso_queryset):
     lines.append('ADIF Export from TLog')
     lines.append('Copyright 2025-2026 by Vladimir Pavlenko R3LO')
     lines.append('ADIF_VER:5 3.1.0')
-    lines.append(f'PROGRAMID: TLog')
+    lines.append('PROGRAMID: TLog')
     lines.append(f'CREATED_TIMESTAMP:{datetime.now().strftime("%Y%m%d %H%M%S")}')
     lines.append('<EOH>')
 
@@ -1365,7 +1376,8 @@ def add_qso(request):
                     cqz = dxcc_info.get('cq_zone')
                 if not ituz:
                     ituz = dxcc_info.get('itu_zone')
-                continent = dxcc_info.get('continent')
+                if not continent:
+                    continent = dxcc_info.get('continent')
 
                 # Получаем country из r150cty.dat (преобразуем в верхний регистр)
                 r150s_country = dxcc_info.get('country')
@@ -1386,10 +1398,12 @@ def add_qso(request):
         # Определяем код региона России только для российских позывных (UA, UA9, UA2)
         state = None
         if callsign and dxcc:
-            if dxcc.upper() in ('UA', 'UA9', 'UA2'):
+            if dxcc.upper() in ('UA', 'UA9', 'UA2') and not data.get('state'):
                 exceptions_path = os.path.join(settings.BASE_DIR, 'tlog', 'exceptions.dat')
                 region_finder = RussianRegionFinder(exceptions_file=exceptions_path)
                 state = region_finder.get_region_code(callsign)
+            elif not data.get('state'):
+                state = None
 
         # Создаем QSO
         qso = QSO.objects.create(
@@ -1494,23 +1508,28 @@ def user_achievements(request):
         # 1000+ QSO
         if total_qso >= 1000:
             achievements.append({'title': 'Мастер', 'icon': '🏆'})
+
         # 10+ диапазонов
         if bands >= 10:
             achievements.append({'title': 'Разведчик', 'icon': '📡'})
+
         # 5+ модуляций
         if modes >= 5:
             achievements.append({'title': 'Универсал', 'icon': '🎛️'})
+
         # 50+ стран Р-150-С
         if r150s_count >= 50:
             achievements.append({'title': 'Охотник за DX', 'icon': '🌍'})
+
         # 100+ стран Р-150-С
         if r150s_count >= 100:
             achievements.append({'title': 'Патриот', 'icon': '🎖️'})
-        # 10+ LoTW
+
+        # LoTW подтверждения
         if lotw_count >= 10:
             achievements.append({'title': 'Цифровой оператор', 'icon': '💻'})
 
-        # Награды QO-100
+        # QO-100 награды
         if qo100_all >= 1000:
             achievements.append({'title': 'W-QO100-B', 'icon': '🛰️'})
         if qo100_lotw >= 1000:
