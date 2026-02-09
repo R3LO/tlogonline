@@ -164,6 +164,10 @@ def logbook(request):
     # Получаем загруженные ADIF файлы для сайдбара
     adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:10]
 
+    # Диплом Cosmos - уникальные callsign для спутниковых QSO
+    cosmos_qso = qso_queryset.filter(Q(prop_mode='SAT') | Q(band='13CM'))
+    cosmos_unique_callsigns = cosmos_qso.values('callsign').distinct().count()
+
     context = {
         'user': request.user,
         'user_callsign': user_callsign,
@@ -190,6 +194,7 @@ def logbook(request):
         'band_stats': band_stats,
         'get_band_from_frequency': get_band_from_frequency,
         'adif_uploads': adif_uploads,
+        'cosmos_unique_callsigns': cosmos_unique_callsigns,
     }
 
     return render(request, 'logbook_base.html', context)
@@ -357,6 +362,7 @@ def edit_qso(request, qso_id):
         from ..region_ru import RussianRegionFinder
         import os
         from django.conf import settings
+        from django.db.models import Q
 
         data = json.loads(request.body)
 
@@ -686,7 +692,7 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # 5 видов модуляции
+            # 5 видов модуляций
             if len(mode_counts) >= 5:
                 achievements.append({
                     'title': 'Универсал',
@@ -713,10 +719,27 @@ def achievements(request):
                     'unlocked': True
                 })
 
-            # === Награды QO-100 (оптимизированные) ===
-            # QO-100 с LoTW
-            qo100_lotw_qsos = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y')
-            qo100_lotw_stats = qo100_lotw_qsos.aggregate(
+            # LoTW подтверждения
+            if lotw_count >= 10:
+                achievements.append({
+                    'title': 'Цифровой оператор',
+                    'description': '10+ подтверждений LoTW',
+                    'icon': '💻',
+                    'unlocked': True
+                })
+
+            # Активность за неделю
+            if week_qso >= 50:
+                achievements.append({
+                    'title': 'В эфире',
+                    'description': '50+ связей за неделю',
+                    'icon': '📻',
+                    'unlocked': True
+                })
+
+            # === Награды QO-100 (оптимизировано) ===
+            # QO-100 статистика с LoTW (оптимизированный запрос)
+            qo100_lotw_stats = user_qsos.filter(sat_name='QO-100', lotw='Y').aggregate(
                 states=Count('state', filter=Q(state__isnull=False, state__gt='')),
                 countries=Count('r150s', filter=Q(r150s__isnull=False, r150s__gt='')),
                 grids=Count('gridsquare', filter=Q(gridsquare__isnull=False, gridsquare__gt='')),
@@ -724,7 +747,7 @@ def achievements(request):
             )
 
             # QO-100 общая статистика
-            qo100_all_callsigns = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
+            qo100_all_callsigns = user_qsos.filter(sat_name='QO-100').values('callsign').distinct().count()
 
             # Награды QO-100
             if qo100_lotw_stats['states'] >= 25:
@@ -1492,11 +1515,7 @@ def user_achievements(request):
         # LoTW подтверждения
         lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
 
-        # QO-100 статистика
-        qo100_all = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
-        qo100_lotw = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y').values('callsign').distinct().count()
-
-        # Собираем награды пользователя
+        # Достижения (awards)
         achievements = []
 
         # 100+ QSO
@@ -1530,18 +1549,22 @@ def user_achievements(request):
             achievements.append({'title': 'Цифровой оператор', 'icon': '💻'})
 
         # QO-100 награды
-        if qo100_all >= 1000:
-            achievements.append({'title': 'W-QO100-B', 'icon': '🛰️'})
-        if qo100_lotw >= 1000:
+        qo100_all_callsigns = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
+        qo100_lotw_callsigns = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y').values('callsign').distinct().count()
+
+        if qo100_lotw_callsigns >= 1000:
             achievements.append({'title': 'W-QO100-U', 'icon': '📡'})
-        if qo100_lotw >= 500:
+        if qo100_lotw_callsigns >= 500:
             achievements.append({'title': 'W-QO100-L', 'icon': '📍'})
-        if qo100_lotw >= 100:
+        if qo100_lotw_callsigns >= 100:
             achievements.append({'title': 'W-QO100-C', 'icon': '🌐'})
-        if qo100_lotw >= 30:
+        if qo100_lotw_callsigns >= 30:
             achievements.append({'title': 'W-QO100-PROFI', 'icon': '🎓'})
-        if qo100_lotw >= 25:
+        if qo100_lotw_callsigns >= 25:
             achievements.append({'title': 'W-QO100-R', 'icon': '🗺️'})
+
+        if qo100_all_callsigns >= 1000:
+            achievements.append({'title': 'W-QO100-B', 'icon': '🛰️'})
 
         user_achievements_list.append({
             'user_id': user.id,
@@ -1553,8 +1576,6 @@ def user_achievements(request):
             'r150s_count': r150s_count,
             'states': states,
             'lotw_count': lotw_count,
-            'qo100_all': qo100_all,
-            'qo100_lotw': qo100_lotw,
             'achievements': achievements,
             'achievement_count': len(achievements),
         })
@@ -1565,11 +1586,4 @@ def user_achievements(request):
     # Статистика платформы
     total_users = users_with_qso.count()
     total_qso_all = QSO.objects.count()
-    total_qso_lotw = QSO.objects.filter(lotw='Y').count()
-
-    return render(request, 'user_achievements.html', {
-        'user_achievements_list': user_achievements_list,
-        'total_users': total_users,
-        'total_qso_all': total_qso_all,
-        'total_qso_lotw': total_qso_lotw,
-    })
+    total_q

@@ -346,6 +346,19 @@
 
                 <!-- Сайдбар -->
                 <div class="col-lg-3">
+                    <!-- Диплом Cosmos -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">🛰️ Диплом Cosmos</h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Уникальных QSO</small>
+                                <span class="badge bg-primary fs-6">{{ cosmos_unique_callsigns|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Загруженные ADIF файлы -->
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -412,107 +425,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <span>✖</span> Завершить
                 </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Модальное окно загрузки ADIF файла -->
-<div class="modal fade" id="adifUploadModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">
-                    <span>📤</span> Загрузить ADIF файл
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{% url 'adif_upload' %}" method="post" enctype="multipart/form-data" id="adifUploadForm">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <!-- Индикатор загрузки -->
-                    <div id="adifUploadProgress" class="text-center py-4" style="display: none;">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Загрузка...</span>
-                        </div>
-                        <h5 class="mb-2">Идёт загрузка и обработка файла...</h5>
-                        <p class="text-muted small">Это может занять несколько минут для больших файлов</p>
-                        <div class="progress mt-3" style="height: 10px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%;"></div>
-                        </div>
-                    </div>
-
-                    <div id="adifUploadFormContent">
-                        <div class="mb-3">
-                            <label class="form-label">Выберите файл</label>
-                            <input type="file" class="form-control" name="file" accept=".adi,.adif" required>
-                            <div class="form-text">Поддерживаемые форматы: .adi, .adif</div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="adif_add_extra_tags" name="add_extra_tags">
-                                <label class="form-check-label" for="adif_add_extra_tags">
-                                    Добавить дополнительные теги
-                                </label>
-                            </div>
-                        </div>
-                        <div class="row adif-options" id="adif-options" style="display: none;">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Мой позывной (MY_CALLSIGN)</label>
-                                <div class="d-flex align-items-center">
-                                    <div class="form-check me-2">
-                                        <input class="form-check-input" type="checkbox" id="adif_override_my_callsign" name="override_my_callsign">
-                                    </div>
-                                    <input type="text" class="form-control" name="my_callsign" id="adif_my_callsign" placeholder="Например: R3LO">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Мой QTH Loc (MY_GRIDSQUARE)</label>
-                                <div class="d-flex align-items-center">
-                                    <div class="form-check me-2">
-                                        <input class="form-check-input" type="checkbox" id="adif_override_my_gridsquare" name="override_my_gridsquare">
-                                    </div>
-                                    <input type="text" class="form-control" name="my_gridsquare" id="adif_my_gridsquare" placeholder="Например: KO85UU">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row adif-options-sat" id="adif-options-sat" style="display: none;">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Режим распространения (PROP_MODE)</label>
-                                <div class="d-flex align-items-center">
-                                    <div class="form-check me-2">
-                                        <input class="form-check-input" type="checkbox" id="adif_override_prop_mode" name="override_prop_mode">
-                                    </div>
-                                    <input type="text" class="form-control" name="prop_mode" id="adif_prop_mode" value="SAT">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Название спутника (SAT_NAME)</label>
-                                <div class="d-flex align-items-center">
-                                    <div class="form-check me-2">
-                                        <input class="form-check-input" type="checkbox" id="adif_override_sat_name" name="override_sat_name">
-                                    </div>
-                                    <input type="text" class="form-control" name="sat_name" id="adif_sat_name" value="QO-100">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="alert alert-info">
-                            <small>
-                                <span>ℹ️</span>
-                                <strong>Оптимизированная загрузка:</strong> данные загружаются пакетами по 100 записей с автоматической проверкой дубликатов.
-                                Дубликаты определяются по совпадению: мой позывной, позывной корреспондента, дата, время, диапазон и вид связи.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <span>✖</span> Отмена
-                        </button>
-                        <button type="submit" class="btn btn-secondary">
-                            <span>📤</span> Загрузить и обработать
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
