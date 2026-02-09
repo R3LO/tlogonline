@@ -3,6 +3,7 @@
 """
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from ..models import QSO, check_user_blocked
