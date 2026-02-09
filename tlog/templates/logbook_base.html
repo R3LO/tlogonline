@@ -9,6 +9,27 @@
 <!-- <link href="{% static 'css/logbook_main.css' %}" rel="stylesheet"> -->
 <!-- Единые стили для таблиц QSO в стиле LoTW -->
 <link href="{% static 'css/qso-tables.css' %}" rel="stylesheet">
+<style>
+/* Стили для модального окна Cosmos */
+.my-callsign-item {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#cosmos_callsigns_container .input-group .btn-remove-callsign {
+    min-width: 38px;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -352,10 +373,15 @@
                             <h6 class="mb-0">🛰️ Диплом Cosmos</h6>
                         </div>
                         <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <small class="text-muted">Уникальных QSO</small>
                                 <span class="badge bg-primary fs-6">{{ cosmos_unique_callsigns|default:0 }}</span>
                             </div>
+                            <button type="button" class="btn btn-primary btn-sm w-100"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#cosmosModal">
+                                <span>📄</span> Создать заявку
+                            </button>
                         </div>
                     </div>
 
@@ -424,6 +450,91 @@
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <span>✖</span> Завершить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно заявки на диплом Cosmos -->
+<div class="modal fade" id="cosmosModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <span>🚀</span> Заявка на диплом "Космос"
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="cosmosMessages"></div>
+
+                <div class="alert alert-info mb-3">
+                    <h6 class="alert-heading mb-2">ℹ️ Информация</h6>
+                    <p class="mb-1 small">Данные из вашего профиля подставлены автоматически.</p>
+                    <p class="mb-1 small">Для диплома необходимо минимум 100 уникальных QSO через спутники.</p>
+                </div>
+
+                <form id="cosmosForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="cosmos_main_callsign" class="form-label fw-bold small">📡 Позывной</label>
+                        <span class="text-danger">*</span>
+                        <input type="text" class="form-control form-control-sm" id="cosmos_main_callsign" name="main_callsign"
+                               placeholder="Например: UA1ABC" maxlength="20" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">📻 Другие ранее использованные позывные</label>
+                        <p class="text-muted small mb-2">Укажите ваши дополнительные позывные, которые загружены в лог</p>
+
+                        <div id="cosmos_callsigns_container">
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addCosmosCallsign()">
+                            <span>+</span> Добавить позывной
+                        </button>
+
+                        <input type="hidden" name="other_callsigns_json" id="cosmos_other_callsigns_json" value="[]">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cosmos_full_name" class="form-label fw-bold small">👤 Фамилия Имя Отчество</label>
+                        <span class="text-danger">*</span>
+                        <input type="text" class="form-control form-control-sm" id="cosmos_full_name" name="full_name"
+                               placeholder="Например: Иванов Иван Иванович" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cosmos_email" class="form-label fw-bold small">📧 Email</label>
+                        <span class="text-danger">*</span>
+                        <input type="email" class="form-control form-control-sm" id="cosmos_email" name="email"
+                               placeholder="Например: example@mail.ru" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cosmos_phone" class="form-label fw-bold small">📞 Телефонный номер</label>
+                        <input type="tel" class="form-control form-control-sm" id="cosmos_phone" name="phone"
+                               placeholder="Например: +7 (999) 123-45-67">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cosmos_info" class="form-label fw-bold small">📝 Прочие сведения</label>
+                        <textarea class="form-control form-control-sm" id="cosmos_info" name="info" rows="2"
+                                  placeholder="Дополнительная информация..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cosmosSubmitBtn" onclick="submitCosmosForm()">
+                    <span>📄</span> Сформировать заявку
+                </button>
+                <button type="button" class="btn btn-success" id="cosmosDownloadBtn" onclick="downloadCosmosFile()" style="display: none;">
+                    <span>⬇️</span> Скачать заявку
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> Закрыть
                 </button>
             </div>
         </div>

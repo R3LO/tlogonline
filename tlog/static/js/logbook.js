@@ -617,3 +617,223 @@ function deleteAdifUpload(uploadId, fileName) {
         });
     }
 }
+
+// ========== Функции для модального окна Cosmos Diploma ==========
+
+// Инициализация модального окна Cosmos
+function initCosmosModal() {
+    const modal = document.getElementById('cosmosModal');
+    if (!modal) return;
+
+    // Загрузка данных пользователя при открытии модального окна
+    modal.addEventListener('show.bs.modal', function() {
+        loadCosmosUserData();
+    });
+
+    // Очистка сообщений при открытии
+    modal.addEventListener('show.bs.modal', function() {
+        const messagesDiv = document.getElementById('cosmosMessages');
+        if (messagesDiv) {
+            messagesDiv.innerHTML = '';
+        }
+        // Скрываем кнопку скачивания
+        const downloadBtn = document.getElementById('cosmosDownloadBtn');
+        if (downloadBtn) {
+            downloadBtn.style.display = 'none';
+        }
+        // Показываем кнопку отправки
+        const submitBtn = document.getElementById('cosmosSubmitBtn');
+        if (submitBtn) {
+            submitBtn.style.display = 'inline-block';
+        }
+    });
+}
+
+// Загрузка данных пользователя для формы Cosmos
+function loadCosmosUserData() {
+    fetch('/api/cosmos/user-data/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        credentials: 'same-origin'
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error ' + response.status);
+        }
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            // Заполняем поля формы
+            document.getElementById('cosmos_main_callsign').value = data.main_callsign || '';
+            document.getElementById('cosmos_full_name').value = data.full_name || '';
+            document.getElementById('cosmos_email').value = data.email || '';
+            document.getElementById('cosmos_phone').value = data.phone || '';
+            document.getElementById('cosmos_info').value = data.info || '';
+
+            // Заполняем дополнительные позывные
+            const container = document.getElementById('cosmos_callsigns_container');
+            container.innerHTML = '';
+            if (data.other_callsigns && data.other_callsigns.length > 0) {
+                data.other_callsigns.forEach(function(callsign) {
+                    addCosmosCallsign(callsign);
+                });
+            } else {
+                // Добавляем одно пустое поле
+                addCosmosCallsign();
+            }
+        } else {
+            showAlert('danger', 'Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(function(error) {
+        console.error('Error loading cosmos user data:', error);
+        // В случае ошибки добавляем пустое поле
+        const container = document.getElementById('cosmos_callsigns_container');
+        container.innerHTML = '';
+        addCosmosCallsign();
+    });
+}
+
+// Добавление поля для дополнительного позывного
+function addCosmosCallsign(value = '') {
+    const container = document.getElementById('cosmos_callsigns_container');
+    const item = document.createElement('div');
+    item.className = 'my-callsign-item mb-2';
+    item.innerHTML = `
+        <div class="input-group">
+            <input type="text" class="form-control form-control-sm callsign-input"
+                   name="other_callsigns_names[]"
+                   placeholder="Позывной"
+                   autocomplete="off"
+                   value="${value}">
+            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-callsign">
+                ✕
+            </button>
+        </div>
+    `;
+    container.appendChild(item);
+
+    // Добавляем обработчик для кнопки удаления
+    const removeBtn = item.querySelector('.btn-remove-callsign');
+    removeBtn.addEventListener('click', function() {
+        item.remove();
+    });
+
+    // Добавляем обработчик для автоматического перевода в верхний регистр
+    const callsignInput = item.querySelector('.callsign-input');
+    callsignInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+    });
+}
+
+// Отправка формы Cosmos
+function submitCosmosForm() {
+    const form = document.getElementById('cosmosForm');
+    const submitBtn = document.getElementById('cosmosSubmitBtn');
+
+    // Валидация
+    const mainCallsign = document.getElementById('cosmos_main_callsign').value.trim();
+    const fullName = document.getElementById('cosmos_full_name').value.trim();
+    const email = document.getElementById('cosmos_email').value.trim();
+
+    if (!mainCallsign) {
+        showCosmosMessage('danger', 'Позывной обязателен для заполнения');
+        return;
+    }
+
+    if (!fullName) {
+        showCosmosMessage('danger', 'ФИО обязательно для заполнения');
+        return;
+    }
+
+    if (!email) {
+        showCosmosMessage('danger', 'Email обязателен для заполнения');
+        return;
+    }
+
+    // Собираем дополнительные позывные
+    const callsigns = [];
+    const items = document.querySelectorAll('#cosmos_callsigns_container .my-callsign-item');
+    items.forEach(function(item) {
+        const input = item.querySelector('input[name="other_callsigns_names[]"]');
+        const name = input.value.trim().toUpperCase();
+        if (name) {
+            callsigns.push(name);
+        }
+    });
+
+    // Формируем данные для отправки
+    const formData = new FormData();
+    formData.append('main_callsign', mainCallsign);
+    formData.append('full_name', fullName);
+    formData.append('email', email);
+    formData.append('phone', document.getElementById('cosmos_phone').value.trim());
+    formData.append('info', document.getElementById('cosmos_info').value.trim());
+    formData.append('other_callsigns_json', JSON.stringify(callsigns));
+
+    // Блокируем кнопку
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Формирование...';
+
+    // Отправляем запрос
+    fetch('/api/cosmos/generate/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error ' + response.status);
+        }
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            showCosmosMessage(data.qso_count >= 100 ? 'success' : 'warning', data.message);
+            // Показываем кнопку скачивания
+            const downloadBtn = document.getElementById('cosmosDownloadBtn');
+            if (downloadBtn) {
+                downloadBtn.style.display = 'inline-block';
+            }
+            // Скрываем кнопку отправки
+            submitBtn.style.display = 'none';
+        } else {
+            showCosmosMessage('danger', 'Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(function(error) {
+        showCosmosMessage('danger', 'Ошибка при формировании заявки: ' + error.message);
+    })
+    .finally(function() {
+        // Разблокируем кнопку
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>📄</span> Сформировать заявку';
+    });
+}
+
+// Скачивание файла Cosmos
+function downloadCosmosFile() {
+    window.location.href = '/api/cosmos/download/';
+}
+
+// Показ сообщения в модальном окне Cosmos
+function showCosmosMessage(type, message) {
+    const messagesDiv = document.getElementById('cosmosMessages');
+    messagesDiv.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initCosmosModal();
+});

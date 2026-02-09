@@ -18,6 +18,10 @@ from .views import (
     lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
     export_lotw_adif, blocked_page
 )
+from .views.api import (
+    api_user_info, api_qso_stats, api_search_callsigns,
+    api_cosmos_user_data, api_cosmos_generate, api_cosmos_download
+)
 
 urlpatterns = [
     path('', home, name='home'),
@@ -58,6 +62,10 @@ urlpatterns = [
     # Диплом Космос
     path('dashboard/cosmos/', cosmos_diploma, name='cosmos_diploma'),
     path('dashboard/cosmos/download/', cosmos_download, name='cosmos_download'),
+    # API для Cosmos
+    path('api/cosmos/user-data/', api_cosmos_user_data, name='api_cosmos_user_data'),
+    path('api/cosmos/generate/', api_cosmos_generate, name='api_cosmos_generate'),
+    path('api/cosmos/download/', api_cosmos_download, name='api_cosmos_download'),
     path('logbook/', logbook, name='logbook'),
     path('logbook/add/', add_qso, name='add_qso'),
     path('logbook/clear/', clear_logbook, name='clear_logbook'),
