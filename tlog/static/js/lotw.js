@@ -508,8 +508,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <strong>Всего регионов:</strong> ${totalRegions}
             </div>
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead style="background-color: #ffffff !important;">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
                         <tr>
                             <th class="col-num">№</th>
                             <th>Позывной</th>
@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!modal) {
             // Создаем модальное окно динамически
             const modalHtml = `
-                <div class="modal fade" id="lotwRegionDetailModal" tabindex="-1" aria-hidden="true">
+                <div class="modal fade lotw-regions-modal" id="lotwRegionDetailModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header bg-light">
@@ -582,8 +582,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="modal-body">
                                 <p class="text-muted mb-3">Всего регионов: <strong>${regions.length}</strong></p>
                                 <div class="table-responsive">
-                                    <table class="table table-hover table-striped">
-                                        <thead style="background-color: #ffffff !important;">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
                                             <tr>
                                                 <th style="width: 60px;">№</th>
                                                 <th style="width: 200px;">Регион</th>
@@ -627,8 +627,8 @@ document.addEventListener('DOMContentLoaded', function() {
             modalBody.innerHTML = `
                 <p class="text-muted mb-3">Всего регионов: <strong>${regions.length}</strong></p>
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead style="background-color: #ffffff !important;">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
                             <tr>
                                 <th style="width: 60px;">№</th>
                                 <th style="width: 200px;">Регион</th>

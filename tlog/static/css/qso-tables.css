@@ -131,10 +131,27 @@ table.qso-table.table-striped > thead.qso-table-header > tr > th {
     color: green;
 }
 
-/* Позывные в модальном окне регионов - светлые и мелкие */
+/* Стили для модальных окон регионов - перебиваем Bootstrap */
+.lotw-regions-modal .modal-content .table thead,
+.lotw-regions-modal .modal-content .table thead tr,
+.lotw-regions-modal .modal-content .table thead th,
+.lotw-regions-modal .modal-content .table.table-striped thead,
+.lotw-regions-modal .modal-content .table.table-striped thead tr,
+.lotw-regions-modal .modal-content .table.table-striped thead th {
+    background-color: #f8f9fa !important;
+    background: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+.lotw-regions-modal .table tbody tr td:first-child,
+.lotw-regions-modal .table.table-striped tbody tr td:first-child {
+    font-size: 0.85rem;
+}
+
+/* Позывные в модальном окне регионов - желтые и мелкие */
 .region-callsign-badge {
-    background-color: #e9ecef !important;
-    color: #495057 !important;
+    background-color: #e5d29a !important;
+    color: #212529 !important;
     font-size: 0.7rem !important;
     font-weight: 400 !important;
     padding: 0.2rem 0.4rem !important;
