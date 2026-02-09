@@ -2,6 +2,30 @@
 {% load i18n %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+/* Стили для иконки просмотра */
+.stat-view-icon {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.7;
+}
+
+.stat-view-icon:hover {
+    transform: scale(1.2);
+    opacity: 1;
+}
+
+.stat-view-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.stat-view-icon i {
+    font-size: 1.2rem;
+}
+</style>
+{% endblock %}
+
 {% block lotw_content %}
 <div class="row">
     <div class="col-lg-9">
@@ -447,12 +471,15 @@
                                 <span class="me-2">🇷🇺</span>
                                 <span class="fw-medium">Регионов России</span>
                             </div>
-                            <button type="button" class="btn btn-link p-0 fw-bold stat-link"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#lotwRegionsModal"
-                                    title="Показать детали по регионам">
-                                <span class="text-warning">{{ ru_states|default:0 }}</span>
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-warning fw-bold">{{ ru_states|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwRegionsModal"
+                                        title="Показать детали по регионам">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -598,7 +625,7 @@
                         </div>
                         {% endif %}
                     </div>
-                </div>               
+                </div>
                 
             </div>
         </div>

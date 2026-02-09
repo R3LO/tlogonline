@@ -389,6 +389,26 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('show.bs.modal', function() {
             loadLotwRegionsData();
         });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            // Проверяем, есть ли другие открытые модальные окна (например, детализация региона)
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                // Удаляем backdrop только если нет других открытых модальных окон
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // Удаляем класс с body
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            // Удаляем класс show из всех модальных окон
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
     }
 
     // Загрузка данных регионов с учетом фильтров
@@ -506,8 +526,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><span class="callsign-badge">${item.callsign}</span></td>
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-link count-link p-0 fw-bold"
-                                data-bs-toggle="modal"
-                                data-bs-target="#lotwRegionDetailModal"
                                 data-callsign="${item.callsign}"
                                 data-regions='${JSON.stringify(item.regions).replace(/'/g, "&#39;")}'>
                             ${item.count}
@@ -533,7 +551,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupRegionDetailButtons() {
         const buttons = document.querySelectorAll('#lotwRegionsContent .count-link');
         buttons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function(event) {
+                // Предотвращаем всплытие события и закрытие родительского модального окна
+                event.stopPropagation();
+                event.preventDefault();
+
                 const callsign = this.getAttribute('data-callsign');
                 const regions = JSON.parse(this.getAttribute('data-regions'));
                 showRegionDetailModal(callsign, regions);
@@ -634,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
-        // Показываем модальное окно
+        // Показываем модальное окно (Bootstrap автоматически управляет backdrop для вложенных модальных окон)
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
     }

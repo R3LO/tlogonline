@@ -99,8 +99,5 @@ from .cosmos import (
 from .api import (
     api_user_info,
     api_qso_stats,
-    api_search_callsigns,
-    api_cosmos_user_data,
-    api_cosmos_generate,
-    api_cosmos_download
+    api_search_callsigns
 )
