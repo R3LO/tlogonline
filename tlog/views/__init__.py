@@ -3,13 +3,48 @@
 """
 # Импорты из существующих модулей
 from .auth import *
-from .logbook import *
 from .adif import *
 
 # Импорты из основного модуля (для обратной совместимости)
 from .main import *
 
-# Прямые импорты из новых модулей для улучшения производительности
+# Импорты из logbook модулей (новая структура)
+from .logbook_main import (
+    logbook,
+    logbook_search,
+    clear_logbook
+)
+
+from .qso import (
+    add_qso,
+    edit_qso,
+    delete_qso,
+    get_qso
+)
+
+from .export import (
+    export_adif
+)
+
+from .privacy import (
+    privacy
+)
+
+from .qth_map import (
+    qth_map
+)
+
+from .achievements import (
+    achievements,
+    user_achievements
+)
+
+from .helpers import (
+    get_band_from_frequency,
+    generate_adif_content
+)
+
+# Прямые импорты из других модулей для улучшения производительности
 from .home import (
     home,
     get_callsigns_list,
