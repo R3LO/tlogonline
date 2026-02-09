@@ -1,7 +1,6 @@
 // Login page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
-    const messageDiv = document.getElementById('message');
 
     // Cookie helper functions
     function getCookie(name) {
@@ -19,22 +18,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedUsername = getCookie('remembered_username');
     const savedPassword = getCookie('remembered_password');
 
-    if (savedUsername && savedPassword && loginForm) {
-        document.getElementById('username').value = savedUsername;
-        document.getElementById('password').value = savedPassword;
-        document.getElementById('rememberMe').checked = true;
-    }
+    if (savedUsername && loginForm) {
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
 
-    // Show Django messages
-    {% if messages %}
-        if (messageDiv) {
-            {% for message in messages %}
-                messageDiv.className = 'alert alert-{{ message.tags|default:"info" }}';
-                messageDiv.textContent = '{{ message|escapejs }}';
-                messageDiv.classList.remove('d-none');
-            {% endfor %}
+        if (usernameInput && savedUsername) {
+            usernameInput.value = savedUsername;
         }
-    {% endif %}
+        if (passwordInput && savedPassword) {
+            passwordInput.value = savedPassword;
+        }
+        if (rememberMeCheckbox) {
+            rememberMeCheckbox.checked = true;
+        }
+    }
 
     // Convert callsign to uppercase on submit
     if (loginForm) {

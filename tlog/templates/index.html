@@ -32,7 +32,7 @@
                             {% endfor %}
                         {% endif %}
 
-                        <form method="POST" class="needs-validation" novalidate>
+                        <form method="POST" class="needs-validation" novalidate id="loginForm">
                             {% csrf_token %}
                             
                             <div class="mb-3">
@@ -44,7 +44,8 @@
                                        id="username" 
                                        name="username" 
                                        required
-                                       placeholder="{% trans 'Введите позывной' %}">
+                                       placeholder="{% trans 'Введите позывной' %}"
+                                       value="{{ request.COOKIES.remembered_username|default:'' }}">
                                 <div class="invalid-feedback">
                                     {% trans "Пожалуйста, введите позывной." %}
                                 </div>
@@ -60,7 +61,8 @@
                                            id="password" 
                                            name="password" 
                                            required
-                                           placeholder="{% trans 'Введите пароль' %}">
+                                           placeholder="{% trans 'Введите пароль' %}"
+                                           value="{{ request.COOKIES.remembered_password|default:'' }}">
                                     <button class="btn btn-outline-secondary" 
                                             type="button" 
                                             id="togglePassword"
@@ -168,4 +170,6 @@ document.getElementById('username').addEventListener('input', function(e) {
     e.target.value = e.target.value.toUpperCase();
 });
 </script>
+
+<script src="{% static 'js/login.js' %}"></script>
 {% endblock %}

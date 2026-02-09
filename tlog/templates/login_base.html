@@ -32,7 +32,7 @@
                         {% endfor %}
                     {% endif %}
 
-                    <form method="POST" class="needs-validation" novalidate>
+                    <form method="POST" class="needs-validation" novalidate id="loginForm">
                         {% csrf_token %}
                         
                         <div class="mb-3">
@@ -61,7 +61,8 @@
                                        id="password" 
                                        name="password" 
                                        required
-                                       placeholder="{% trans 'Введите пароль' %}">
+                                       placeholder="{% trans 'Введите пароль' %}"
+                                       value="{{ request.COOKIES.remembered_password|default:'' }}">
                                 <button class="btn btn-outline-secondary" 
                                         type="button" 
                                         id="togglePassword"
@@ -107,63 +108,6 @@
                 </div>
             </div>
 
-            <!-- Дополнительная информация -->
-            <div class="text-center mt-5">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-center flex-wrap gap-4 text-muted small">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🔒</span>
-                                <span>{% trans "Безопасный вход" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">📡</span>
-                                <span>{% trans "Радиолюбительский журнал" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">💾</span>
-                                <span>{% trans "Сохранение QSO" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🌐</span>
-                                <span>{% trans "LoTW синхронизация" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">📱</span>
-                                <span>{% trans "Мобильная версия" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">⚡</span>
-                                <span>{% trans "Быстрый доступ" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🏆</span>
-                                <span>{% trans "Дипломы" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🗺️</span>
-                                <span>{% trans "QTH карты" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">📊</span>
-                                <span>{% trans "Статистика" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🎯</span>
-                                <span>{% trans "Соревнования" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🔄</span>
-                                <span>{% trans "ADIF импорт" %}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">☁️</span>
-                                <span>{% trans "Облачная синхронизация" %}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -206,4 +150,7 @@ document.getElementById('username').addEventListener('input', function(e) {
     e.target.value = e.target.value.toUpperCase();
 });
 </script>
+
+<script src="{% static 'js/login.js' %}"></script>
+<script src="{% static 'js/language.js' %}"></script>
 {% endblock %}
