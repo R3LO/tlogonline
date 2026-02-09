@@ -620,6 +620,65 @@ function deleteAdifUpload(uploadId, fileName) {
 
 // ========== Функции для модального окна Cosmos Diploma ==========
 
+// Имена куки для полей формы Cosmos
+const COSMOS_COOKIE_NAMES = {
+    main_callsign: 'cosmos_main_callsign',
+    full_name: 'cosmos_full_name',
+    email: 'cosmos_email',
+    phone: 'cosmos_phone',
+    info: 'cosmos_info',
+    other_callsigns: 'cosmos_other_callsigns'
+};
+
+// Установка куки
+function setCosmosCookie(name, value, days = 30) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + expires.toUTCString() + ';path=/';
+}
+
+// Получение куки
+function getCosmosCookie(name) {
+    const nameEQ = name + '=';
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1, cookie.length);
+        }
+        if (cookie.indexOf(nameEQ) === 0) {
+            return decodeURIComponent(cookie.substring(nameEQ.length, cookie.length));
+        }
+    }
+    return null;
+}
+
+// Удаление куки
+function deleteCosmosCookie(name) {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+}
+
+// Сохранение всех полей формы в куки
+function saveCosmosFormToCookies() {
+    setCosmosCookie(COSMOS_COOKIE_NAMES.main_callsign, document.getElementById('cosmos_main_callsign').value.trim());
+    setCosmosCookie(COSMOS_COOKIE_NAMES.full_name, document.getElementById('cosmos_full_name').value.trim());
+    setCosmosCookie(COSMOS_COOKIE_NAMES.email, document.getElementById('cosmos_email').value.trim());
+    setCosmosCookie(COSMOS_COOKIE_NAMES.phone, document.getElementById('cosmos_phone').value.trim());
+    setCosmosCookie(COSMOS_COOKIE_NAMES.info, document.getElementById('cosmos_info').value.trim());
+
+    // Сохраняем дополнительные позывные
+    const callsigns = [];
+    const items = document.querySelectorAll('#cosmos_callsigns_container .my-callsign-item');
+    items.forEach(function(item) {
+        const input = item.querySelector('input[name="other_callsigns_names[]"]');
+        const name = input.value.trim().toUpperCase();
+        if (name) {
+            callsigns.push(name);
+        }
+    });
+    setCosmosCookie(COSMOS_COOKIE_NAMES.other_callsigns, JSON.stringify(callsigns));
+}
+
 // Инициализация модального окна Cosmos
 function initCosmosModal() {
     const modal = document.getElementById('cosmosModal');
@@ -651,6 +710,45 @@ function initCosmosModal() {
 
 // Загрузка данных пользователя для формы Cosmos
 function loadCosmosUserData() {
+    // Сначала пробуем загрузить из куки
+    const cookieMainCallsign = getCosmosCookie(COSMOS_COOKIE_NAMES.main_callsign);
+    const cookieFullName = getCosmosCookie(COSMOS_COOKIE_NAMES.full_name);
+    const cookieEmail = getCosmosCookie(COSMOS_COOKIE_NAMES.email);
+    const cookiePhone = getCosmosCookie(COSMOS_COOKIE_NAMES.phone);
+    const cookieInfo = getCosmosCookie(COSMOS_COOKIE_NAMES.info);
+    const cookieOtherCallsigns = getCosmosCookie(COSMOS_COOKIE_NAMES.other_callsigns);
+
+    // Если все основные поля есть в куках, используем их
+    if (cookieMainCallsign && cookieFullName && cookieEmail) {
+        document.getElementById('cosmos_main_callsign').value = cookieMainCallsign;
+        document.getElementById('cosmos_full_name').value = cookieFullName;
+        document.getElementById('cosmos_email').value = cookieEmail;
+        document.getElementById('cosmos_phone').value = cookiePhone || '';
+        document.getElementById('cosmos_info').value = cookieInfo || '';
+
+        // Заполняем дополнительные позывные из куки
+        const container = document.getElementById('cosmos_callsigns_container');
+        container.innerHTML = '';
+        if (cookieOtherCallsigns) {
+            try {
+                const otherCallsigns = JSON.parse(cookieOtherCallsigns);
+                if (Array.isArray(otherCallsigns) && otherCallsigns.length > 0) {
+                    otherCallsigns.forEach(function(callsign) {
+                        addCosmosCallsign(callsign);
+                    });
+                } else {
+                    addCosmosCallsign();
+                }
+            } catch (e) {
+                addCosmosCallsign();
+            }
+        } else {
+            addCosmosCallsign();
+        }
+        return;
+    }
+
+    // Если куки нет или он неполный, загружаем из базы только для полей ввода
     fetch('/api/cosmos/user-data/', {
         method: 'GET',
         headers: {
@@ -666,26 +764,24 @@ function loadCosmosUserData() {
     })
     .then(function(data) {
         if (data.success) {
-            // Заполняем поля формы
+            // Заполняем только поля ввода (main_callsign, email)
+            // Остальные поля оставляем пустыми для ручного заполнения
             document.getElementById('cosmos_main_callsign').value = data.main_callsign || '';
-            document.getElementById('cosmos_full_name').value = data.full_name || '';
+            document.getElementById('cosmos_full_name').value = ''; // Не заполняем из базы
             document.getElementById('cosmos_email').value = data.email || '';
-            document.getElementById('cosmos_phone').value = data.phone || '';
-            document.getElementById('cosmos_info').value = data.info || '';
+            document.getElementById('cosmos_phone').value = ''; // Не заполняем из базы
+            document.getElementById('cosmos_info').value = ''; // Не заполняем из базы
 
-            // Заполняем дополнительные позывные
+            // Дополнительные позывные не заполняем из базы - оставляем пустыми
             const container = document.getElementById('cosmos_callsigns_container');
             container.innerHTML = '';
-            if (data.other_callsigns && data.other_callsigns.length > 0) {
-                data.other_callsigns.forEach(function(callsign) {
-                    addCosmosCallsign(callsign);
-                });
-            } else {
-                // Добавляем одно пустое поле
-                addCosmosCallsign();
-            }
+            addCosmosCallsign();
         } else {
             showAlert('danger', 'Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            // В случае ошибки добавляем пустое поле
+            const container = document.getElementById('cosmos_callsigns_container');
+            container.innerHTML = '';
+            addCosmosCallsign();
         }
     })
     .catch(function(error) {
@@ -753,6 +849,9 @@ function submitCosmosForm() {
         showCosmosMessage('danger', 'Email обязателен для заполнения');
         return;
     }
+
+    // Сохраняем данные формы в куки перед отправкой
+    saveCosmosFormToCookies();
 
     // Собираем дополнительные позывные
     const callsigns = [];

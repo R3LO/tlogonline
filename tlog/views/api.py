@@ -2,6 +2,7 @@
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.db import models
 
 
 @login_required
@@ -252,9 +253,8 @@ def api_cosmos_generate(request):
     API для генерации заявки на диплом Cosmos
     """
     try:
-        from ..models import RadioProfile
+        from ..models import RadioProfile, QSO
         from django.conf import settings
-        from django.db import connection
         import os
         import json
         import time
@@ -299,26 +299,42 @@ def api_cosmos_generate(request):
         # Формируем список всех позывных для поиска QSO
         all_callsigns = [main_callsign] + [c for c in other_callsigns if c and c != main_callsign]
 
-        # Запрос QSO из базы данных
+        # Оптимизированный запрос QSO через ORM с использованием индексов
         qso_data = []
         try:
             if all_callsigns:
-                placeholders = ','.join(['%s'] * len(all_callsigns))
-                query = f"""
-                    SELECT * FROM (
-                        SELECT DISTINCT ON (callsign)
-                            LEFT(COALESCE(gridsquare, ''), 4) as gridsquare,
-                            date, band, time, mode, callsign,
-                            rst_sent, rst_rcvd
-                        FROM tlog_qso
-                        WHERE user_id = %s AND my_callsign IN ({placeholders}) and (prop_mode = 'SAT' OR band = '13CM')
-                        ORDER BY callsign, date, time
-                    ) AS distinct_qsos
-                    ORDER BY date, time
-                """
-                with connection.cursor() as cursor:
-                    cursor.execute(query, [request.user.id] + all_callsigns)
-                    qso_data = cursor.fetchall()
+                # Используем ORM для оптимизированного запроса
+                qsos = QSO.objects.filter(
+                    user=request.user,
+                    my_callsign__in=all_callsigns
+                ).filter(
+                    models.Q(prop_mode='SAT') | models.Q(band='13CM')
+                ).order_by('callsign', 'date', 'time')
+
+                # Получаем только нужные поля
+                qsos = qsos.values('callsign', 'date', 'time', 'band', 'mode', 'rst_sent', 'rst_rcvd', 'gridsquare')
+
+                # Убираем дубликаты по callsign (берем первую запись)
+                seen_callsigns = set()
+                for qso in qsos:
+                    if qso['callsign'] not in seen_callsigns:
+                        seen_callsigns.add(qso['callsign'])
+                        # Формируем gridsquare (первые 4 символа)
+                        gridsquare = qso.get('gridsquare', '') or ''
+                        gridsquare_4 = gridsquare[:4] if len(gridsquare) >= 4 else gridsquare
+                        qso_data.append((
+                            gridsquare_4,
+                            qso['date'],
+                            qso['band'],
+                            qso['time'],
+                            qso['mode'],
+                            qso['callsign'],
+                            qso['rst_sent'],
+                            qso['rst_rcvd']
+                        ))
+
+                # Сортируем по дате и времени
+                qso_data.sort(key=lambda x: (x[1] or '', x[3] or ''))
         except Exception as e:
             return JsonResponse({
                 'success': False,

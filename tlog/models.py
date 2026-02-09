@@ -116,6 +116,14 @@ class QSO(models.Model):
             models.Index(fields=['mode'], name='qso_mode_idx'),
             models.Index(fields=['band'], name='qso_band_idx'),
             models.Index(fields=['date', 'time'], name='qso_date_time_idx'),
+            # Индексы для оптимизации запросов Cosmos и спутниковой связи
+            models.Index(fields=['prop_mode'], name='qso_prop_mode_idx'),
+            models.Index(fields=['gridsquare'], name='qso_gridsquare_idx'),
+            # Составной индекс для оптимизации поиска спутниковых QSO
+            models.Index(
+                fields=['user', 'my_callsign', 'prop_mode', 'band'],
+                name='qso_cosmos_satellite_idx'
+            ),
             # Составной индекс для предотвращения дублирования
             models.Index(
                 fields=['user', 'my_callsign', 'callsign', 'date', 'time', 'band', 'mode'],
