@@ -74,6 +74,7 @@ from .lotw import (
     get_qso_details,
     lotw_filter_api,
     get_user_callsigns,
+    lotw_regions_api,
     export_lotw_adif
 )
 
@@ -98,5 +99,8 @@ from .cosmos import (
 from .api import (
     api_user_info,
     api_qso_stats,
-    api_search_callsigns
+    api_search_callsigns,
+    api_cosmos_user_data,
+    api_cosmos_generate,
+    api_cosmos_download
 )

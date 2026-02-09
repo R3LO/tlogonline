@@ -821,3 +821,114 @@ def delete_lotw_credentials(request):
     except Exception as e:
         messages.error(request, f'Ошибка при удалении: {str(e)}')
         return redirect('profile_update')
+
+
+@login_required
+def lotw_regions_api(request):
+    """
+    API endpoint для получения данных регионов России с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from tlog.region_ru import RussianRegionFinder
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Фильтруем только российские DXCC
+        russian_dxcc = ['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD']
+        lotw_qso = lotw_qso.filter(dxcc__in=russian_dxcc)
+
+        # Получаем уникальные пары my_callsign + регион + callsign
+        qso_filtered = lotw_qso.filter(
+            state__isnull=False
+        ).exclude(state='').values('my_callsign', 'state', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по региону
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            region_code = item['state']
+            call = item['callsign']
+            callsign_data[my_call][region_code].add(call)
+
+        # Получаем данные регионов
+        region_finder = RussianRegionFinder()
+
+        # Формируем список с позывным, количеством и данными регионов
+        ratings = []
+        for my_call, regions_dict in callsign_data.items():
+            regions_list = []
+            for region_code, callsigns in regions_dict.items():
+                region_name = region_finder.region_data.get(region_code, region_code)
+                regions_list.append({
+                    'code': region_code,
+                    'name': region_name,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по названию региона
+            regions_list.sort(key=lambda x: x['name'])
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(regions_list),
+                'regions': regions_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество регионов
+        total_regions = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_regions': total_regions,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

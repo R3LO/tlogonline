@@ -16,7 +16,7 @@ from .views import (
     qo100_dxcc, qo100_converter, qo100_converter_download,
     cosmos_diploma, cosmos_download,
     lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
-    export_lotw_adif, blocked_page
+    lotw_regions_api, export_lotw_adif, blocked_page
 )
 from .views.api import (
     api_user_info, api_qso_stats, api_search_callsigns,
@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/lotw/filter/', lotw_filter_api, name='lotw_filter_api'),
     path('api/lotw/callsigns/', get_user_callsigns, name='get_user_callsigns'),
     path('api/lotw/qso-details/', get_qso_details, name='get_qso_details'),
+    path('api/lotw/regions/', lotw_regions_api, name='lotw_regions_api'),
     path('profile/change-password/', change_password, name='change_password'),
     path('dashboard/profile/change-password/', change_password, name='change_password_legacy'),
     path('lotw/', lotw_page, name='lotw_page'),
