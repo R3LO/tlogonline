@@ -41,11 +41,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% if request.path != '/' %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">{% trans "Главная" %}</a>
-                    </li>
-                    {% endif %}
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">{% trans "Журнал" %}</a>
