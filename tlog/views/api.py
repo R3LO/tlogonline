@@ -297,6 +297,7 @@ def api_cosmos_generate(request):
             }, status=400)
 
         # Формируем список всех позывных для поиска QSO
+        # Используем ТОЛЬКО позывные, указанные в форме (основной + дополнительные)
         all_callsigns = [main_callsign] + [c for c in other_callsigns if c and c != main_callsign]
 
         # Оптимизированный запрос QSO через ORM с использованием индексов
@@ -304,6 +305,7 @@ def api_cosmos_generate(request):
         try:
             if all_callsigns:
                 # Используем ORM для оптимизированного запроса
+                # Поиск QSO только по позывным, указанным в форме
                 qsos = QSO.objects.filter(
                     user=request.user,
                     my_callsign__in=all_callsigns
@@ -562,10 +564,11 @@ def api_cosmos_generate(request):
         request.session['cosmos_download_filename'] = output_filename
 
         # Формируем сообщение
+        callsigns_used = ', '.join(all_callsigns)
         if len(qso_data) >= 100:
-            message = f'✅ Заявка сформирована! Найдено {len(qso_data)} уникальных QSO.'
+            message = f'✅ Заявка сформирована! Найдено {len(qso_data)} уникальных QSO для позывных: {callsigns_used}'
         else:
-            message = f'⚠️ Внимание! В заявке найдено только {len(qso_data)} уникальных QSO. Для диплома необходимо минимум 100.'
+            message = f'⚠️ Внимание! В заявке найдено только {len(qso_data)} уникальных QSO для позывных: {callsigns_used}. Для диплома необходимо минимум 100.'
 
         return JsonResponse({
             'success': True,
