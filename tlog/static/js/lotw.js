@@ -676,4 +676,301 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализируем модальное окно регионов
     initLotwRegionsModal();
 
+    // ========== Функции для модального окна штатов USA ==========
+
+    // Инициализация модального окна штатов USA
+    function initLotwUSAStatesModal() {
+        const modal = document.getElementById('lotwUSAStatesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwUSAStatesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            // Проверяем, есть ли другие открытые модальные окна
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                // Удаляем backdrop только если нет других открытых модальных окон
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // Удаляем класс с body
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            // Удаляем класс show из всех модальных окон
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных штатов USA с учетом фильтров
+    async function loadLotwUSAStatesData() {
+        const contentDiv = document.getElementById('lotwUSAStatesContent');
+        if (!contentDiv) return;
+
+        // Показываем индикатор загрузки
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных штатов...</p>
+            </div>
+        `;
+
+        try {
+            // Получаем текущие значения фильтров
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            // Формируем URL с параметрами фильтров
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/usa-states/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwUSAStatesTable(data.ratings, data.total_states, data.filters);
+            } else {
+                showUSAStatesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw usa states:', error);
+            showUSAStatesError('Ошибка при загрузке данных штатов: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы штатов USA
+    function renderLotwUSAStatesTable(ratings, totalStates, filters) {
+        const contentDiv = document.getElementById('lotwUSAStatesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Формируем строку с активными фильтрами
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        // Формируем HTML для таблицы
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего штатов:</strong> ${totalStates}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Штатов</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-states='${JSON.stringify(item.states).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        // Добавляем обработчики для кнопок с количеством штатов
+        setupUSAStateDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по штатам
+    function setupUSAStateDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwUSAStatesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                // Предотвращаем всплытие события и закрытие родительского модального окна
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const states = JSON.parse(this.getAttribute('data-states'));
+                showUSAStateDetailModal(callsign, states);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по штатам для позывного
+    function showUSAStateDetailModal(callsign, states) {
+        // Проверяем, существует ли модальное окно
+        let modal = document.getElementById('lotwUSAStateDetailModal');
+        if (!modal) {
+            // Создаем модальное окно динамически
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwUSAStateDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Штаты USA
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего штатов: <strong>${states.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 200px;">Штат</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${states.map((state, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${state.code}</span>
+                                                        <span class="region-name">${state.name}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${state.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwUSAStateDetailModal');
+        } else {
+            // Обновляем содержимое существующего модального окна
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Штаты USA`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего штатов: <strong>${states.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 200px;">Штат</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${states.map((state, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${state.code}</span>
+                                        <span class="region-name">${state.name}</span>
+                                    </td>
+                                    <td>
+                                        ${state.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Показываем модальное окно
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для USA штатов
+    function showUSAStatesError(message) {
+        const contentDiv = document.getElementById('lotwUSAStatesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно штатов USA
+    initLotwUSAStatesModal();
+
 });
