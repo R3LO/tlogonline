@@ -663,3 +663,10 @@ def user_achievements(request):
     total_qso_all = QSO.objects.count()
     total_qow_lotw = QSO.objects.filter(lotw='Y').count()
 
+
+    return render(request, 'user_achievements.html', {
+        'user_achievements_list': user_achievements_list,
+        'total_users': total_users,
+        'total_qso_all': total_qso_all,
+        'total_qso_lotw': total_qow_lotw,
+    })
