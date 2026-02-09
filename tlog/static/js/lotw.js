@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped">
-                    <thead class="table-light">
+                    <thead style="background-color: #ffffff !important;">
                         <tr>
                             <th class="col-num">№</th>
                             <th>Позывной</th>
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p class="text-muted mb-3">Всего регионов: <strong>${regions.length}</strong></p>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-striped">
-                                        <thead class="table-light">
+                                        <thead style="background-color: #ffffff !important;">
                                             <tr>
                                                 <th style="width: 60px;">№</th>
                                                 <th style="width: 200px;">Регион</th>
@@ -596,11 +596,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <td>${index + 1}</td>
                                                     <td>
                                                         <span class="badge bg-secondary">${region.code}</span>
-                                                        ${region.name}
+                                                        <span class="region-name">${region.name}</span>
                                                     </td>
                                                     <td>
                                                         ${region.callsigns.map(call => `
-                                                            <span class="badge bg-primary me-1">${call}</span>
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
                                                         `).join('')}
                                                     </td>
                                                 </tr>
@@ -628,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="text-muted mb-3">Всего регионов: <strong>${regions.length}</strong></p>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped">
-                        <thead class="table-light">
+                        <thead style="background-color: #ffffff !important;">
                             <tr>
                                 <th style="width: 60px;">№</th>
                                 <th style="width: 200px;">Регион</th>
@@ -641,11 +641,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <td>${index + 1}</td>
                                     <td>
                                         <span class="badge bg-secondary">${region.code}</span>
-                                        ${region.name}
+                                        <span class="region-name">${region.name}</span>
                                     </td>
                                     <td>
                                         ${region.callsigns.map(call => `
-                                            <span class="badge bg-primary me-1">${call}</span>
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
                                         `).join('')}
                                     </td>
                                 </tr>

@@ -131,6 +131,20 @@ table.qso-table.table-striped > thead.qso-table-header > tr > th {
     color: green;
 }
 
+/* Позывные в модальном окне регионов - светлые и мелкие */
+.region-callsign-badge {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    font-size: 0.7rem !important;
+    font-weight: 400 !important;
+    padding: 0.2rem 0.4rem !important;
+}
+
+/* Название региона - меньший шрифт */
+.region-name {
+    font-size: 0.85rem;
+}
+
 /* Кнопки действий */
 .qso-table .col-actions .action-buttons,
 .col-actions .action-buttons {
