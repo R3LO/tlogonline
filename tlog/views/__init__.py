@@ -77,6 +77,7 @@ from .lotw import (
     lotw_regions_api,
     lotw_usa_states_api,
     lotw_china_provinces_api,
+    lotw_japan_prefectures_api,
     export_lotw_adif
 )
 
