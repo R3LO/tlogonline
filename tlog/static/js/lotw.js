@@ -1527,4 +1527,1394 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализируем модальное окно префектур Японии
     initLotwJapanPrefecturesModal();
 
+    // Инициализация модального окна районов Австралии
+    function initLotwAustraliaStatesModal() {
+        const modal = document.getElementById('lotwAustraliaStatesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwAustraliaStatesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных районов Австралии с учетом фильтров
+    async function loadLotwAustraliaStatesData() {
+        const contentDiv = document.getElementById('lotwAustraliaStatesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных районов...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/australia-states/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwAustraliaStatesTable(data.ratings, data.total_states, data.filters);
+            } else {
+                showAustraliaStatesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw australia states:', error);
+            showAustraliaStatesError('Ошибка при загрузке данных районов: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы районов Австралии
+    function renderLotwAustraliaStatesTable(ratings, totalStates, filters) {
+        const contentDiv = document.getElementById('lotwAustraliaStatesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего районов:</strong> ${totalStates}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Районов</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-states='${JSON.stringify(item.states).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupAustraliaStateDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по районам
+    function setupAustraliaStateDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwAustraliaStatesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const states = JSON.parse(this.getAttribute('data-states'));
+                showAustraliaStateDetailModal(callsign, states);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по районам для позывного
+    function showAustraliaStateDetailModal(callsign, states) {
+        let modal = document.getElementById('lotwAustraliaStateDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwAustraliaStateDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Районы Австралии
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего районов: <strong>${states.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 80px;">Район</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${states.map((state, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${state.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${state.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwAustraliaStateDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Районы Австралии`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего районов: <strong>${states.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 80px;">Район</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${states.map((state, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${state.code}</span>
+                                    </td>
+                                    <td>
+                                        ${state.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для районов Австралии
+    function showAustraliaStatesError(message) {
+        const contentDiv = document.getElementById('lotwAustraliaStatesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно районов Австралии
+    initLotwAustraliaStatesModal();
+
+    // Инициализация модального окна провинций Канады
+    function initLotwCanadaProvincesModal() {
+        const modal = document.getElementById('lotwCanadaProvincesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwCanadaProvincesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных провинций Канады с учетом фильтров
+    async function loadLotwCanadaProvincesData() {
+        const contentDiv = document.getElementById('lotwCanadaProvincesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных провинций...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/canada-provinces/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwCanadaProvincesTable(data.ratings, data.total_provinces, data.filters);
+            } else {
+                showCanadaProvincesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw canada provinces:', error);
+            showCanadaProvincesError('Ошибка при загрузке данных провинций: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы провинций Канады
+    function renderLotwCanadaProvincesTable(ratings, totalProvinces, filters) {
+        const contentDiv = document.getElementById('lotwCanadaProvincesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего провинций:</strong> ${totalProvinces}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Провинций</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-provinces='${JSON.stringify(item.provinces).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupCanadaProvinceDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по провинциям
+    function setupCanadaProvinceDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwCanadaProvincesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const provinces = JSON.parse(this.getAttribute('data-provinces'));
+                showCanadaProvinceDetailModal(callsign, provinces);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по провинциям для позывного
+    function showCanadaProvinceDetailModal(callsign, provinces) {
+        let modal = document.getElementById('lotwCanadaProvinceDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwCanadaProvinceDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Провинции Канады
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего провинций: <strong>${provinces.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 80px;">Провинция</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${provinces.map((province, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${province.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${province.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwCanadaProvinceDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Провинции Канады`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего провинций: <strong>${provinces.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 80px;">Провинция</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${provinces.map((province, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${province.code}</span>
+                                    </td>
+                                    <td>
+                                        ${province.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для провинций Канады
+    function showCanadaProvincesError(message) {
+        const contentDiv = document.getElementById('lotwCanadaProvincesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно провинций Канады
+    initLotwCanadaProvincesModal();
+
+    // Инициализация модального окна зон CQ
+    function initLotwCQZonesModal() {
+        const modal = document.getElementById('lotwCQZonesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwCQZonesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных зон CQ с учетом фильтров
+    async function loadLotwCQZonesData() {
+        const contentDiv = document.getElementById('lotwCQZonesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных зон...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/cq-zones/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwCQZonesTable(data.ratings, data.total_zones, data.filters);
+            } else {
+                showCQZonesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw cq zones:', error);
+            showCQZonesError('Ошибка при загрузке данных зон: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы зон CQ
+    function renderLotwCQZonesTable(ratings, totalZones, filters) {
+        const contentDiv = document.getElementById('lotwCQZonesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего зон:</strong> ${totalZones}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Зон</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-zones='${JSON.stringify(item.zones).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupCQZoneDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по зонам
+    function setupCQZoneDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwCQZonesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const zones = JSON.parse(this.getAttribute('data-zones'));
+                showCQZoneDetailModal(callsign, zones);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по зонам для позывного
+    function showCQZoneDetailModal(callsign, zones) {
+        let modal = document.getElementById('lotwCQZoneDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwCQZoneDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Зоны CQ
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего зон: <strong>${zones.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 80px;">Зона</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${zones.map((zone, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${zone.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${zone.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwCQZoneDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Зоны CQ`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего зон: <strong>${zones.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 80px;">Зона</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${zones.map((zone, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${zone.code}</span>
+                                    </td>
+                                    <td>
+                                        ${zone.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для зон CQ
+    function showCQZonesError(message) {
+        const contentDiv = document.getElementById('lotwCQZonesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно зон CQ
+    initLotwCQZonesModal();
+
+    // Инициализация модального окна зон ITU
+    function initLotwITUZonesModal() {
+        const modal = document.getElementById('lotwITUZonesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwITUZonesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных зон ITU с учетом фильтров
+    async function loadLotwITUZonesData() {
+        const contentDiv = document.getElementById('lotwITUZonesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных зон...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/itu-zones/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwITUZonesTable(data.ratings, data.total_zones, data.filters);
+            } else {
+                showITUZonesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw itu zones:', error);
+            showITUZonesError('Ошибка при загрузке данных зон: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы зон ITU
+    function renderLotwITUZonesTable(ratings, totalZones, filters) {
+        const contentDiv = document.getElementById('lotwITUZonesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего зон:</strong> ${totalZones}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Зон</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-zones='${JSON.stringify(item.zones).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupITUZoneDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по зонам
+    function setupITUZoneDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwITUZonesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const zones = JSON.parse(this.getAttribute('data-zones'));
+                showITUZoneDetailModal(callsign, zones);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по зонам для позывного
+    function showITUZoneDetailModal(callsign, zones) {
+        let modal = document.getElementById('lotwITUZoneDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwITUZoneDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Зоны ITU
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего зон: <strong>${zones.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 80px;">Зона</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${zones.map((zone, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${zone.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${zone.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwITUZoneDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Зоны ITU`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего зон: <strong>${zones.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 80px;">Зона</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${zones.map((zone, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${zone.code}</span>
+                                    </td>
+                                    <td>
+                                        ${zone.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для зон ITU
+    function showITUZonesError(message) {
+        const contentDiv = document.getElementById('lotwITUZonesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно зон ITU
+    initLotwITUZonesModal();
+
+    // Инициализация модального окна IOTA
+    function initLotwIOTAModal() {
+        const modal = document.getElementById('lotwIOTAModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwIOTAData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных IOTA с учетом фильтров
+    async function loadLotwIOTAData() {
+        const contentDiv = document.getElementById('lotwIOTAContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных IOTA...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/iota/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwIOTATable(data.ratings, data.total_iotas, data.filters);
+            } else {
+                showIOTAError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw iota:', error);
+            showIOTAError('Ошибка при загрузке данных IOTA: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы IOTA
+    function renderLotwIOTATable(ratings, totalIotas, filters) {
+        const contentDiv = document.getElementById('lotwIOTAContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего IOTA:</strong> ${totalIotas}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">IOTA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-iotas='${JSON.stringify(item.iotas).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupIOTADetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по IOTA
+    function setupIOTADetailButtons() {
+        const buttons = document.querySelectorAll('#lotwIOTAContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const iotas = JSON.parse(this.getAttribute('data-iotas'));
+                showIOTADetailModal(callsign, iotas);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по IOTA для позывного
+    function showIOTADetailModal(callsign, iotas) {
+        let modal = document.getElementById('lotwIOTADetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwIOTADetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - IOTA
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего IOTA: <strong>${iotas.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 100px;">IOTA</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${iotas.map((iota, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${iota.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${iota.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwIOTADetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - IOTA`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего IOTA: <strong>${iotas.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 100px;">IOTA</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${iotas.map((iota, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${iota.code}</span>
+                                    </td>
+                                    <td>
+                                        ${iota.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для IOTA
+    function showIOTAError(message) {
+        const contentDiv = document.getElementById('lotwIOTAContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно IOTA
+    initLotwIOTAModal();
+
 });

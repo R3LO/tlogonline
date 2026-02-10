@@ -78,6 +78,11 @@ from .lotw import (
     lotw_usa_states_api,
     lotw_china_provinces_api,
     lotw_japan_prefectures_api,
+    lotw_australia_states_api,
+    lotw_canada_provinces_api,
+    lotw_cq_zones_api,
+    lotw_itu_zones_api,
+    lotw_iota_api,
     export_lotw_adif
 )
 

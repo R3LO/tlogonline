@@ -399,6 +399,517 @@ def debug_user_qso(request):
 
 
 @login_required
+def lotw_iota_api(request):
+    """
+    API endpoint для получения данных IOTA с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Получаем уникальные пары my_callsign + IOTA + callsign
+        qso_filtered = lotw_qso.filter(
+            iota__isnull=False
+        ).exclude(iota='').values('my_callsign', 'iota', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по IOTA
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            iota_code = item['iota']
+            call = item['callsign']
+            callsign_data[my_call][iota_code].add(call)
+
+        # Формируем список с позывным, количеством и данными IOTA
+        ratings = []
+        for my_call, iotas_dict in callsign_data.items():
+            iotas_list = []
+            for iota_code, callsigns in iotas_dict.items():
+                iotas_list.append({
+                    'code': iota_code,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду IOTA
+            iotas_list.sort(key=lambda x: x['code'])
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(iotas_list),
+                'iotas': iotas_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество IOTA
+        total_iotas = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_iotas': total_iotas,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def lotw_itu_zones_api(request):
+    """
+    API endpoint для получения данных зон ITU с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Получаем уникальные пары my_callsign + зона ITU + callsign
+        qso_filtered = lotw_qso.filter(
+            ituz__isnull=False
+        ).exclude(ituz=0).values('my_callsign', 'ituz', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по зоне ITU
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            zone_code = str(item['ituz'])
+            call = item['callsign']
+            callsign_data[my_call][zone_code].add(call)
+
+        # Формируем список с позывным, количеством и данными зон
+        ratings = []
+        for my_call, zones_dict in callsign_data.items():
+            zones_list = []
+            for zone_code, callsigns in zones_dict.items():
+                zones_list.append({
+                    'code': zone_code,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду зоны (численно)
+            zones_list.sort(key=lambda x: int(x['code']))
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(zones_list),
+                'zones': zones_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество зон
+        total_zones = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_zones': total_zones,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def lotw_cq_zones_api(request):
+    """
+    API endpoint для получения данных зон CQ с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Получаем уникальные пары my_callsign + зона CQ + callsign
+        qso_filtered = lotw_qso.filter(
+            cqz__isnull=False
+        ).exclude(cqz=0).values('my_callsign', 'cqz', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по зоне CQ
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            zone_code = str(item['cqz'])
+            call = item['callsign']
+            callsign_data[my_call][zone_code].add(call)
+
+        # Формируем список с позывным, количеством и данными зон
+        ratings = []
+        for my_call, zones_dict in callsign_data.items():
+            zones_list = []
+            for zone_code, callsigns in zones_dict.items():
+                zones_list.append({
+                    'code': zone_code,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду зоны (численно)
+            zones_list.sort(key=lambda x: int(x['code']))
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(zones_list),
+                'zones': zones_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество зон
+        total_zones = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_zones': total_zones,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def lotw_canada_provinces_api(request):
+    """
+    API endpoint для получения данных провинций Канады с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Фильтруем только канадский DXCC
+        lotw_qso = lotw_qso.filter(dxcc='CANADA')
+
+        # Получаем уникальные пары my_callsign + провинция + callsign
+        qso_filtered = lotw_qso.filter(
+            state__isnull=False
+        ).exclude(state='').values('my_callsign', 'state', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по провинции
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            province_code = item['state']
+            call = item['callsign']
+            callsign_data[my_call][province_code].add(call)
+
+        # Формируем список с позывным, количеством и данными провинций
+        ratings = []
+        for my_call, provinces_dict in callsign_data.items():
+            provinces_list = []
+            for province_code, callsigns in provinces_dict.items():
+                provinces_list.append({
+                    'code': province_code,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду провинции
+            provinces_list.sort(key=lambda x: x['code'])
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(provinces_list),
+                'provinces': provinces_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество провинций
+        total_provinces = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_provinces': total_provinces,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def lotw_australia_states_api(request):
+    """
+    API endpoint для получения данных районов Австралии с учетом фильтров LoTW
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Фильтруем только австралийский DXCC
+        lotw_qso = lotw_qso.filter(dxcc='AUSTRALIA')
+
+        # Получаем уникальные пары my_callsign + район + callsign
+        qso_filtered = lotw_qso.filter(
+            state__isnull=False
+        ).exclude(state='').values('my_callsign', 'state', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по району
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            state_code = item['state']
+            call = item['callsign']
+            callsign_data[my_call][state_code].add(call)
+
+        # Формируем список с позывным, количеством и данными районов
+        ratings = []
+        for my_call, states_dict in callsign_data.items():
+            states_list = []
+            for state_code, callsigns in states_dict.items():
+                states_list.append({
+                    'code': state_code,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду района
+            states_list.sort(key=lambda x: x['code'])
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(states_list),
+                'states': states_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество районов
+        total_states = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_states': total_states,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
 def lotw_japan_prefectures_api(request):
     """
     API endpoint для получения данных префектур Японии с учетом фильтров LoTW

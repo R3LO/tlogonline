@@ -550,7 +550,15 @@
                                 <span class="me-2">🇦🇺</span>
                                 <span class="fw-medium">Районов Австралии</span>
                             </div>
-                            <div class="stat-number text-success fw-bold h5 mb-0">{{ australia_states|default:0 }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-success fw-bold">{{ australia_states|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwAustraliaStatesModal"
+                                        title="Показать детали по районам Австралии">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -561,7 +569,15 @@
                                 <span class="me-2">🇨🇦</span>
                                 <span class="fw-medium">Провинций Канады</span>
                             </div>
-                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ canada_states|default:0 }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-warning fw-bold">{{ canada_states|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwCanadaProvincesModal"
+                                        title="Показать детали по провинциям Канады">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -572,7 +588,15 @@
                                 <span class="me-2">🌍</span>
                                 <span class="fw-medium">Зон CQ</span>
                             </div>
-                            <div class="stat-number text-primary fw-bold h5 mb-0">{{ cq_zones|default:0 }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-primary fw-bold">{{ cq_zones|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwCQZonesModal"
+                                        title="Показать детали по зонам CQ">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -583,7 +607,15 @@
                                 <span class="me-2">📡</span>
                                 <span class="fw-medium">Зон ITU</span>
                             </div>
-                            <div class="stat-number text-info fw-bold h5 mb-0">{{ itu_zones|default:0 }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-info fw-bold">{{ itu_zones|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwITUZonesModal"
+                                        title="Показать детали по зонам ITU">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -605,7 +637,15 @@
                                 <span class="me-2">🏝️</span>
                                 <span class="fw-medium">IOTA</span>
                             </div>
-                            <div class="stat-number text-warning fw-bold h5 mb-0">{{ iota_count|default:0 }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-warning fw-bold">{{ iota_count|default:0 }}</span>
+                                <button type="button" class="btn btn-link p-0 stat-view-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lotwIOTAModal"
+                                        title="Показать детали по IOTA">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -895,6 +935,141 @@
                             <span class="visually-hidden">Загрузка...</span>
                         </div>
                         <p class="mt-3 text-muted">Загрузка данных префектур...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно районов Австралии LoTW -->
+<div class="modal fade lotw-regions-modal" id="lotwAustraliaStatesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="me-2">🇦🇺</span> Районы Австралии - LoTW
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lotwAustraliaStatesContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Загрузка данных районов...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно провинций Канады LoTW -->
+<div class="modal fade lotw-regions-modal" id="lotwCanadaProvincesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="me-2">🇨🇦</span> Провинции Канады - LoTW
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lotwCanadaProvincesContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Загрузка данных провинций...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно зон CQ LoTW -->
+<div class="modal fade lotw-regions-modal" id="lotwCQZonesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="me-2">🌍</span> Зоны CQ - LoTW
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lotwCQZonesContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Загрузка данных зон...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно зон ITU LoTW -->
+<div class="modal fade lotw-regions-modal" id="lotwITUZonesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="me-2">📡</span> Зоны ITU - LoTW
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lotwITUZonesContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Загрузка данных зон...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно IOTA LoTW -->
+<div class="modal fade lotw-regions-modal" id="lotwIOTAModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <span class="me-2">🏝️</span> IOTA - LoTW
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lotwIOTAContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Загрузка данных IOTA...</p>
                     </div>
                 </div>
             </div>

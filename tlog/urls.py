@@ -16,7 +16,7 @@ from .views import (
     qo100_dxcc, qo100_converter, qo100_converter_download,
     cosmos_diploma, cosmos_download,
     lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
-    lotw_regions_api, lotw_usa_states_api, lotw_china_provinces_api, lotw_japan_prefectures_api, export_lotw_adif, blocked_page
+    lotw_regions_api, lotw_usa_states_api, lotw_china_provinces_api, lotw_japan_prefectures_api, lotw_australia_states_api, lotw_canada_provinces_api, lotw_cq_zones_api, lotw_itu_zones_api, lotw_iota_api, export_lotw_adif, blocked_page
 )
 from .views.api import (
     api_user_info, api_qso_stats, api_search_callsigns,
@@ -45,6 +45,11 @@ urlpatterns = [
     path('api/lotw/usa-states/', lotw_usa_states_api, name='lotw_usa_states_api'),
     path('api/lotw/china-provinces/', lotw_china_provinces_api, name='lotw_china_provinces_api'),
     path('api/lotw/japan-prefectures/', lotw_japan_prefectures_api, name='lotw_japan_prefectures_api'),
+    path('api/lotw/australia-states/', lotw_australia_states_api, name='lotw_australia_states_api'),
+    path('api/lotw/canada-provinces/', lotw_canada_provinces_api, name='lotw_canada_provinces_api'),
+    path('api/lotw/cq-zones/', lotw_cq_zones_api, name='lotw_cq_zones_api'),
+    path('api/lotw/itu-zones/', lotw_itu_zones_api, name='lotw_itu_zones_api'),
+    path('api/lotw/iota/', lotw_iota_api, name='lotw_iota_api'),
     path('profile/change-password/', change_password, name='change_password'),
     path('dashboard/profile/change-password/', change_password, name='change_password_legacy'),
     path('lotw/', lotw_page, name='lotw_page'),
