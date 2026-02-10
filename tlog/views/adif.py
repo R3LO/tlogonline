@@ -315,11 +315,18 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             skipped_count += 1
                             continue
 
-                        # Определяем код региона России только для российских позывных (UA, UA9, UA2)
+                        # Определяем код региона России только для российских позывных (UA-UG, R0-R9, RA-RZ)
                         state = None
                         callsign_upper = callsign.upper()
                         # Определяем российские позывные по префиксу без использования dxcc
+                        # UA-UG - старые российские позывные, R0-R9, RA-RZ - новые российские позывные
                         if (callsign_upper.startswith('UA') or
+                            callsign_upper.startswith('UB') or
+                            callsign_upper.startswith('UC') or
+                            callsign_upper.startswith('UD') or
+                            callsign_upper.startswith('UE') or
+                            callsign_upper.startswith('UF') or
+                            callsign_upper.startswith('UG') or
                             callsign_upper.startswith('R0') or
                             callsign_upper.startswith('R1') or
                             callsign_upper.startswith('R2') or
