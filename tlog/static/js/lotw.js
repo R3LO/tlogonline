@@ -971,4 +971,282 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализируем модальное окно штатов USA
     initLotwUSAStatesModal();
 
+    // Инициализация модального окна провинций Китая
+    function initLotwChinaProvincesModal() {
+        const modal = document.getElementById('lotwChinaProvincesModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwChinaProvincesData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных провинций Китая с учетом фильтров
+    async function loadLotwChinaProvincesData() {
+        const contentDiv = document.getElementById('lotwChinaProvincesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных провинций...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/china-provinces/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwChinaProvincesTable(data.ratings, data.total_provinces, data.filters);
+            } else {
+                showChinaProvincesError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw china provinces:', error);
+            showChinaProvincesError('Ошибка при загрузке данных провинций: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы провинций Китая
+    function renderLotwChinaProvincesTable(ratings, totalProvinces, filters) {
+        const contentDiv = document.getElementById('lotwChinaProvincesContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего провинций:</strong> ${totalProvinces}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Провинций</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-provinces='${JSON.stringify(item.provinces).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupChinaProvinceDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по провинциям
+    function setupChinaProvinceDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwChinaProvincesContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const provinces = JSON.parse(this.getAttribute('data-provinces'));
+                showChinaProvinceDetailModal(callsign, provinces);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по провинциям для позывного
+    function showChinaProvinceDetailModal(callsign, provinces) {
+        let modal = document.getElementById('lotwChinaProvinceDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwChinaProvinceDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Провинции Китая
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего провинций: <strong>${provinces.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 80px;">Провинция</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${provinces.map((province, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${province.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${province.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwChinaProvinceDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Провинции Китая`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего провинций: <strong>${provinces.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 80px;">Провинция</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${provinces.map((province, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${province.code}</span>
+                                    </td>
+                                    <td>
+                                        ${province.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для провинций Китая
+    function showChinaProvincesError(message) {
+        const contentDiv = document.getElementById('lotwChinaProvincesContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно провинций Китая
+    initLotwChinaProvincesModal();
+
 });
