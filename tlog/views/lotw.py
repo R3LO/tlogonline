@@ -399,6 +399,114 @@ def debug_user_qso(request):
 
 
 @login_required
+def lotw_qth_locators_api(request):
+    """
+    API endpoint для получения данных QTH локаторов с учетом фильтров LoTW
+    Локаторы берутся только первые 4 знака
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+
+    try:
+        from collections import defaultdict
+        from django.db.models.functions import Substr
+
+        # Получаем параметры фильтрации
+        my_callsign_filter = request.GET.get('my_callsign', '').strip()
+        search_callsign = request.GET.get('search_callsign', '').strip()
+        search_qth = request.GET.get('search_qth', '').strip()
+        band_filter = request.GET.get('band', '').strip()
+        mode_filter = request.GET.get('mode', '').strip()
+        sat_name_filter = request.GET.get('sat_name', '').strip()
+
+        # Базовый QuerySet для QSO с LoTW подтверждением
+        lotw_qso = QSO.objects.filter(
+            user=request.user,
+            lotw='Y',
+            app_lotw_rxqsl__isnull=False
+        )
+
+        # Применяем фильтры
+        if my_callsign_filter:
+            lotw_qso = lotw_qso.filter(my_callsign__iexact=my_callsign_filter)
+
+        if search_callsign:
+            lotw_qso = lotw_qso.filter(callsign__icontains=search_callsign)
+
+        if search_qth:
+            lotw_qso = lotw_qso.filter(gridsquare__icontains=search_qth)
+
+        if band_filter:
+            lotw_qso = lotw_qso.filter(band=band_filter)
+
+        if mode_filter:
+            lotw_qso = lotw_qso.filter(mode=mode_filter)
+
+        if sat_name_filter:
+            lotw_qso = lotw_qso.filter(sat_name=sat_name_filter)
+
+        # Получаем уникальные пары my_callsign + локатор (первые 4 знака) + callsign
+        # Используем annotate для получения первых 4 символов локатора
+        lotw_qso = lotw_qso.annotate(
+            locator4=Substr('gridsquare', 1, 4)
+        )
+
+        qso_filtered = lotw_qso.filter(
+            locator4__isnull=False
+        ).exclude(locator4='').values('my_callsign', 'locator4', 'callsign').distinct()
+
+        # Группируем по my_callsign, затем по локатору
+        callsign_data = defaultdict(lambda: defaultdict(set))
+
+        for item in qso_filtered:
+            my_call = item['my_callsign']
+            locator = item['locator4']
+            call = item['callsign']
+            callsign_data[my_call][locator].add(call)
+
+        # Формируем список с позывным, количеством и данными локаторов
+        ratings = []
+        for my_call, locators_dict in callsign_data.items():
+            locators_list = []
+            for locator, callsigns in locators_dict.items():
+                locators_list.append({
+                    'code': locator,
+                    'callsigns': sorted(list(callsigns))
+                })
+            # Сортируем по коду локатора
+            locators_list.sort(key=lambda x: x['code'])
+
+            ratings.append({
+                'callsign': my_call,
+                'count': len(locators_list),
+                'locators': locators_list
+            })
+
+        # Сортируем по количеству (убывание), затем по позывному
+        ratings.sort(key=lambda x: (-x['count'], x['callsign']))
+
+        # Подсчитываем общее количество локаторов
+        total_locators = sum(item['count'] for item in ratings)
+
+        return JsonResponse({
+            'success': True,
+            'ratings': ratings,
+            'total_locators': total_locators,
+            'filters': {
+                'my_callsign': my_callsign_filter,
+                'search_callsign': search_callsign,
+                'search_qth': search_qth,
+                'band': band_filter,
+                'mode': mode_filter,
+                'sat_name': sat_name_filter,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
 def lotw_dxcc_api(request):
     """
     API endpoint для получения данных стран DXCC с учетом фильтров LoTW

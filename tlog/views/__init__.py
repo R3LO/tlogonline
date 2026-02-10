@@ -85,6 +85,7 @@ from .lotw import (
     lotw_iota_api,
     lotw_r150s_api,
     lotw_dxcc_api,
+    lotw_qth_locators_api,
     export_lotw_adif
 )
 
