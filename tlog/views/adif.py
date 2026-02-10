@@ -39,9 +39,9 @@ def adif_upload(request):
                 messages.error(request, 'Неподдерживаемый формат файла. Разрешены только .adi и .adif файлы')
                 return redirect('logbook')
 
-            # Проверяем размер файла (максимум 10MB)
-            if uploaded_file.size > 10 * 1024 * 1024:
-                messages.error(request, 'Размер файла превышает 10MB')
+            # Проверяем размер файла (максимум 20MB)
+            if uploaded_file.size > 20 * 1024 * 1024:
+                messages.error(request, 'Размер файла превышает 20MB')
                 return redirect('logbook')
 
             # Создаем запись в базе данных
@@ -124,11 +124,9 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
     # Получаем путь к базе r150s (файл находится в папке tlog)
     tlog_dir = os.path.dirname(os.path.dirname(__file__))
     db_path = os.path.join(tlog_dir, 'r150cty.dat')
-    cty_path = os.path.join(tlog_dir, 'cty.dat')
 
     # Инициализируем базы данных
     r150s.init_database(db_path)
-    r150s.init_cty_database(cty_path)
 
     # Инициализируем определитель регионов России
     exceptions_path = os.path.join(tlog_dir, 'exceptions.dat')
@@ -313,21 +311,51 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             if r150s_country:
                                 r150s_country = r150s_country.strip().upper()[:100]
 
-                        # Получаем dxcc (primary_prefix) из cty.dat
-                        dxcc = None
-                        if not dxcc:
-                            cty_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cty.dat')
-                            dxcc = r150s.get_cty_primary_prefix(callsign, cty_path)
-                            if dxcc:
-                                dxcc = dxcc.upper()[:10]
-
                         if not callsign:
                             skipped_count += 1
                             continue
 
                         # Определяем код региона России только для российских позывных (UA, UA9, UA2)
                         state = None
-                        if dxcc and dxcc.upper() in ('UA', 'UA9', 'UA2'):
+                        callsign_upper = callsign.upper()
+                        # Определяем российские позывные по префиксу без использования dxcc
+                        if (callsign_upper.startswith('UA') or
+                            callsign_upper.startswith('R0') or
+                            callsign_upper.startswith('R1') or
+                            callsign_upper.startswith('R2') or
+                            callsign_upper.startswith('R3') or
+                            callsign_upper.startswith('R4') or
+                            callsign_upper.startswith('R5') or
+                            callsign_upper.startswith('R6') or
+                            callsign_upper.startswith('R7') or
+                            callsign_upper.startswith('R8') or
+                            callsign_upper.startswith('R9') or
+                            callsign_upper.startswith('RA') or
+                            callsign_upper.startswith('RB') or
+                            callsign_upper.startswith('RC') or
+                            callsign_upper.startswith('RD') or
+                            callsign_upper.startswith('RE') or
+                            callsign_upper.startswith('RF') or
+                            callsign_upper.startswith('RG') or
+                            callsign_upper.startswith('RH') or
+                            callsign_upper.startswith('RI') or
+                            callsign_upper.startswith('RJ') or
+                            callsign_upper.startswith('RK') or
+                            callsign_upper.startswith('RL') or
+                            callsign_upper.startswith('RM') or
+                            callsign_upper.startswith('RN') or
+                            callsign_upper.startswith('RO') or
+                            callsign_upper.startswith('RP') or
+                            callsign_upper.startswith('RQ') or
+                            callsign_upper.startswith('RR') or
+                            callsign_upper.startswith('RS') or
+                            callsign_upper.startswith('RT') or
+                            callsign_upper.startswith('RU') or
+                            callsign_upper.startswith('RV') or
+                            callsign_upper.startswith('RW') or
+                            callsign_upper.startswith('RX') or
+                            callsign_upper.startswith('RY') or
+                            callsign_upper.startswith('RZ')):
                             state = region_finder.get_region_code(callsign)
 
                         qso_obj = QSO(
@@ -346,7 +374,6 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             prop_mode=prop_mode if prop_mode else None,
                             sat_name=sat_name if sat_name else None,
                             r150s=r150s_country if r150s_country else None,
-                            dxcc=dxcc if dxcc else None,
                             cqz=cqz,
                             ituz=ituz,
                             continent=continent if continent else None,
