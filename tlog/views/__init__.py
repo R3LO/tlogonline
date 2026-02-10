@@ -75,6 +75,7 @@ from .lotw import (
     lotw_filter_api,
     get_user_callsigns,
     lotw_regions_api,
+    lotw_usa_states_api,
     export_lotw_adif
 )
 

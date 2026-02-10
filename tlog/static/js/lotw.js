@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <thead>
                                             <tr>
                                                 <th style="width: 60px;">№</th>
-                                                <th style="width: 200px;">Штат</th>
+                                                <th style="width: 80px;">Штат</th>
                                                 <th>Позывные</th>
                                             </tr>
                                         </thead>
@@ -893,7 +893,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <td>${index + 1}</td>
                                                     <td>
                                                         <span class="badge bg-secondary">${state.code}</span>
-                                                        <span class="region-name">${state.name}</span>
                                                     </td>
                                                     <td>
                                                         ${state.callsigns.map(call => `
@@ -928,7 +927,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <thead>
                             <tr>
                                 <th style="width: 60px;">№</th>
-                                <th style="width: 200px;">Штат</th>
+                                <th style="width: 80px;">Штат</th>
                                 <th>Позывные</th>
                             </tr>
                         </thead>
@@ -938,7 +937,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <td>${index + 1}</td>
                                     <td>
                                         <span class="badge bg-secondary">${state.code}</span>
-                                        <span class="region-name">${state.name}</span>
                                     </td>
                                     <td>
                                         ${state.callsigns.map(call => `
