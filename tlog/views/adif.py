@@ -73,7 +73,7 @@ def adif_upload(request):
 
             # Запускаем обработку файла
             try:
-                qso_count = process_adif_file(
+                qso_count, updated_count = process_adif_file(
                     saved_path, request.user, adif_upload.id,
                     my_callsign_default=my_callsign_default,
                     my_gridsquare_default=my_gridsquare_default,
@@ -82,8 +82,8 @@ def adif_upload(request):
                     add_extra_tags=add_extra_tags
                 )
 
-                # Если добавлено 0 записей, удаляем запись о загрузке и файл
-                if qso_count == 0:
+                # Если добавлено 0 записей и нет обновлений, удаляем запись о загрузке и файл
+                if qso_count == 0 and updated_count == 0:
                     adif_upload.delete()
                     # Удаляем файл
                     if default_storage.exists(saved_path):
@@ -93,7 +93,12 @@ def adif_upload(request):
                     adif_upload.processed = True
                     adif_upload.qso_count = qso_count
                     adif_upload.save()
-                    messages.success(request, f'Файл "{uploaded_file.name}" успешно загружен и обработан. Добавлено {qso_count} записей QSO.')
+                    msg_parts = []
+                    if qso_count > 0:
+                        msg_parts.append(f'добавлено {qso_count} новых записей QSO')
+                    if updated_count > 0:
+                        msg_parts.append(f'обновлено {updated_count} записей с подтверждением LoTW')
+                    messages.success(request, f'Файл "{uploaded_file.name}" успешно загружен и обработан. {", ".join(msg_parts)}.')
 
             except Exception as process_error:
                 adif_upload.processed = True
@@ -196,27 +201,31 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
     qso_count = 0
     skipped_count = 0
     error_count = 0
+    updated_count = 0
 
     # Предварительная загрузка существующих QSO пользователя для проверки дубликатов
-    existing_qsos = set()
+    # Словарь: ключ -> (id, lotw)
+    existing_qsos = {}
     try:
         existing_db = QSO.objects.filter(user=user).values_list(
-            'my_callsign', 'callsign', 'date', 'mode', 'band'
+            'my_callsign', 'callsign', 'date', 'mode', 'band', 'id', 'lotw'
         )
         for item in existing_db:
-            existing_qsos.add((
+            key = (
                 str(item[0]).upper() if item[0] else '',
                 str(item[1]).upper() if item[1] else '',
                 item[2],
                 str(item[3]).upper() if item[3] else '',
                 str(item[4]).upper() if item[4] else ''
-            ))
+            )
+            existing_qsos[key] = {'id': item[5], 'lotw': item[6]}
     except Exception:
         pass  # Если ошибка, продолжаем без кэша
 
     for i in range(0, len(qso_records), batch_size):
         batch = qso_records[i:i + batch_size]
         qso_objects = []
+        qso_updates = {}  # {id: {'rst_sent': ..., 'rst_rcvd': ...}}
 
         for record in batch:
             try:
@@ -237,7 +246,21 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                         band_qso
                     )
 
-                    if dup_key not in existing_qsos:
+                    if dup_key in existing_qsos:
+                        # Дубликат найден - проверяем lotw статус
+                        existing = existing_qsos[dup_key]
+                        if existing['lotw'] == 'Y':
+                            # Обновляем только rst_sent и rst_rcvd для QSO с подтверждением LoTW
+                            rst_sent = qso_data.get('rst_sent', '').strip().upper()[:10]
+                            rst_rcvd = qso_data.get('rst_rcvd', '').strip().upper()[:10]
+                            qso_updates[existing['id']] = {
+                                'rst_sent': rst_sent if rst_sent else None,
+                                'rst_rcvd': rst_rcvd if rst_rcvd else None
+                            }
+                            updated_count += 1
+                        else:
+                            skipped_count += 1
+                    else:
                         # Валидация и очистка данных
                         frequency = qso_data.get('frequency', 0.0)
                         if not isinstance(frequency, (int, float)) or frequency < 0:
@@ -394,10 +417,6 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                             skipped_count += 1
                             continue
                         qso_objects.append(qso_obj)
-                    else:
-                        skipped_count += 1
-                else:
-                    skipped_count += 1
             except Exception:
                 error_count += 1
                 continue
@@ -411,7 +430,32 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
             except Exception:
                 error_count += len(qso_objects)
 
-    return qso_count
+        # Обновление QSO с подтверждением LoTW (только rst_sent и rst_rcvd)
+        if qso_updates:
+            try:
+                with transaction.atomic():
+                    # Получаем объекты QSO для обновления
+                    qso_ids = list(qso_updates.keys())
+                    qso_objects_to_update = list(QSO.objects.filter(id__in=qso_ids))
+
+                    # Обновляем поля
+                    for qso_obj in qso_objects_to_update:
+                        if qso_obj.id in qso_updates:
+                            update_data = qso_updates[qso_obj.id]
+                            qso_obj.rst_sent = update_data['rst_sent']
+                            qso_obj.rst_rcvd = update_data['rst_rcvd']
+
+                    # Пакетное обновление по 1000 записей
+                    if qso_objects_to_update:
+                        QSO.objects.bulk_update(
+                            qso_objects_to_update,
+                            ['rst_sent', 'rst_rcvd'],
+                            batch_size=1000
+                        )
+            except Exception:
+                error_count += len(qso_updates)
+
+    return qso_count, updated_count
 
 
 def parse_adif_record(record):
