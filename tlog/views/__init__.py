@@ -83,6 +83,8 @@ from .lotw import (
     lotw_cq_zones_api,
     lotw_itu_zones_api,
     lotw_iota_api,
+    lotw_r150s_api,
+    lotw_dxcc_api,
     export_lotw_adif
 )
 

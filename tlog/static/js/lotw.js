@@ -2917,4 +2917,560 @@ document.addEventListener('DOMContentLoaded', function() {
     // Инициализируем модальное окно IOTA
     initLotwIOTAModal();
 
+    // Инициализация модального окна стран Р-150-С
+    function initLotwR150sModal() {
+        const modal = document.getElementById('lotwR150sModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwR150sData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных стран Р-150-С с учетом фильтров
+    async function loadLotwR150sData() {
+        const contentDiv = document.getElementById('lotwR150sContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных стран...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/r150s/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwR150sTable(data.ratings, data.total_countries, data.filters);
+            } else {
+                showR150sError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw r150s:', error);
+            showR150sError('Ошибка при загрузке данных стран: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы стран Р-150-С
+    function renderLotwR150sTable(ratings, totalCountries, filters) {
+        const contentDiv = document.getElementById('lotwR150sContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего стран:</strong> ${totalCountries}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Стран</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-countries='${JSON.stringify(item.countries).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupR150sDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по странам
+    function setupR150sDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwR150sContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const countries = JSON.parse(this.getAttribute('data-countries'));
+                showR150sDetailModal(callsign, countries);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по странам для позывного
+    function showR150sDetailModal(callsign, countries) {
+        let modal = document.getElementById('lotwR150sDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwR150sDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Страны Р-150-С
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего стран: <strong>${countries.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 200px;">Страна</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${countries.map((country, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${country.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${country.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwR150sDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Страны Р-150-С`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего стран: <strong>${countries.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 200px;">Страна</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${countries.map((country, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${country.code}</span>
+                                    </td>
+                                    <td>
+                                        ${country.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для стран Р-150-С
+    function showR150sError(message) {
+        const contentDiv = document.getElementById('lotwR150sContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно стран Р-150-С
+    initLotwR150sModal();
+
+    // Инициализация модального окна стран DXCC
+    function initLotwDXCCModal() {
+        const modal = document.getElementById('lotwDXCCModal');
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function() {
+            loadLotwDXCCData();
+        });
+
+        // Исправление проблемы с закрытием модального окна при скролле
+        modal.addEventListener('hidden.bs.modal', function() {
+            const otherModals = document.querySelectorAll('.modal.show');
+            if (otherModals.length === 0) {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
+
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(m => m.classList.remove('show'));
+        });
+    }
+
+    // Загрузка данных стран DXCC с учетом фильтров
+    async function loadLotwDXCCData() {
+        const contentDiv = document.getElementById('lotwDXCCContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка данных стран...</p>
+            </div>
+        `;
+
+        try {
+            const filterForm = document.querySelector('.filter-controls');
+            const myCallsign = filterForm?.querySelector('[name="my_callsign"]')?.value || '';
+            const searchCallsign = filterForm?.querySelector('[name="search_callsign"]')?.value || '';
+            const searchQth = filterForm?.querySelector('[name="search_qth"]')?.value || '';
+            const band = filterForm?.querySelector('[name="band"]')?.value || '';
+            const mode = filterForm?.querySelector('[name="mode"]')?.value || '';
+            const satName = filterForm?.querySelector('[name="sat_name"]')?.value || '';
+
+            const params = new URLSearchParams({
+                my_callsign: myCallsign,
+                search_callsign: searchCallsign,
+                search_qth: searchQth,
+                band: band,
+                mode: mode,
+                sat_name: satName
+            });
+
+            const response = await fetch(`/api/lotw/dxcc/?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderLotwDXCCTable(data.ratings, data.total_countries, data.filters);
+            } else {
+                showDXCCError('Ошибка при загрузке данных: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('Error loading lotw dxcc:', error);
+            showDXCCError('Ошибка при загрузке данных стран: ' + error.message);
+        }
+    }
+
+    // Рендеринг таблицы стран DXCC
+    function renderLotwDXCCTable(ratings, totalCountries, filters) {
+        const contentDiv = document.getElementById('lotwDXCCContent');
+        if (!contentDiv) return;
+
+        if (!ratings || ratings.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <span class="display-4 text-muted">📭</span>
+                    <h5 class="mt-3 text-muted">Нет данных для отображения</h5>
+                    <p class="text-muted">Попробуйте изменить фильтры или добавьте новые QSO</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filterInfo = '';
+        const activeFilters = [];
+        if (filters.my_callsign) activeFilters.push(`Позывной: ${filters.my_callsign}`);
+        if (filters.search_callsign) activeFilters.push(`Корреспондент: ${filters.search_callsign}`);
+        if (filters.search_qth) activeFilters.push(`Локатор: ${filters.search_qth}`);
+        if (filters.band) activeFilters.push(`Диапазон: ${filters.band}`);
+        if (filters.mode) activeFilters.push(`Модуляция: ${filters.mode}`);
+        if (filters.sat_name) activeFilters.push(`Спутник: ${filters.sat_name}`);
+
+        if (activeFilters.length > 0) {
+            filterInfo = `
+                <div class="alert alert-info mb-3">
+                    <strong>Активные фильтры:</strong> ${activeFilters.join(', ')}
+                </div>
+            `;
+        }
+
+        let html = `
+            ${filterInfo}
+            <div class="alert alert-success mb-3">
+                <strong>Всего стран:</strong> ${totalCountries}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped lotw-regions-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th>Позывной</th>
+                            <th class="col-regions-count">Стран</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        ratings.forEach((item, index) => {
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="callsign-badge">${item.callsign}</span></td>
+                    <td class="col-regions-count">
+                        <button type="button" class="btn btn-link count-link p-0 fw-bold"
+                                data-callsign="${item.callsign}"
+                                data-countries='${JSON.stringify(item.countries).replace(/'/g, "&#39;")}'>
+                            ${item.count}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+
+        setupDXCCDetailButtons();
+    }
+
+    // Настройка кнопок для показа деталей по странам
+    function setupDXCCDetailButtons() {
+        const buttons = document.querySelectorAll('#lotwDXCCContent .count-link');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const callsign = this.getAttribute('data-callsign');
+                const countries = JSON.parse(this.getAttribute('data-countries'));
+                showDXCCDetailModal(callsign, countries);
+            });
+        });
+    }
+
+    // Показ модального окна с деталями по странам для позывного
+    function showDXCCDetailModal(callsign, countries) {
+        let modal = document.getElementById('lotwDXCCDetailModal');
+        if (!modal) {
+            const modalHtml = `
+                <div class="modal fade lotw-regions-modal" id="lotwDXCCDetailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title">
+                                    <span class="callsign-badge">${callsign}</span> - Страны DXCC
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Всего стран: <strong>${countries.length}</strong></p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped lotw-regions-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">№</th>
+                                                <th style="width: 200px;">Страна</th>
+                                                <th>Позывные</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${countries.map((country, index) => `
+                                                <tr>
+                                                    <td>${index + 1}</td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">${country.code}</span>
+                                                    </td>
+                                                    <td>
+                                                        ${country.callsigns.map(call => `
+                                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                                        `).join('')}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            modal = document.getElementById('lotwDXCCDetailModal');
+        } else {
+            const modalTitle = modal.querySelector('.modal-title');
+            const modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.innerHTML = `<span class="callsign-badge">${callsign}</span> - Страны DXCC`;
+            modalBody.innerHTML = `
+                <p class="text-muted mb-3">Всего стран: <strong>${countries.length}</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped lotw-regions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">№</th>
+                                <th style="width: 200px;">Страна</th>
+                                <th>Позывные</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${countries.map((country, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">${country.code}</span>
+                                    </td>
+                                    <td>
+                                        ${country.callsigns.map(call => `
+                                            <span class="badge region-callsign-badge me-1">${call}</span>
+                                        `).join('')}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Показ ошибки для стран DXCC
+    function showDXCCError(message) {
+        const contentDiv = document.getElementById('lotwDXCCContent');
+        if (!contentDiv) return;
+
+        contentDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка:</strong> ${message}
+            </div>
+        `;
+    }
+
+    // Инициализируем модальное окно стран DXCC
+    initLotwDXCCModal();
+
 });
