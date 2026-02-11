@@ -268,31 +268,33 @@
                     </div>
                 </div>
 
-                <!-- Уникальные позывные -->
+                <!-- Уникальные позывные - Глобальный рейтинг -->
                 <div class="rating-tab {% if request.GET.active_tab == 'callsigns' %}active{% endif %}" id="callsigns-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><span>📡</span> Уникальные позывные</h6>
+                            <h6 class="mb-0"><span>📡</span> Глобальный рейтинг по уникальным позывным</h6>
                         </div>
                         <div class="card-body p-0">
-                            {% if callsigns_stats %}
+                            {% if global_callsigns_stats %}
                             <div class="table-responsive">
                                 <table class="table table-striped mb-0 rating-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>#</th>
                                             <th>Позывной</th>
-                                            <th>Количество QSO</th>
+                                            <th>Уникальных позывных</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in callsigns_stats %}
+                                        {% for item in global_callsigns_stats %}
                                         <tr>
                                             <td>{{ forloop.counter }}</td>
                                             <td>
-                                                <span class="callsign-badge">{{ item.callsign }}</span>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
                                             </td>
-                                            <td>{{ item.count }}</td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_callsigns }}</span>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

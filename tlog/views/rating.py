@@ -136,6 +136,28 @@ def rating_page(request):
         unique_dxcc=Count('dxcc', distinct=True)
     ).order_by('-unique_dxcc')
 
+    # Глобальный рейтинг по уникальным позывным (по всем пользователям системы)
+    global_callsigns_queryset = QSO.objects.all()
+
+    # Применяем фильтр по типу диапазона для глобального рейтинга позывных
+    if band_type_filter == 'hf':
+        global_callsigns_queryset = global_callsigns_queryset.filter(band__in=hf_bands)
+    elif band_type_filter == 'vhf':
+        global_callsigns_queryset = global_callsigns_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+    elif band_type_filter == 'sat':
+        global_callsigns_queryset = global_callsigns_queryset.filter(prop_mode='SAT')
+    elif band_type_filter == 'qo100':
+        global_callsigns_queryset = global_callsigns_queryset.filter(sat_name='QO-100')
+
+    # Применяем фильтр по LoTW для глобального рейтинга позывных
+    if lotw_filter == 'yes':
+        global_callsigns_queryset = global_callsigns_queryset.filter(lotw='Y')
+
+    # Глобальный рейтинг по уникальным позывным для каждого my_callsign
+    global_callsigns_stats = global_callsigns_queryset.values('my_callsign').annotate(
+        unique_callsigns=Count('callsign', distinct=True)
+    ).order_by('-unique_callsigns')
+
     # Получаем все QSO пользователя
     qso_queryset = QSO.objects.filter(user=user)
 
@@ -260,6 +282,7 @@ def rating_page(request):
         'global_regions_stats': global_regions_stats,
         'global_r150s_stats': global_r150s_stats,
         'global_dxcc_stats': global_dxcc_stats,
+        'global_callsigns_stats': global_callsigns_stats,
         'regions_stats': regions_stats,
         'r150s_stats': r150s_stats,
         'dxcc_stats': dxcc_stats,
