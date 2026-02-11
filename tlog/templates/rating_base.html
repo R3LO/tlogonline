@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}TLog - Рейтинг{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rating.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 rating-page">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок страницы -->
+            <div class="rating-header text-center mb-4">
+                <h2><span>🏆</span> Рейтинг</h2>
+                <p class="mb-0">Статистика по категориям</p>
+            </div>
+
+            <!-- Навигация по категориям -->
+            <div class="rating-nav mb-4">
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn active" data-tab="regions">
+                        <span>🗺️</span> Регионы России
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="r150s">
+                        <span>🎯</span> Страны Р-150-С
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="dxcc">
+                        <span>🌍</span> Страны DXCC
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="qth">
+                        <span>📍</span> QTH локаторы
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="callsigns">
+                        <span>📡</span> Уникальные позывные
+                    </button>
+                </div>
+            </div>
+
+            <!-- Контент категорий -->
+            <div class="rating-content">
+                <!-- Регионы России -->
+                <div class="rating-tab active" id="regions-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>🗺️</span> Регионы России</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if regions_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Регион</th>
+                                            <th>Количество QSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in regions_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <span class="badge bg-warning text-dark">{{ item.state }}</span>
+                                            </td>
+                                            <td>{{ item.count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">🗺️</span>
+                                <p class="mb-0">Данные о регионах отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Страны Р-150-С -->
+                <div class="rating-tab" id="r150s-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>🎯</span> Страны Р-150-С</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if r150s_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Страна</th>
+                                            <th>Количество QSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in r150s_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ item.r150s }}</td>
+                                            <td>{{ item.count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">🎯</span>
+                                <p class="mb-0">Данные о странах Р-150-С отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Страны DXCC -->
+                <div class="rating-tab" id="dxcc-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>🌍</span> Страны DXCC</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if dxcc_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Страна</th>
+                                            <th>Количество QSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in dxcc_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ item.dxcc }}</td>
+                                            <td>{{ item.count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">🌍</span>
+                                <p class="mb-0">Данные о странах DXCC отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QTH локаторы -->
+                <div class="rating-tab" id="qth-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>📍</span> QTH локаторы</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if qth_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Локатор</th>
+                                            <th>Количество QSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in qth_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <span class="badge bg-info text-dark">{{ item.gridsquare }}</span>
+                                            </td>
+                                            <td>{{ item.count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">📍</span>
+                                <p class="mb-0">Данные о QTH локаторах отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Уникальные позывные -->
+                <div class="rating-tab" id="callsigns-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>📡</span> Уникальные позывные</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if callsigns_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Позывной</th>
+                                            <th>Количество QSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in callsigns_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <span class="callsign-badge">{{ item.callsign }}</span>
+                                            </td>
+                                            <td>{{ item.count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">📡</span>
+                                <p class="mb-0">Данные о позывных отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/rating.js' %}"></script>
+{% endblock %}

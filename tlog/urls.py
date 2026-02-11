@@ -18,6 +18,7 @@ from .views import (
     lotw_page, debug_callsigns, test_callsigns_simple, lotw_filter_api, get_user_callsigns, get_qso_details,
     lotw_regions_api, lotw_usa_states_api, lotw_china_provinces_api, lotw_japan_prefectures_api, lotw_australia_states_api, lotw_canada_provinces_api, lotw_cq_zones_api, lotw_itu_zones_api, lotw_iota_api, lotw_r150s_api, lotw_dxcc_api, lotw_qth_locators_api, export_lotw_adif, blocked_page
 )
+from .views.rating import rating_page
 from .views.api import (
     api_user_info, api_qso_stats, api_search_callsigns,
     api_cosmos_user_data, api_cosmos_generate, api_cosmos_download
@@ -25,6 +26,7 @@ from .views.api import (
 
 urlpatterns = [
     path('', home, name='home'),
+    path('rating/', rating_page, name='rating_page'),
     path('register/', register_page, name='register_page'),
     path('debug-register/', register_page, name='debug_register'),
     path('login/', login_page, name='login_page'),

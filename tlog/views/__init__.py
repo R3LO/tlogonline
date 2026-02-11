@@ -112,3 +112,7 @@ from .api import (
     api_qso_stats,
     api_search_callsigns
 )
+
+from .rating import (
+    rating_page
+)

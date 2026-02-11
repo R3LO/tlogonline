@@ -43,6 +43,9 @@
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
+                        <a class="nav-link {% if '/rating/' in request.path %}active{% endif %}" href="/rating/">🏆 Рейтинг</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">{% trans "Журнал" %}</a>
                     </li>
                     <li class="nav-item">
