@@ -46,13 +46,13 @@
                         <a class="nav-link {% if '/rating/' in request.path %}active{% endif %}" href="/rating/">🏆 Рейтинг</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">{% trans "Журнал" %}</a>
+                        <a class="nav-link {% if '/logbook/' in request.path %}active{% endif %}" href="/logbook/">📖 {% trans "Журнал" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/lotw/' or 'lotw' in request.path %}active{% endif %}" href="/lotw/">LoTW</a>
+                        <a class="nav-link {% if request.path == '/lotw/' or 'lotw' in request.path %}active{% endif %}" href="/lotw/">📡 LoTW</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/qth-loc.html" target="_blank">Grid map</a>
+                        <a class="nav-link" href="/qth-loc.html" target="_blank">🗺️ Grid map</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/dashboard/' or '/dashboard/' in request.path %}active{% endif %}" href="/dashboard/">{% trans "Инструменты" %}</a>
@@ -66,7 +66,7 @@
                     <!-- Language Switcher - Always at the right -->
                     <li class="nav-item dropdown ms-auto">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {% if LANGUAGE_CODE == 'ru' %}Language{% else %}Язык{% endif %}
+                            🌍 {% if LANGUAGE_CODE == 'ru' %}Language{% else %}Язык{% endif %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% for lang_code, lang_name in LANGUAGES %}
@@ -85,10 +85,10 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/profile/' %}active{% endif %}" href="/profile/">{{ user.username }}</a>
+                        <a class="nav-link {% if request.path == '/profile/' %}active{% endif %}" href="/profile/">👤 {{ user.username }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout/">{% trans "Logout" %}</a>
+                        <a class="nav-link" href="/logout/">🚪 {% trans "Logout" %}</a>
                     </li>
                     {% else %}
                     {% if request.path != '/' and request.path != '/login/' and request.path != '/register/' %}
