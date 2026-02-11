@@ -105,14 +105,17 @@ def login_page(request):
 
             login(request, user)
 
+            # Определяем страницу для перенаправления после входа
+            next_url = request.POST.get('next') or request.GET.get('next') or '/lotw/'
+
             # Если отмечен "Запомнить меня", сохраняем данные в cookies
             if remember_me:
-                response = redirect('dashboard')
+                response = redirect(next_url)
                 response.set_cookie('remembered_username', username, 30*24*60*60)
                 response.set_cookie('remembered_password', password, 30*24*60*60)
                 return response
             else:
-                response = redirect('dashboard')
+                response = redirect(next_url)
                 response.delete_cookie('remembered_username')
                 response.delete_cookie('remembered_password')
                 return response

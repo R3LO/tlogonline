@@ -18,10 +18,11 @@ def home(request):
     """
     Главная страница с формой входа
     """
-    # Если пользователь уже аутентифицирован, перенаправляем на dashboard
+    # Если пользователь уже аутентифицирован, перенаправляем на dashboard или на next параметр
     if request.user.is_authenticated:
-        return redirect('dashboard')
-    
+        next_url = request.GET.get('next', '/lotw/')
+        return redirect(next_url)
+
     total_users = User.objects.count()
     total_qso = QSO.objects.count()
 
@@ -42,6 +43,9 @@ def home(request):
                 else:
                     login(request, user)
                     
+                    # Определяем страницу для перенаправления после входа
+                    next_url = request.POST.get('next') or request.GET.get('next') or '/lotw/'
+
                     # Обработка "Запомнить меня"
                     if remember_me:
                         request.session.set_expiry(30 * 24 * 60 * 60)  # 30 дней
@@ -49,7 +53,7 @@ def home(request):
                         request.session.set_expiry(0)  # До закрытия браузера
                     
                     messages.success(request, f'Добро пожаловать, {user.username}!')
-                    return redirect('dashboard')
+                    return redirect(next_url)
             else:
                 messages.error(request, 'Неверный логин или пароль.')
         else:

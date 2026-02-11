@@ -135,6 +135,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 86400  # 24 hours
 
+# Login redirect URL - redirect to LoTW page after login
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/lotw/'
+LOGOUT_REDIRECT_URL = '/'
+
 
 
 

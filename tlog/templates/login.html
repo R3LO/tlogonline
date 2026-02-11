@@ -34,6 +34,7 @@
 
             <form method="POST" id="loginForm">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="/lotw/">
                 <div class="mb-3">
                     <label for="username" class="form-label">
                         <i class="fas fa-broadcast-tower"></i> {% trans "Позывной" %}
