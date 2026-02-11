@@ -157,7 +157,7 @@ def process_adif_content(content):
         # Формируем содержимое для скачивания с заголовком
         header_lines = [
             '<ADIF_VER:5>3.1.0',
-            '<PROGRAMID:8>TLOG CONVERTER',
+            '<PROGRAMID:8>TLOG converter',
             '<EOH>'
         ]
         header_text = '\n'.join(header_lines)
