@@ -55,8 +55,8 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_regions_queryset = global_regions_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг регионов России (по всем пользователям системы)
-    global_regions_stats = global_regions_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг регионов России (по всем пользователям системы) - группировка по username
+    global_regions_stats = global_regions_queryset.values('user__username').annotate(
         unique_states=Count('state', distinct=True)
     ).order_by('-unique_states')
 
@@ -84,30 +84,30 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_r150s_queryset = global_r150s_queryset.filter(lotw='Y')
 
-    # Получаем все уникальные пары (my_callsign, r150s) и (my_callsign, dxcc) за один запрос
+    # Получаем все уникальные пары (username, r150s) и (username, dxcc) за один запрос
     # Используем values_list для оптимизации памяти
     from collections import defaultdict
 
-    # Словарь для хранения множеств уникальных стран для каждого позывного
-    callsign_countries = defaultdict(set)
+    # Словарь для хранения множеств уникальных стран для каждого username
+    username_countries = defaultdict(set)
 
-    # Получаем все r150s (исключаем пустые)
-    r150s_data = global_r150s_queryset.exclude(r150s='').exclude(r150s__isnull=True).values_list('my_callsign', 'r150s').distinct()
-    for callsign, country in r150s_data:
-        callsign_countries[callsign].add(country)
+    # Получаем все r150s (исключаем пустые) - группировка по username
+    r150s_data = global_r150s_queryset.exclude(r150s='').exclude(r150s__isnull=True).values_list('user__username', 'r150s').distinct()
+    for username, country in r150s_data:
+        username_countries[username].add(country)
 
-    # Получаем все dxcc (исключаем пустые)
-    dxcc_data = global_r150s_queryset.exclude(dxcc='').exclude(dxcc__isnull=True).values_list('my_callsign', 'dxcc').distinct()
-    for callsign, country in dxcc_data:
-        callsign_countries[callsign].add(country)
+    # Получаем все dxcc (исключаем пустые) - группировка по username
+    dxcc_data = global_r150s_queryset.exclude(dxcc='').exclude(dxcc__isnull=True).values_list('user__username', 'dxcc').distinct()
+    for username, country in dxcc_data:
+        username_countries[username].add(country)
 
     # Формируем результат
     global_r150s_stats = [
         {
-            'my_callsign': callsign,
+            'username': username,
             'unique_countries': len(countries)
         }
-        for callsign, countries in callsign_countries.items()
+        for username, countries in username_countries.items()
     ]
 
     # Сортируем по количеству уникальных стран
@@ -131,8 +131,8 @@ def rating_page(request):
     # Для DXCC фильтр LoTW всегда должен быть 'yes'
     global_dxcc_queryset = global_dxcc_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг DXCC по всем пользователям системы
-    global_dxcc_stats = global_dxcc_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг DXCC по всем пользователям системы - группировка по username
+    global_dxcc_stats = global_dxcc_queryset.values('user__username').annotate(
         unique_dxcc=Count('dxcc', distinct=True)
     ).order_by('-unique_dxcc')
 
@@ -153,8 +153,8 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_callsigns_queryset = global_callsigns_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг по уникальным позывным для каждого my_callsign
-    global_callsigns_stats = global_callsigns_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг по уникальным позывным для каждого username
+    global_callsigns_stats = global_callsigns_queryset.values('user__username').annotate(
         unique_callsigns=Count('callsign', distinct=True)
     ).order_by('-unique_callsigns')
 
@@ -177,8 +177,8 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_cqz_queryset = global_cqz_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг по CQ зонам для каждого my_callsign
-    global_cqz_stats = global_cqz_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг по CQ зонам для каждого username
+    global_cqz_stats = global_cqz_queryset.values('user__username').annotate(
         unique_cqz=Count('cqz', distinct=True)
     ).order_by('-unique_cqz')
 
@@ -201,8 +201,8 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_ituz_queryset = global_ituz_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг по ITU зонам для каждого my_callsign
-    global_ituz_stats = global_ituz_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг по ITU зонам для каждого username
+    global_ituz_stats = global_ituz_queryset.values('user__username').annotate(
         unique_ituz=Count('ituz', distinct=True)
     ).order_by('-unique_ituz')
 
@@ -227,8 +227,8 @@ def rating_page(request):
     if lotw_filter == 'yes':
         global_iota_queryset = global_iota_queryset.filter(lotw='Y')
 
-    # Глобальный рейтинг по IOTA для каждого my_callsign
-    global_iota_stats = global_iota_queryset.values('my_callsign').annotate(
+    # Глобальный рейтинг по IOTA для каждого username
+    global_iota_stats = global_iota_queryset.values('user__username').annotate(
         unique_iota=Count('iota', distinct=True)
     ).order_by('-unique_iota')
 
@@ -255,17 +255,17 @@ def rating_page(request):
         global_qth_queryset = global_qth_queryset.filter(lotw='Y')
 
     # Извлекаем данные и обрабатываем в Python для учета первых 4 символов
-    callsign_grids = defaultdict(set)
+    username_grids = defaultdict(set)
 
-    # Получаем данные из базы
-    qth_data = global_qth_queryset.values_list('my_callsign', 'gridsquare', 'vucc_grids')
+    # Получаем данные из базы - группировка по username
+    qth_data = global_qth_queryset.values_list('user__username', 'gridsquare', 'vucc_grids')
 
-    for callsign, gridsquare, vucc_grids in qth_data:
+    for username, gridsquare, vucc_grids in qth_data:
         # Обрабатываем gridsquare (первые 4 символа)
         if gridsquare and len(gridsquare) >= 4:
             grid_4 = gridsquare[:4].upper()
             if grid_4:
-                callsign_grids[callsign].add(grid_4)
+                username_grids[username].add(grid_4)
 
         # Обрабатываем vucc_grids (разбиваем по запятым, берем первые 4 символа каждого)
         if vucc_grids:
@@ -274,15 +274,15 @@ def rating_page(request):
                 if grid and len(grid) >= 4:
                     grid_4 = grid[:4].upper()
                     if grid_4:
-                        callsign_grids[callsign].add(grid_4)
+                        username_grids[username].add(grid_4)
 
     # Формируем результат глобального рейтинга QTH локаторов
     global_qth_stats = [
         {
-            'my_callsign': callsign,
+            'username': username,
             'unique_grids': len(grids)
         }
-        for callsign, grids in callsign_grids.items()
+        for username, grids in username_grids.items()
     ]
 
     # Сортируем по количеству уникальных локаторов
