@@ -285,7 +285,7 @@
 }
 
 .achievement-card.unlocked {
-    border-color: var(--primary);
+    border-color: var(--light-border);
 }
 
 .achievement-card.locked {

@@ -63,8 +63,7 @@
 }
 
 .achievement-card.unlocked {
-    border-color: var(--success);
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    border-color: var(--light-border);
 }
 
 .achievement-card.locked {
