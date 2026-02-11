@@ -3,40 +3,44 @@
 {% load static %}
 {% block title %}TLog - {% trans "Награды пользователей" %}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/qso-tables.css' %}">
+<link rel="stylesheet" href="{% static 'css/rating.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <!-- Page Header -->
-        <div class="card-header bg-primary text-white text-center">
-            <h2 class="mb-0"><span>🏆</span> {% trans "Награды пользователей" %}</h2>
+<div class="container-fluid mt-4">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="logbook-header text-center">
+            <h2><span>🏆</span> {% trans "Награды пользователей" %}</h2>
+            <p class="mb-0 text-white">{% trans "Достижения и награды всех пользователей платформы" %}</p>
         </div>
-        <div class="card-body">
-            <p class="text-center text-muted">{% trans "Достижения и награды всех пользователей платформы" %}</p>
 
+        <div class="p-4">
             <!-- Platform Statistics -->
             <div class="row mb-4">
                 <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body text-center">
-                            <h3 class="display-4">{{ total_users }}</h3>
-                            <p class="mb-0">{% trans "Пользователей" %}</p>
+                    <div class="card filter-card text-center">
+                        <div class="card-body">
+                            <h3 class="display-4 mb-0">{{ total_users }}</h3>
+                            <p class="mb-0 text-muted">{% trans "Пользователей" %}</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body text-center">
-                            <h3 class="display-4">{{ total_qso_all }}</h3>
-                            <p class="mb-0">{% trans "Всего QSO" %}</p>
+                    <div class="card filter-card text-center">
+                        <div class="card-body">
+                            <h3 class="display-4 mb-0">{{ total_qso_all }}</h3>
+                            <p class="mb-0 text-muted">{% trans "Всего QSO" %}</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body text-center">
-                            <h3 class="display-4">{{ total_qso_lotw }}</h3>
-                            <p class="mb-0">{% trans "LoTW подтверждений" %}</p>
+                    <div class="card filter-card text-center">
+                        <div class="card-body">
+                            <h3 class="display-4 mb-0">{{ total_qso_lotw }}</h3>
+                            <p class="mb-0 text-muted">{% trans "LoTW подтверждений" %}</p>
                         </div>
                     </div>
                 </div>
@@ -44,9 +48,14 @@
 
             <!-- Users Achievements Table -->
             {% if user_achievements_list %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead class="table-dark">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><span>🏆</span> {% trans "Рейтинг пользователей" %}</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0 rating-table">
+                            <thead class="table-dark">
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>{% trans "Позывной" %}</th>
@@ -62,7 +71,7 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>
-                                <strong>{{ user.callsign }}</strong>
+                                <span class="callsign-badge">{{ user.callsign }}</span>
                             </td>
                             <td style="text-align: center;">
                                 <span class="badge bg-primary">{{ user.total_qso }}</span>
@@ -91,6 +100,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                    </div>
+                </div>
             </div>
             {% else %}
             <div class="text-center py-5 text-muted">
