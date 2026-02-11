@@ -94,6 +94,9 @@
                     <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'cqz' %}active{% endif %}" data-tab="cqz">
                         <span>🌐</span> CQ зоны
                     </button>
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'ituz' %}active{% endif %}" data-tab="ituz">
+                        <span>📶</span> ITU зоны
+                    </button>
                     <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'qth' %}active{% endif %}" data-tab="qth">
                         <span>📍</span> QTH локаторы
                     </button>
@@ -267,6 +270,48 @@
                             <div class="text-center py-5 text-muted">
                                 <span style="font-size: 3rem;">🌐</span>
                                 <p class="mb-0">Данные о CQ зонах отсутствуют</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ITU зоны - Глобальный рейтинг -->
+                <div class="rating-tab {% if request.GET.active_tab == 'ituz' %}active{% endif %}" id="ituz-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><span>📶</span> Глобальный рейтинг по ITU зонам</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if global_ituz_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rating-table">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Позывной</th>
+                                            <th>ITU зон</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in global_ituz_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_ituz }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <span style="font-size: 3rem;">📶</span>
+                                <p class="mb-0">Данные об ITU зонах отсутствуют</p>
                             </div>
                             {% endif %}
                         </div>
