@@ -185,7 +185,7 @@
                                     <th class="col-rst"><span>RST</span></th>
                                     <th class="col-qth"><span>📍</span> QTH</th>
                                     <th class="col-r150s"><span>🎯</span> Р-150-С</th>
-                                    <th class="col-region"><span>🇷🇺</span> RU</th>
+                                    <th class="col-region"><span></span> State</th>
                                     <th class="col-lotw"><span>LoTW</span></th>
                                     <th class="col-propsat"><span>Prop/SAT</span></th>
                                     <th class="col-actions"><span>⚙️</span></th>
@@ -234,7 +234,7 @@
                                 <td class="col-r150s" data-label="🎯 Р-150-С">
                                     <small>{{ qso.r150s|default:"-" }}</small>
                                 </td>
-                                <td class="col-region" data-label="🇷🇺 RU">
+                                <td class="col-region" data-label="🇷🇺 State">
                                     {% if qso.ru_region %}
                                         <span class="region-badge">{{ qso.ru_region }}</span>
                                     {% else %}
