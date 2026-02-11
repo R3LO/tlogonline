@@ -23,6 +23,8 @@
             <div class="filter-card mb-4">
                 <h5 class="section-title"><span>🔍</span> Фильтры</h5>
                 <form class="filter-controls" method="GET" action="{% url 'rating_page' %}" id="rating-filter-form">
+                    <!-- Скрытое поле для активной вкладки -->
+                    <input type="hidden" name="active_tab" id="active-tab" value="{{ request.GET.active_tab|default:'regions' }}">
                     <div class="row g-3">
                         <!-- Тип диапазона -->
                         <div class="col-12">
@@ -79,19 +81,19 @@
             <!-- Навигация по категориям -->
             <div class="rating-nav mb-4">
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <button type="button" class="btn btn-outline-primary rating-nav-btn active" data-tab="regions">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'regions' or not request.GET.active_tab %}active{% endif %}" data-tab="regions">
                         <span>🗺️</span> Регионы России
                     </button>
-                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="r150s">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'r150s' %}active{% endif %}" data-tab="r150s">
                         <span>🎯</span> Страны Р-150-С
                     </button>
-                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="dxcc">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'dxcc' %}active{% endif %}" data-tab="dxcc">
                         <span>🌍</span> Страны DXCC
                     </button>
-                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="qth">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'qth' %}active{% endif %}" data-tab="qth">
                         <span>📍</span> QTH локаторы
                     </button>
-                    <button type="button" class="btn btn-outline-primary rating-nav-btn" data-tab="callsigns">
+                    <button type="button" class="btn btn-outline-primary rating-nav-btn {% if request.GET.active_tab == 'callsigns' %}active{% endif %}" data-tab="callsigns">
                         <span>📡</span> Уникальные позывные
                     </button>
                 </div>
@@ -100,7 +102,7 @@
             <!-- Контент категорий -->
             <div class="rating-content">
                 <!-- Регионы России - Глобальный рейтинг -->
-                <div class="rating-tab active" id="regions-tab">
+                <div class="rating-tab {% if request.GET.active_tab == 'regions' or not request.GET.active_tab %}active{% endif %}" id="regions-tab">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="mb-0"><span>🗺️</span> Глобальный рейтинг по регионам России</h6>
@@ -141,29 +143,33 @@
                     </div>
                 </div>
 
-                <!-- Страны Р-150-С -->
-                <div class="rating-tab" id="r150s-tab">
+                <!-- Страны Р-150-С - Глобальный рейтинг -->
+                <div class="rating-tab {% if request.GET.active_tab == 'r150s' %}active{% endif %}" id="r150s-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><span>🎯</span> Страны Р-150-С</h6>
+                            <h6 class="mb-0"><span>🎯</span> Глобальный рейтинг по странам Р-150-С</h6>
                         </div>
                         <div class="card-body p-0">
-                            {% if r150s_stats %}
+                            {% if global_r150s_stats %}
                             <div class="table-responsive">
                                 <table class="table table-striped mb-0 rating-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>#</th>
-                                            <th>Страна</th>
-                                            <th>Количество QSO</th>
+                                            <th>Позывной</th>
+                                            <th>Стран Р-150-С</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in r150s_stats %}
+                                        {% for item in global_r150s_stats %}
                                         <tr>
                                             <td>{{ forloop.counter }}</td>
-                                            <td>{{ item.r150s }}</td>
-                                            <td>{{ item.count }}</td>
+                                            <td>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_countries }}</span>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -180,7 +186,7 @@
                 </div>
 
                 <!-- Страны DXCC -->
-                <div class="rating-tab" id="dxcc-tab">
+                <div class="rating-tab {% if request.GET.active_tab == 'dxcc' %}active{% endif %}" id="dxcc-tab">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="mb-0"><span>🌍</span> Страны DXCC</h6>
@@ -218,7 +224,7 @@
                 </div>
 
                 <!-- QTH локаторы -->
-                <div class="rating-tab" id="qth-tab">
+                <div class="rating-tab {% if request.GET.active_tab == 'qth' %}active{% endif %}" id="qth-tab">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="mb-0"><span>📍</span> QTH локаторы</h6>
@@ -258,7 +264,7 @@
                 </div>
 
                 <!-- Уникальные позывные -->
-                <div class="rating-tab" id="callsigns-tab">
+                <div class="rating-tab {% if request.GET.active_tab == 'callsigns' %}active{% endif %}" id="callsigns-tab">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="mb-0"><span>📡</span> Уникальные позывные</h6>

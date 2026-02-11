@@ -3,7 +3,8 @@
 """
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value
+from django.db.models.functions import Coalesce
 from tlog.models import QSO
 
 
@@ -53,6 +54,59 @@ def rating_page(request):
     global_regions_stats = global_regions_queryset.values('my_callsign').annotate(
         unique_states=Count('state', distinct=True)
     ).order_by('-unique_states')
+
+    # Глобальный рейтинг по странам Р-150-С (по всем пользователям системы)
+    # Оптимизированный запрос - получаем все уникальные страны за один запрос
+    global_r150s_queryset = QSO.objects.filter(
+        Q(r150s__isnull=False) | Q(dxcc__isnull=False)
+    ).exclude(
+        r150s=''
+    ).exclude(
+        dxcc=''
+    )
+
+    # Применяем фильтр по типу диапазона для глобального рейтинга Р-150-С
+    if band_type_filter == 'hf':
+        global_r150s_queryset = global_r150s_queryset.filter(band__in=hf_bands)
+    elif band_type_filter == 'vhf':
+        global_r150s_queryset = global_r150s_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+    elif band_type_filter == 'sat':
+        global_r150s_queryset = global_r150s_queryset.filter(prop_mode='SAT')
+    elif band_type_filter == 'qo100':
+        global_r150s_queryset = global_r150s_queryset.filter(sat_name='QO-100')
+
+    # Применяем фильтр по LoTW для глобального рейтинга Р-150-С
+    if lotw_filter == 'yes':
+        global_r150s_queryset = global_r150s_queryset.filter(lotw='Y')
+
+    # Получаем все уникальные пары (my_callsign, r150s) и (my_callsign, dxcc) за один запрос
+    # Используем values_list для оптимизации памяти
+    from collections import defaultdict
+
+    # Словарь для хранения множеств уникальных стран для каждого позывного
+    callsign_countries = defaultdict(set)
+
+    # Получаем все r150s (исключаем пустые)
+    r150s_data = global_r150s_queryset.exclude(r150s='').exclude(r150s__isnull=True).values_list('my_callsign', 'r150s').distinct()
+    for callsign, country in r150s_data:
+        callsign_countries[callsign].add(country)
+
+    # Получаем все dxcc (исключаем пустые)
+    dxcc_data = global_r150s_queryset.exclude(dxcc='').exclude(dxcc__isnull=True).values_list('my_callsign', 'dxcc').distinct()
+    for callsign, country in dxcc_data:
+        callsign_countries[callsign].add(country)
+
+    # Формируем результат
+    global_r150s_stats = [
+        {
+            'my_callsign': callsign,
+            'unique_countries': len(countries)
+        }
+        for callsign, countries in callsign_countries.items()
+    ]
+
+    # Сортируем по количеству уникальных стран
+    global_r150s_stats.sort(key=lambda x: x['unique_countries'], reverse=True)
 
     # Получаем все QSO пользователя
     qso_queryset = QSO.objects.filter(user=user)
@@ -176,6 +230,7 @@ def rating_page(request):
 
     context = {
         'global_regions_stats': global_regions_stats,
+        'global_r150s_stats': global_r150s_stats,
         'regions_stats': regions_stats,
         'r150s_stats': r150s_stats,
         'dxcc_stats': dxcc_stats,
