@@ -5,19 +5,20 @@
 {% block title %}TLog - Рейтинг{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/qso-tables.css' %}">
 <link rel="stylesheet" href="{% static 'css/rating.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 rating-page">
-    <div class="row">
-        <div class="col-12">
-            <!-- Заголовок страницы -->
-            <div class="rating-header text-center mb-4">
-                <h2><span>🏆</span> Рейтинг</h2>
-                <p class="mb-0">Статистика по категориям</p>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="logbook-header text-center">
+            <h2><span>🏆</span> Рейтинг</h2>
+            <p class="mb-0 text-white">Статистика по категориям</p>
+        </div>
 
+        <div class="p-4">
             <!-- Навигация по категориям -->
             <div class="rating-nav mb-4">
                 <div class="d-flex flex-wrap gap-2 justify-content-center">

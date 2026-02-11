@@ -19,10 +19,10 @@
 
 /* Навигация по категориям */
 .rating-nav {
-    background: white;
+    background: var(--light);
     padding: 1rem;
-    border-radius: var(--radius, 8px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--light-border);
 }
 
 .rating-nav-btn {
@@ -37,8 +37,8 @@
 }
 
 .rating-nav-btn.active {
-    background: var(--primary) !important;
-    color: white !important;
+    background: var(--bg-gradient) !important;
+    color: var(--white) !important;
     border-color: var(--primary) !important;
 }
 
@@ -93,7 +93,7 @@
 
 .rating-table td:first-child {
     font-weight: 600;
-    color: var(--text-muted, #6c757d);
+    color: var(--text-muted);
     width: 60px;
 }
 
