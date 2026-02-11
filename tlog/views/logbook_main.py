@@ -111,7 +111,11 @@ def logbook(request):
         'unique_callsigns': qso_queryset.values('callsign').distinct().count(),
         'unique_dxcc': qso_queryset.filter(dxcc__isnull=False).exclude(dxcc='').values('dxcc').distinct().count(),
         'unique_r150s': qso_queryset.filter(r150s__isnull=False).exclude(r150s='').values('r150s').distinct().count(),
-        'unique_states': qso_queryset.filter(state__isnull=False).exclude(state='').values('state').distinct().count(),
+        'unique_states': qso_queryset.filter(
+            Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
+            Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD']),
+            state__isnull=False
+        ).exclude(state='').values('state').distinct().count(),
     }
 
     # Статистика по диапазонам
@@ -142,7 +146,6 @@ def logbook(request):
     adif_uploads = ADIFUpload.objects.filter(user=request.user).order_by('-upload_date')[:10]
 
     # Диплом Cosmos - уникальные callsign для спутниковых QSO (без учета фильтров)
-    from django.db.models import Q
     cosmos_qso = QSO.objects.filter(
         user=request.user
     ).filter(

@@ -25,7 +25,7 @@
             <div class="stat-card">
                 <div class="stat-icon">🌍</div>
                 <div class="stat-value">{{ filtered_stats.unique_dxcc|default:0 }}</div>
-                <div class="stat-label">{% trans "Стран DXCC" %}</div>
+                <div class="stat-label">{% trans "Стран DXCC (LoTW)" %}</div>
             </div>
         </div>
         <div class="col mb-3">
@@ -38,7 +38,7 @@
         <div class="col mb-3">
             <div class="stat-card">
                 <div class="stat-icon">🗺️</div>
-                <div class="stat-value">{{ filtered_stats.unique_ru_regions|default:0 }}</div>
+                <div class="stat-value">{{ filtered_stats.unique_states|default:0 }}</div>
                 <div class="stat-label">{% trans "Регионов РФ" %}</div>
             </div>
         </div>
