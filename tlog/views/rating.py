@@ -206,6 +206,32 @@ def rating_page(request):
         unique_ituz=Count('ituz', distinct=True)
     ).order_by('-unique_ituz')
 
+    # Глобальный рейтинг по IOTA (по всем пользователям системы)
+    global_iota_queryset = QSO.objects.filter(
+        iota__isnull=False
+    ).exclude(
+        iota=''
+    )
+
+    # Применяем фильтр по типу диапазона для глобального рейтинга IOTA
+    if band_type_filter == 'hf':
+        global_iota_queryset = global_iota_queryset.filter(band__in=hf_bands)
+    elif band_type_filter == 'vhf':
+        global_iota_queryset = global_iota_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+    elif band_type_filter == 'sat':
+        global_iota_queryset = global_iota_queryset.filter(prop_mode='SAT')
+    elif band_type_filter == 'qo100':
+        global_iota_queryset = global_iota_queryset.filter(sat_name='QO-100')
+
+    # Применяем фильтр по LoTW для глобального рейтинга IOTA
+    if lotw_filter == 'yes':
+        global_iota_queryset = global_iota_queryset.filter(lotw='Y')
+
+    # Глобальный рейтинг по IOTA для каждого my_callsign
+    global_iota_stats = global_iota_queryset.values('my_callsign').annotate(
+        unique_iota=Count('iota', distinct=True)
+    ).order_by('-unique_iota')
+
     # Получаем все QSO пользователя
     qso_queryset = QSO.objects.filter(user=user)
 
@@ -333,6 +359,7 @@ def rating_page(request):
         'global_callsigns_stats': global_callsigns_stats,
         'global_cqz_stats': global_cqz_stats,
         'global_ituz_stats': global_ituz_stats,
+        'global_iota_stats': global_iota_stats,
         'regions_stats': regions_stats,
         'r150s_stats': r150s_stats,
         'dxcc_stats': dxcc_stats,
