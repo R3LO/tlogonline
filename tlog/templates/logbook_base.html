@@ -385,6 +385,23 @@
                         </div>
                     </div>
 
+                    <!-- Конвертировать ADIF -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">🔄 Конвертировать ADIF</h6>
+                        </div>
+                        <div class="card-body p-3">
+                            <p class="small text-muted mb-3">
+                                Конвертер позволяет конвертировать ваш ADIF лог в ADIF с необходимыми тегами для QO-100.
+                            </p>
+                            <button type="button" class="btn btn-primary btn-sm w-100"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#qo100ConverterModal">
+                                <span>🔄</span> Конвертировать
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Загруженные ADIF файлы -->
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -532,6 +549,69 @@
                 </button>
                 <button type="button" class="btn btn-success" id="cosmosDownloadBtn" onclick="downloadCosmosFile()" style="display: none;">
                     <span>⬇️</span> Скачать заявку
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span>✖</span> Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно конвертера QO-100 ADIF -->
+<div class="modal fade" id="qo100ConverterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <span>🛰️</span> Конвертер лога QO-100
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="qo100ConverterMessages"></div>
+
+                <div class="alert alert-info mb-3">
+                    <h6 class="alert-heading mb-2">📋 Описание сервиса</h6>
+                    <p class="mb-1 small">Если ваш лог не позволяет вести учёт связей для QO-100, этот сервис может сконвертировать ваш ADIF файл в правильный формат со всеми необходимыми тегами для QO-100.</p>
+                </div>
+
+                <div class="alert alert-warning mb-3">
+                    <h6 class="alert-heading mb-2">⚠️ Важно</h6>
+                    <p class="mb-1 small">Пожалуйста, конвертируйте только лог, который имеет отношение к QO-100. При конвертации все значения тега BAND будут изменены на диапазон 13CM и будут добавлены дополнительные теги SAT и QO-100.</p>
+                </div>
+
+                <form id="qo100ConverterForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="qo100_adif_file" class="form-label fw-bold small">📁 Загрузите ADIF файл</label>
+                        <input type="file" class="form-control form-control-sm" id="qo100_adif_file" name="adif_file"
+                               accept=".adi,.adif,.txt" required>
+                        <div class="form-text">
+                            Поддерживаются файлы с расширением .adi, .adif, .txt
+                        </div>
+                    </div>
+                </form>
+
+                <div id="qo100ConverterResult" style="display: none;">
+                    <h6 class="mb-3">📊 Результат конвертации</h6>
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Превью файла</span>
+                            <button type="button" class="btn btn-success btn-sm" id="qo100DownloadBtn">
+                                <span>💾</span> Скачать конвертированный файл
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="qo100ConverterPreview" class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="qo100ConvertBtn" onclick="convertQO100Adif()">
+                    <span>🔄</span> Конвертировать
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <span>✖</span> Закрыть

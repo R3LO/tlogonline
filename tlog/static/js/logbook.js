@@ -936,3 +936,139 @@ function showCosmosMessage(type, message) {
 document.addEventListener('DOMContentLoaded', function() {
     initCosmosModal();
 });
+
+// ========== Функции для модального окна QO-100 Converter ==========
+
+// Инициализация модального окна QO-100 Converter
+function initQO100ConverterModal() {
+    const modal = document.getElementById('qo100ConverterModal');
+    if (!modal) return;
+
+    // Очистка сообщений и результатов при открытии
+    modal.addEventListener('show.bs.modal', function() {
+        const messagesDiv = document.getElementById('qo100ConverterMessages');
+        if (messagesDiv) {
+            messagesDiv.innerHTML = '';
+        }
+        const resultDiv = document.getElementById('qo100ConverterResult');
+        if (resultDiv) {
+            resultDiv.style.display = 'none';
+        }
+        // Сбрасываем форму
+        const form = document.getElementById('qo100ConverterForm');
+        if (form) {
+            form.reset();
+        }
+    });
+}
+
+// Конвертация ADIF файла для QO-100
+function convertQO100Adif() {
+    const fileInput = document.getElementById('qo100_adif_file');
+    const convertBtn = document.getElementById('qo100ConvertBtn');
+    const resultDiv = document.getElementById('qo100ConverterResult');
+    const previewDiv = document.getElementById('qo100ConverterPreview');
+    const downloadBtn = document.getElementById('qo100DownloadBtn');
+    const messagesDiv = document.getElementById('qo100ConverterMessages');
+
+    // Проверяем, выбран ли файл
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showQO100ConverterMessage('danger', 'Пожалуйста, выберите файл для загрузки');
+        return;
+    }
+
+    const file = fileInput.files[0];
+
+    // Проверяем размер файла (максимум 10 MB)
+    if (file.size > 10 * 1024 * 1024) {
+        showQO100ConverterMessage('danger', 'Размер файла превышает 10 MB');
+        return;
+    }
+
+    // Блокируем кнопку
+    convertBtn.disabled = true;
+    convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Конвертация...';
+
+    // Создаем FormData
+    const formData = new FormData();
+    formData.append('adif_file', file);
+
+    // Отправляем запрос
+    fetch('/dashboard/qo100/converter/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error ' + response.status);
+        }
+        return response.text();
+    })
+    .then(function(html) {
+        // Парсим HTML ответ для извлечения данных
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Проверяем наличие сообщений об ошибках
+        const alerts = doc.querySelectorAll('.alert-danger');
+        if (alerts.length > 0) {
+            const errorMessages = [];
+            alerts.forEach(function(alert) {
+                errorMessages.push(alert.textContent.trim());
+            });
+            showQO100ConverterMessage('danger', errorMessages.join('<br>'));
+            convertBtn.disabled = false;
+            convertBtn.innerHTML = '<span>🔄</span> Конвертировать';
+            return;
+        }
+
+        // Проверяем наличие успешных сообщений
+        const successAlerts = doc.querySelectorAll('.alert-success');
+        if (successAlerts.length > 0) {
+            showQO100ConverterMessage('success', successAlerts[0].textContent.trim());
+        }
+
+        // Извлекаем превью
+        const previewElement = doc.querySelector('pre');
+        if (previewElement) {
+            previewDiv.textContent = previewElement.textContent;
+            resultDiv.style.display = 'block';
+        }
+
+        // Извлекаем ссылку на скачивание
+        const downloadLink = doc.querySelector('a[href*="download"]');
+        if (downloadLink) {
+            downloadBtn.onclick = function() {
+                window.location.href = downloadLink.href;
+            };
+        }
+
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<span>🔄</span> Конвертировать';
+    })
+    .catch(function(error) {
+        showQO100ConverterMessage('danger', 'Ошибка при конвертации: ' + error.message);
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<span>🔄</span> Конвертировать';
+    });
+}
+
+// Показ сообщения в модальном окне QO-100 Converter
+function showQO100ConverterMessage(type, message) {
+    const messagesDiv = document.getElementById('qo100ConverterMessages');
+    messagesDiv.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+}
+
+// Инициализация модального окна QO-100 Converter при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initQO100ConverterModal();
+});
