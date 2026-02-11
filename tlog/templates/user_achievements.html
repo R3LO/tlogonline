@@ -51,8 +51,6 @@
                             <th style="width: 50px;">#</th>
                             <th>{% trans "Позывной" %}</th>
                             <th style="text-align: center;">{% trans "QSO" %}</th>
-                            <th style="text-align: center;">{% trans "Диап." %}</th>
-                            <th style="text-align: center;">{% trans "Модул." %}</th>
                             <th style="text-align: center;">{% trans "Р-150-С" %}</th>
                             <th style="text-align: center;">{% trans "Регионы" %}</th>
                             <th style="text-align: center;">LoTW</th>
@@ -68,16 +66,6 @@
                             </td>
                             <td style="text-align: center;">
                                 <span class="badge bg-primary">{{ user.total_qso }}</span>
-                            </td>
-                            <td style="text-align: center;">
-                                <span class="badge {% if user.bands >= 10 %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ user.bands }}
-                                </span>
-                            </td>
-                            <td style="text-align: center;">
-                                <span class="badge {% if user.modes >= 5 %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ user.modes }}
-                                </span>
                             </td>
                             <td style="text-align: center;">
                                 <span class="badge {% if user.r150s_count >= 50 %}bg-success{% else %}bg-secondary{% endif %}">

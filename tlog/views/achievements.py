@@ -582,11 +582,21 @@ def user_achievements(request):
         # Модуляции
         modes = QSO.objects.filter(user=user).exclude(mode__isnull=True).values('mode').distinct().count()
 
-        # Страны Р-150-С
-        r150s_count = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values('r150s').distinct().count()
+        # Страны Р-150-С (r150s + dxcc вместе)
+        countries_set = set()
+        # Получаем уникальные r150s
+        r150s_data = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values_list('r150s', flat=True).distinct()
+        countries_set.update(r150s_data)
+        # Получаем уникальные dxcc
+        dxcc_data = QSO.objects.filter(user=user).exclude(dxcc__isnull=True).exclude(dxcc='').values_list('dxcc', flat=True).distinct()
+        countries_set.update(dxcc_data)
+        r150s_count = len(countries_set)
 
-        # Регионы России
-        states = QSO.objects.filter(user=user).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
+        # Регионы России (только QSO из России)
+        states = QSO.objects.filter(user=user).filter(
+            Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
+            Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])
+        ).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
 
         # LoTW подтверждения
         lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
