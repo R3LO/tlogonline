@@ -74,6 +74,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>
@@ -189,25 +190,29 @@
                 <div class="rating-tab {% if request.GET.active_tab == 'dxcc' %}active{% endif %}" id="dxcc-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><span>🌍</span> Страны DXCC</h6>
+                            <h6 class="mb-0"><span>🌍</span> Глобальный рейтинг по странам DXCC (LoTW)</h6>
                         </div>
                         <div class="card-body p-0">
-                            {% if dxcc_stats %}
+                            {% if global_dxcc_stats %}
                             <div class="table-responsive">
                                 <table class="table table-striped mb-0 rating-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>#</th>
-                                            <th>Страна</th>
-                                            <th>Количество QSO</th>
+                                            <th>Позывной</th>
+                                            <th>Стран DXCC</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in dxcc_stats %}
+                                        {% for item in global_dxcc_stats %}
                                         <tr>
                                             <td>{{ forloop.counter }}</td>
-                                            <td>{{ item.dxcc }}</td>
-                                            <td>{{ item.count }}</td>
+                                            <td>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_dxcc }}</span>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

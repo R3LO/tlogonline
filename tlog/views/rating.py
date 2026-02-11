@@ -21,7 +21,12 @@ def rating_page(request):
 
     # Получаем параметры фильтров
     band_type_filter = request.GET.get('band_type', 'all')  # 'all', 'hf', 'vhf', 'sat', 'qo100'
+    active_tab = request.GET.get('active_tab', 'regions')  # активная вкладка
     lotw_filter = request.GET.get('lotw', 'no')  # 'yes', 'no'
+
+    # Если активная вкладка DXCC, принудительно устанавливаем LoTW = yes
+    if active_tab == 'dxcc':
+        lotw_filter = 'yes'
 
     # КВ диапазоны
     hf_bands = ['160M', '80M', '40M', '30M', '20M', '17M', '15M', '12M', '10M']
@@ -107,6 +112,29 @@ def rating_page(request):
 
     # Сортируем по количеству уникальных стран
     global_r150s_stats.sort(key=lambda x: x['unique_countries'], reverse=True)
+
+    # Глобальный рейтинг по странам DXCC (по всем пользователям системы)
+    global_dxcc_queryset = QSO.objects.filter(
+        dxcc__isnull=False
+    ).exclude(dxcc='')
+
+    # Применяем фильтр по типу диапазона для глобального рейтинга DXCC
+    if band_type_filter == 'hf':
+        global_dxcc_queryset = global_dxcc_queryset.filter(band__in=hf_bands)
+    elif band_type_filter == 'vhf':
+        global_dxcc_queryset = global_dxcc_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+    elif band_type_filter == 'sat':
+        global_dxcc_queryset = global_dxcc_queryset.filter(prop_mode='SAT')
+    elif band_type_filter == 'qo100':
+        global_dxcc_queryset = global_dxcc_queryset.filter(sat_name='QO-100')
+
+    # Для DXCC фильтр LoTW всегда должен быть 'yes'
+    global_dxcc_queryset = global_dxcc_queryset.filter(lotw='Y')
+
+    # Глобальный рейтинг DXCC по всем пользователям системы
+    global_dxcc_stats = global_dxcc_queryset.values('my_callsign').annotate(
+        unique_dxcc=Count('dxcc', distinct=True)
+    ).order_by('-unique_dxcc')
 
     # Получаем все QSO пользователя
     qso_queryset = QSO.objects.filter(user=user)
@@ -231,6 +259,7 @@ def rating_page(request):
     context = {
         'global_regions_stats': global_regions_stats,
         'global_r150s_stats': global_r150s_stats,
+        'global_dxcc_stats': global_dxcc_stats,
         'regions_stats': regions_stats,
         'r150s_stats': r150s_stats,
         'dxcc_stats': dxcc_stats,

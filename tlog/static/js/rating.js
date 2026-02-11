@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const navButtons = document.querySelectorAll('.rating-nav-btn');
     const tabs = document.querySelectorAll('.rating-tab');
     const activeTabInput = document.getElementById('active-tab');
+    const lotwYesRadio = document.getElementById('lotw_yes');
+    const lotwNoRadio = document.getElementById('lotw_no');
 
     // Получаем активную вкладку из URL параметра или из скрытого поля
     const urlParams = new URLSearchParams(window.location.search);
@@ -45,6 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const activeTab = document.getElementById(tabId + '-tab');
         if (activeTab) {
             activeTab.classList.add('active');
+        }
+
+        // Если это вкладка DXCC, автоматически устанавливаем LoTW = Да
+        if (tabId === 'dxcc' && lotwYesRadio && lotwNoRadio) {
+            lotwYesRadio.checked = true;
         }
     }
 
