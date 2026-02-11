@@ -1,284 +1,146 @@
-<!DOCTYPE html>
-<html lang="ru">
+{% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Награды пользователей - TLog</title>
-    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
-    <link rel="alternate icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 2rem;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .achievement-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f8f9fa;
-            border-radius: 20px;
-            padding: 4px 10px;
-            margin: 2px;
-            font-size: 0.85rem;
-        }
-        .achievement-badge .icon {
-            font-size: 1rem;
-        }
-        .user-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        .user-card.highlight {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 2px solid #667eea;
-        }
-        .rank-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .callsign-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .callsign-link:hover {
-            text-decoration: underline;
-        }
-        .table-awards {
-            font-size: 0.9rem;
-        }
-        .table-awards th {
-            background: #f8f9fa;
-            font-weight: 600;
-            border-bottom: 2px solid #667eea;
-        }
-        .table-awards td {
-            vertical-align: middle;
-        }
-        .progress-mini {
-            height: 6px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .progress-mini .progress-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">📡 TLog - твой лог</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light me-3" href="/dashboard/">
-                    <span>📊</span> Панель
-                </a>
-                <a class="nav-link text-light me-3" href="/logbook/">
-                    <span>📓</span> Logbook
-                </a>
-                <a class="nav-link text-light me-3" href="/qth-loc.html" target="_blank">
-                    <span>🗺️</span> Grid map
-                </a>
-                <a class="nav-link text-light me-3" href="/achievements/">
-                    <span>🏆</span> Достижения
-                </a>
-                {% if user.is_authenticated %}
-                    <a class="nav-link text-light me-3" href="/dashboard/">
-                        <span>📊</span> Панель
-                    </a>
-                    <a class="nav-link text-light" href="/logout/">
-                        <span>🚪</span> Выйти
-                    </a>
-                {% else %}
-                    <a class="nav-link text-light" href="/login/">
-                        <span>🔑</span> Войти
-                    </a>
-                {% endif %}
-            </div>
+{% block title %}TLog - {% trans "Награды пользователей" %}{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <!-- Page Header -->
+        <div class="card-header bg-primary text-white text-center">
+            <h2 class="mb-0"><span>🏆</span> {% trans "Награды пользователей" %}</h2>
         </div>
-    </nav>
+        <div class="card-body">
+            <p class="text-center text-muted">{% trans "Достижения и награды всех пользователей платформы" %}</p>
 
-    <div class="container mt-4">
-        <div class="main-container">
-            <!-- Header -->
-            <div class="header text-center">
-                <h2><span>🏆</span> Награды пользователей</h2>
-                <p class="mb-0">Рейтинг радиолюбителей по количеству достижений</p>
+            <!-- Platform Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">{{ total_users }}</h3>
+                            <p class="mb-0">{% trans "Пользователей" %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">{{ total_qso_all }}</h3>
+                            <p class="mb-0">{% trans "Всего QSO" %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 class="display-4">{{ total_qso_lotw }}</h3>
+                            <p class="mb-0">{% trans "LoTW подтверждений" %}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-4">
-                <!-- Статистика платформы -->
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ total_users }}</div>
-                        <div>Пользователей</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ total_qso_all }}</div>
-                        <div>Всего QSO</div>
-                    </div>
-                    <div class="stats-card flex-fill" style="min-width: 140px;">
-                        <div class="stats-number">{{ total_qso_lotw }}</div>
-                        <div>Подтверждено LoTW</div>
-                    </div>
-                </div>
+            <!-- Users Achievements Table -->
+            {% if user_achievements_list %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>{% trans "Позывной" %}</th>
+                            <th style="text-align: center;">{% trans "QSO" %}</th>
+                            <th style="text-align: center;">{% trans "Диап." %}</th>
+                            <th style="text-align: center;">{% trans "Модул." %}</th>
+                            <th style="text-align: center;">{% trans "Р-150-С" %}</th>
+                            <th style="text-align: center;">{% trans "Регионы" %}</th>
+                            <th style="text-align: center;">LoTW</th>
+                            <th style="min-width: 200px;">{% trans "Награды" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_achievements_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ user.callsign }}</strong>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge bg-primary">{{ user.total_qso }}</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge {% if user.bands >= 10 %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ user.bands }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge {% if user.modes >= 5 %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ user.modes }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge {% if user.r150s_count >= 50 %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ user.r150s_count }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge bg-info">{{ user.states }}</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="badge {% if user.lotw_count >= 10 %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ user.lotw_count }}
+                                </span>
+                            </td>
+                            <td>
+                                {% for achievement in user.achievements %}
+                                <span class="badge bg-light border text-dark" title="{{ achievement.title }}">
+                                    {{ achievement.icon }}
+                                </span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <div style="font-size: 4rem;">🏆</div>
+                <h4>{% trans "Нет данных" %}</h4>
+                <p>{% trans "На платформе пока нет пользователей с QSO" %}</p>
+            </div>
+            {% endif %}
 
-                <!-- Таблица пользователей -->
-                {% if user_achievements_list %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-awards">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>Пользователь</th>
-                                <th style="text-align: center;">QSO</th>
-                                <th style="text-align: center;">Диап.</th>
-                                <th style="text-align: center;">Модул.</th>
-                                <th style="text-align: center;">Стран</th>
-                                <th style="text-align: center;">Регион РФ</th>
-                                <th style="text-align: center;">LoTW</th>
-                                <th style="text-align: center;">QO-100</th>
-                                <th style="min-width: 300px;">Награды</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user_data in user_achievements_list %}
-                            <tr>
-                                <td>
-                                    <span class="rank-badge">{{ forloop.counter }}</span>
-                                </td>
-                                <td>
-                                    <a href="/{{ user_data.callsign|default:user_data.username }}/" class="callsign-link">
-                                        <strong>{{ user_data.username }}</strong>
-                                    </a>
-                                    {% if user_data.callsign %}
-                                        <br><small class="text-muted">{{ user_data.callsign }}</small>
-                                    {% endif %}
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge bg-primary">{{ user_data.total_qso }}</span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge {% if user_data.bands >= 10 %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ user_data.bands }}
-                                    </span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge {% if user_data.modes >= 5 %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ user_data.modes }}
-                                    </span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge {% if user_data.r150s_count >= 50 %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ user_data.r150s_count }}
-                                    </span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge bg-info">{{ user_data.states }}</span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge {% if user_data.lotw_count >= 10 %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ user_data.lotw_count }}
-                                    </span>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="badge {% if user_data.qo100_all >= 100 %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ user_data.qo100_all }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% for achievement in user_data.achievements %}
-                                        <span class="achievement-badge" title="{{ achievement.title }}">
-                                            <span class="icon">{{ achievement.icon }}</span>
-                                            <span>{{ achievement.title }}</span>
-                                        </span>
-                                    {% empty %}
-                                        <small class="text-muted">Нет наград</small>
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- Achievements Legend -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold text-dark"><span>📖</span> {% trans "Легенда наград" %}</h6>
                 </div>
-                {% else %}
-                <div class="text-center py-5">
-                    <p class="text-muted">Нет данных о пользователях</p>
-                </div>
-                {% endif %}
-
-                <!-- Легенда наград -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h6 class="mb-0"><span>📖</span> Легенда наград</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Основные награды</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="achievement-badge"><span class="icon">🎯</span> Новичок (100+ QSO)</span>
-                                    <span class="achievement-badge"><span class="icon">⭐</span> Опытный (500+ QSO)</span>
-                                    <span class="achievement-badge"><span class="icon">🏆</span> Мастер (1000+ QSO)</span>
-                                    <span class="achievement-badge"><span class="icon">📡</span> Разведчик (10+ диапазонов)</span>
-                                    <span class="achievement-badge"><span class="icon">🎛️</span> Универсал (5+ модуляций)</span>
-                                    <span class="achievement-badge"><span class="icon">🌍</span> Охотник за DX (50+ стран Р-150-С)</span>
-                                    <span class="achievement-badge"><span class="icon">🎖️</span> Патриот (100+ стран Р-150-С)</span>
-                                    <span class="achievement-badge"><span class="icon">💻</span> Цифровой оператор (10+ LoTW)</span>
-                                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">{% trans "Основные награды" %}</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light border text-dark"><span>🎯</span> Новичок (100+ QSO)</span>
+                                <span class="badge bg-light border text-dark"><span>⭐</span> Опытный (500+ QSO)</span>
+                                <span class="badge bg-light border text-dark"><span>🏆</span> Мастер (1000+ QSO)</span>
+                                <span class="badge bg-light border text-dark"><span>📡</span> Разведчик (10+ диапазонов)</span>
+                                <span class="badge bg-light border text-dark"><span>🎛️</span> Универсал (5+ модуляций)</span>
+                                <span class="badge bg-light border text-dark"><span>🌍</span> Охотник за DX (50+ стран)</span>
+                                <span class="badge bg-light border text-dark"><span>🎖️</span> Патриот (100+ стран)</span>
+                                <span class="badge bg-light border text-dark"><span>💻</span> Цифровой оператор (10+ LoTW)</span>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Награды QO-100</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="achievement-badge"><span class="icon">🗺️</span> W-QO100-R (25+ регионов РФ, LoTW)</span>
-                                    <span class="achievement-badge"><span class="icon">🎓</span> W-QO100-PROFI (30+ регионов РФ, LoTW)</span>
-                                    <span class="achievement-badge"><span class="icon">🌐</span> W-QO100-C (100+ стран, LoTW)</span>
-                                    <span class="achievement-badge"><span class="icon">📍</span> W-QO100-L (500+ QTH локаторов, LoTW)</span>
-                                    <span class="achievement-badge"><span class="icon">📡</span> W-QO100-U (1000+ позывных, LoTW)</span>
-                                    <span class="achievement-badge"><span class="icon">🛰️</span> W-QO100-B (1000+ связей)</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">{% trans "Награды QO-100" %}</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light border text-dark"><span>🗺️</span> W-QO100-R (25+ регионов, LoTW)</span>
+                                <span class="badge bg-light border text-dark"><span>🎓</span> W-QO100-PROFI (30+ регионов, LoTW)</span>
+                                <span class="badge bg-light border text-dark"><span>🌐</span> W-QO100-C (100+ стран, LoTW)</span>
+                                <span class="badge bg-light border text-dark"><span>📍</span> W-QO100-L (500+ локаторов, LoTW)</span>
+                                <span class="badge bg-light border text-dark"><span>📡</span> W-QO100-U (1000+ позывных, LoTW)</span>
+                                <span class="badge bg-light border text-dark"><span>🛰️</span> W-QO100-B (1000+ связей)</span>
                             </div>
                         </div>
                     </div>
@@ -286,7 +148,23 @@
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% block extra_js %}
+<script>
+// Подсказки для наград
+document.addEventListener('DOMContentLoaded', function() {
+    const achievementBadges = document.querySelectorAll('.badge[title]');
+    
+    achievementBadges.forEach(badge => {
+        badge.addEventListener('click', function() {
+            const title = this.getAttribute('title');
+            if (title) {
+                alert(title);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
