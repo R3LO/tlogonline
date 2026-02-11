@@ -232,6 +232,62 @@ def rating_page(request):
         unique_iota=Count('iota', distinct=True)
     ).order_by('-unique_iota')
 
+    # Глобальный рейтинг по QTH локаторам (по всем пользователям системы)
+    # Собираем QSO с gridsquare или vucc_grids
+    global_qth_queryset = QSO.objects.filter(
+        Q(gridsquare__isnull=False) | Q(vucc_grids__isnull=False)
+    ).exclude(
+        Q(gridsquare='') & Q(vucc_grids='')
+    )
+
+    # Применяем фильтр по типу диапазона для глобального рейтинга QTH локаторов
+    if band_type_filter == 'hf':
+        global_qth_queryset = global_qth_queryset.filter(band__in=hf_bands)
+    elif band_type_filter == 'vhf':
+        global_qth_queryset = global_qth_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+    elif band_type_filter == 'sat':
+        global_qth_queryset = global_qth_queryset.filter(prop_mode='SAT')
+    elif band_type_filter == 'qo100':
+        global_qth_queryset = global_qth_queryset.filter(sat_name='QO-100')
+
+    # Применяем фильтр по LoTW для глобального рейтинга QTH локаторов
+    if lotw_filter == 'yes':
+        global_qth_queryset = global_qth_queryset.filter(lotw='Y')
+
+    # Извлекаем данные и обрабатываем в Python для учета первых 4 символов
+    callsign_grids = defaultdict(set)
+
+    # Получаем данные из базы
+    qth_data = global_qth_queryset.values_list('my_callsign', 'gridsquare', 'vucc_grids')
+
+    for callsign, gridsquare, vucc_grids in qth_data:
+        # Обрабатываем gridsquare (первые 4 символа)
+        if gridsquare and len(gridsquare) >= 4:
+            grid_4 = gridsquare[:4].upper()
+            if grid_4:
+                callsign_grids[callsign].add(grid_4)
+
+        # Обрабатываем vucc_grids (разбиваем по запятым, берем первые 4 символа каждого)
+        if vucc_grids:
+            for grid in vucc_grids.split(','):
+                grid = grid.strip()
+                if grid and len(grid) >= 4:
+                    grid_4 = grid[:4].upper()
+                    if grid_4:
+                        callsign_grids[callsign].add(grid_4)
+
+    # Формируем результат глобального рейтинга QTH локаторов
+    global_qth_stats = [
+        {
+            'my_callsign': callsign,
+            'unique_grids': len(grids)
+        }
+        for callsign, grids in callsign_grids.items()
+    ]
+
+    # Сортируем по количеству уникальных локаторов
+    global_qth_stats.sort(key=lambda x: x['unique_grids'], reverse=True)
+
     # Получаем все QSO пользователя
     qso_queryset = QSO.objects.filter(user=user)
 
@@ -360,6 +416,7 @@ def rating_page(request):
         'global_cqz_stats': global_cqz_stats,
         'global_ituz_stats': global_ituz_stats,
         'global_iota_stats': global_iota_stats,
+        'global_qth_stats': global_qth_stats,
         'regions_stats': regions_stats,
         'r150s_stats': r150s_stats,
         'dxcc_stats': dxcc_stats,

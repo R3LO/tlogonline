@@ -363,31 +363,33 @@
                     </div>
                 </div>
 
-                <!-- QTH локаторы -->
+                <!-- QTH локаторы - Глобальный рейтинг -->
                 <div class="rating-tab {% if request.GET.active_tab == 'qth' %}active{% endif %}" id="qth-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><span>📍</span> QTH локаторы</h6>
+                            <h6 class="mb-0"><span>📍</span> Глобальный рейтинг по QTH локаторам</h6>
                         </div>
                         <div class="card-body p-0">
-                            {% if qth_stats %}
+                            {% if global_qth_stats %}
                             <div class="table-responsive">
                                 <table class="table table-striped mb-0 rating-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>#</th>
-                                            <th>Локатор</th>
-                                            <th>Количество QSO</th>
+                                            <th>Позывной</th>
+                                            <th>Уникальных локаторов (4 символа)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in qth_stats %}
+                                        {% for item in global_qth_stats %}
                                         <tr>
                                             <td>{{ forloop.counter }}</td>
                                             <td>
-                                                <span class="badge bg-info text-dark">{{ item.gridsquare }}</span>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
                                             </td>
-                                            <td>{{ item.count }}</td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_grids }}</span>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
