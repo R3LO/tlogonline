@@ -17,6 +17,40 @@
     margin-bottom: 0.5rem;
 }
 
+/* Фильтры */
+.filter-card {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--light-border);
+    margin-bottom: var(--padding-lg);
+}
+
+.filter-controls {
+    margin: 0;
+}
+
+.filter-controls label.form-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark);
+}
+
+.filter-controls .form-check {
+    display: inline-flex;
+    align-items: center;
+    margin-right: var(--padding-md);
+}
+
+.filter-controls .form-check-input {
+    cursor: pointer;
+}
+
+.filter-controls .form-check-label {
+    cursor: pointer;
+    margin-left: var(--padding-xs);
+    user-select: none;
+}
+
 /* Навигация по категориям */
 .rating-nav {
     background: var(--light);
@@ -99,12 +133,12 @@
 
 /* Адаптивные стили */
 @media (max-width: 768px) {
-    .rating-header {
-        padding: 1.5rem;
+    .filter-card {
+        padding: 0.75rem;
     }
 
-    .rating-header h2 {
-        font-size: 1.5rem;
+    .filter-controls .row {
+        gap: var(--padding-md);
     }
 
     .rating-nav {
@@ -126,6 +160,15 @@
 }
 
 @media (max-width: 576px) {
+    .filter-controls .d-flex {
+        flex-direction: column;
+        gap: var(--padding-xs);
+    }
+
+    .filter-controls .form-check {
+        width: 100%;
+    }
+
     .rating-nav .d-flex {
         flex-direction: column;
         align-items: stretch;

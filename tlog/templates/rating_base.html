@@ -19,6 +19,63 @@
         </div>
 
         <div class="p-4">
+            <!-- Фильтры -->
+            <div class="filter-card mb-4">
+                <h5 class="section-title"><span>🔍</span> Фильтры</h5>
+                <form class="filter-controls" method="GET" action="{% url 'rating_page' %}" id="rating-filter-form">
+                    <div class="row g-3">
+                        <!-- Тип диапазона -->
+                        <div class="col-12">
+                            <label class="form-label small mb-2">Диапазон</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="band_type" id="band_all" value="all"
+                                           {% if band_type_filter == 'all' %}checked{% endif %}>
+                                    <label class="form-check-label" for="band_all">Все</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="band_type" id="band_hf" value="hf"
+                                           {% if band_type_filter == 'hf' %}checked{% endif %}>
+                                    <label class="form-check-label" for="band_hf">КВ</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="band_type" id="band_vhf" value="vhf"
+                                           {% if band_type_filter == 'vhf' %}checked{% endif %}>
+                                    <label class="form-check-label" for="band_vhf">УКВ</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="band_type" id="band_sat" value="sat"
+                                           {% if band_type_filter == 'sat' %}checked{% endif %}>
+                                    <label class="form-check-label" for="band_sat">Sat</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="band_type" id="band_qo100" value="qo100"
+                                           {% if band_type_filter == 'qo100' %}checked{% endif %}>
+                                    <label class="form-check-label" for="band_qo100">QO-100</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LoTW -->
+                        <div class="col-12">
+                            <label class="form-label small mb-2">LoTW</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="lotw" id="lotw_no" value="no"
+                                           {% if lotw_filter == 'no' %}checked{% endif %}>
+                                    <label class="form-check-label" for="lotw_no">Нет</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input filter-radio" type="radio" name="lotw" id="lotw_yes" value="yes"
+                                           {% if lotw_filter == 'yes' %}checked{% endif %}>
+                                    <label class="form-check-label" for="lotw_yes">Да</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <!-- Навигация по категориям -->
             <div class="rating-nav mb-4">
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
@@ -42,31 +99,33 @@
 
             <!-- Контент категорий -->
             <div class="rating-content">
-                <!-- Регионы России -->
+                <!-- Регионы России - Глобальный рейтинг -->
                 <div class="rating-tab active" id="regions-tab">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="mb-0"><span>🗺️</span> Регионы России</h6>
+                            <h6 class="mb-0"><span>🗺️</span> Глобальный рейтинг по регионам России</h6>
                         </div>
                         <div class="card-body p-0">
-                            {% if regions_stats %}
+                            {% if global_regions_stats %}
                             <div class="table-responsive">
                                 <table class="table table-striped mb-0 rating-table">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>#</th>
-                                            <th>Регион</th>
-                                            <th>Количество QSO</th>
+                                            <th>Позывной</th>
+                                            <th>Регионов России</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in regions_stats %}
+                                        {% for item in global_regions_stats %}
                                         <tr>
                                             <td>{{ forloop.counter }}</td>
                                             <td>
-                                                <span class="badge bg-warning text-dark">{{ item.state }}</span>
+                                                <span class="callsign-badge">{{ item.my_callsign }}</span>
                                             </td>
-                                            <td>{{ item.count }}</td>
+                                            <td>
+                                                <span class="badge bg-success">{{ item.unique_states }}</span>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

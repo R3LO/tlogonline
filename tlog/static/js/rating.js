@@ -27,4 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Автоматическая отправка формы при изменении фильтров
+    const filterRadios = document.querySelectorAll('.filter-radio');
+    const filterForm = document.getElementById('rating-filter-form');
+
+    filterRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (filterForm) {
+                filterForm.submit();
+            }
+        });
+    });
 });
