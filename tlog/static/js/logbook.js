@@ -941,11 +941,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Инициализация модального окна QO-100 Converter
 function initQO100ConverterModal() {
+    console.log('initQO100ConverterModal called');
     const modal = document.getElementById('qo100ConverterModal');
-    if (!modal) return;
+    if (!modal) {
+        console.log('qo100ConverterModal not found');
+        return;
+    }
 
     // Очистка сообщений и результатов при открытии
     modal.addEventListener('show.bs.modal', function() {
+        console.log('qo100ConverterModal show.bs.modal');
         const messagesDiv = document.getElementById('qo100ConverterMessages');
         if (messagesDiv) {
             messagesDiv.innerHTML = '';
@@ -960,64 +965,61 @@ function initQO100ConverterModal() {
             form.reset();
         }
     });
+
+    // Обработка загрузки результата в iframe
+    const iframe = document.getElementById('qo100ConverterFrame');
+    if (iframe) {
+        iframe.addEventListener('load', function() {
+            handleIframeLoad(iframe);
+        });
+    }
+
+    // Добавляем обработчик для кнопки конвертации
+    const convertBtn = document.getElementById('qo100ConvertBtn');
+    if (convertBtn) {
+        console.log('Adding click listener to qo100ConvertBtn');
+        convertBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('qo100ConvertBtn clicked');
+            convertQO100Adif();
+        });
+    } else {
+        console.log('qo100ConvertBtn not found');
+    }
 }
 
-// Конвертация ADIF файла для QO-100
-function convertQO100Adif() {
-    const fileInput = document.getElementById('qo100_adif_file');
-    const convertBtn = document.getElementById('qo100ConvertBtn');
-    const resultDiv = document.getElementById('qo100ConverterResult');
-    const previewDiv = document.getElementById('qo100ConverterPreview');
-    const downloadBtn = document.getElementById('qo100DownloadBtn');
-    const messagesDiv = document.getElementById('qo100ConverterMessages');
+// Обработка загрузки iframe
+window.handleIframeLoad = function(iframe) {
+    console.log('handleIframeLoad called');
+    try {
+        const iframeContent = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeHTML = iframeContent.documentElement.innerHTML;
 
-    // Проверяем, выбран ли файл
-    if (!fileInput.files || fileInput.files.length === 0) {
-        showQO100ConverterMessage('danger', 'Пожалуйста, выберите файл для загрузки');
-        return;
-    }
+        console.log('iframeHTML length:', iframeHTML.length);
+        console.log('iframeHTML preview:', iframeHTML.substring(0, 500));
 
-    const file = fileInput.files[0];
-
-    // Проверяем размер файла (максимум 10 MB)
-    if (file.size > 10 * 1024 * 1024) {
-        showQO100ConverterMessage('danger', 'Размер файла превышает 10 MB');
-        return;
-    }
-
-    // Блокируем кнопку
-    convertBtn.disabled = true;
-    convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Конвертация...';
-
-    // Создаем FormData
-    const formData = new FormData();
-    formData.append('adif_file', file);
-
-    // Отправляем запрос
-    fetch('/dashboard/qo100/converter/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: formData,
-        credentials: 'same-origin'
-    })
-    .then(function(response) {
-        if (!response.ok) {
-            throw new Error('HTTP error ' + response.status);
-        }
-        return response.text();
-    })
-    .then(function(html) {
         // Парсим HTML ответ для извлечения данных
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
+        const doc = parser.parseFromString(iframeHTML, 'text/html');
+
+        const convertBtn = document.getElementById('qo100ConvertBtn');
+        const resultDiv = document.getElementById('qo100ConverterResult');
+        const previewDiv = document.getElementById('qo100ConverterPreview');
+        const downloadBtn = document.getElementById('qo100DownloadBtn');
 
         // Проверяем наличие сообщений об ошибках
-        const alerts = doc.querySelectorAll('.alert-danger');
+        const alerts = doc.querySelectorAll('.alert');
+        console.log('Found alerts:', alerts.length);
         if (alerts.length > 0) {
+            alerts.forEach(function(alert, index) {
+                console.log('Alert', index, ':', alert.className, '-', alert.textContent.trim());
+            });
+        }
+
+        const dangerAlerts = doc.querySelectorAll('.alert-danger');
+        if (dangerAlerts.length > 0) {
             const errorMessages = [];
-            alerts.forEach(function(alert) {
+            dangerAlerts.forEach(function(alert) {
                 errorMessages.push(alert.textContent.trim());
             });
             showQO100ConverterMessage('danger', errorMessages.join('<br>'));
@@ -1034,6 +1036,7 @@ function convertQO100Adif() {
 
         // Извлекаем превью
         const previewElement = doc.querySelector('pre');
+        console.log('Found preview element:', previewElement !== null);
         if (previewElement) {
             previewDiv.textContent = previewElement.textContent;
             resultDiv.style.display = 'block';
@@ -1041,7 +1044,9 @@ function convertQO100Adif() {
 
         // Извлекаем ссылку на скачивание
         const downloadLink = doc.querySelector('a[href*="download"]');
+        console.log('Found download link:', downloadLink !== null);
         if (downloadLink) {
+            console.log('Download link href:', downloadLink.href);
             downloadBtn.onclick = function() {
                 window.location.href = downloadLink.href;
             };
@@ -1049,26 +1054,76 @@ function convertQO100Adif() {
 
         convertBtn.disabled = false;
         convertBtn.innerHTML = '<span>🔄</span> Конвертировать';
-    })
-    .catch(function(error) {
-        showQO100ConverterMessage('danger', 'Ошибка при конвертации: ' + error.message);
+    } catch (e) {
+        // Ошибка доступа к iframe (возможно, перенаправление)
+        console.error('Ошибка доступа к iframe:', e);
+        const convertBtn = document.getElementById('qo100ConvertBtn');
         convertBtn.disabled = false;
         convertBtn.innerHTML = '<span>🔄</span> Конвертировать';
-    });
-}
+    }
+};
+
+// Конвертация ADIF файла для QO-100
+window.convertQO100Adif = function() {
+    console.log('convertQO100Adif called');
+
+    const fileInput = document.getElementById('qo100_adif_file');
+    const convertBtn = document.getElementById('qo100ConvertBtn');
+    const resultDiv = document.getElementById('qo100ConverterResult');
+    const messagesDiv = document.getElementById('qo100ConverterMessages');
+
+    // Проверяем, выбран ли файл
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showQO100ConverterMessage('danger', 'Пожалуйста, выберите файл для загрузки');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    console.log('File selected:', file.name, 'Size:', file.size);
+
+    // Проверяем размер файла (максимум 10 MB)
+    if (file.size > 10 * 1024 * 1024) {
+        showQO100ConverterMessage('danger', 'Размер файла превышает 10 MB');
+        return;
+    }
+
+    // Очищаем предыдущие результаты
+    resultDiv.style.display = 'none';
+    messagesDiv.innerHTML = '';
+
+    // Блокируем кнопку
+    convertBtn.disabled = true;
+    convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Конвертация...';
+
+    // Обновляем URL формы с параметром iframe=1
+    const form = document.getElementById('qo100ConverterForm');
+    console.log('Form action before:', form.getAttribute('action'));
+    const currentAction = form.getAttribute('action');
+    if (!currentAction.includes('iframe=1')) {
+        form.setAttribute('action', currentAction + '?iframe=1');
+    }
+    console.log('Form action after:', form.getAttribute('action'));
+
+    // Отправляем форму через iframe
+    console.log('Submitting form...');
+    form.submit();
+};
 
 // Показ сообщения в модальном окне QO-100 Converter
-function showQO100ConverterMessage(type, message) {
+window.showQO100ConverterMessage = function(type, message) {
     const messagesDiv = document.getElementById('qo100ConverterMessages');
-    messagesDiv.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-}
+    if (messagesDiv) {
+        messagesDiv.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    }
+};
 
 // Инициализация модального окна QO-100 Converter при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing QO-100 converter modal');
     initQO100ConverterModal();
 });

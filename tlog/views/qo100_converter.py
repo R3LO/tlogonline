@@ -3,6 +3,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 from ..models import check_user_blocked
@@ -12,10 +13,13 @@ import re
 
 
 @login_required
+@xframe_options_exempt
 def qo100_converter(request):
     """
     Конвертер ADIF файлов для QO-100
     """
+    print(f"[QO-100 DEBUG] qo100_converter called, method={request.method}")
+
     # Проверяем, не заблокирован ли пользователь
     is_blocked, reason = check_user_blocked(request.user)
     if is_blocked:
@@ -25,15 +29,26 @@ def qo100_converter(request):
     download_url = None
     download_filename = None
 
+    # Определяем шаблон для отображения (iframe или полный)
+    is_iframe = request.GET.get('iframe') == '1'
+    template_name = 'qo100/converter_iframe.html' if is_iframe else 'qo100/converter.html'
+
     if request.method == 'POST':
         try:
             adif_file = request.FILES.get('adif_file')
+            print(f"[QO-100 DEBUG] adif_file={adif_file}")
+
             if not adif_file:
                 messages.error(request, 'Пожалуйста, выберите файл для загрузки')
-                return render(request, 'qo100/converter.html')
+                return render(request, template_name, {
+                    'preview': preview,
+                    'download_url': download_url,
+                    'download_filename': download_filename,
+                })
 
             # Читаем содержимое файла
             content = adif_file.read().decode('utf-8', errors='ignore')
+            print(f"[QO-100 DEBUG] content length={len(content)}")
 
             # Переводим в верхний регистр для统一 обработки
             content = content.upper()
@@ -41,14 +56,23 @@ def qo100_converter(request):
             # Проверяем наличие обязательного тега EOH
             if 'EOH' not in content:
                 messages.error(request, 'Некорректный ADIF файл: отсутствует тег EOH')
-                return render(request, 'qo100/converter.html')
+                return render(request, template_name, {
+                    'preview': preview,
+                    'download_url': download_url,
+                    'download_filename': download_filename,
+                })
 
             # Обрабатываем файл
             result = process_adif_content(content)
+            print(f"[QO-100 DEBUG] process_adif_content result={result}")
             
-            if result['error']:
+            if 'error' in result:
                 messages.error(request, result['error'])
-                return render(request, 'qo100/converter.html')
+                return render(request, template_name, {
+                    'preview': preview,
+                    'download_url': download_url,
+                    'download_filename': download_filename,
+                })
 
             preview = result['preview']
             
@@ -66,12 +90,15 @@ def qo100_converter(request):
                 
                 download_url = f"/media/temp/{download_filename}"
 
-            messages.success(request, f'Файл успешно обработан. Найдено QSO: {result["qso_count"]}')
+            messages.success(request, f'Файл успешно обработан. Обработано QSO: {result["qso_count"]}')
 
         except Exception as e:
+            import traceback
+            print(f"[QO-100 DEBUG] Exception: {str(e)}")
+            print(f"[QO-100 DEBUG] Traceback: {traceback.format_exc()}")
             messages.error(request, f'Ошибка при обработке файла: {str(e)}')
 
-    return render(request, 'qo100/converter.html', {
+    return render(request, template_name, {
         'preview': preview,
         'download_url': download_url,
         'download_filename': download_filename,
@@ -80,48 +107,66 @@ def qo100_converter(request):
 
 def process_adif_content(content):
     """
-    Обработка содержимого ADIF файла
+    Обработка содержимого ADIF файла - конвертирует все QSO в формат QO-100
     """
     try:
+        print(f"[QO-100 DEBUG] Starting process_adif_content, content length: {len(content)}")
+
         # Разделяем на заголовок и данные
         eoh_pos = content.find('EOH')
         if eoh_pos == -1:
+            print("[QO-100 DEBUG] EOH tag not found")
             return {'error': 'Некорректный ADIF файл: отсутствует тег EOH'}
         
+        print(f"[QO-100 DEBUG] EOH found at position {eoh_pos}")
+
         header = content[:eoh_pos + 3]
         data = content[eoh_pos + 3:]
         
-        # Извлекаем информацию о полях из заголовка
-        fields_info = parse_adif_header(header)
-        
-        # Парсим записи QSO
-        qso_records = parse_adif_records(data, fields_info)
+        print(f"[QO-100 DEBUG] Header length: {len(header)}, Data length: {len(data)}")
+
+        # Парсим записи QSO из данных
+        qso_records = parse_adif_records_simple(data)
+        print(f"[QO-100 DEBUG] Parsed {len(qso_records)} QSO records")
         
         if not qso_records:
+            print("[QO-100 DEBUG] No QSO records found")
             return {'error': 'В файле не найдено записей QSO'}
         
-        # Фильтруем и обрабатываем записи для QO-100
+        # Обрабатываем все QSO - конвертируем в формат QO-100
         processed_qso = []
         download_content = []
         
-        for record in qso_records:
-            # Проверяем, что QSO относится к QO-100
-            if is_qo100_qso(record):
-                processed_record = process_qso_record(record)
-                if processed_record:
-                    processed_qso.append(processed_record)
-                    # Добавляем в содержимое для скачивания
-                    download_content.append(format_qso_for_download(processed_record))
-        
+        for i, record in enumerate(qso_records):
+            print(f"[QO-100 DEBUG] Processing record {i}: {record}")
+            processed_record = convert_qso_to_qo100(record)
+            print(f"[QO-100 DEBUG] Converted record {i}: {processed_record}")
+
+            if processed_record:
+                processed_qso.append(processed_record)
+                # Добавляем в содержимое для скачивания
+                download_content.append(format_qso_for_download(processed_record))
+
         if not processed_qso:
-            return {'error': 'В файле не найдено QSO, связанных с QO-100'}
-        
+            print("[QO-100 DEBUG] No successfully processed QSOs")
+            return {'error': 'Не удалось обработать записи QSO'}
+
         # Формируем превью (первые 10 записей)
         preview = processed_qso[:10]
         
-        # Формируем содержимое для скачивания
-        download_text = '\n'.join(download_content)
-        
+        # Формируем содержимое для скачивания с заголовком
+        header_lines = [
+            '<ADIF_VER:5>3.1.0',
+            '<PROGRAMID:8>TLOG CONVERTER',
+            '<EOH>'
+        ]
+        header_text = '\n'.join(header_lines)
+
+        # QSO записи разделены переносом строки
+        download_text = header_text + '\n' + '\n'.join(download_content)
+
+        print(f"[QO-100 DEBUG] Successfully processed {len(processed_qso)} QSOs")
+
         return {
             'preview': preview,
             'download_content': download_text,
@@ -129,28 +174,23 @@ def process_adif_content(content):
         }
         
     except Exception as e:
+        import traceback
+        print(f"[QO-100 DEBUG] Exception in process_adif_content: {str(e)}")
+        print(f"[QO-100 DEBUG] Traceback: {traceback.format_exc()}")
         return {'error': f'Ошибка при обработке файла: {str(e)}'}
 
 
 def parse_adif_header(header):
     """
-    Парсинг заголовка ADIF файла
+    Парсинг заголовка ADIF файла (больше не используется, оставлен для совместимости)
     """
-    fields_info = {}
-    
-    # Ищем определения полей в формате <FIELDn:len:fieldname>
-    field_pattern = r'<FIELD(\d+):(\d+):([^:]+)>'
-    matches = re.findall(field_pattern, header)
-    
-    for field_num, field_len, field_name in matches:
-        fields_info[field_name.upper()] = int(field_num)
-    
-    return fields_info
+    return {}
 
 
-def parse_adif_records(data, fields_info):
+def parse_adif_records_simple(data):
     """
-    Парсинг записей QSO из ADIF данных
+    Парсинг записей QSO из ADIF данных - упрощенная версия
+    Обрабатывает формат: <FIELD:length>value (где value может содержать пробелы)
     """
     records = []
     
@@ -165,122 +205,95 @@ def parse_adif_records(data, fields_info):
         record = {}
         
         # Парсим каждое поле в записи
-        field_pattern = r'<([A-Z_]+):(\d+):?([A-Z_]*)?>([^<]*)'
+        # Формат: <FIELD:length>value
+        # Значение начинается сразу после > и имеет указанную длину
+        field_pattern = r'<([A-Z0-9_]+):(\d+)>([^<]+)'
         matches = re.findall(field_pattern, record_string)
-        
-        for field_name, field_len, field_type, field_value in matches:
+
+        print(f"[QO-100 DEBUG] parse_adif_records_simple: Found {len(matches)} fields")
+
+        for field_name, field_len, field_value in matches:
             field_name = field_name.upper()
             field_value = field_value.strip()
-            
-            # Преобразуем типы данных если указано
-            if field_type == 'D':
-                # Дата в формате YYYYMMDD
-                if len(field_value) == 8:
-                    field_value = f"{field_value[:4]}-{field_value[4:6]}-{field_value[6:8]}"
-            elif field_type == 'T':
-                # Время в формате HHMMSS
-                if len(field_value) == 6:
-                    field_value = f"{field_value[:2]}:{field_value[2:4]}:{field_value[4:6]}"
-            
+
+            # Обрезаем значение до указанной длины
+            try:
+                field_len_int = int(field_len)
+                if len(field_value) > field_len_int:
+                    field_value = field_value[:field_len_int]
+            except ValueError:
+                pass
+
             record[field_name] = field_value
-        
+
         if record:
+            print(f"[QO-100 DEBUG] parse_adif_records_simple: Parsed record: {record}")
             records.append(record)
-    
+
     return records
 
 
-def is_qo100_qso(record):
+def convert_qso_to_qo100(record):
     """
-    Проверка, относится ли QSO к QO-100
-    """
-    # Проверяем диапазон частот QO-100 (10 GHz)
-    freq = record.get('FREQ', '')
-    band = record.get('BAND', '')
-    
-    # QO-100 работает на частотах около 10 GHz
-    qo100_bands = ['10GHZ', '10', '10G', '10GH']
-    qo100_freqs = ['10489', '10490', '10491', '10492', '10493', '10494', '10495']
-    
-    if band in qo100_bands:
-        return True
-    
-    if any(freq_start in freq for freq_start in qo100_freqs):
-        return True
-    
-    # Проверяем спутник
-    sat_name = record.get('SAT_NAME', '').upper()
-    if 'QO' in sat_name or 'OSCAR' in sat_name:
-        return True
-    
-    # Проверяем режим распространения
-    prop_mode = record.get('PROP_MODE', '').upper()
-    if prop_mode == 'SAT':
-        sat_name = record.get('SAT_NAME', '').upper()
-        if 'QO' in sat_name:
-            return True
-    
-    return False
-
-
-def process_qso_record(record):
-    """
-    Обработка записи QSO для QO-100
+    Конвертирует QSO в формат QO-100
+    - Оставляет все поля как есть
+    - Исправляет BAND на 13CM
+    - Устанавливает PROP_MODE=SAT
+    - Устанавливает SAT_NAME=QO-100
     """
     try:
-        processed = {}
-        
-        # Основные поля
-        processed['callsign'] = record.get('CALL', '').upper()
-        processed['date'] = record.get('QSO_DATE', '')
-        processed['time'] = record.get('TIME_ON', '')
-        processed['mode'] = record.get('MODE', '').upper()
-        processed['band'] = record.get('BAND', '').upper()
-        processed['freq'] = record.get('FREQ', '')
-        
-        # Дополнительные поля
-        processed['rst_rcvd'] = record.get('RST_RCVD', '')
-        processed['rst_sent'] = record.get('RST_SENT', '')
-        processed['gridsquare'] = record.get('GRIDSQUARE', '').upper()
-        processed['qth'] = record.get('QTH', '')
-        processed['name'] = record.get('NAME', '')
-        
-        # Информация о спутнике
-        processed['sat_name'] = record.get('SAT_NAME', '').upper()
-        processed['prop_mode'] = record.get('PROP_MODE', '').upper()
-        
-        # Проверяем обязательные поля
-        if not all([processed['callsign'], processed['date'], processed['time'], processed['mode']]):
-            return None
-        
-        return processed
-        
-    except Exception:
+        print(f"[QO-100 DEBUG] convert_qso_to_qo100: Input record: {record}")
+
+        # Копируем все поля из исходной записи
+        converted = record.copy()
+
+        # Исправляем BAND на 13CM
+        if 'BAND' in converted:
+            converted['BAND'] = '13CM'
+
+        # Устанавливаем PROP_MODE=SAT
+        converted['PROP_MODE'] = 'SAT'
+
+        # Устанавливаем SAT_NAME=QO-100
+        converted['SAT_NAME'] = 'QO-100'
+
+        print(f"[QO-100 DEBUG] convert_qso_to_qo100: Converted record: {converted}")
+
+        return converted
+
+    except Exception as e:
+        print(f"[QO-100 DEBUG] convert_qso_to_qo100: Exception: {str(e)}")
         return None
 
 
 def format_qso_for_download(record):
     """
     Форматирование записи QSO для скачивания
+    Все теги в одной строке, разделённые пробелами, перенос только после <EOR>
     """
-    lines = []
-    
+    tags = []
+
     # Форматируем поля для ADIF
     for field, value in record.items():
         if value:
-            if field in ['date']:
+            # Приводим к верхнему регистру
+            field = field.upper()
+            value = str(value).upper()
+
+            if field == 'QSO_DATE':
                 # Дата в формате YYYYMMDD
                 date_value = value.replace('-', '')
-                lines.append(f"<{field}:8>{date_value}")
-            elif field in ['time']:
-                # Время в формате HHMMSS
+                tags.append(f"<{field}:{len(date_value)}>{date_value}")
+            elif field == 'TIME_ON':
+                # Время в формате HHMMSS или HHMM
                 time_value = value.replace(':', '').replace('-', '')
-                lines.append(f"<{field}:6>{time_value}")
+                tags.append(f"<{field}:{len(time_value)}>{time_value}")
             else:
-                lines.append(f"<{field}:{len(value)}>{value}")
-    
-    lines.append("<EOR>")
-    return '\n'.join(lines)
+                tags.append(f"<{field}:{len(value)}>{value}")
+
+    tags.append("<EOR>")
+    # Все теги в одной строке, разделённые пробелами
+    return ' '.join(tags)
 
 
 def qo100_converter_download(request):

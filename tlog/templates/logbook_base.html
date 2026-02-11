@@ -581,7 +581,7 @@
                     <p class="mb-1 small">Пожалуйста, конвертируйте только лог, который имеет отношение к QO-100. При конвертации все значения тега BAND будут изменены на диапазон 13CM и будут добавлены дополнительные теги SAT и QO-100.</p>
                 </div>
 
-                <form id="qo100ConverterForm">
+                <form id="qo100ConverterForm" action="{% url 'qo100_converter' %}?iframe=1" method="post" enctype="multipart/form-data" target="qo100ConverterFrame">
                     {% csrf_token %}
 
                     <div class="mb-3">
@@ -593,6 +593,8 @@
                         </div>
                     </div>
                 </form>
+
+                <iframe id="qo100ConverterFrame" name="qo100ConverterFrame" style="display: none;"></iframe>
 
                 <div id="qo100ConverterResult" style="display: none;">
                     <h6 class="mb-3">📊 Результат конвертации</h6>
@@ -610,7 +612,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="qo100ConvertBtn" onclick="convertQO100Adif()">
+                <button type="button" class="btn btn-primary" id="qo100ConvertBtn">
                     <span>🔄</span> Конвертировать
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
