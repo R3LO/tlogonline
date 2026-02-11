@@ -68,7 +68,7 @@ table.qso-table.table-striped > thead.qso-table-header > tr > th {
 .col-lotw { width: 60px; }
 .col-lotw-date { width: 100px; }
 .col-propsat { width: 120px; }
-.col-actions { width: auto; min-width: 80px; }
+.col-actions { width: auto; }
 .col-num { width: 50px; }
 .col-num-wide { width: 60px; }
 .col-regions-count { width: 150px; text-align: center; }
