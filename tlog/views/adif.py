@@ -460,106 +460,172 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
 
 def parse_adif_record(record):
     """
-    Парсит одну запись ADIF
+    Парсит одну запись ADIF с учётом длины полей.
+    Поддерживает как современный формат (<TAG:length>value),
+    так и старый формат с указанием типа данных (<TAG:length:type>value).
+
+    Значение берётся ровно указанной длины, а не до следующего тега.
     """
     data = {}
 
-    # Паттерны для извлечения полей ADIF
-    patterns = {
-        'callsign': r'<call:(\d+)>([^<]+)',
-        'name': r'<name:(\d+)>([^<]+)',
-        'qth': r'<qth:(\d+)>([^<]+)',
-        'location': r'<location:(\d+)>([^<]+)',
-        'mode': r'<mode:(\d+)>([^<]+)',
-        'submode': r'<submode:(\d+)>([^<]+)',
-        'band': r'<band:(\d+)>([^<]+)',
-        'freq': r'<freq:(\d+)>([^<]+)',
-        'freq_rx': r'<freq_rx:(\d+)>([^<]+)',
-        'band_rx': r'<band_rx:(\d+)>([^<]+)',
-        'qso_date': r'<qso_date:(\d+)>(\d{8})',
-        'time_on': r'<time_on:(\d+)>(\d{4,6})',
-        'qso_date_off': r'<qso_date_off:(\d+)>(\d{8})',
-        'time_off': r'<time_off:(\d+)>(\d{4,6})',
-        'rst_sent': r'<rst_sent:(\d+)>([^<]+)',
-        'rst_rcvd': r'<rst_rcvd:(\d+)>([^<]+)',
-        'signal_report': r'<signal_report:(\d+)>([^<]+)',
-        'notes': r'<notes:(\d+)>([^<]+)',
-        'gridsquare': r'<gridsquare:(\d+)>([^<]+)',
-        'my_gridsquare': r'<my_gridsquare:(\d+)>([^<]+)',
-        'prop_mode': r'<prop_mode:(\d+)>([^<]+)',
-        'sat_name': r'<sat_name:(\d+)>([^<]+)',
-        'sat_mode': r'<sat_mode:(\d+)>([^<]+)',
-        'station_callsign': r'<station_callsign:(\d+)>([^<]+)',
-        'country': r'<country:(\d+)>([^<]+)',
-        'cont': r'<cont:(\d+)>([^<]+)',
-        'cqz': r'<cqz:(\d+)>(\d+)',
-        'ituz': r'<ituz:(\d+)>(\d+)',
-        'dxcc': r'<dxcc:(\d+)>(\d+)',
-        'operator': r'<operator:(\d+)>([^<]+)'
-    }
+    # Паттерн для поиска всех тегов ADIF
+    # <TAG>name</TAG> или <TAG:length[:type]>value
+    # Формат: <имя_тега:длина[:тип]>значение
+    tag_pattern = r'<([A-Z0-9_]+):(\d+)(?::[a-zA-Z])?>'
 
-    date_value = None
-    time_value = None
+    # Находим все теги в записи
+    pos = 0
+    while True:
+        match = re.search(tag_pattern, record[pos:], re.IGNORECASE)
+        if not match:
+            break
 
-    for field, pattern in patterns.items():
-        match = re.search(pattern, record, re.IGNORECASE)
-        if match:
-            if field == 'qso_date':
-                value = match.group(2)
-                if len(value) == 8:
+        tag_name = match.group(1).lower()
+        length = int(match.group(2))
+        tag_end_pos = pos + match.end()
+
+        # Извлекаем значение указанной длины
+        value = record[tag_end_pos:tag_end_pos + length]
+
+        # Обрабатываем тег в зависимости от его типа
+        if tag_name == 'call':
+            data['callsign'] = value.strip().upper()
+        elif tag_name == 'name':
+            data['name'] = value.strip()
+        elif tag_name == 'qth':
+            data['qth'] = value.strip()
+        elif tag_name == 'location':
+            data['location'] = value.strip()
+        elif tag_name == 'mode':
+            mode_value = value.strip().upper()
+            mode_mapping = {
+                'SSB': 'SSB', 'CW': 'CW', 'FM': 'FM', 'AM': 'AM', 'RTTY': 'RTTY',
+                'PSK31': 'PSK31', 'PSK63': 'PSK63', 'FT8': 'FT8', 'FT4': 'FT4',
+                'JT65': 'JT65', 'JT9': 'JT9', 'SSTV': 'SSTV', 'JS8': 'JS8',
+                'MSK144': 'MSK144', 'MFSK': 'MFSK'
+            }
+            data['mode'] = mode_mapping.get(mode_value, 'SSB')
+        elif tag_name == 'submode':
+            data['submode'] = value.strip().upper()
+        elif tag_name == 'band':
+            data['band'] = value.strip().upper()
+        elif tag_name == 'freq':
+            try:
+                freq_str = value.strip()
+                if freq_str and all(c in '0123456789.+-eE' for c in freq_str):
+                    freq_value = float(freq_str)
+                    if 0.1 <= freq_value <= 300000.0:
+                        data['frequency'] = freq_value
+                    else:
+                        data['frequency'] = 0.0
+                else:
+                    data['frequency'] = 0.0
+            except (ValueError, OverflowError):
+                data['frequency'] = 0.0
+        elif tag_name == 'freq_rx':
+            try:
+                freq_str = value.strip()
+                if freq_str and all(c in '0123456789.+-eE' for c in freq_str):
+                    data['frequency_rx'] = float(freq_str)
+            except (ValueError, OverflowError):
+                pass
+        elif tag_name == 'band_rx':
+            data['band_rx'] = value.strip().upper()
+        elif tag_name == 'qso_date':
+            if len(value) >= 8:
+                try:
                     year = int(value[:4])
                     month = int(value[4:6])
                     day = int(value[6:8])
-                    date_value = date(year, month, day)
-
-            elif field == 'time_on':
-                time_str = match.group(2)
-                if len(time_str) == 4:
-                    hour = int(time_str[:2])
-                    minute = int(time_str[2:4])
-                    time_value = time(hour, minute)
-                elif len(time_str) == 6:
-                    hour = int(time_str[:2])
-                    minute = int(time_str[2:4])
-                    second = int(time_str[4:6])
-                    time_value = time(hour, minute, second)
-
-            elif field == 'freq':
+                    data['date'] = date(year, month, day)
+                except (ValueError, IndexError):
+                    pass
+        elif tag_name == 'time_on':
+            time_str = value.strip()
+            if len(time_str) >= 4:
                 try:
-                    freq_str = match.group(2).strip()
-                    if freq_str and all(c in '0123456789.+-eE' for c in freq_str):
-                        freq_value = float(freq_str)
-                        if 0.1 <= freq_value <= 300000.0:
-                            data['frequency'] = freq_value
-                        else:
-                            data['frequency'] = 0.0
-                    else:
-                        data['frequency'] = 0.0
-                except (ValueError, OverflowError):
-                    data['frequency'] = 0.0
+                    hour = int(time_str[:2])
+                    minute = int(time_str[2:4])
+                    second = 0
+                    if len(time_str) >= 6:
+                        second = int(time_str[4:6])
+                    data['time'] = time(hour, minute, second)
+                except (ValueError, IndexError):
+                    pass
+        elif tag_name == 'qso_date_off':
+            if len(value) >= 8:
+                try:
+                    year = int(value[:4])
+                    month = int(value[4:6])
+                    day = int(value[6:8])
+                    data['date_off'] = date(year, month, day)
+                except (ValueError, IndexError):
+                    pass
+        elif tag_name == 'time_off':
+            time_str = value.strip()
+            if len(time_str) >= 4:
+                try:
+                    hour = int(time_str[:2])
+                    minute = int(time_str[2:4])
+                    second = 0
+                    if len(time_str) >= 6:
+                        second = int(time_str[4:6])
+                    data['time_off'] = time(hour, minute, second)
+                except (ValueError, IndexError):
+                    pass
+        elif tag_name == 'rst_sent':
+            data['rst_sent'] = value.strip().upper()
+        elif tag_name == 'rst_rcvd':
+            data['rst_rcvd'] = value.strip().upper()
+        elif tag_name == 'signal_report':
+            data['signal_report'] = value.strip()
+        elif tag_name == 'notes':
+            data['notes'] = value.strip()
+        elif tag_name == 'gridsquare':
+            data['gridsquare'] = value.strip().upper()
+        elif tag_name == 'my_gridsquare':
+            data['my_gridsquare'] = value.strip().upper()
+        elif tag_name == 'my_callsign':
+            data['my_callsign'] = value.strip().upper()
+        elif tag_name == 'prop_mode':
+            data['prop_mode'] = value.strip().upper()
+        elif tag_name == 'sat_name':
+            data['sat_name'] = value.strip().upper()
+        elif tag_name == 'sat_mode':
+            data['sat_mode'] = value.strip().upper()
+        elif tag_name == 'station_callsign':
+            data['station_callsign'] = value.strip().upper()
+        elif tag_name == 'country':
+            data['country'] = value.strip().upper()
+        elif tag_name == 'cont':
+            data['cont'] = value.strip().upper()
+        elif tag_name == 'cqz':
+            try:
+                data['cqz'] = int(value.strip())
+            except ValueError:
+                pass
+        elif tag_name == 'ituz':
+            try:
+                data['ituz'] = int(value.strip())
+            except ValueError:
+                pass
+        elif tag_name == 'dxcc':
+            try:
+                data['dxcc'] = int(value.strip())
+            except ValueError:
+                pass
+        elif tag_name == 'operator':
+            data['operator'] = value.strip().upper()
 
-            elif field == 'mode':
-                mode_value = match.group(2).strip().upper()
-                mode_mapping = {
-                    'SSB': 'SSB', 'CW': 'CW', 'FM': 'FM', 'AM': 'AM', 'RTTY': 'RTTY',
-                    'PSK31': 'PSK31', 'PSK63': 'PSK63', 'FT8': 'FT8', 'FT4': 'FT4',
-                    'JT65': 'JT65', 'JT9': 'JT9', 'SSTV': 'SSTV', 'JS8': 'JS8',
-                    'MSK144': 'MSK144', 'MFSK': 'MFSK'
-                }
-                data['mode'] = mode_mapping.get(mode_value, 'SSB')
+        # Продвигаем позицию вперёд
+        pos = tag_end_pos + length
 
-            else:
-                data[field] = match.group(2).strip().upper()
-
-    # Устанавливаем дату и время
-    if date_value:
-        data['date'] = date_value
-    else:
+    # Устанавливаем дату по умолчанию
+    if 'date' not in data:
         data['date'] = date.today()
 
-    if time_value:
-        data['time'] = time_value
-    else:
+    # Устанавливаем время по умолчанию
+    if 'time' not in data:
         data['time'] = time(0, 0)
 
     # Если нет позывного, пропускаем запись
@@ -577,12 +643,6 @@ def parse_adif_record(record):
 
     if 'frequency' not in data:
         data['frequency'] = 0.0
-
-    # Обработка локаторов
-    if 'gridsquare' in data:
-        data['gridsquare'] = data['gridsquare']
-    if 'my_gridsquare' in data:
-        data['my_gridsquare'] = data['my_gridsquare']
 
     return data
 
