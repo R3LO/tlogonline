@@ -265,17 +265,17 @@
                 <p>{% trans "Вы действительно хотите удалить весь лог радиосвязей?" %}</p>
                 <p><strong>{% trans "Будет удалено:" %}</strong></p>
                 <ul>
-                    <li>{% trans "Всего QSO" %}: <strong>{{ total_count }}</strong></li>
+                    <li>{% trans "Всего QSO (без LoTW)" %}: <strong>{{ total_count }}</strong></li>
                     <li>{% trans "Уникальные позывные" %}: <strong>{{ filtered_stats.unique_callsigns }}</strong></li>
                     <li>{% trans "Стран DXCC" %}: <strong>{{ filtered_stats.unique_dxcc }}</strong></li>
                     <li>{% trans "Стран Р-150-С" %}: <strong>{{ filtered_stats.unique_r150s }}</strong></li>
                 </ul>
-                <p class="text-muted mb-0">
+                <div class="alert alert-info mb-0">
                     <small>
                         <span>ℹ️</span>
-                        {% trans "Рекомендуем создать резервную копию перед удалением." %}
+                        <strong>{% trans "Примечание:" %}</strong> {% trans "Будут удалены только записи, не подтверждённые в LoTW (lotw ≠ Y). Записи с подтверждением LoTW останутся в логе." %}
                     </small>
-                </p>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">

@@ -273,7 +273,7 @@ def logbook_search(request, callsign):
 
 def clear_logbook(request):
     """
-    Удаляет все записи QSO и загруженные ADIF файлы пользователя
+    Удаляет записи QSO пользователя, где lotw != 'Y', и все загруженные ADIF файлы
     """
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Unauthorized'}, status=401)
@@ -287,26 +287,27 @@ def clear_logbook(request):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
     try:
-        # Подсчитываем количество записей для статистики
-        qso_count = QSO.objects.filter(user=request.user).count()
-        unique_callsigns = QSO.objects.filter(user=request.user).values('callsign').distinct().count()
-        unique_dxcc = QSO.objects.filter(user=request.user).filter(
+        # Подсчитываем количество записей для удаления (только где lotw != 'Y')
+        qso_queryset = QSO.objects.filter(user=request.user).exclude(lotw='Y')
+        qso_count = qso_queryset.count()
+        unique_callsigns = qso_queryset.values('callsign').distinct().count()
+        unique_dxcc = qso_queryset.filter(
             dxcc__isnull=False
         ).exclude(dxcc='').values('dxcc').distinct().count()
-        unique_r150s = QSO.objects.filter(user=request.user).filter(
+        unique_r150s = qso_queryset.filter(
             r150s__isnull=False
         ).exclude(r150s='').values('r150s').distinct().count()
         adif_uploads_count = ADIFUpload.objects.filter(user=request.user).count()
 
-        # Удаляем все записи QSO пользователя
-        deleted_qso_count, _ = QSO.objects.filter(user=request.user).delete()
+        # Удаляем только записи QSO пользователя, где lotw != 'Y'
+        deleted_qso_count, _ = qso_queryset.delete()
 
         # Удаляем все загруженные ADIF файлы пользователя
         deleted_adif_count, _ = ADIFUpload.objects.filter(user=request.user).delete()
 
         return JsonResponse({
             'success': True,
-            'message': f'Удалено {deleted_qso_count} записей QSO и {deleted_adif_count} записей о загруженных файлах',
+            'message': f'Удалено {deleted_qso_count} записей QSO (без LoTW) и {deleted_adif_count} записей о загруженных файлах',
             'stats': {
                 'deleted_qso': deleted_qso_count,
                 'deleted_adif_uploads': deleted_adif_count,

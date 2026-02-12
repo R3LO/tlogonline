@@ -137,7 +137,9 @@ def rating_page(request):
     ).order_by('-unique_dxcc')
 
     # Глобальный рейтинг по уникальным позывным (по всем пользователям системы)
-    global_callsigns_queryset = QSO.objects.all()
+    global_callsigns_queryset = QSO.objects.filter(
+        callsign__isnull=False
+    ).exclude(callsign='')
 
     # Применяем фильтр по типу диапазона для глобального рейтинга позывных
     if band_type_filter == 'hf':
@@ -160,7 +162,7 @@ def rating_page(request):
 
     # Глобальный рейтинг по CQ зонам (по всем пользователям системы)
     global_cqz_queryset = QSO.objects.filter(
-        cqz__isnull=False
+        cqz__gt=0
     )
 
     # Применяем фильтр по типу диапазона для глобального рейтинга CQ зон
@@ -184,7 +186,7 @@ def rating_page(request):
 
     # Глобальный рейтинг по ITU зонам (по всем пользователям системы)
     global_ituz_queryset = QSO.objects.filter(
-        ituz__isnull=False
+        ituz__gt=0
     )
 
     # Применяем фильтр по типу диапазона для глобального рейтинга ITU зон
@@ -209,9 +211,7 @@ def rating_page(request):
     # Глобальный рейтинг по IOTA (по всем пользователям системы)
     global_iota_queryset = QSO.objects.filter(
         iota__isnull=False
-    ).exclude(
-        iota=''
-    )
+    ).exclude(iota='')
 
     # Применяем фильтр по типу диапазона для глобального рейтинга IOTA
     if band_type_filter == 'hf':
@@ -388,7 +388,9 @@ def rating_page(request):
     ).order_by('-count')
 
     # 5. Уникальные позывные
-    callsigns_qso = qso_queryset
+    callsigns_qso = qso_queryset.filter(
+        callsign__isnull=False
+    ).exclude(callsign='')
 
     # Применяем фильтр по типу диапазона
     if band_type_filter == 'hf':
