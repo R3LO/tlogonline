@@ -122,7 +122,7 @@ def profile_update(request):
                 })
 
             # Устанавливаем данные профиля
-            profile.lotw_lastsync = None
+            # lotw_lastsync не сбрасываем, сохраняем текущее значение
             profile.my_callsigns = new_my_callsigns
 
             print(f"💾 Сохраняем позывные в профиль: {new_my_callsigns}")
