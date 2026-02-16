@@ -100,6 +100,32 @@ class QSOViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(qsos, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def by_grid(self, request):
+        """
+        Получить QSO по QTH локатору (gridsquare)
+        """
+        grid = request.query_params.get('grid', '').upper()
+        if not grid:
+            return Response(
+                {'error': 'Параметр grid обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        qsos = self.get_queryset().filter(gridsquare__icontains=grid)
+        serializer = self.get_serializer(qsos, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def by_lotw(self, request):
+        """
+        Получить QSO подтверждённые через LoTW
+        Сортировка по дате получения подтверждения (app_lotw_rxqsl)
+        """
+        qsos = self.get_queryset().filter(lotw='Y').order_by('-app_lotw_rxqsl')
+        serializer = self.get_serializer(qsos, many=True)
+        return Response(serializer.data)
+
 
 class ProfileAPIView(APIView):
     """
