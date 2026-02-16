@@ -464,6 +464,24 @@ def lotw_qth_locators_api(request):
             call = item['callsign']
             callsign_data[my_call][locator].add(call)
 
+        # Обрабатываем vucc_grids (множественные локаторы через запятую)
+        vucc_qsos = lotw_qso.exclude(vucc_grids__isnull=True).exclude(vucc_grids='').values(
+            'my_callsign', 'vucc_grids', 'callsign'
+        )
+
+        for item in vucc_qsos:
+            my_call = item['my_callsign']
+            vucc_grids = item['vucc_grids']
+            call = item['callsign']
+
+            if vucc_grids:
+                # Разбиваем строку по запятой и берем первые 4 символа каждого локатора
+                for loc in vucc_grids.split(','):
+                    loc = loc.strip()
+                    if loc and len(loc) >= 4:
+                        locator = loc[:4]
+                        callsign_data[my_call][locator].add(call)
+
         # Формируем список с позывным, количеством и данными локаторов
         ratings = []
         for my_call, locators_dict in callsign_data.items():
