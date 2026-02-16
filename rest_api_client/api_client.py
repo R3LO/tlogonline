@@ -55,12 +55,35 @@ class APIClient:
 
     # ===== QSO методы =====
 
-    def get_qsos(self) -> List[Dict]:
-        """Получить список всех QSO"""
-        result = self._request('GET', '/api/v1/qsos/')
-        if isinstance(result, dict) and 'results' in result:
-            return result['results']
-        return result if isinstance(result, list) else []
+    def get_qsos(self, updated_since: Optional[str] = None) -> List[Dict]:
+        """Получить список всех QSO
+
+        Args:
+            updated_since: Фильтр по дате обновления (ISO формат). Если указан,
+                          возвращаются только QSO, обновлённые после этой даты.
+        """
+        all_qsos = []
+        url = '/api/v1/qsos/'
+        params = {}
+        if updated_since:
+            params['updated_since'] = updated_since
+
+        while url:
+            result = self._request('GET', url, params=params)
+            params = {}  # Сбрасываем параметры после первого запроса
+
+            if isinstance(result, dict) and 'results' in result:
+                all_qsos.extend(result['results'])
+                url = result.get('next')
+                if url:
+                    # Преобразуем полный URL в относительный путь
+                    if url.startswith('http'):
+                        url = url.replace(self.base_url, '')
+            else:
+                all_qsos.extend(result if isinstance(result, list) else [])
+                break
+
+        return all_qsos
 
     def get_qso(self, qso_id: str) -> Dict:
         """Получить конкретное QSO по ID"""
