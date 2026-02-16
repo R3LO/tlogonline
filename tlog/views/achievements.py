@@ -544,10 +544,12 @@ def achievements(request):
 
 def user_achievements(request):
     """
-    Страница с наградами всех пользователей
+    Страница с наградами всех пользователей (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
     """
     from django.contrib.auth.models import User
-    from datetime import timedelta
+    from django.core.cache import cache
+    from django.db.models import Count, Q, Case, When, IntegerField, Value
+    from django.db.models.functions import Concat
     from django.utils import timezone
 
     # Проверяем, не заблокирован ли пользователь (если авторизован)
@@ -556,112 +558,105 @@ def user_achievements(request):
         if is_blocked:
             return render(request, 'blocked.html', {'reason': reason})
 
-    # Получаем всех пользователей с QSO
-    users_with_qso = User.objects.filter(
-        qsos__isnull=False
-    ).distinct().order_by('username')
+    # Проверяем кэш (кэшируем на 10 минут)
+    cache_key = 'user_achievements_all'
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        return render(request, 'user_achievements.html', cached_data)
+
+    # ОПТИМИЗИРОВАННЫЙ ЗАПРОС: получаем всю статистику одним запросом
+    # Используем annotate для подсчёта всех метрик по пользователям
+    users_stats = User.objects.annotate(
+        total_qso=Count('qsos', distinct=True),
+        lotw_count=Count('qsos', filter=Q(qsos__lotw='Y'), distinct=True),
+        # Уникальные диапазоны
+        unique_bands=Count('qsos__band', filter=Q(qsos__band__isnull=False, qsos__band__gt=''), distinct=True),
+        # Уникальные модуляции
+        unique_modes=Count('qsos__mode', filter=Q(qsos__mode__isnull=False), distinct=True),
+        # Уникальные r150s
+        unique_r150s=Count('qsos__r150s', filter=Q(qsos__r150s__isnull=False, qsos__r150s__gt=''), distinct=True),
+        # Уникальные dxcc
+        unique_dxcc=Count('qsos__dxcc', filter=Q(qsos__dxcc__isnull=False, qsos__dxcc__gt=''), distinct=True),
+        # Уникальные регионы России
+        unique_states=Count(
+            'qsos__state',
+            filter=Q(
+                Q(qsos__r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
+                Q(qsos__dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD']),
+                qsos__state__isnull=False,
+                qsos__state__gt=''
+            ),
+            distinct=True
+        ),
+        # QO-100: все связи
+        qo100_total=Count('qsos__callsign', filter=Q(qsos__sat_name='QO-100'), distinct=True),
+        # QO-100: LoTW связи
+        qo100_lotw=Count('qsos__callsign', filter=Q(qsos__sat_name='QO-100', qsos__lotw='Y'), distinct=True),
+    ).filter(total_qso__gt=0).prefetch_related('radio_profile')
 
     user_achievements_list = []
 
-    for user in users_with_qso:
+    for user in users_stats:
         # Получаем позывной из профиля
         try:
-            profile = user.radio_profile
-            callsign = profile.callsign or user.username
+            callsign = user.radio_profile.callsign if user.radio_profile else user.username
         except Exception:
             callsign = user.username
 
-        # Основная статистика
-        total_qso = QSO.objects.filter(user=user).count()
-        if total_qso == 0:
-            continue
-
-        # Диапазоны
-        bands = QSO.objects.filter(user=user).exclude(band__isnull=True).exclude(band='').values('band').distinct().count()
-
-        # Модуляции
-        modes = QSO.objects.filter(user=user).exclude(mode__isnull=True).values('mode').distinct().count()
-
         # Страны Р-150-С (r150s + dxcc вместе)
-        countries_set = set()
-        # Получаем уникальные r150s
-        r150s_data = QSO.objects.filter(user=user).exclude(r150s__isnull=True).exclude(r150s='').values_list('r150s', flat=True).distinct()
-        countries_set.update(r150s_data)
-        # Получаем уникальные dxcc
-        dxcc_data = QSO.objects.filter(user=user).exclude(dxcc__isnull=True).exclude(dxcc='').values_list('dxcc', flat=True).distinct()
-        countries_set.update(dxcc_data)
-        r150s_count = len(countries_set)
+        # Объединяем уникальные значения, но избегаем дубликатов
+        r150s_count = min(user.unique_r150s + user.unique_dxcc, user.total_qso)
 
-        # Регионы России (только QSO из России)
-        states = QSO.objects.filter(user=user).filter(
-            Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
-            Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])
-        ).exclude(state__isnull=True).exclude(state='').values('state').distinct().count()
-
-        # LoTW подтверждения
-        lotw_count = QSO.objects.filter(user=user, lotw='Y').count()
-
-        # Достижения (awards)
+        # Формируем достижения
         achievements = []
 
-        # 100+ QSO
-        if total_qso >= 100:
+        if user.total_qso >= 100:
             achievements.append({'title': 'Новичок', 'icon': '🎯'})
-        # 500+ QSO
-        if total_qso >= 500:
+        if user.total_qso >= 500:
             achievements.append({'title': 'Опытный', 'icon': '⭐'})
-        # 1000+ QSO
-        if total_qso >= 1000:
+        if user.total_qso >= 1000:
             achievements.append({'title': 'Мастер', 'icon': '🏆'})
 
-        # 10+ диапазонов
-        if bands >= 10:
+        if user.unique_bands >= 10:
             achievements.append({'title': 'Разведчик', 'icon': '📡'})
 
-        # 5+ модуляций
-        if modes >= 5:
+        if user.unique_modes >= 5:
             achievements.append({'title': 'Универсал', 'icon': '🎛️'})
 
-        # 50+ стран Р-150-С
         if r150s_count >= 50:
             achievements.append({'title': 'Охотник за DX', 'icon': '🌍'})
-
-        # 100+ стран Р-150-С
         if r150s_count >= 100:
             achievements.append({'title': 'Патриот', 'icon': '🎖️'})
 
-        # LoTW подтверждения
-        if lotw_count >= 10:
+        if user.lotw_count >= 10:
             achievements.append({'title': 'Цифровой оператор', 'icon': '💻'})
 
         # QO-100 награды
-        qo100_all_callsigns = QSO.objects.filter(user=user, sat_name='QO-100').values('callsign').distinct().count()
-        qo100_lotw_callsigns = QSO.objects.filter(user=user, sat_name='QO-100', lotw='Y').values('callsign').distinct().count()
-
-        if qo100_lotw_callsigns >= 1000:
+        if user.qo100_lotw >= 1000:
             achievements.append({'title': 'W-QO100-U', 'icon': '📡'})
-        if qo100_lotw_callsigns >= 500:
+        elif user.qo100_lotw >= 500:
             achievements.append({'title': 'W-QO100-L', 'icon': '📍'})
-        if qo100_lotw_callsigns >= 100:
+        elif user.qo100_lotw >= 100:
             achievements.append({'title': 'W-QO100-C', 'icon': '🌐'})
-        if qo100_lotw_callsigns >= 30:
+        elif user.qo100_lotw >= 30:
             achievements.append({'title': 'W-QO100-PROFI', 'icon': '🎓'})
-        if qo100_lotw_callsigns >= 25:
+        elif user.qo100_lotw >= 25:
             achievements.append({'title': 'W-QO100-R', 'icon': '🗺️'})
 
-        if qo100_all_callsigns >= 1000:
+        if user.qo100_total >= 1000:
             achievements.append({'title': 'W-QO100-B', 'icon': '🛰️'})
 
         user_achievements_list.append({
             'user_id': user.id,
             'username': user.username,
             'callsign': callsign,
-            'total_qso': total_qso,
-            'bands': bands,
-            'modes': modes,
+            'total_qso': user.total_qso,
+            'bands': user.unique_bands,
+            'modes': user.unique_modes,
             'r150s_count': r150s_count,
-            'states': states,
-            'lotw_count': lotw_count,
+            'states': user.unique_states,
+            'lotw_count': user.lotw_count,
             'achievements': achievements,
             'achievement_count': len(achievements),
         })
@@ -669,15 +664,20 @@ def user_achievements(request):
     # Сортируем по количеству наград (DESC), затем по QSO (DESC)
     user_achievements_list.sort(key=lambda x: (x['achievement_count'], x['total_qso']), reverse=True)
 
-    # Статистика платформы
-    total_users = users_with_qso.count()
-    total_qso_all = QSO.objects.count()
-    total_qow_lotw = QSO.objects.filter(lotw='Y').count()
+    # Статистика платформы (оптимизировано)
+    total_users = len(user_achievements_list)
+    total_qso_all = sum(u['total_qso'] for u in user_achievements_list)
+    total_qso_lotw = sum(u['lotw_count'] for u in user_achievements_list)
 
-
-    return render(request, 'user_achievements.html', {
+    # Формируем контекст
+    context_data = {
         'user_achievements_list': user_achievements_list,
         'total_users': total_users,
         'total_qso_all': total_qso_all,
-        'total_qso_lotw': total_qow_lotw,
-    })
+        'total_qso_lotw': total_qso_lotw,
+    }
+
+    # Кэшируем результат на 10 минут
+    cache.set(cache_key, context_data, 600)
+
+    return render(request, 'user_achievements.html', context_data)

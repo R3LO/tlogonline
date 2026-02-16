@@ -129,6 +129,12 @@ class QSO(models.Model):
                 fields=['user', 'my_callsign', 'callsign', 'date', 'time', 'band', 'mode'],
                 name='qso_unique_constraint_idx'
             ),
+            # Индексы для оптимизации user_achievements
+            models.Index(fields=['user', 'lotw'], name='qso_user_lotw_idx'),
+            models.Index(fields=['user', 'sat_name'], name='qso_user_sat_name_idx'),
+            models.Index(fields=['user', 'r150s'], name='qso_user_r150s_idx'),
+            models.Index(fields=['user', 'dxcc'], name='qso_user_dxcc_idx'),
+            models.Index(fields=['user', 'state'], name='qso_user_state_idx'),
         ]
         # Уникальные ограничения для предотвращения дублирования
         constraints = [
