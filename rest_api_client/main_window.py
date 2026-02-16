@@ -3,8 +3,7 @@
 """
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QTabWidget, QStatusBar,
-    QMessageBox, QDialog, QDialogButtonBox, QFormLayout, QLineEdit,
-    QCheckBox
+    QMessageBox, QDialog, QDialogButtonBox, QFormLayout, QLineEdit
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
@@ -33,7 +32,6 @@ class MainWindow(QMainWindow):
     def setup_ui(self):
         """Настраивает интерфейс"""
         self.setWindowTitle("TLog Search")
-        self.setMinimumSize(700, 500)
         self.resize(800, 600)
 
         # Меню
@@ -77,6 +75,11 @@ class MainWindow(QMainWindow):
         self.search_tab.search_input.returnPressed.connect(self.perform_search)
         self.search_tab.clear_search_btn.clicked.connect(self.clear_search)
 
+        # Сохранение ширины колонок при изменении
+        self.search_tab.search_table.horizontalHeader().sectionResized.connect(
+            lambda logical, old_size, new_size: self.save_table_columns(self.search_tab.search_table, 'search')
+        )
+
         # Статистика
         self.stats_tab.refresh_stats_btn.clicked.connect(self.load_stats)
 
@@ -102,25 +105,10 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
 
-        remember_action = QAction("Запомнить учетные данные", self)
-        remember_action.setCheckable(True)
-        remember_action.setChecked(self.settings.get('remember_credentials', False))
-        remember_action.triggered.connect(self.toggle_remember_credentials)
-        file_menu.addAction(remember_action)
-
-        file_menu.addSeparator()
-
         exit_action = QAction("Выход", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-
-        # Меню Настройки
-        settings_menu = menubar.addMenu("Настройки")
-
-        clear_creds_action = QAction("Очистить сохраненные пароли", self)
-        clear_creds_action.triggered.connect(self.clear_credentials)
-        settings_menu.addAction(clear_creds_action)
 
         # Меню Справка
         help_menu = menubar.addMenu("Справка")
@@ -131,25 +119,50 @@ class MainWindow(QMainWindow):
 
     def load_settings(self):
         """Загружает сохраненные настройки"""
+        from PySide6.QtCore import QByteArray
+
         last_search_type = self.settings.get('last_search_type', 'callsign')
         self.search_tab.search_type_combo.setCurrentIndex({
-            'callsign': 0, 'grid': 1, 'band': 2
+            'callsign': 0, 'grid': 1
         }.get(last_search_type, 0))
 
-        # Восстанавливаем размер окна
-        width = self.settings.get('window_width', 800)
-        height = self.settings.get('window_height', 600)
-        self.resize(width, height)
+        # Восстанавливаем геометрию окна
+        geometry = self.settings.get_window_geometry()
+        if geometry:
+            self.restoreGeometry(QByteArray(geometry))
+
+        # Восстанавливаем состояние окна (максимизировано и т.д.)
+        state = self.settings.get_window_state()
+        if state:
+            self.restoreState(QByteArray(state))
+
+        # Восстанавливаем ширину колонок таблицы поиска
+        self.restore_table_columns(self.search_tab.search_table, 'search')
+
+    def restore_table_columns(self, table, table_name):
+        """Восстанавливает ширину колонок таблицы"""
+        widths = self.settings.get_table_column_widths(table_name)
+        if widths:
+            header = table.horizontalHeader()
+            for col, width in widths.items():
+                header.resizeSection(int(col), int(width))
+
+    def save_table_columns(self, table, table_name):
+        """Сохраняет ширину колонок таблицы"""
+        widths = {}
+        header = table.horizontalHeader()
+        for col in range(table.columnCount()):
+            widths[col] = header.sectionSize(col)
+        self.settings.set_table_column_widths(table_name, widths)
 
     def auto_connect(self):
         """Автоматическое подключение при запуске"""
-        if self.settings.get('remember_credentials', False):
-            username, password = self.settings.get_credentials()
-            if username and password:
-                url = self.settings.get_api_url()
-                self.api_client = APIClient(url)
-                self.api_client.set_credentials(username, password)
-                self.connect_to_server(show_dialog=False)
+        username, password = self.settings.get_credentials()
+        if username and password:
+            url = self.settings.get_api_url()
+            self.api_client = APIClient(url)
+            self.api_client.set_credentials(username, password)
+            self.connect_to_server(show_dialog=False)
 
     def show_connection_dialog(self):
         """Показывает диалог подключения"""
@@ -176,10 +189,6 @@ class MainWindow(QMainWindow):
         password_input.setPlaceholderText("Пароль")
         layout.addRow("Пароль:", password_input)
 
-        remember_checkbox = QCheckBox("Запомнить учетные данные")
-        remember_checkbox.setChecked(self.settings.get('remember_credentials', False))
-        layout.addRow(remember_checkbox)
-
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
@@ -191,15 +200,14 @@ class MainWindow(QMainWindow):
             url = url_input.text().strip()
             username = username_input.text().strip()
             password = password_input.text()
-            remember = remember_checkbox.isChecked()
 
             if not url or not username or not password:
                 QMessageBox.warning(self, "Внимание", "Заполните все поля подключения")
                 return
 
-            # Сохраняем настройки
+            # Сохраняем настройки (учетные данные всегда запоминаются)
             self.settings.set_api_url(url)
-            self.settings.set_credentials(username, password, remember)
+            self.settings.set_credentials(username, password, True)
 
             # Обновляем клиент
             self.api_client = APIClient(url)
@@ -222,12 +230,6 @@ class MainWindow(QMainWindow):
         self.update_connection_status(False)
         self.status_bar.showMessage("Отключено", 5000)
 
-    def toggle_remember_credentials(self, checked):
-        """Переключает запоминание учетных данных"""
-        self.settings.set('remember_credentials', checked)
-        if not checked:
-            self.settings.clear_credentials()
-
     def update_connection_status(self, connected):
         """Обновляет статус подключения"""
         if connected:
@@ -249,12 +251,6 @@ class MainWindow(QMainWindow):
         """Обрабатывает ошибку подключения"""
         self.update_connection_status(False)
         QMessageBox.critical(self, "Ошибка подключения", error_msg)
-
-    def clear_credentials(self):
-        """Очищает сохраненные учетные данные"""
-        self.settings.clear_credentials()
-        self.disconnect_from_server()
-        QMessageBox.information(self, "Успешно", "Сохраненные пароли очищены")
 
     def show_about(self):
         """Показывает информацию о программе"""
@@ -380,13 +376,13 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Обрабатывает закрытие окна"""
-        import base64
-        geometry = self.saveGeometry().data()
-        self.settings.set('window_geometry', base64.b64encode(geometry).decode('utf-8'))
+        # Сохраняем геометрию окна
+        self.settings.set_window_geometry(self.saveGeometry())
 
-        # Сохраняем размер окна
-        size = self.size()
-        self.settings.set('window_width', size.width())
-        self.settings.set('window_height', size.height())
+        # Сохраняем состояние окна
+        self.settings.set_window_state(self.saveState())
+
+        # Сохраняем ширину колонок таблицы поиска
+        self.save_table_columns(self.search_tab.search_table, 'search')
 
         event.accept()

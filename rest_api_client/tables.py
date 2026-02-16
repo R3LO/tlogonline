@@ -12,33 +12,31 @@ def setup_compact_table(table: QTableWidget):
     """Настраивает компактную таблицу QSO"""
     table.setColumnCount(8)
     table.setHorizontalHeaderLabels([
-        "Дата", "Позывной", "Диапазон", "Режим", "DXCC", "QTH", "LoTW", "RST"
+        "DATE", "CALL", "BAND", "MODE", "DXCC", "LOC", "LOTW", "RST"
     ])
 
     header = table.horizontalHeader()
-    header.setStretchLastSection(False)
-    header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # Дата
-    header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Позывной
-    header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Диапазон
-    header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Режим
-    header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # DXCC
-    header.setSectionResizeMode(5, QHeaderView.ResizeToContents)  # QTH
-    header.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # LoTW
-    header.setSectionResizeMode(7, QHeaderView.Stretch)           # RST
+    header.setStretchLastSection(True)
+    # Колонки можно менять вручную
+    for i in range(7):
+        header.setSectionResizeMode(i, QHeaderView.Interactive)
+    header.setSectionResizeMode(7, QHeaderView.Stretch)
 
     table.setSelectionBehavior(QTableWidget.SelectRows)
     table.setAlternatingRowColors(True)
     table.setSortingEnabled(False)
     table.verticalHeader().setVisible(False)
-    table.setShowGrid(False)
+    table.setShowGrid(True)  # Включаем сетку
     table.setStyleSheet("""
         QTableWidget {
-            border: none;
+            border: 1px solid #ccc;
             alternate-background-color: #f5f5f5;
             background-color: white;
+            gridline-color: #ddd;
         }
         QTableWidget::item {
             padding: 3px;
+            border: 1px solid #ddd;
         }
         QTableWidget::item:selected {
             background-color: #0078d4;
@@ -51,8 +49,8 @@ def setup_compact_table(table: QTableWidget):
         QHeaderView::section {
             background-color: #e0e0e0;
             padding: 4px;
-            border: none;
-            border-bottom: 1px solid #ccc;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid #ccc;
             font-weight: bold;
         }
     """)
@@ -62,35 +60,32 @@ def setup_lotw_table(table: QTableWidget):
     """Настраивает таблицу LoTW QSO"""
     table.setColumnCount(9)
     table.setHorizontalHeaderLabels([
-        "Дата QSO", "Позывной", "Диапазон", "Режим", "DXCC", "QTH",
-        "LoTW дата", "CQ", "ITU"
+        "DATE", "CALL", "BAND", "MODE", "DXCC", "LOC",
+        "LOTW DATE", "CQ", "ITU"
     ])
 
     header = table.horizontalHeader()
-    header.setStretchLastSection(False)
-    header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # Дата QSO
-    header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Позывной
-    header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Диапазон
-    header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Режим
-    header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # DXCC
-    header.setSectionResizeMode(5, QHeaderView.ResizeToContents)  # QTH
-    header.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # LoTW дата
-    header.setSectionResizeMode(7, QHeaderView.ResizeToContents)  # CQ
-    header.setSectionResizeMode(8, QHeaderView.Stretch)           # ITU
+    header.setStretchLastSection(True)
+    # Колонки можно менять вручную
+    for i in range(8):
+        header.setSectionResizeMode(i, QHeaderView.Interactive)
+    header.setSectionResizeMode(8, QHeaderView.Stretch)
 
     table.setSelectionBehavior(QTableWidget.SelectRows)
     table.setAlternatingRowColors(True)
     table.setSortingEnabled(False)
     table.verticalHeader().setVisible(False)
-    table.setShowGrid(False)
+    table.setShowGrid(True)  # Включаем сетку
     table.setStyleSheet("""
         QTableWidget {
-            border: none;
+            border: 1px solid #ccc;
             alternate-background-color: #f5f5f5;
             background-color: white;
+            gridline-color: #ddd;
         }
         QTableWidget::item {
             padding: 3px;
+            border: 1px solid #ddd;
         }
         QTableWidget::item:selected {
             background-color: #0078d4;
@@ -103,8 +98,8 @@ def setup_lotw_table(table: QTableWidget):
         QHeaderView::section {
             background-color: #e0e0e0;
             padding: 4px;
-            border: none;
-            border-bottom: 1px solid #ccc;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid #ccc;
             font-weight: bold;
         }
     """)
@@ -114,26 +109,49 @@ def setup_full_table(table: QTableWidget):
     """Настраивает полную таблицу QSO"""
     table.setColumnCount(11)
     table.setHorizontalHeaderLabels([
-        "Дата/Время", "Позывной", "Диапазон", "Режим",
-        "RST S/R", "DXCC", "QTH", "LoTW", "CQ", "ITU", "Заметки"
+        "DATE/TIME", "CALL", "BAND", "MODE",
+        "RST S/R", "DXCC", "LOC", "LOTW", "CQ", "ITU", "NOTES"
     ])
 
     header = table.horizontalHeader()
     header.setStretchLastSection(True)
-    header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(6, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(7, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(8, QHeaderView.ResizeToContents)
-    header.setSectionResizeMode(9, QHeaderView.ResizeToContents)
+    # Колонки можно менять вручную
+    for i in range(10):
+        header.setSectionResizeMode(i, QHeaderView.Interactive)
+    header.setSectionResizeMode(10, QHeaderView.Stretch)
 
     table.setSelectionBehavior(QTableWidget.SelectRows)
     table.setAlternatingRowColors(True)
     table.setSortingEnabled(False)
+    table.verticalHeader().setVisible(False)
+    table.setShowGrid(True)  # Включаем сетку
+    table.setStyleSheet("""
+        QTableWidget {
+            border: 1px solid #ccc;
+            alternate-background-color: #f5f5f5;
+            background-color: white;
+            gridline-color: #ddd;
+        }
+        QTableWidget::item {
+            padding: 3px;
+            border: 1px solid #ddd;
+        }
+        QTableWidget::item:selected {
+            background-color: #0078d4;
+            color: white;
+        }
+        QTableWidget::item:alternate:selected {
+            background-color: #0078d4;
+            color: white;
+        }
+        QHeaderView::section {
+            background-color: #e0e0e0;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid #ccc;
+            font-weight: bold;
+        }
+    """)
 
 
 def populate_compact_table(table: QTableWidget, qsos: List[dict]):
@@ -209,9 +227,16 @@ def populate_compact_table(table: QTableWidget, qsos: List[dict]):
         # RST S/R
         rst_sent = qso.get('rst_sent', '')
         rst_rcvd = qso.get('rst_rcvd', '')
-        table.setItem(row, 7, QTableWidgetItem(f"{rst_sent}/{rst_rcvd}"))
-
-    table.resizeColumnsToContents()
+        # Формируем RST без разделителя, если одно из значений пустое
+        if rst_sent and rst_rcvd:
+            rst_display = f"{rst_sent}/{rst_rcvd}"
+        elif rst_sent:
+            rst_display = rst_sent
+        elif rst_rcvd:
+            rst_display = rst_rcvd
+        else:
+            rst_display = ''
+        table.setItem(row, 7, QTableWidgetItem(rst_display))
 
 
 def populate_lotw_table(table: QTableWidget, qsos: List[dict]):
@@ -279,8 +304,6 @@ def populate_lotw_table(table: QTableWidget, qsos: List[dict]):
         ituz = qso.get('ituz')
         table.setItem(row, 8, QTableWidgetItem(str(ituz) if ituz else ""))
 
-    table.resizeColumnsToContents()
-
 
 def populate_full_table(table: QTableWidget, qsos: List[dict]):
     """Заполняет полную таблицу QSO данными"""
@@ -327,7 +350,16 @@ def populate_full_table(table: QTableWidget, qsos: List[dict]):
         # RST S/R
         rst_sent = qso.get('rst_sent', '')
         rst_rcvd = qso.get('rst_rcvd', '')
-        table.setItem(row, 4, QTableWidgetItem(f"{rst_sent}/{rst_rcvd}"))
+        # Формируем RST без разделителя, если одно из значений пустое
+        if rst_sent and rst_rcvd:
+            rst_display = f"{rst_sent}/{rst_rcvd}"
+        elif rst_sent:
+            rst_display = rst_sent
+        elif rst_rcvd:
+            rst_display = rst_rcvd
+        else:
+            rst_display = ''
+        table.setItem(row, 4, QTableWidgetItem(rst_display))
 
         # DXCC
         table.setItem(row, 5, QTableWidgetItem(qso.get('dxcc', '')))
@@ -355,8 +387,6 @@ def populate_full_table(table: QTableWidget, qsos: List[dict]):
         if len(notes) > 50:
             notes = notes[:50] + "..."
         table.setItem(row, 10, QTableWidgetItem(notes))
-
-    table.resizeColumnsToContents()
 
 
 def get_selected_qso_id(table: QTableWidget) -> str:

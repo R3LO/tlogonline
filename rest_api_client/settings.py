@@ -1,9 +1,8 @@
 """
 Модуль для работы с настройками пользователя
-Настройки сохраняются в JSON файл в домашней директории пользователя
+Настройки сохраняются в INI файл в домашней директории пользователя
 """
-import json
-import os
+from PySide6.QtCore import QSettings
 from pathlib import Path
 
 
@@ -11,82 +10,100 @@ class Settings:
     """Класс для управления настройками приложения"""
 
     def __init__(self):
-        # Определяем путь к файлу настроек
-        self.config_dir = Path.home() / '.tlog_rest_client'
-        self.config_file = self.config_dir / 'settings.json'
+        # Определяем путь к файлу настроек в текущей директории
+        self.config_file = Path.cwd() / 'settings.ini'
 
-        # Создаем директорию, если она не существует
-        self.config_dir.mkdir(exist_ok=True)
-
-        # Загружаем настройки
-        self.settings = self._load_settings()
-
-    def _load_settings(self):
-        """Загружает настройки из файла"""
-        if self.config_file.exists():
-            try:
-                with open(self.config_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, IOError):
-                pass
-
-        # Настройки по умолчанию
-        return {
-            'api_url': 'http://127.0.0.1:8000',
-            'username': '',
-            'password': '',
-            'remember_credentials': False,
-            'window_geometry': None,
-            'window_state': None,
-            'table_column_widths': {},
-            'last_search_type': 'callsign',  # 'callsign' или 'grid'
-        }
-
-    def save(self):
-        """Сохраняет настройки в файл"""
-        try:
-            with open(self.config_file, 'w', encoding='utf-8') as f:
-                json.dump(self.settings, f, indent=2, ensure_ascii=False)
-        except IOError as e:
-            print(f"Ошибка сохранения настроек: {e}")
+        # Инициализируем QSettings с форматом INI
+        self.settings = QSettings(str(self.config_file), QSettings.IniFormat)
 
     def get(self, key, default=None):
         """Получает значение настройки"""
-        return self.settings.get(key, default)
+        return self.settings.value(key, default)
 
     def set(self, key, value):
         """Устанавливает значение настройки"""
-        self.settings[key] = value
-        self.save()
+        self.settings.setValue(key, value)
+        self.settings.sync()
 
     def get_api_url(self):
         """Возвращает URL API"""
-        return self.settings.get('api_url', 'http://127.0.0.1:8000')
+        return self.settings.value('api_url', 'http://127.0.0.1:8000')
 
     def set_api_url(self, url):
         """Устанавливает URL API"""
-        self.settings['api_url'] = url.rstrip('/')
-        self.save()
+        self.settings.setValue('api_url', url.rstrip('/'))
+        self.settings.sync()
 
     def get_credentials(self):
         """Возвращает учетные данные пользователя"""
-        if self.settings.get('remember_credentials', False):
-            return self.settings.get('username', ''), self.settings.get('password', '')
-        return '', ''
+        username = self.settings.value('username', '')
+        password = self.settings.value('password', '')
+        return username, password
 
-    def set_credentials(self, username, password, remember=False):
+    def set_credentials(self, username, password, remember=True):
         """Устанавливает учетные данные"""
-        self.settings['username'] = username
-        if remember:
-            self.settings['password'] = password
-        else:
-            self.settings['password'] = ''
-        self.settings['remember_credentials'] = remember
-        self.save()
+        self.settings.setValue('username', username)
+        self.settings.setValue('password', password)
+        self.settings.setValue('remember_credentials', remember)
+        self.settings.sync()
 
     def clear_credentials(self):
         """Очищает сохраненные учетные данные"""
-        self.settings['username'] = ''
-        self.settings['password'] = ''
-        self.settings['remember_credentials'] = False
-        self.save()
+        self.settings.setValue('username', '')
+        self.settings.setValue('password', '')
+        self.settings.setValue('remember_credentials', False)
+        self.settings.sync()
+
+    def get_window_geometry(self):
+        """Возвращает геометрию окна"""
+        return self.settings.value('window_geometry')
+
+    def set_window_geometry(self, geometry):
+        """Устанавливает геометрию окна"""
+        self.settings.setValue('window_geometry', geometry)
+        self.settings.sync()
+
+    def get_window_state(self):
+        """Возвращает состояние окна"""
+        return self.settings.value('window_state')
+
+    def set_window_state(self, state):
+        """Устанавливает состояние окна"""
+        self.settings.setValue('window_state', state)
+        self.settings.sync()
+
+    def get_table_column_widths(self, table_name):
+        """Возвращает ширину колонок таблицы"""
+        return self.settings.value(f'table/{table_name}/column_widths', {})
+
+    def set_table_column_widths(self, table_name, widths):
+        """Устанавливает ширину колонок таблицы"""
+        self.settings.setValue(f'table/{table_name}/column_widths', widths)
+        self.settings.sync()
+
+    def get_table_column_order(self, table_name):
+        """Возвращает порядок колонок таблицы"""
+        return self.settings.value(f'table/{table_name}/column_order', {})
+
+    def set_table_column_order(self, table_name, order):
+        """Устанавливает порядок колонок таблицы"""
+        self.settings.setValue(f'table/{table_name}/column_order', order)
+        self.settings.sync()
+
+    def get_table_sort_column(self, table_name):
+        """Возвращает колонку сортировки таблицы"""
+        return self.settings.value(f'table/{table_name}/sort_column', -1)
+
+    def set_table_sort_column(self, table_name, column):
+        """Устанавливает колонку сортировки таблицы"""
+        self.settings.setValue(f'table/{table_name}/sort_column', column)
+        self.settings.sync()
+
+    def get_table_sort_order(self, table_name):
+        """Возвращает порядок сортировки таблицы"""
+        return self.settings.value(f'table/{table_name}/sort_order', 0)
+
+    def set_table_sort_order(self, table_name, order):
+        """Устанавливает порядок сортировки таблицы"""
+        self.settings.setValue(f'table/{table_name}/sort_order', order)
+        self.settings.sync()
