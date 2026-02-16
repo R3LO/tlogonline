@@ -1,17 +1,19 @@
 """
-Представления для страницы рейтинга
+Представления для страницы рейтинга (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
 """
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Value
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Substr
+from django.core.cache import cache
 from tlog.models import QSO
+from collections import defaultdict
 
 
 @login_required
 def rating_page(request):
     """
-    Страница рейтинга с различными категориями
+    Страница рейтинга с различными категориями (ОПТИМИЗИРОВАННАЯ)
     """
     if not request.user.is_authenticated:
         from django.contrib.auth.views import redirect_to_login
@@ -33,382 +35,204 @@ def rating_page(request):
     # УКВ диапазоны
     vhf_bands = ['6M', '2M', '70CM', '23CM', '13CM']
 
-    # Базовый QuerySet для глобального рейтинга (все пользователи)
-    global_regions_queryset = QSO.objects.filter(
-        Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
-        Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])
-    ).filter(
-        state__isnull=False
-    ).exclude(state='')
+    # Формируем ключ кэша на основе фильтров (кэшируем глобальные рейтинги на 10 минут)
+    cache_key = f'rating_global_{band_type_filter}_{lotw_filter}'
+    cached_global_stats = cache.get(cache_key)
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга
-    if band_type_filter == 'hf':
-        global_regions_queryset = global_regions_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_regions_queryset = global_regions_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_regions_queryset = global_regions_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_regions_queryset = global_regions_queryset.filter(sat_name='QO-100')
+    if cached_global_stats:
+        # Если данные в кэше, используем их
+        (global_regions_stats, global_r150s_stats, global_dxcc_stats,
+         global_callsigns_stats, global_cqz_stats, global_ituz_stats,
+         global_iota_stats, global_qth_stats) = cached_global_stats
+    else:
+        # Базовый фильтр по диапазону и LoTW для всех глобальных запросов
+        base_filters = Q()
 
-    # Применяем фильтр по LoTW для глобального рейтинга
-    if lotw_filter == 'yes':
-        global_regions_queryset = global_regions_queryset.filter(lotw='Y')
+        if band_type_filter == 'hf':
+            base_filters &= Q(band__in=hf_bands)
+        elif band_type_filter == 'vhf':
+            base_filters &= Q(band__in=vhf_bands) & ~Q(prop_mode='SAT')
+        elif band_type_filter == 'sat':
+            base_filters &= Q(prop_mode='SAT')
+        elif band_type_filter == 'qo100':
+            base_filters &= Q(sat_name='QO-100')
 
-    # Глобальный рейтинг регионов России (по всем пользователям системы) - группировка по username
-    global_regions_stats = global_regions_queryset.values('user__username').annotate(
-        unique_states=Count('state', distinct=True)
-    ).order_by('-unique_states')
+        if lotw_filter == 'yes':
+            base_filters &= Q(lotw='Y')
 
-    # Глобальный рейтинг по странам Р-150-С (по всем пользователям системы)
-    # Оптимизированный запрос - получаем все уникальные страны за один запрос
-    global_r150s_queryset = QSO.objects.filter(
-        Q(r150s__isnull=False) | Q(dxcc__isnull=False)
-    ).exclude(
-        r150s=''
-    ).exclude(
-        dxcc=''
-    )
+        # 1. Глобальный рейтинг регионов России
+        global_regions_stats = QSO.objects.filter(
+            base_filters &
+            (Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
+             Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])) &
+            Q(state__isnull=False) & ~Q(state='')
+        ).values('user__username').annotate(
+            unique_states=Count('state', distinct=True)
+        ).order_by('-unique_states')[:100]  # Ограничиваем топ-100
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга Р-150-С
-    if band_type_filter == 'hf':
-        global_r150s_queryset = global_r150s_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_r150s_queryset = global_r150s_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_r150s_queryset = global_r150s_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_r150s_queryset = global_r150s_queryset.filter(sat_name='QO-100')
+        # 2. Глобальный рейтинг по странам Р-150-С (оптимизировано)
+        # Получаем уникальные r150s и dxcc за один запрос
+        r150s_dxcc_data = QSO.objects.filter(
+            base_filters &
+            (Q(r150s__isnull=False, r150s__gt='') | Q(dxcc__isnull=False, dxcc__gt=''))
+        ).values_list('user__username', 'r150s', 'dxcc').distinct()
 
-    # Применяем фильтр по LoTW для глобального рейтинга Р-150-С
-    if lotw_filter == 'yes':
-        global_r150s_queryset = global_r150s_queryset.filter(lotw='Y')
+        username_countries = defaultdict(set)
+        for username, r150s, dxcc in r150s_dxcc_data:
+            if r150s:
+                username_countries[username].add(r150s)
+            if dxcc:
+                username_countries[username].add(dxcc)
 
-    # Получаем все уникальные пары (username, r150s) и (username, dxcc) за один запрос
-    # Используем values_list для оптимизации памяти
-    from collections import defaultdict
+        global_r150s_stats = [
+            {'username': username, 'unique_countries': len(countries)}
+            for username, countries in username_countries.items()
+        ]
+        global_r150s_stats.sort(key=lambda x: x['unique_countries'], reverse=True)
+        global_r150s_stats = global_r150s_stats[:100]  # Ограничиваем топ-100
 
-    # Словарь для хранения множеств уникальных стран для каждого username
-    username_countries = defaultdict(set)
+        # 3. Глобальный рейтинг по DXCC (LoTW всегда yes)
+        dxcc_filter = base_filters
+        if lotw_filter != 'yes':
+            dxcc_filter &= Q(lotw='Y')
 
-    # Получаем все r150s (исключаем пустые) - группировка по username
-    r150s_data = global_r150s_queryset.exclude(r150s='').exclude(r150s__isnull=True).values_list('user__username', 'r150s').distinct()
-    for username, country in r150s_data:
-        username_countries[username].add(country)
+        global_dxcc_stats = QSO.objects.filter(
+            dxcc_filter & Q(dxcc__isnull=False) & ~Q(dxcc='')
+        ).values('user__username').annotate(
+            unique_dxcc=Count('dxcc', distinct=True)
+        ).order_by('-unique_dxcc')[:100]
 
-    # Получаем все dxcc (исключаем пустые) - группировка по username
-    dxcc_data = global_r150s_queryset.exclude(dxcc='').exclude(dxcc__isnull=True).values_list('user__username', 'dxcc').distinct()
-    for username, country in dxcc_data:
-        username_countries[username].add(country)
+        # 4. Глобальный рейтинг по уникальным позывным
+        global_callsigns_stats = QSO.objects.filter(
+            base_filters & Q(callsign__isnull=False) & ~Q(callsign='')
+        ).values('user__username').annotate(
+            unique_callsigns=Count('callsign', distinct=True)
+        ).order_by('-unique_callsigns')[:100]
 
-    # Формируем результат
-    global_r150s_stats = [
-        {
-            'username': username,
-            'unique_countries': len(countries)
-        }
-        for username, countries in username_countries.items()
-    ]
+        # 5. Глобальный рейтинг по CQ зонам
+        global_cqz_stats = QSO.objects.filter(
+            base_filters & Q(cqz__gt=0)
+        ).values('user__username').annotate(
+            unique_cqz=Count('cqz', distinct=True)
+        ).order_by('-unique_cqz')[:100]
 
-    # Сортируем по количеству уникальных стран
-    global_r150s_stats.sort(key=lambda x: x['unique_countries'], reverse=True)
+        # 6. Глобальный рейтинг по ITU зонам
+        global_ituz_stats = QSO.objects.filter(
+            base_filters & Q(ituz__gt=0)
+        ).values('user__username').annotate(
+            unique_ituz=Count('ituz', distinct=True)
+        ).order_by('-unique_ituz')[:100]
 
-    # Глобальный рейтинг по странам DXCC (по всем пользователям системы)
-    global_dxcc_queryset = QSO.objects.filter(
-        dxcc__isnull=False
-    ).exclude(dxcc='')
+        # 7. Глобальный рейтинг по IOTA
+        global_iota_stats = QSO.objects.filter(
+            base_filters & Q(iota__isnull=False) & ~Q(iota='')
+        ).values('user__username').annotate(
+            unique_iota=Count('iota', distinct=True)
+        ).order_by('-unique_iota')[:100]
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга DXCC
-    if band_type_filter == 'hf':
-        global_dxcc_queryset = global_dxcc_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_dxcc_queryset = global_dxcc_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_dxcc_queryset = global_dxcc_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_dxcc_queryset = global_dxcc_queryset.filter(sat_name='QO-100')
+        # 8. Глобальный рейтинг по QTH локаторам (оптимизировано)
+        qth_data = QSO.objects.filter(
+            base_filters & (Q(gridsquare__isnull=False) | Q(vucc_grids__isnull=False))
+        ).exclude(Q(gridsquare='') & Q(vucc_grids='')).values_list(
+            'user__username', 'gridsquare', 'vucc_grids'
+        )
 
-    # Для DXCC фильтр LoTW всегда должен быть 'yes'
-    global_dxcc_queryset = global_dxcc_queryset.filter(lotw='Y')
+        username_grids = defaultdict(set)
+        for username, gridsquare, vucc_grids in qth_data:
+            if gridsquare and len(gridsquare) >= 4:
+                grid_4 = gridsquare[:4].upper()
+                if grid_4:
+                    username_grids[username].add(grid_4)
+            if vucc_grids:
+                for grid in vucc_grids.split(','):
+                    grid = grid.strip()
+                    if grid and len(grid) >= 4:
+                        grid_4 = grid[:4].upper()
+                        if grid_4:
+                            username_grids[username].add(grid_4)
 
-    # Глобальный рейтинг DXCC по всем пользователям системы - группировка по username
-    global_dxcc_stats = global_dxcc_queryset.values('user__username').annotate(
-        unique_dxcc=Count('dxcc', distinct=True)
-    ).order_by('-unique_dxcc')
+        global_qth_stats = [
+            {'username': username, 'unique_grids': len(grids)}
+            for username, grids in username_grids.items()
+        ]
+        global_qth_stats.sort(key=lambda x: x['unique_grids'], reverse=True)
+        global_qth_stats = global_qth_stats[:100]
 
-    # Глобальный рейтинг по уникальным позывным (по всем пользователям системы)
-    global_callsigns_queryset = QSO.objects.filter(
-        callsign__isnull=False
-    ).exclude(callsign='')
+        # Сохраняем в кэш на 10 минут
+        cache.set(cache_key, (
+            global_regions_stats, global_r150s_stats, global_dxcc_stats,
+            global_callsigns_stats, global_cqz_stats, global_ituz_stats,
+            global_iota_stats, global_qth_stats
+        ), 600)
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга позывных
-    if band_type_filter == 'hf':
-        global_callsigns_queryset = global_callsigns_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_callsigns_queryset = global_callsigns_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_callsigns_queryset = global_callsigns_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_callsigns_queryset = global_callsigns_queryset.filter(sat_name='QO-100')
+    # Кэшируем личную статистику пользователя (на 5 минут)
+    personal_cache_key = f'rating_personal_{user.id}_{band_type_filter}_{lotw_filter}'
+    cached_personal_stats = cache.get(personal_cache_key)
 
-    # Применяем фильтр по LoTW для глобального рейтинга позывных
-    if lotw_filter == 'yes':
-        global_callsigns_queryset = global_callsigns_queryset.filter(lotw='Y')
+    if cached_personal_stats:
+        (regions_stats, r150s_stats, dxcc_stats,
+         qth_stats, callsigns_stats) = cached_personal_stats
+    else:
+        # Получаем все QSO пользователя с фильтрами
+        qso_queryset = QSO.objects.filter(user=user)
 
-    # Глобальный рейтинг по уникальным позывным для каждого username
-    global_callsigns_stats = global_callsigns_queryset.values('user__username').annotate(
-        unique_callsigns=Count('callsign', distinct=True)
-    ).order_by('-unique_callsigns')
+        # Применяем фильтры к пользовательским запросам
+        if band_type_filter == 'hf':
+            qso_queryset = qso_queryset.filter(band__in=hf_bands)
+        elif band_type_filter == 'vhf':
+            qso_queryset = qso_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
+        elif band_type_filter == 'sat':
+            qso_queryset = qso_queryset.filter(prop_mode='SAT')
+        elif band_type_filter == 'qo100':
+            qso_queryset = qso_queryset.filter(sat_name='QO-100')
 
-    # Глобальный рейтинг по CQ зонам (по всем пользователям системы)
-    global_cqz_queryset = QSO.objects.filter(
-        cqz__gt=0
-    )
+        if lotw_filter == 'yes':
+            qso_queryset = qso_queryset.filter(lotw='Y')
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга CQ зон
-    if band_type_filter == 'hf':
-        global_cqz_queryset = global_cqz_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_cqz_queryset = global_cqz_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_cqz_queryset = global_cqz_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_cqz_queryset = global_cqz_queryset.filter(sat_name='QO-100')
+        # 1. Регионы России
+        russia_qso = qso_queryset.filter(
+            (Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
+             Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])) &
+            Q(state__isnull=False) & ~Q(state='')
+        )
 
-    # Применяем фильтр по LoTW для глобального рейтинга CQ зон
-    if lotw_filter == 'yes':
-        global_cqz_queryset = global_cqz_queryset.filter(lotw='Y')
+        regions_stats = russia_qso.values('state').annotate(
+            count=Count('id')
+        ).order_by('-count')
 
-    # Глобальный рейтинг по CQ зонам для каждого username
-    global_cqz_stats = global_cqz_queryset.values('user__username').annotate(
-        unique_cqz=Count('cqz', distinct=True)
-    ).order_by('-unique_cqz')
+        # 2. Страны Р-150-С
+        r150s_stats = qso_queryset.filter(
+            r150s__isnull=False, r150s__gt=''
+        ).values('r150s').annotate(
+            count=Count('id')
+        ).order_by('-count')
 
-    # Глобальный рейтинг по ITU зонам (по всем пользователям системы)
-    global_ituz_queryset = QSO.objects.filter(
-        ituz__gt=0
-    )
+        # 3. Страны DXCC
+        dxcc_stats = qso_queryset.filter(
+            dxcc__isnull=False, dxcc__gt=''
+        ).values('dxcc').annotate(
+            count=Count('id')
+        ).order_by('-count')
 
-    # Применяем фильтр по типу диапазона для глобального рейтинга ITU зон
-    if band_type_filter == 'hf':
-        global_ituz_queryset = global_ituz_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_ituz_queryset = global_ituz_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_ituz_queryset = global_ituz_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_ituz_queryset = global_ituz_queryset.filter(sat_name='QO-100')
+        # 4. QTH локаторы
+        qth_stats = qso_queryset.filter(
+            gridsquare__isnull=False, gridsquare__gt=''
+        ).values('gridsquare').annotate(
+            count=Count('id')
+        ).order_by('-count')
 
-    # Применяем фильтр по LoTW для глобального рейтинга ITU зон
-    if lotw_filter == 'yes':
-        global_ituz_queryset = global_ituz_queryset.filter(lotw='Y')
+        # 5. Уникальные позывные
+        callsigns_stats = qso_queryset.filter(
+            callsign__isnull=False, callsign__gt=''
+        ).values('callsign').annotate(
+            count=Count('id')
+        ).order_by('-count')
 
-    # Глобальный рейтинг по ITU зонам для каждого username
-    global_ituz_stats = global_ituz_queryset.values('user__username').annotate(
-        unique_ituz=Count('ituz', distinct=True)
-    ).order_by('-unique_ituz')
-
-    # Глобальный рейтинг по IOTA (по всем пользователям системы)
-    global_iota_queryset = QSO.objects.filter(
-        iota__isnull=False
-    ).exclude(iota='')
-
-    # Применяем фильтр по типу диапазона для глобального рейтинга IOTA
-    if band_type_filter == 'hf':
-        global_iota_queryset = global_iota_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_iota_queryset = global_iota_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_iota_queryset = global_iota_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_iota_queryset = global_iota_queryset.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW для глобального рейтинга IOTA
-    if lotw_filter == 'yes':
-        global_iota_queryset = global_iota_queryset.filter(lotw='Y')
-
-    # Глобальный рейтинг по IOTA для каждого username
-    global_iota_stats = global_iota_queryset.values('user__username').annotate(
-        unique_iota=Count('iota', distinct=True)
-    ).order_by('-unique_iota')
-
-    # Глобальный рейтинг по QTH локаторам (по всем пользователям системы)
-    # Собираем QSO с gridsquare или vucc_grids
-    global_qth_queryset = QSO.objects.filter(
-        Q(gridsquare__isnull=False) | Q(vucc_grids__isnull=False)
-    ).exclude(
-        Q(gridsquare='') & Q(vucc_grids='')
-    )
-
-    # Применяем фильтр по типу диапазона для глобального рейтинга QTH локаторов
-    if band_type_filter == 'hf':
-        global_qth_queryset = global_qth_queryset.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        global_qth_queryset = global_qth_queryset.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        global_qth_queryset = global_qth_queryset.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        global_qth_queryset = global_qth_queryset.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW для глобального рейтинга QTH локаторов
-    if lotw_filter == 'yes':
-        global_qth_queryset = global_qth_queryset.filter(lotw='Y')
-
-    # Извлекаем данные и обрабатываем в Python для учета первых 4 символов
-    username_grids = defaultdict(set)
-
-    # Получаем данные из базы - группировка по username
-    qth_data = global_qth_queryset.values_list('user__username', 'gridsquare', 'vucc_grids')
-
-    for username, gridsquare, vucc_grids in qth_data:
-        # Обрабатываем gridsquare (первые 4 символа)
-        if gridsquare and len(gridsquare) >= 4:
-            grid_4 = gridsquare[:4].upper()
-            if grid_4:
-                username_grids[username].add(grid_4)
-
-        # Обрабатываем vucc_grids (разбиваем по запятым, берем первые 4 символа каждого)
-        if vucc_grids:
-            for grid in vucc_grids.split(','):
-                grid = grid.strip()
-                if grid and len(grid) >= 4:
-                    grid_4 = grid[:4].upper()
-                    if grid_4:
-                        username_grids[username].add(grid_4)
-
-    # Формируем результат глобального рейтинга QTH локаторов
-    global_qth_stats = [
-        {
-            'username': username,
-            'unique_grids': len(grids)
-        }
-        for username, grids in username_grids.items()
-    ]
-
-    # Сортируем по количеству уникальных локаторов
-    global_qth_stats.sort(key=lambda x: x['unique_grids'], reverse=True)
-
-    # Получаем все QSO пользователя
-    qso_queryset = QSO.objects.filter(user=user)
-
-    # 1. Регионы России
-    # Фильтруем QSO из России (r150s или dxcc с RU)
-    russia_qso = qso_queryset.filter(
-        Q(r150s__in=['EUROPEAN RUSSIA', 'ASIATIC RUSSIA', 'KALININGRAD']) |
-        Q(dxcc__in=['ASIATIC RUSSIA', 'EUROPEAN RUSSIA', 'KALININGRAD'])
-    ).filter(
-        state__isnull=False
-    ).exclude(state='')
-
-    # Применяем фильтр по типу диапазона
-    if band_type_filter == 'hf':
-        russia_qso = russia_qso.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        russia_qso = russia_qso.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        russia_qso = russia_qso.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        russia_qso = russia_qso.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW
-    if lotw_filter == 'yes':
-        russia_qso = russia_qso.filter(lotw='Y')
-
-    regions_stats = russia_qso.values('state').annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    # 2. Страны Р-150-С
-    r150s_qso = qso_queryset.filter(
-        r150s__isnull=False
-    ).exclude(r150s='')
-
-    # Применяем фильтр по типу диапазона
-    if band_type_filter == 'hf':
-        r150s_qso = r150s_qso.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        r150s_qso = r150s_qso.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        r150s_qso = r150s_qso.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        r150s_qso = r150s_qso.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW
-    if lotw_filter == 'yes':
-        r150s_qso = r150s_qso.filter(lotw='Y')
-
-    r150s_stats = r150s_qso.values('r150s').annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    # 3. Страны DXCC
-    dxcc_qso = qso_queryset.filter(
-        dxcc__isnull=False
-    ).exclude(dxcc='')
-
-    # Применяем фильтр по типу диапазона
-    if band_type_filter == 'hf':
-        dxcc_qso = dxcc_qso.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        dxcc_qso = dxcc_qso.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        dxcc_qso = dxcc_qso.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        dxcc_qso = dxcc_qso.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW
-    if lotw_filter == 'yes':
-        dxcc_qso = dxcc_qso.filter(lotw='Y')
-
-    dxcc_stats = dxcc_qso.values('dxcc').annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    # 4. QTH локаторы
-    qth_qso = qso_queryset.filter(
-        gridsquare__isnull=False
-    ).exclude(gridsquare='')
-
-    # Применяем фильтр по типу диапазона
-    if band_type_filter == 'hf':
-        qth_qso = qth_qso.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        qth_qso = qth_qso.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        qth_qso = qth_qso.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        qth_qso = qth_qso.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW
-    if lotw_filter == 'yes':
-        qth_qso = qth_qso.filter(lotw='Y')
-
-    qth_stats = qth_qso.values('gridsquare').annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    # 5. Уникальные позывные
-    callsigns_qso = qso_queryset.filter(
-        callsign__isnull=False
-    ).exclude(callsign='')
-
-    # Применяем фильтр по типу диапазона
-    if band_type_filter == 'hf':
-        callsigns_qso = callsigns_qso.filter(band__in=hf_bands)
-    elif band_type_filter == 'vhf':
-        callsigns_qso = callsigns_qso.filter(band__in=vhf_bands).exclude(prop_mode='SAT')
-    elif band_type_filter == 'sat':
-        callsigns_qso = callsigns_qso.filter(prop_mode='SAT')
-    elif band_type_filter == 'qo100':
-        callsigns_qso = callsigns_qso.filter(sat_name='QO-100')
-
-    # Применяем фильтр по LoTW
-    if lotw_filter == 'yes':
-        callsigns_qso = callsigns_qso.filter(lotw='Y')
-
-    callsigns_stats = callsigns_qso.values('callsign').annotate(
-        count=Count('id')
-    ).order_by('-count')
+        # Сохраняем в кэш на 5 минут
+        cache.set(personal_cache_key, (
+            regions_stats, r150s_stats, dxcc_stats,
+            qth_stats, callsigns_stats
+        ), 300)
 
     context = {
         'global_regions_stats': global_regions_stats,

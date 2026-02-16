@@ -135,6 +135,14 @@ class QSO(models.Model):
             models.Index(fields=['user', 'r150s'], name='qso_user_r150s_idx'),
             models.Index(fields=['user', 'dxcc'], name='qso_user_dxcc_idx'),
             models.Index(fields=['user', 'state'], name='qso_user_state_idx'),
+            # Индексы для оптимизации rating_page
+            models.Index(fields=['cqz'], name='qso_cqz_idx'),
+            models.Index(fields=['ituz'], name='qso_ituz_idx'),
+            models.Index(fields=['iota'], name='qso_iota_idx'),
+            models.Index(fields=['vucc_grids'], name='qso_vucc_grids_idx'),
+            models.Index(fields=['user', 'cqz'], name='qso_user_cqz_idx'),
+            models.Index(fields=['user', 'ituz'], name='qso_user_ituz_idx'),
+            models.Index(fields=['user', 'iota'], name='qso_user_iota_idx'),
         ]
         # Уникальные ограничения для предотвращения дублирования
         constraints = [
