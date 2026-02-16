@@ -1,7 +1,7 @@
 """
 URLs для фронтенда
 """
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from django.views.generic import RedirectView
 from .views import (
     home, register_page, login_page, dashboard, logbook,
@@ -23,6 +23,13 @@ from .views.api import (
     api_user_info, api_qso_stats, api_search_callsigns,
     api_cosmos_user_data, api_cosmos_generate, api_cosmos_download
 )
+from rest_framework.routers import DefaultRouter
+from .views.rest_api import QSOViewSet
+from .views.rest_api import ProfileAPIView, UserInfoAPIView
+
+# Router для ViewSet
+router = DefaultRouter()
+router.register(r'qsos', QSOViewSet, basename='qso')
 
 urlpatterns = [
     path('', home, name='home'),
@@ -94,5 +101,9 @@ urlpatterns = [
     path('qth-loc.html', RedirectView.as_view(url='/static/qth-loc.html', permanent=False), name='qth_loc'),
     path('achievements/', achievements, name='achievements'),
     path('user-awards/', user_achievements, name='user_achievements'),
+    # REST API endpoints (должны быть ДО логбук поиска)
+    path('api/v1/', include(router.urls)),
+    path('api/v1/profile/', ProfileAPIView.as_view(), name='rest_profile'),
+    path('api/v1/user-info/', UserInfoAPIView.as_view(), name='rest_user_info'),
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
 ]
