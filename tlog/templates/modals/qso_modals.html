@@ -458,7 +458,7 @@
                                             <input type="text" class="form-control form-control-sm" id="edit_continent" name="continent" placeholder="Например: EU" {% if qso.lotw == 'Y' %}readonly{% endif %}>
                                         </div>
                                         
-                                        <div class="col-4 text-muted">🇷🇺 {% trans "Регион РФ" %}:</div>
+                                        <div class="col-4 text-muted">STATE:</div>
                                         <div class="col-8">
                                             <input type="text" class="form-control form-control-sm" id="edit_state" name="state" placeholder="{% trans 'Двухбуквенный код региона' %}" maxlength="2" {% if qso.lotw == 'Y' %}readonly{% endif %}>
                                         </div>
@@ -613,7 +613,7 @@
                                     <div class="col-5 text-muted">🌎 {% trans "Континент" %}:</div>
                                     <div class="col-7"><span id="view_continent">-</span></div>
                                     
-                                    <div class="col-5 text-muted">🇷🇺 {% trans "Регион РФ" %}:</div>
+                                    <div class="col-5 text-muted">STATE:</div>
                                     <div class="col-7"><span id="view_state" class="badge bg-warning">-</span></div>
                                 </div>
                             </div>
