@@ -1,6 +1,7 @@
 {% extends 'lotw_base.html' %}
 {% load i18n %}
 {% load static %}
+{% load custom_filters %}
 
 {% block extra_css %}
 {{ block.super }}
@@ -290,7 +291,6 @@
                                 </li>
                             {% endif %}
 
-                            {% load custom_filters %}
                             {% paginate_numbers current_page total_pages 3 as page_numbers %}
                             {% for page_num in page_numbers %}
                                 {% if page_num == '...' %}

@@ -14,7 +14,7 @@ This form works WITHOUT JavaScript - perfect for QRZ.com which blocks scripts.
 <!-- TlogOnline QSO Search Form (No JavaScript) -->
 <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
     <div style="color: #0066cc; margin-bottom: 15px; font-size: 18px; font-weight: bold; text-align: center;">
-        📻 Check QSO in my log
+        Check QSO in my log
     </div>
 
     <form action="https://tlogonline.com/public/qso-search/" method="get" target="_blank" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
