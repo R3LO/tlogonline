@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.shortcuts import render
 from django.db.models import Count, Q
 from collections import Counter
 
@@ -321,3 +322,119 @@ class PublicQSOSearchAPIView(APIView):
             'search_callsign': search_callsign,
             'results': formatted_results
         })
+
+
+def public_qso_search_html(request):
+    """
+    HTML форма для поиска QSO (без JavaScript)
+    Для использования на QRZ.com и других сайтах, блокирующих скрипты
+
+    Параметры:
+    - owner_callsign: позывной владельца (обязательный)
+    - search_callsign: позывной для поиска (обязательный)
+    """
+    owner_callsign = request.GET.get('owner_callsign', '').strip().upper()
+    search_callsign = request.GET.get('search_callsign', '').strip().upper()
+
+    results = []
+    found = False
+    error = None
+    all_bands = []
+
+    if owner_callsign and search_callsign:
+        # Ищем RadioProfile по позывному владельца
+        try:
+            radio_profile = RadioProfile.objects.get(callsign__iexact=owner_callsign)
+            user = radio_profile.user
+
+            # Ищем QSO
+            qsos = QSO.objects.filter(
+                callsign__iexact=search_callsign,
+                user=user
+            ).select_related('user')
+
+            if qsos.exists():
+                found = True
+
+                # Группируем по my_callsign, затем по band/sat_name, затем по mode
+                results_dict = {}
+                for qso in qsos:
+                    my_callsign = qso.my_callsign or 'UNKNOWN'
+                    mode = qso.mode or 'UNKNOWN'
+
+                    # Определяем ключ для диапазона/спутника
+                    if qso.sat_name:
+                        band_key = f"SAT:{qso.sat_name}"
+                    else:
+                        band_key = qso.band or 'UNKNOWN'
+
+                    if my_callsign not in results_dict:
+                        results_dict[my_callsign] = {}
+
+                    if band_key not in results_dict[my_callsign]:
+                        results_dict[my_callsign][band_key] = {}
+
+                    if mode not in results_dict[my_callsign][band_key]:
+                        results_dict[my_callsign][band_key][mode] = 0
+
+                    results_dict[my_callsign][band_key][mode] += 1
+
+                # Собираем все уникальные bands
+                all_bands_set = set()
+                for my_callsign, bands in results_dict.items():
+                    all_bands_set.update(bands.keys())
+
+                # Сортируем bands
+                def sort_bands(band):
+                    if band.startswith('SAT:'):
+                        return (2, band[4:])
+                    num = band.replace('m', '')
+                    try:
+                        return (0, int(num))
+                    except ValueError:
+                        return (1, band)
+
+                all_bands = sorted(all_bands_set, key=sort_bands)
+
+                # Преобразуем в список и сортируем
+                results = []
+                for my_callsign, bands in results_dict.items():
+                    total = sum(sum(modes.values()) for modes in bands.values())
+
+                    # Создаем список для каждого band с modes
+                    bands_data = []
+                    for band in all_bands:
+                        if band in bands:
+                            modes_list = sorted(bands[band].keys())
+                            bands_data.append({
+                                'band': band,
+                                'modes': modes_list
+                            })
+                        else:
+                            bands_data.append({
+                                'band': band,
+                                'modes': []
+                            })
+
+                    results.append({
+                        'my_callsign': my_callsign,
+                        'bands_data': bands_data,
+                        'total': total
+                    })
+
+                results.sort(key=lambda x: x['total'], reverse=True)
+            else:
+                found = False
+        except RadioProfile.DoesNotExist:
+            error = f'Profile with callsign {owner_callsign} not found'
+        except Exception as e:
+            error = str(e)
+
+    return render(request, 'public_qso_search.html', {
+        'owner_callsign': owner_callsign,
+        'search_callsign': search_callsign,
+        'found': found,
+        'results': results,
+        'all_bands': all_bands,
+        'error': error,
+    })

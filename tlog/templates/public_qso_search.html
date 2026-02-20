@@ -1,0 +1,175 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QSO Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .error {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .not-found {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        th:last-child,
+        td:last-child {
+            border-right: none;
+        }
+        th {
+            background: #0066cc;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        td {
+            text-align: left;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .mode-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #007bff;
+            color: white;
+        }
+        .mode-badge.CW { background: #28a745; }
+        .mode-badge.SSB { background: #17a2b8; }
+        .mode-badge.FT8 { background: #ffc107; color: #333; }
+        .mode-badge.FT4 { background: #fd7e14; }
+        .mode-badge.AM { background: #6c757d; }
+        .mode-badge.FM { background: #6c757d; }
+        .mode-badge.PSK31 { background: #6f42c1; }
+        .mode-badge.RTTY { background: #6f42c1; }
+        .mode-badge.JT65 { background: #e83e8c; }
+        .mode-badge.SSTV { background: #e83e8c; }
+        .mode-badge.DIGITAL { background: #6610f2; }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        small {
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QSO Search Results</h1>
+
+        {% if error %}
+            <div class="error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% elif not found %}
+            <div class="not-found">
+                📭 No QSO found for callsign <strong>{{ search_callsign }}</strong> in log of <strong>{{ owner_callsign }}</strong>
+            </div>
+        {% else %}
+            <div class="success">
+                ✅ QSO found for callsign <strong>{{ search_callsign }}</strong> in log of <strong>{{ owner_callsign }}</strong>
+            </div>
+
+            {% if results %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>My Callsign</th>
+                            {% for band in all_bands %}
+                                <th>
+                                    {% if band|startswith:"SAT:" %}
+                                        SAT<br><small>{{ band|slice:"4:" }}</small>
+                                    {% else %}
+                                        {{ band }}
+                                    {% endif %}
+                                </th>
+                            {% endfor %}
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr>
+                                <td><strong>{{ result.my_callsign }}</strong></td>
+                                {% for band_data in result.bands_data %}
+                                    <td>
+                                        {% for mode in band_data.modes %}
+                                            <span class="mode-badge {{ mode }}">{{ mode }}</span>
+                                        {% endfor %}
+                                    </td>
+                                {% endfor %}
+                                <td><strong>{{ result.total }}</strong></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        {% endif %}
+
+        <div class="back-link">
+            <a href="javascript:history.back()">← Back to previous page</a>
+        </div>
+    </div>
+</body>
+</html>
