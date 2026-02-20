@@ -88,7 +88,6 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
         #tlog-result-table th,
         #tlog-result-table td {
             padding: 10px;
-            text-align: left;
             border-bottom: 1px solid #ddd;
             border-right: 1px solid #ddd;
         }
@@ -100,6 +99,10 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
             background: #0066cc;
             color: white;
             font-weight: bold;
+            text-align: center;
+        }
+        #tlog-result-table td {
+            text-align: left;
         }
         #tlog-result-table tr:hover {
             background: #f9f9f9;
@@ -319,7 +322,7 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
                     }).join(' ');
                     html += `<td>${modeBadges}</td>`;
                 } else {
-                    html += '<td>-</td>';
+                    html += '<td></td>';
                 }
             });
 

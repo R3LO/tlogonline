@@ -170,7 +170,6 @@
         #tlog-result-table th,
         #tlog-result-table td {
             padding: 10px;
-            text-align: left;
             border-bottom: 1px solid #ddd;
             border-right: 1px solid #ddd;
         }
@@ -182,6 +181,10 @@
             background: #0066cc;
             color: white;
             font-weight: bold;
+            text-align: center;
+        }
+        #tlog-result-table td {
+            text-align: left;
         }
         #tlog-result-table tr:hover {
             background: #f9f9f9;
@@ -338,13 +341,21 @@
                 #tlog-result-table th,
                 #tlog-result-table td {
                     padding: 10px;
-                    text-align: left;
                     border-bottom: 1px solid #ddd;
+                    border-right: 1px solid #ddd;
+                }
+                #tlog-result-table th:last-child,
+                #tlog-result-table td:last-child {
+                    border-right: none;
                 }
                 #tlog-result-table th {
                     background: #0066cc;
                     color: white;
                     font-weight: bold;
+                    text-align: center;
+                }
+                #tlog-result-table td {
+                    text-align: left;
                 }
                 #tlog-result-table tr:hover {
                     background: #f9f9f9;
@@ -356,6 +367,27 @@
                     font-weight: bold;
                     color: #0066cc;
                 }
+                .mode-badge {
+                    display: inline-block;
+                    padding: 3px 8px;
+                    margin: 2px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: bold;
+                    background: #007bff;
+                    color: white;
+                }
+                .mode-badge.CW { background: #28a745; }
+                .mode-badge.SSB { background: #17a2b8; }
+                .mode-badge.FT8 { background: #ffc107; color: #333; }
+                .mode-badge.FT4 { background: #fd7e14; }
+                .mode-badge.AM { background: #6c757d; }
+                .mode-badge.FM { background: #6c757d; }
+                .mode-badge.PSK31 { background: #6f42c1; }
+                .mode-badge.RTTY { background: #6f42c1; }
+                .mode-badge.JT65 { background: #e83e8c; }
+                .mode-badge.SSTV { background: #e83e8c; }
+                .mode-badge.DIGITAL { background: #6610f2; }
                 #tlog-loading {
                     text-align: center;
                     padding: 20px;
@@ -653,7 +685,7 @@
                             }).join(' ');
                             html += `<td>${modeBadges}</td>`;
                         } else {
-                            html += '<td>-</td>';
+                            html += '<td></td>';
                         }
                     });
 
