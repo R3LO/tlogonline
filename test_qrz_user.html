@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест формы поиска QSO (по owner_callsign)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .config-section {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .config-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .config-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .config-row label {
+            font-weight: bold;
+            min-width: 150px;
+        }
+        .config-row input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .test-btn:hover {
+            background: #218838;
+        }
+        .divider {
+            border: none;
+            border-top: 2px solid #ddd;
+            margin: 30px 0;
+        }
+        .api-status {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .api-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .api-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .api-status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .api-response {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        /* Стили формы поиска (как на QRZ.com) */
+        #tlog-search-container {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        #tlog-search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        #tlog-callsign-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #tlog-search-btn {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #tlog-search-btn:hover {
+            background: #0052a3;
+        }
+        #tlog-search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #tlog-result {
+            margin-top: 20px;
+        }
+        #tlog-result-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #tlog-result-table th,
+        #tlog-result-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        #tlog-result-table th {
+            background: #0066cc;
+            color: white;
+            font-weight: bold;
+        }
+        #tlog-result-table tr:hover {
+            background: #f9f9f9;
+        }
+        .tlog-mode-count {
+            background: #e6f3ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        #tlog-loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        #tlog-error {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        #tlog-not-found {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .tlog-title {
+            color: #0066cc;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box h4 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест формы поиска QSO (по owner_callsign)</h1>
+        <p class="subtitle">Проверка работы API с фильтрацией по owner_callsign</p>
+
+        <!-- Секция конфигурации -->
+        <div class="config-section">
+            <h3>⚙️ Конфигурация</h3>
+            <div class="config-row">
+                <label for="api-url">URL сервера:</label>
+                <input type="text" id="api-url" value="http://127.0.0.1:8000" placeholder="https://tlogonline.com">
+            </div>
+            <div class="config-row">
+                <label for="owner-callsign">Owner Callsign:</label>
+                <input type="text" id="owner-callsign" value="R3LO" placeholder="Позывной владельца (например, R3LO)">
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testConnection()">🔗 Проверить соединение</button>
+                <button class="test-btn" onclick="testWithExample()">📊 Тест с примером</button>
+            </div>
+            <div id="api-status" class="api-status" style="display: none;"></div>
+            <div id="api-response" class="api-response" style="display: none;"></div>
+        </div>
+
+        <div class="info-box">
+            <h4>ℹ️ Как это работает:</h4>
+            <ul>
+                <li><strong>owner_callsign:</strong> позывной владельца страницы (например, R3LO) - используется для получения user_id из RadioProfile</li>
+                <li><strong>search_callsign:</strong> позывной корреспондента, который ищет пользователь (вводится в форму)</li>
+                <li>API ищет QSO только для конкретного user_id</li>
+            </ul>
+        </div>
+
+        <hr class="divider">
+
+        <h2 style="text-align: center; color: #333;">📻 Форма поиска (как на QRZ.com)</h2>
+
+        <!-- Форма поиска (как на QRZ.com) -->
+        <div id="tlog-search-container">
+            <style>
+                #tlog-search-container {
+                    background: #f5f5f5;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                }
+                #tlog-search-form {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    flex-wrap: wrap;
+                }
+                #tlog-callsign-input {
+                    flex: 1;
+                    min-width: 200px;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 14px;
+                }
+                #tlog-search-btn {
+                    padding: 10px 20px;
+                    background: #0066cc;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                #tlog-search-btn:hover {
+                    background: #0052a3;
+                }
+                #tlog-search-btn:disabled {
+                    background: #ccc;
+                    cursor: not-allowed;
+                }
+                #tlog-result {
+                    margin-top: 20px;
+                }
+                #tlog-result-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+                #tlog-result-table th,
+                #tlog-result-table td {
+                    padding: 10px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }
+                #tlog-result-table th {
+                    background: #0066cc;
+                    color: white;
+                    font-weight: bold;
+                }
+                #tlog-result-table tr:hover {
+                    background: #f9f9f9;
+                }
+                .tlog-mode-count {
+                    background: #e6f3ff;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-weight: bold;
+                    color: #0066cc;
+                }
+                #tlog-loading {
+                    text-align: center;
+                    padding: 20px;
+                    color: #666;
+                }
+                #tlog-error {
+                    background: #ffe6e6;
+                    color: #cc0000;
+                    padding: 10px;
+                    border-radius: 4px;
+                    margin-top: 10px;
+                }
+                #tlog-not-found {
+                    background: #fff3cd;
+                    color: #856404;
+                    padding: 15px;
+                    border-radius: 4px;
+                    text-align: center;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                .tlog-title {
+                    color: #0066cc;
+                    margin-bottom: 15px;
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                }
+            </style>
+
+            <div class="tlog-title">📻 Проверка QSO в моём логе</div>
+
+            <form id="tlog-search-form">
+                <input
+                    type="text"
+                    id="tlog-callsign-input"
+                    placeholder="Введите ваш позывной"
+                    maxlength="20"
+                />
+                <button type="submit" id="tlog-search-btn">Найти</button>
+            </form>
+
+            <div id="tlog-result"></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="info-box">
+            <h4>📋 Пример тестирования:</h4>
+            <ol>
+                <li>Owner Callsign: <strong>R3LO</strong></li>
+                <li>Search Callsign: <strong>GJ0KYZ</strong></li>
+                <li>Нажмите "Найти"</li>
+                <li>Должны появиться все QSO R3LO с GJ0KYZ</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ФУНКЦИИ ТЕСТИРОВАНИЯ ====================
+
+        function getApiBaseUrl() {
+            return document.getElementById('api-url').value.replace(/\/$/, '');
+        }
+
+        function getOwnerCallsign() {
+            return document.getElementById('owner-callsign').value.trim().toUpperCase();
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.className = `api-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        function showResponse(data) {
+            const responseDiv = document.getElementById('api-response');
+            responseDiv.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+            responseDiv.style.display = 'block';
+        }
+
+        async function testConnection() {
+            const baseUrl = getApiBaseUrl();
+            const ownerCallsign = getOwnerCallsign();
+            showStatus('loading', '🔍 Проверка соединения...');
+
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=TEST`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('success', '✅ Соединение установлено успешно!');
+                    showResponse(data);
+                } else {
+                    showStatus('error', `❌ Ошибка сервера: ${response.status}`);
+                    showResponse(data);
+                }
+            } catch (error) {
+                showStatus('error', `❌ Ошибка соединения: ${error.message}`);
+                showResponse(error.toString());
+            }
+        }
+
+        async function testWithExample() {
+            const baseUrl = getApiBaseUrl();
+            const ownerCallsign = getOwnerCallsign();
+            showStatus('loading', '📊 Тестирование с примером...');
+
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=GJ0KYZ`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const message = data.found
+                        ? `✅ Найдены QSO: ${data.owner_callsign} <-> ${data.search_callsign}`
+                        : `✅ API работает (ничего не найдено)`;
+                    showStatus('success', message);
+                    showResponse(data);
+                } else {
+                    showStatus('error', `❌ Ошибка: ${response.status}`);
+                    showResponse(data);
+                }
+            } catch (error) {
+                showStatus('error', `❌ Ошибка: ${error.message}`);
+                showResponse(error.toString());
+            }
+        }
+
+        // ==================== ФОРМА ПОИСКА (как на QRZ.com) ====================
+
+        (function() {
+            const form = document.getElementById('tlog-search-form');
+            const input = document.getElementById('tlog-callsign-input');
+            const button = document.getElementById('tlog-search-btn');
+            const resultDiv = document.getElementById('tlog-result');
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const searchCallsign = input.value.trim().toUpperCase();
+                const ownerCallsign = getOwnerCallsign();
+
+                if (!searchCallsign) {
+                    showError('Пожалуйста, введите ваш позывной');
+                    return;
+                }
+
+                // Проверка формата позывного (базовая)
+                const callsignRegex = /^[A-Z0-9\/]+$/;
+                if (!callsignRegex.test(searchCallsign)) {
+                    showError('Неверный формат позывного. Используйте только буквы, цифры и символ /');
+                    return;
+                }
+
+                showLoading();
+                button.disabled = true;
+
+                const baseUrl = getApiBaseUrl();
+
+                try {
+                    const response = await fetch(
+                        `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=${encodeURIComponent(searchCallsign)}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`Ошибка сервера: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    displayResults(data);
+
+                    // Показываем результат в секции тестирования
+                    showStatus('success', `✅ Поиск завершён: ${ownerCallsign} <-> ${searchCallsign}`);
+                    showResponse(data);
+
+                } catch (error) {
+                    console.error('Ошибка поиска:', error);
+                    showError(`Ошибка при поиске: ${error.message}. Проверьте соединение с сервером.`);
+                    showStatus('error', `❌ Ошибка поиска: ${error.message}`);
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+            function showLoading() {
+                resultDiv.innerHTML = '<div id="tlog-loading">⏳ Поиск...</div>';
+            }
+
+            function showError(message) {
+                resultDiv.innerHTML = `<div id="tlog-error">❌ ${message}</div>`;
+            }
+
+            function displayResults(data) {
+                if (!data.found) {
+                    const message = data.message || 'Ничего не найдено';
+                    resultDiv.innerHTML = `
+                        <div id="tlog-not-found">
+                            📭 Для позывного <strong>${data.search_callsign || ''}</strong> ничего не найдено в логе <strong>${data.owner_callsign || ''}</strong>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!data.results || data.results.length === 0) {
+                    resultDiv.innerHTML = `
+                        <div id="tlog-not-found">
+                            📭 Для позывного <strong>${data.search_callsign}</strong> ничего не найдено в логе <strong>${data.owner_callsign}</strong>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Собираем все уникальные модуляции
+                const allModes = new Set();
+                data.results.forEach(result => {
+                    Object.keys(result.modes).forEach(mode => allModes.add(mode));
+                });
+                const sortedModes = Array.from(allModes).sort();
+
+                // Создаем таблицу
+                let html = `
+                    <table id="tlog-result-table">
+                        <thead>
+                            <tr>
+                                <th>Мой позывной</th>
+                                ${sortedModes.map(mode => `<th>${mode}</th>`).join('')}
+                                <th>Всего</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.results.forEach(result => {
+                    const totalQSO = Object.values(result.modes).reduce((a, b) => a + b, 0);
+                    html += `
+                        <tr>
+                            <td><strong>${result.my_callsign}</strong></td>
+                            ${sortedModes.map(mode => {
+                                const count = result.modes[mode] || 0;
+                                return count > 0
+                                    ? `<td><span class="tlog-mode-count">${count}</span></td>`
+                                    : '<td>-</td>';
+                            }).join('')}
+                            <td><strong>${totalQSO}</strong></td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                        ✅ Найдено QSO для позывного <strong>${data.search_callsign}</strong> в логе <strong>${data.owner_callsign}</strong>
+                    </p>
+                `;
+
+                resultDiv.innerHTML = html;
+            }
+
+            // Автофокус на поле ввода при загрузке
+            window.addEventListener('load', function() {
+                input.focus();
+            });
+
+            // Обработка Enter
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

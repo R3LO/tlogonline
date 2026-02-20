@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Count, Q
 from collections import Counter
 
@@ -192,3 +192,132 @@ class UserInfoAPIView(APIView):
             'date_joined': user.date_joined,
         }
         return Response(data)
+
+
+class PublicQSOSearchAPIView(APIView):
+    """
+    Публичный API для поиска QSO по позывному (без аутентификации)
+    Для использования на внешних сайтах (например, qrz.com)
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        """
+        Поиск QSO по позывному корреспондента (callsign) и позывному владельца (owner_callsign)
+        owner_callsign используется для получения user_id из RadioProfile
+        Возвращает данные в формате: строки = my_callsign, колонки = band/sat_name, ячейки = mode:count
+
+        Параметры:
+        - owner_callsign: позывной владельца страницы (например, "R3LO") - используется для получения user_id из RadioProfile (обязательный)
+        - search_callsign: позывной для поиска корреспондента (обязательный)
+
+        Ответ:
+        {
+            "found": true,
+            "owner_callsign": "R3LO",
+            "search_callsign": "UA1AAA",
+            "results": [
+                {
+                    "my_callsign": "R3LO",
+                    "bands": {
+                        "160m": {"CW": 2, "FT8": 1},
+                        "80m": {"SSB": 3},
+                        "20m": {"FT8": 5},
+                        "SAT": {"FO-29": {"CW": 1}}
+                    }
+                }
+            ]
+        }
+        """
+        owner_callsign = request.query_params.get('owner_callsign', '').strip().upper()
+        search_callsign = request.query_params.get('search_callsign', '').strip().upper()
+
+        if not owner_callsign:
+            return Response(
+                {
+                    'found': False,
+                    'error': 'owner_callsign parameter is required'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not search_callsign:
+            return Response(
+                {
+                    'found': False,
+                    'error': 'search_callsign parameter is required'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Ищем RadioProfile по позывному владельца
+        try:
+            radio_profile = RadioProfile.objects.get(callsign__iexact=owner_callsign)
+            user = radio_profile.user
+        except RadioProfile.DoesNotExist:
+            return Response({
+                'found': False,
+                'error': f'Profile with callsign {owner_callsign} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Ищем QSO с указанным search_callsign для конкретного пользователя
+        qsos = QSO.objects.filter(
+            callsign__iexact=search_callsign,
+            user=user
+        ).select_related('user')
+
+        if not qsos.exists():
+            return Response({
+                'found': False,
+                'owner_callsign': owner_callsign,
+                'search_callsign': search_callsign,
+                'message': 'Not found'
+            })
+
+        # Группируем по my_callsign, затем по band/sat_name, затем по mode
+        results = {}
+        for qso in qsos:
+            my_callsign = qso.my_callsign or 'UNKNOWN'
+            mode = qso.mode or 'UNKNOWN'
+
+            # Определяем ключ для диапазона/спутника
+            if qso.sat_name:
+                band_key = f"SAT:{qso.sat_name}"
+            else:
+                band_key = qso.band or 'UNKNOWN'
+
+            if my_callsign not in results:
+                results[my_callsign] = {}
+
+            if band_key not in results[my_callsign]:
+                results[my_callsign][band_key] = {}
+
+            if mode not in results[my_callsign][band_key]:
+                results[my_callsign][band_key][mode] = 0
+
+            results[my_callsign][band_key][mode] += 1
+
+        # Преобразуем в список
+        formatted_results = [
+            {
+                'my_callsign': my_callsign,
+                'bands': bands
+            }
+            for my_callsign, bands in results.items()
+        ]
+
+        # Сортируем по количеству QSO (по убыванию)
+        formatted_results.sort(
+            key=lambda x: sum(
+                sum(modes.values())
+                for modes in x['bands'].values()
+            ),
+            reverse=True
+        )
+
+        return Response({
+            'found': True,
+            'owner_callsign': owner_callsign,
+            'search_callsign': search_callsign,
+            'results': formatted_results
+        })

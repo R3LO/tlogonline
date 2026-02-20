@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отладка формы поиска</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 { color: #333; }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+        }
+        .log-entry.error {
+            border-left-color: #dc3545;
+            color: #ff6b6b;
+        }
+        .log-entry.success {
+            border-left-color: #28a745;
+            color: #51cf66;
+        }
+        .log-entry.info {
+            border-left-color: #17a2b8;
+            color: #339af0;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .config-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Отладка формы поиска QSO</h1>
+
+    <div class="container">
+        <h2>Конфигурация</h2>
+        <div class="config-section">
+            <div class="form-row">
+                <label>URL API:</label>
+                <input type="text" id="api-url" value="http://127.0.0.1:8000">
+            </div>
+            <div class="form-row">
+                <label>Username:</label>
+                <input type="text" id="username-input" placeholder="Введите username" value="">
+            </div>
+            <div class="form-row">
+                <button onclick="testApiConnection()">🔗 Тест соединения с API</button>
+                <button onclick="clearLog()">🗑️ Очистить лог</button>
+            </div>
+        </div>
+
+        <h2>Форма поиска</h2>
+        <form id="search-form">
+            <div class="form-row">
+                <input type="text" id="callsign-input" placeholder="Введите позывной" value="TEST">
+                <button type="submit">🔍 Найти</button>
+            </div>
+        </form>
+
+        <h2>Лог событий</h2>
+        <div class="log" id="log"></div>
+
+        <h2>Результат</h2>
+        <div id="result-area">Результаты будут здесь...</div>
+    </div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        const resultArea = document.getElementById('result-area');
+        const apiUrlInput = document.getElementById('api-url');
+        const callsignInput = document.getElementById('callsign-input');
+        const searchForm = document.getElementById('search-form');
+
+        function log(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<strong>[${time}]</strong> ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function clearLog() {
+            logDiv.innerHTML = '';
+            log('Лог очищен', 'info');
+        }
+
+        function getApiUrl() {
+            return apiUrlInput.value.replace(/\/$/, '');
+        }
+
+        async function testApiConnection() {
+            log('Начинаю тест соединения с API...', 'info');
+            const url = getApiUrl();
+            log(`URL: ${url}/api/v1/public/qso-search/?callsign=TEST`, 'info');
+
+            try {
+                const response = await fetch(`${url}/api/v1/public/qso-search/?callsign=TEST`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Статус ответа: ${response.status} ${response.statusText}`, 'info');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                log(`Данные получены: ${JSON.stringify(data, null, 2)}`, 'success');
+                resultArea.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+            } catch (error) {
+                log(`Ошибка: ${error.message}`, 'error');
+                resultArea.innerHTML = `<div style="color: red;">Ошибка: ${error.message}</div>`;
+            }
+        }
+
+        searchForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const callsign = callsignInput.value.trim().toUpperCase();
+            log(`Отправка формы. Позывной: "${callsign}"`, 'info');
+
+            if (!callsign) {
+                log('Ошибка: позывной не введён', 'error');
+                alert('Введите позывной');
+                return;
+            }
+
+            const callsignRegex = /^[A-Z0-9\/]+$/;
+            if (!callsignRegex.test(callsign)) {
+                log(`Ошибка: неверный формат позывного "${callsign}"`, 'error');
+                alert('Неверный формат позывного');
+                return;
+            }
+
+            log(`Позывной "${callsign}" прошёл валидацию`, 'success');
+
+            const url = getApiUrl();
+            const fullUrl = `${url}/api/v1/public/qso-search/?callsign=${encodeURIComponent(callsign)}`;
+            log(`Запрос к: ${fullUrl}`, 'info');
+
+            resultArea.innerHTML = '<div>⏳ Поиск...</div>';
+
+            try {
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                log(`Статус ответа: ${response.status} ${response.statusText}`, 'info');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(`Ответ получен: ${JSON.stringify(data)}`, 'success');
+
+                displayResults(data);
+
+            } catch (error) {
+                log(`Ошибка поиска: ${error.message}`, 'error');
+                resultArea.innerHTML = `<div style="color: red; padding: 15px; background: #ffe6e6;">
+                    ❌ Ошибка: ${error.message}
+                </div>`;
+            }
+        });
+
+        function displayResults(data) {
+            log('Отображение результатов...', 'info');
+
+            if (!data.found) {
+                const message = data.message || 'Ничего не найдено';
+                log(`Результат: ничего не найдено для "${data.callsign}"`, 'info');
+                resultArea.innerHTML = `
+                    <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; text-align: center; font-weight: bold;">
+                        📭 Для позывного <strong>${data.callsign || ''}</strong> ${message}
+                    </div>
+                `;
+                return;
+            }
+
+            if (!data.results || data.results.length === 0) {
+                log('Результат: data.found=true, но results пуст', 'error');
+                resultArea.innerHTML = `
+                    <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; text-align: center; font-weight: bold;">
+                        📭 Для позывного <strong>${data.callsign}</strong> ничего не найдено
+                    </div>
+                `;
+                return;
+            }
+
+            log(`Найдено ${data.results.length} записей`, 'success');
+
+            // Собираем все уникальные модуляции
+            const allModes = new Set();
+            data.results.forEach(result => {
+                Object.keys(result.modes).forEach(mode => allModes.add(mode));
+            });
+            const sortedModes = Array.from(allModes).sort();
+            log(`Модуляции: ${sortedModes.join(', ')}`, 'info');
+
+            // Создаем таблицу
+            let html = `
+                <table style="width: 100%; border-collapse: collapse; background: white;">
+                    <thead>
+                        <tr style="background: #0066cc; color: white;">
+                            <th style="padding: 10px; text-align: left;">Мой позывной</th>
+                            ${sortedModes.map(mode => `<th style="padding: 10px; text-align: left;">${mode}</th>`).join('')}
+                            <th style="padding: 10px; text-align: left;">Всего</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.results.forEach(result => {
+                const totalQSO = Object.values(result.modes).reduce((a, b) => a + b, 0);
+                html += `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;"><strong>${result.my_callsign}</strong></td>
+                        ${sortedModes.map(mode => {
+                            const count = result.modes[mode] || 0;
+                            return count > 0
+                                ? `<td style="padding: 10px;"><span style="background: #e6f3ff; padding: 2px 8px; border-radius: 12px; font-weight: bold; color: #0066cc;">${count}</span></td>`
+                                : '<td style="padding: 10px;">-</td>';
+                        }).join('')}
+                        <td style="padding: 10px;"><strong>${totalQSO}</strong></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                <p style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                    ✅ Найдено QSO для позывного <strong>${data.callsign}</strong>
+                </p>
+            `;
+
+            resultArea.innerHTML = html;
+            log('Результаты отображены', 'success');
+        }
+
+        // Инициализация
+        window.addEventListener('load', function() {
+            log('Страница загружена', 'info');
+            log(`Текущий URL: ${window.location.href}`, 'info');
+            log(`API URL: ${getApiUrl()}`, 'info');
+            callsignInput.focus();
+        });
+
+        // Логирование всех событий формы
+        callsignInput.addEventListener('input', function(e) {
+            log(`Ввод в поле: "${e.target.value}"`, 'info');
+        });
+
+        callsignInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                log('Нажат Enter', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

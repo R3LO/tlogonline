@@ -25,7 +25,7 @@ from .views.api import (
 )
 from rest_framework.routers import DefaultRouter
 from .views.rest_api import QSOViewSet
-from .views.rest_api import ProfileAPIView, UserInfoAPIView
+from .views.rest_api import ProfileAPIView, UserInfoAPIView, PublicQSOSearchAPIView
 
 # Router для ViewSet
 router = DefaultRouter()
@@ -105,5 +105,7 @@ urlpatterns = [
     path('api/v1/', include(router.urls)),
     path('api/v1/profile/', ProfileAPIView.as_view(), name='rest_profile'),
     path('api/v1/user-info/', UserInfoAPIView.as_view(), name='rest_user_info'),
+    # Публичный API для внешних сайтов (без аутентификации)
+    path('api/v1/public/qso-search/', PublicQSOSearchAPIView.as_view(), name='public_qso_search'),
     re_path(r'^(?P<callsign>[A-Za-z0-9/]+)/$', logbook_search, name='logbook_search'),
 ]

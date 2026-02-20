@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'tlog',
     'log_online',
 ]
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -169,6 +171,45 @@ REST_FRAMEWORK = {
 CSRF_TRUSTED_ORIGINS = [
     'https://tlogonline.com',
     'http://localhost',
+    'http://localhost:8080',
     'http://127.0.0.1',
+    'http://127.0.0.1:8080',
     'http://192.168.31.5',
+]
+
+# CORS settings для публичного API
+CORS_ALLOW_ALL_ORIGINS = True  # Для тестирования. В production используйте CORS_ALLOWED_ORIGINS
+
+CORS_ALLOWED_ORIGINS = [
+    'https://qrz.com',
+    'https://www.qrz.com',
+    'http://localhost',
+    'http://localhost:8080',
+    'http://127.0.0.1',
+    'http://127.0.0.1:8080',
+]
+
+CORS_ALLOW_CREDENTIALS = False  # Должно быть False при CORS_ALLOW_ALL_ORIGINS = True
+
+# Разрешаем только GET запросы для публичного API
+CORS_ALLOW_METHODS = [
+    'GET',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Отключаем CSRF для публичного API
+CSRF_EXEMPT_URLS = [
+    r'^api/v1/public/',
 ]

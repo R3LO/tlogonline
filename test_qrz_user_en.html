@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QSO Search Form Test (by owner_callsign)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .config-section {
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .config-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .config-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .config-row label {
+            font-weight: bold;
+            min-width: 150px;
+        }
+        .config-row input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .test-btn:hover {
+            background: #218838;
+        }
+        .divider {
+            border: none;
+            border-top: 2px solid #ddd;
+            margin: 30px 0;
+        }
+        .api-status {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .api-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .api-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .api-status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .api-response {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        /* Search form styles (as on QRZ.com) */
+        #tlog-search-container {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        #tlog-search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        #tlog-callsign-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #tlog-search-btn {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #tlog-search-btn:hover {
+            background: #0052a3;
+        }
+        #tlog-search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #tlog-result {
+            margin-top: 20px;
+        }
+        #tlog-result-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #tlog-result-table th,
+        #tlog-result-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        #tlog-result-table th {
+            background: #0066cc;
+            color: white;
+            font-weight: bold;
+        }
+        #tlog-result-table tr:hover {
+            background: #f9f9f9;
+        }
+        .mode-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #007bff;
+            color: white;
+        }
+        .mode-badge.CW { background: #28a745; }
+        .mode-badge.SSB { background: #17a2b8; }
+        .mode-badge.FT8 { background: #ffc107; color: #333; }
+        .mode-badge.FT4 { background: #fd7e14; }
+        .mode-badge.AM { background: #6c757d; }
+        .mode-badge.FM { background: #6c757d; }
+        .mode-badge.PSK31 { background: #6f42c1; }
+        .mode-badge.RTTY { background: #6f42c1; }
+        .mode-badge.JT65 { background: #e83e8c; }
+        .mode-badge.SSTV { background: #e83e8c; }
+        .mode-badge.DIGITAL { background: #6610f2; }
+        #tlog-loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        #tlog-error {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        #tlog-not-found {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .tlog-title {
+            color: #0066cc;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box h4 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 QSO Search Form Test (by owner_callsign)</h1>
+        <p class="subtitle">Testing API with owner_callsign filtering</p>
+
+        <!-- Configuration section -->
+        <div class="config-section">
+            <h3>⚙️ Configuration</h3>
+            <div class="config-row">
+                <label for="api-url">Server URL:</label>
+                <input type="text" id="api-url" value="http://127.0.0.1:8000" placeholder="https://tlogonline.com">
+            </div>
+            <div class="config-row">
+                <label for="owner-callsign">Owner Callsign:</label>
+                <input type="text" id="owner-callsign" value="R3LO" placeholder="Owner callsign (e.g., R3LO)">
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testConnection()">🔗 Test Connection</button>
+                <button class="test-btn" onclick="testWithExample()">📊 Test with Example</button>
+            </div>
+            <div id="api-status" class="api-status" style="display: none;"></div>
+            <div id="api-response" class="api-response" style="display: none;"></div>
+        </div>
+
+        <div class="info-box">
+            <h4>ℹ️ How it works:</h4>
+            <ul>
+                <li><strong>owner_callsign:</strong> page owner's callsign (e.g., R3LO) - used to get user_id from RadioProfile</li>
+                <li><strong>search_callsign:</strong> correspondent's callsign that user searches (entered in form)</li>
+                <li>API searches QSO only for specific user_id</li>
+            </ul>
+        </div>
+
+        <hr class="divider">
+
+        <h2 style="text-align: center; color: #333;">📻 Search Form (as on QRZ.com)</h2>
+
+        <!-- Search form (as on QRZ.com) -->
+        <div id="tlog-search-container">
+            <style>
+                #tlog-search-container {
+                    background: #f5f5f5;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                }
+                #tlog-search-form {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    flex-wrap: wrap;
+                }
+                #tlog-callsign-input {
+                    flex: 1;
+                    min-width: 200px;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    font-size: 14px;
+                }
+                #tlog-search-btn {
+                    padding: 10px 20px;
+                    background: #0066cc;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                #tlog-search-btn:hover {
+                    background: #0052a3;
+                }
+                #tlog-search-btn:disabled {
+                    background: #ccc;
+                    cursor: not-allowed;
+                }
+                #tlog-result {
+                    margin-top: 20px;
+                }
+                #tlog-result-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+                #tlog-result-table th,
+                #tlog-result-table td {
+                    padding: 10px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }
+                #tlog-result-table th {
+                    background: #0066cc;
+                    color: white;
+                    font-weight: bold;
+                }
+                #tlog-result-table tr:hover {
+                    background: #f9f9f9;
+                }
+                .tlog-mode-count {
+                    background: #e6f3ff;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-weight: bold;
+                    color: #0066cc;
+                }
+                #tlog-loading {
+                    text-align: center;
+                    padding: 20px;
+                    color: #666;
+                }
+                #tlog-error {
+                    background: #ffe6e6;
+                    color: #cc0000;
+                    padding: 10px;
+                    border-radius: 4px;
+                    margin-top: 10px;
+                }
+                #tlog-not-found {
+                    background: #fff3cd;
+                    color: #856404;
+                    padding: 15px;
+                    border-radius: 4px;
+                    text-align: center;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                .tlog-title {
+                    color: #0066cc;
+                    margin-bottom: 15px;
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                }
+            </style>
+
+            <div class="tlog-title">📻 Check QSO in my log</div>
+
+            <form id="tlog-search-form">
+                <input
+                    type="text"
+                    id="tlog-callsign-input"
+                    placeholder="Enter your callsign"
+                    maxlength="20"
+                />
+                <button type="submit" id="tlog-search-btn">Search</button>
+            </form>
+
+            <div id="tlog-result"></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="info-box">
+            <h4>📋 Testing example:</h4>
+            <ol>
+                <li>Owner Callsign: <strong>R3LO</strong></li>
+                <li>Search Callsign: <strong>GJ0KYZ</strong></li>
+                <li>Click "Search"</li>
+                <li>You should see all QSO R3LO with GJ0KYZ</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TESTING FUNCTIONS ====================
+
+        function getApiBaseUrl() {
+            return document.getElementById('api-url').value.replace(/\/$/, '');
+        }
+
+        function getOwnerCallsign() {
+            return document.getElementById('owner-callsign').value.trim().toUpperCase();
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.className = `api-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        function showResponse(data) {
+            const responseDiv = document.getElementById('api-response');
+            responseDiv.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+            responseDiv.style.display = 'block';
+        }
+
+        async function testConnection() {
+            const baseUrl = getApiBaseUrl();
+            const ownerCallsign = getOwnerCallsign();
+            showStatus('loading', '🔍 Testing connection...');
+
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=TEST`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('success', '✅ Connection successful!');
+                    showResponse(data);
+                } else {
+                    showStatus('error', `❌ Server error: ${response.status}`);
+                    showResponse(data);
+                }
+            } catch (error) {
+                showStatus('error', `❌ Connection error: ${error.message}`);
+                showResponse(error.toString());
+            }
+        }
+
+        async function testWithExample() {
+            const baseUrl = getApiBaseUrl();
+            const ownerCallsign = getOwnerCallsign();
+            showStatus('loading', '📊 Testing with example...');
+
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=GJ0KYZ`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const message = data.found
+                        ? `✅ QSO found: ${data.owner_callsign} <-> ${data.search_callsign}`
+                        : `✅ API works (not found)`;
+                    showStatus('success', message);
+                    showResponse(data);
+                } else {
+                    showStatus('error', `❌ Error: ${response.status}`);
+                    showResponse(data);
+                }
+            } catch (error) {
+                showStatus('error', `❌ Error: ${error.message}`);
+                showResponse(error.toString());
+            }
+        }
+
+        // ==================== SEARCH FORM (as on QRZ.com) ====================
+
+        (function() {
+            const form = document.getElementById('tlog-search-form');
+            const input = document.getElementById('tlog-callsign-input');
+            const button = document.getElementById('tlog-search-btn');
+            const resultDiv = document.getElementById('tlog-result');
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const searchCallsign = input.value.trim().toUpperCase();
+                const ownerCallsign = getOwnerCallsign();
+
+                if (!searchCallsign) {
+                    showError('Please enter your callsign');
+                    return;
+                }
+
+                showLoading();
+                button.disabled = true;
+
+                const baseUrl = getApiBaseUrl();
+
+                try {
+                    const response = await fetch(
+                        `${baseUrl}/api/v1/public/qso-search/?owner_callsign=${encodeURIComponent(ownerCallsign)}&search_callsign=${encodeURIComponent(searchCallsign)}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    displayResults(data);
+
+                    // Show result in testing section
+                    showStatus('success', `✅ Search complete: ${ownerCallsign} <-> ${searchCallsign}`);
+                    showResponse(data);
+
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showError(`Search error: ${error.message}. Please check your connection.`);
+                    showStatus('error', `❌ Search error: ${error.message}`);
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+            function showLoading() {
+                resultDiv.innerHTML = '<div id="tlog-loading">⏳ Searching...</div>';
+            }
+
+            function showError(message) {
+                resultDiv.innerHTML = `<div id="tlog-error">❌ ${message}</div>`;
+            }
+
+            function displayResults(data) {
+                if (!data.found) {
+                    const message = data.message || 'Not found';
+                    resultDiv.innerHTML = `
+                        <div id="tlog-not-found">
+                            📭 No QSO found for callsign <strong>${data.search_callsign || ''}</strong> in log of <strong>${data.owner_callsign || ''}</strong>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!data.results || data.results.length === 0) {
+                    resultDiv.innerHTML = `
+                        <div id="tlog-not-found">
+                            📭 No QSO found for callsign <strong>${data.search_callsign}</strong> in log of <strong>${data.owner_callsign}</strong>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Collect all unique bands/satellites
+                const allBands = new Set();
+                data.results.forEach(result => {
+                    Object.keys(result.bands).forEach(band => allBands.add(band));
+                });
+
+                // Sort bands: numeric first, then SAT, then others
+                const sortedBands = Array.from(allBands).sort((a, b) => {
+                    // SAT bands go last
+                    if (a.startsWith('SAT:') && !b.startsWith('SAT:')) return 1;
+                    if (!a.startsWith('SAT:') && b.startsWith('SAT:')) return -1;
+
+                    // Extract numeric value for regular bands
+                    const aNum = parseInt(a.replace('m', ''));
+                    const bNum = parseInt(b.replace('m', ''));
+
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return aNum - bNum; // Ascending for bands
+                    }
+
+                    // For SAT, sort by satellite name
+                    if (a.startsWith('SAT:') && b.startsWith('SAT:')) {
+                        return a.localeCompare(b);
+                    }
+
+                    // Fallback to alphabetical
+                    return a.localeCompare(b);
+                });
+
+                // Create table
+                let html = `
+                    <table id="tlog-result-table">
+                        <thead>
+                            <tr>
+                                <th>My Callsign</th>
+                                ${sortedBands.map(band => {
+                                    if (band.startsWith('SAT:')) {
+                                        const satName = band.replace('SAT:', '');
+                                        return `<th>SAT<br><small>${satName}</small></th>`;
+                                    }
+                                    return `<th>${band}</th>`;
+                                }).join('')}
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.results.forEach(result => {
+                    const totalQSO = Object.values(result.bands).reduce(
+                        (sum, modes) => sum + Object.values(modes).reduce((a, b) => a + b, 0),
+                        0
+                    );
+
+                    html += `<tr><td><strong>${result.my_callsign}</strong></td>`;
+
+                    sortedBands.forEach(band => {
+                        const modes = result.bands[band];
+                        if (modes && Object.keys(modes).length > 0) {
+                            // Sort modes alphabetically and create badges
+                            const sortedModes = Object.keys(modes).sort();
+                            const modeBadges = sortedModes.map(mode => {
+                                const modeClass = mode.replace(/[^a-zA-Z0-9]/g, '');
+                                return `<span class="mode-badge ${modeClass}">${mode}</span>`;
+                            }).join(' ');
+                            html += `<td>${modeBadges}</td>`;
+                        } else {
+                            html += '<td>-</td>';
+                        }
+                    });
+
+                    html += `<td><strong>${totalQSO}</strong></td></tr>`;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                        ✅ QSO found for callsign <strong>${data.search_callsign}</strong> in log of <strong>${data.owner_callsign}</strong>
+                    </p>
+                `;
+
+                resultDiv.innerHTML = html;
+            }
+
+            // Auto-focus on input field on load
+            window.addEventListener('load', function() {
+                input.focus();
+            });
+
+            // Handle Enter key
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
