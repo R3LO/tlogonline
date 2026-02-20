@@ -90,6 +90,11 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        #tlog-result-table th:last-child,
+        #tlog-result-table td:last-child {
+            border-right: none;
         }
         #tlog-result-table th {
             background: #0066cc;
@@ -337,9 +342,10 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
         input.focus();
     });
 
-    // Handle Enter key
-    input.addEventListener('keypress', function(e) {
+    // Handle Enter key - use keydown for better compatibility
+    input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
+            e.preventDefault();
             form.dispatchEvent(new Event('submit'));
         }
     });

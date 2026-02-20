@@ -172,6 +172,11 @@
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        #tlog-result-table th:last-child,
+        #tlog-result-table td:last-child {
+            border-right: none;
         }
         #tlog-result-table th {
             background: #0066cc;
@@ -671,9 +676,11 @@
                 input.focus();
             });
 
-            // Handle Enter key
-            input.addEventListener('keypress', function(e) {
+            // Handle Enter key - prevent default form submission
+            input.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Manually trigger the form submit handler
                     form.dispatchEvent(new Event('submit'));
                 }
             });
