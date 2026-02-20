@@ -102,12 +102,18 @@
             text-align: center;
             margin-top: 20px;
         }
-        .back-link a {
-            color: #0066cc;
-            text-decoration: none;
+        .back-link button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
         }
-        .back-link a:hover {
-            text-decoration: underline;
+        .back-link button:hover {
+            background: #0055a5;
         }
         small {
             font-size: 10px;
@@ -168,7 +174,7 @@
         {% endif %}
 
         <div class="back-link">
-            <a href="javascript:history.back()">← Back to previous page</a>
+            <button onclick="history.back()">← Back to previous page</button>
         </div>
     </div>
 </body>
