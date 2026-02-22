@@ -56,6 +56,7 @@ class QSO(models.Model):
             ('PSK63', 'PSK63'),
             ('FT8', 'FT8'),
             ('FT4', 'FT4'),
+            ('FT2', 'FT2'),
             ('JT65', 'JT65'),
             ('JT9', 'JT9'),
             ('SSTV', 'SSTV'),

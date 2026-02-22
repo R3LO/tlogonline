@@ -501,8 +501,8 @@ def parse_adif_record(record):
             mode_mapping = {
                 'SSB': 'SSB', 'CW': 'CW', 'FM': 'FM', 'AM': 'AM', 'RTTY': 'RTTY',
                 'PSK31': 'PSK31', 'PSK63': 'PSK63', 'FT8': 'FT8', 'FT4': 'FT4',
-                'JT65': 'JT65', 'JT9': 'JT9', 'SSTV': 'SSTV', 'JS8': 'JS8',
-                'MSK144': 'MSK144', 'MFSK': 'MFSK'
+                'FT2': 'FT2', 'JT65': 'JT65', 'JT9': 'JT9', 'SSTV': 'SSTV',
+                'JS8': 'JS8', 'MSK144': 'MSK144', 'MFSK': 'MFSK'
             }
             data['mode'] = mode_mapping.get(mode_value, 'SSB')
         elif tag_name == 'submode':
