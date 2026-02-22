@@ -121,6 +121,7 @@ Copy all the code below and paste it into the "Bio" field of your QRZ.com profil
         .mode-badge.SSB { background: #17a2b8; }
         .mode-badge.FT8 { background: #ffc107; color: #333; }
         .mode-badge.FT4 { background: #fd7e14; }
+        .mode-badge.FT2 { background: #e67e22; }
         .mode-badge.AM { background: #6c757d; }
         .mode-badge.FM { background: #6c757d; }
         .mode-badge.PSK31 { background: #6f42c1; }

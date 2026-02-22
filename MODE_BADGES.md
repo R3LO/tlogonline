@@ -26,6 +26,7 @@ Each mode now has its own color:
 | SSB | Cyan | #17a2b8 |
 | FT8 | Yellow | #ffc107 |
 | FT4 | Orange | #fd7e14 |
+| FT2 | Dark Orange | #e67e22 |
 | AM | Gray | #6c757d |
 | FM | Gray | #6c757d |
 | PSK31 | Purple | #6f42c1 |
@@ -66,6 +67,7 @@ Each mode now has its own color:
 .mode-badge.SSB { background: #17a2b8; }
 .mode-badge.FT8 { background: #ffc107; color: #333; }
 .mode-badge.FT4 { background: #fd7e14; }
+.mode-badge.FT2 { background: #e67e22; }
 .mode-badge.AM { background: #6c757d; }
 .mode-badge.FM { background: #6c757d; }
 .mode-badge.PSK31 { background: #6f42c1; }
