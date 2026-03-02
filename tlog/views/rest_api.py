@@ -341,12 +341,27 @@ def public_qso_search_html(request):
     error = None
     all_bands = []
 
+    # Статистика по базе
+    total_qso = 0
+    last_upload = None
+
     if owner_callsign and search_callsign:
         # Ищем RadioProfile по позывному владельца
         try:
             radio_profile = RadioProfile.objects.get(callsign__iexact=owner_callsign)
             user = radio_profile.user
 
+            # Сбор статистики по базе tlog_qso для пользователя
+            all_user_qsos = QSO.objects.filter(user=user)
+            total_qso = all_user_qsos.count()
+            
+            # Последнее обновление (created_at)
+            last_qso = all_user_qsos.order_by('-created_at').first()
+            if last_qso and last_qso.created_at:
+                last_upload = last_qso.created_at.strftime('%Y-%m-%d')
+            else:
+                last_upload = 'N/A'
+            
             # Ищем QSO
             qsos = QSO.objects.filter(
                 callsign__iexact=search_callsign,
@@ -437,4 +452,6 @@ def public_qso_search_html(request):
         'results': results,
         'all_bands': all_bands,
         'error': error,
+        'total_qso': total_qso,
+        'last_upload': last_upload,
     })
