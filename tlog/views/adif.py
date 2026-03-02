@@ -205,14 +205,17 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
 
     # Предварительная загрузка существующих QSO пользователя для проверки дубликатов
     # Словарь: ключ -> (id, lotw)
+    # Ключ составляется так же, как при создании QSO: my_callsign (или user_callsign если пустой) + callsign + date + mode + band
     existing_qsos = {}
     try:
         existing_db = QSO.objects.filter(user=user).values_list(
             'my_callsign', 'callsign', 'date', 'mode', 'band', 'id', 'lotw'
         )
         for item in existing_db:
+            # Если my_callsign пустой, используем user_callsign (так же как при создании QSO)
+            my_callsign_for_cache = item[0] if item[0] else user_callsign
             key = (
-                str(item[0]).upper() if item[0] else '',
+                str(my_callsign_for_cache).upper() if my_callsign_for_cache else '',
                 str(item[1]).upper() if item[1] else '',
                 item[2],
                 str(item[3]).upper() if item[3] else '',
@@ -237,13 +240,32 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
                     band_qso = qso_data.get('band', '').strip().upper()[:10]
                     mode_qso = qso_data.get('mode', 'SSB').upper()
 
+                    # Определяем my_callsign для проверки дубликатов (та же логика, что при создании QSO)
+                    # MY_CALLSIGN - приоритет: форма(если галочка) > OPERATOR > MY_CALLSIGN > профиль
+                    my_callsign_adif = qso_data.get('my_callsign', '').strip().upper()[:20]
+                    operator_adif = qso_data.get('operator', '').strip().upper()[:20]
+
+                    # Используем тот же my_callsign, который будет записан в QSO
+                    if add_extra_tags and my_callsign_default:
+                        my_callsign_for_check = my_callsign_default.upper()[:20]
+                    elif operator_adif:
+                        my_callsign_for_check = operator_adif
+                    elif my_callsign_adif:
+                        my_callsign_for_check = my_callsign_adif
+                    else:
+                        my_callsign_for_check = user_callsign.upper() if user_callsign else ''
+
+                    # Нормализуем band и mode для корректного сравнения
+                    band_for_check = band_qso.strip().upper() if band_qso else ''
+                    mode_for_check = mode_qso.strip().upper() if mode_qso else 'SSB'
+
                     # Быстрая проверка дубликатов через кэш
                     dup_key = (
-                        user_callsign.upper() if user_callsign else '',
+                        my_callsign_for_check,
                         callsign_qso,
                         date_qso,
-                        mode_qso,
-                        band_qso
+                        mode_for_check,
+                        band_for_check
                     )
 
                     if dup_key in existing_qsos:
@@ -425,7 +447,27 @@ def process_adif_file(file_path, user, adif_upload_id=None, my_callsign_default=
         if qso_objects:
             try:
                 with transaction.atomic():
+                    # Получаем реально добавленное количество (без дубликатов)
+                    # Сначала создаём записи, затем проверяем сколько реально добавилось
                     QSO.objects.bulk_create(qso_objects, batch_size=100, ignore_conflicts=True)
+                    
+                    # Обновляем кэш existing_qsos добавленными записями
+                    # Это предотвращает дубликаты в пределах одного файла
+                    for qso_obj in qso_objects:
+                        if qso_obj.callsign and qso_obj.date:
+                            # Используем тот же my_callsign, который записывается в БД
+                            my_callsign_for_cache = qso_obj.my_callsign if qso_obj.my_callsign else user_callsign
+                            cache_key = (
+                                str(my_callsign_for_cache).upper() if my_callsign_for_cache else '',
+                                str(qso_obj.callsign).upper() if qso_obj.callsign else '',
+                                qso_obj.date,
+                                str(qso_obj.mode).upper() if qso_obj.mode else 'SSB',
+                                str(qso_obj.band).upper() if qso_obj.band else ''
+                            )
+                            # Добавляем в кэш без ID (пока неизвестен) и без lotw
+                            if cache_key not in existing_qsos:
+                                existing_qsos[cache_key] = {'id': None, 'lotw': 'N'}
+                    
                     qso_count += len(qso_objects)
             except Exception:
                 error_count += len(qso_objects)
