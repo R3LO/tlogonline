@@ -371,35 +371,87 @@ def public_qso_search_html(request):
             if qsos.exists():
                 found = True
 
-                # Группируем по my_callsign, затем по band/sat_name, затем по mode
-                results_dict = {}
-                for qso in qsos:
-                    my_callsign = qso.my_callsign or 'UNKNOWN'
-                    mode = qso.mode or 'UNKNOWN'
+                # Получаем все QSO с полным набором полей
+                qsos_list = qsos.order_by('-date', '-time')
 
-                    # Определяем ключ для диапазона/спутника
+                # Формируем детальные результаты для каждого QSO
+                results = []
+                for qso in qsos_list:
+                    # Форматируем дату и время
+                    date_str = qso.date.strftime('%d.%m.%Y') if qso.date else '-'
+                    time_str = qso.time.strftime('%H:%M') if qso.time else '-'
+
+                    # Определяем диапазон
+                    band_display = qso.band or '-'
                     if qso.sat_name:
-                        band_key = f"SAT:{qso.sat_name}"
-                    else:
-                        band_key = qso.band or 'UNKNOWN'
+                        band_display = 'SAT'
 
-                    if my_callsign not in results_dict:
-                        results_dict[my_callsign] = {}
+                    # Частота
+                    freq_display = f"{qso.frequency:.3f}" if qso.frequency else '-'
 
-                    if band_key not in results_dict[my_callsign]:
-                        results_dict[my_callsign][band_key] = {}
+                    # RST
+                    rst_sent = qso.rst_sent or '-'
+                    rst_rcvd = qso.rst_rcvd or '-'
 
-                    if mode not in results_dict[my_callsign][band_key]:
-                        results_dict[my_callsign][band_key][mode] = 0
+                    # QTH локаторы
+                    my_gridsquare = qso.my_gridsquare or '-'
+                    gridsquare = qso.gridsquare or '-'
 
-                    results_dict[my_callsign][band_key][mode] += 1
+                    # Континент и регион
+                    continent = qso.continent or '-'
+                    state = qso.state or '-'
 
-                # Собираем все уникальные bands
+                    # Propagation mode
+                    prop_mode = qso.prop_mode or '-'
+
+                    # DXCC и зоны
+                    dxcc = qso.dxcc or '-'
+                    cqz = str(qso.cqz) if qso.cqz else '-'
+                    ituz = str(qso.ituz) if qso.ituz else '-'
+
+                    # Дополнительные поля
+                    iota = qso.iota or '-'
+                    vucc_grids = qso.vucc_grids or '-'
+                    r150s = qso.r150s or '-'
+
+                    # Подтверждения
+                    lotw = qso.lotw or '-'
+                    paper_qsl = qso.paper_qsl or '-'
+
+                    results.append({
+                        'my_callsign': qso.my_callsign or '-',
+                        'callsign': qso.callsign or '-',
+                        'date': date_str,
+                        'time': time_str,
+                        'frequency': freq_display,
+                        'band': band_display,
+                        'sat_name': qso.sat_name or '-',
+                        'mode': qso.mode or '-',
+                        'rst_sent': rst_sent,
+                        'rst_rcvd': rst_rcvd,
+                        'my_gridsquare': my_gridsquare,
+                        'gridsquare': gridsquare,
+                        'continent': continent,
+                        'state': state,
+                        'prop_mode': prop_mode,
+                        'dxcc': dxcc,
+                        'cqz': cqz,
+                        'ituz': ituz,
+                        'iota': iota,
+                        'vucc_grids': vucc_grids,
+                        'r150s': r150s,
+                        'lotw': lotw,
+                        'paper_qsl': paper_qsl,
+                    })
+
+                # Для обратной совместимости - список всех диапазонов
                 all_bands_set = set()
-                for my_callsign, bands in results_dict.items():
-                    all_bands_set.update(bands.keys())
+                for qso in qsos_list:
+                    if qso.sat_name:
+                        all_bands_set.add(f"SAT:{qso.sat_name}")
+                    elif qso.band:
+                        all_bands_set.add(qso.band)
 
-                # Сортируем bands
                 def sort_bands(band):
                     if band.startswith('SAT:'):
                         return (2, band[4:])
@@ -410,34 +462,6 @@ def public_qso_search_html(request):
                         return (1, band)
 
                 all_bands = sorted(all_bands_set, key=sort_bands)
-
-                # Преобразуем в список и сортируем
-                results = []
-                for my_callsign, bands in results_dict.items():
-                    total = sum(sum(modes.values()) for modes in bands.values())
-
-                    # Создаем список для каждого band с modes
-                    bands_data = []
-                    for band in all_bands:
-                        if band in bands:
-                            modes_list = sorted(bands[band].keys())
-                            bands_data.append({
-                                'band': band,
-                                'modes': modes_list
-                            })
-                        else:
-                            bands_data.append({
-                                'band': band,
-                                'modes': []
-                            })
-
-                    results.append({
-                        'my_callsign': my_callsign,
-                        'bands_data': bands_data,
-                        'total': total
-                    })
-
-                results.sort(key=lambda x: x['total'], reverse=True)
             else:
                 found = False
         except RadioProfile.DoesNotExist:

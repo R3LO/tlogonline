@@ -1,197 +1,348 @@
 {% load custom_filters %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QSO Search Results</title>
+    <title>QSL Card - {{ owner_callsign }}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500&display=swap');
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             padding: 20px;
-            background: #f5f5f5;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 30px;
+
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 900px;
         }
-        h1 {
-            color: #333;
+
+        .qsl-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 20px;
+            box-shadow:
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 0 0 3px #e94560,
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, #e94560 0%, #0f3460 100%);
+            padding: 25px 20px;
             text-align: center;
-            margin-bottom: 30px;
+            position: relative;
         }
-        .error {
+
+        .header-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: 400;
+        }
+
+        .my-callsign {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 3px;
+        }
+
+        .search-info {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .search-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .search-info strong {
+            color: #e94560;
+        }
+
+        .qso-info {
+            padding: 20px;
+        }
+
+        .qso-count {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #0f3460;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .qso-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .qso-table thead {
+            background: linear-gradient(90deg, #0f3460 0%, #16213e 100%);
+        }
+
+        .qso-table th {
+            color: #fff;
+            padding: 10px 6px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .qso-table th:first-child {
+            width: 35px;
+        }
+
+        .qso-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #eee;
+            font-family: 'Roboto', sans-serif;
+            font-size: 11px;
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .qso-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .qso-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .qso-table tbody tr:hover {
+            background: #e8f4f8;
+        }
+
+        .their-call {
+            font-size: 12px !important;
+            color: #e94560 !important;
+            font-weight: 700 !important;
+        }
+
+        .lotw-yes {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .lotw-no {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .card-footer {
+            background: #0f3460;
+            padding: 15px;
+            text-align: center;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .qsl-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            margin-bottom: 8px;
+        }
+
+        .thank-you {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .error-message {
             background: #ffe6e6;
             color: #cc0000;
             padding: 15px;
             border-radius: 4px;
             text-align: center;
-            margin-bottom: 20px;
+            margin: 20px;
         }
-        .not-found {
+
+        .not-found-message {
             background: #fff3cd;
             color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px;
+            font-size: 16px;
+        }
+
+        .stats-container {
+            background: #f8f9fa;
             padding: 15px;
-            border-radius: 4px;
             text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
+            border-bottom: 1px solid #eee;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            border-right: 1px solid #ddd;
-        }
-        th:last-child,
-        td:last-child {
-            border-right: none;
-        }
-        th {
-            background: #0066cc;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-        }
-        td {
-            text-align: left;
-        }
-        tr:hover {
-            background: #f9f9f9;
-        }
-        .mode-badge {
+
+        .stat-item {
             display: inline-block;
-            padding: 3px 8px;
-            margin: 2px;
-            border-radius: 12px;
-            font-size: 11px;
+            margin: 0 20px;
+        }
+
+        .stat-value {
+            font-size: 24px;
             font-weight: bold;
-            background: #007bff;
-            color: white;
+            color: #0f3460;
         }
-        .mode-badge.CW { background: #28a745; }
-        .mode-badge.SSB { background: #17a2b8; }
-        .mode-badge.FT8 { background: #ffc107; color: #333; }
-        .mode-badge.FT4 { background: #fd7e14; }
-        .mode-badge.FT2 { background: #e67e22; }
-        .mode-badge.AM { background: #6c757d; }
-        .mode-badge.FM { background: #6c757d; }
-        .mode-badge.PSK31 { background: #6f42c1; }
-        .mode-badge.RTTY { background: #6f42c1; }
-        .mode-badge.JT65 { background: #e83e8c; }
-        .mode-badge.SSTV { background: #e83e8c; }
-        .mode-badge.DIGITAL { background: #6610f2; }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 4px;
-            text-align: center;
-            margin-bottom: 20px;
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .back-link {
-            text-align: center;
-            margin-top: 20px;
+
+        @media print {
+            body {
+                background: white;
+            }
+            .qsl-card {
+                box-shadow: none;
+                border: 2px solid #e94560;
+            }
         }
-        .back-link button {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        .back-link button:hover {
-            background: #0055a5;
-        }
-        small {
-            font-size: 10px;
+
+        @media (max-width: 920px) {
+            .qsl-card {
+                width: 100%;
+                max-width: 100%;
+            }
+            .my-callsign {
+                font-size: 28px;
+            }
+            .qso-table {
+                font-size: 9px;
+            }
+            .qso-table th, .qso-table td {
+                padding: 4px 2px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>QSO Search Results</h1>
+    <div class="card-container">
+        <div class="qsl-card">
+            <div class="card-header">
+                <div class="my-callsign">{{ owner_callsign|upper }}</div>
+            </div>
 
-        {# Статистика по базе tlog_qso #}
-        <div class="stats-container" style="margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-            <div class="stats-row" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
-                <div class="stat-item" style="text-align: center;">
-                    <div style="font-size: 24px; font-weight: bold; color: #0066cc;">{{ total_qso }}</div>
-                    <div style="font-size: 12px; color: #666;">Total QSO</div>
+            {% if error %}
+                <div class="error-message">
+                    <strong>Error:</strong> {{ error }}
                 </div>
-            </div>
-        </div>
+            {% elif not found %}
+                <div class="not-found-message">
+                    📭 No QSO found for callsign <strong>{{ search_callsign|upper }}</strong> in log of <strong>{{ owner_callsign|upper }}</strong>
+                </div>
+            {% else %}
+                <div class="search-info">
+                    <p>Searching for: <strong>{{ search_callsign|upper }}</strong></p>
+                </div>
 
-        {% if error %}
-            <div class="error">
-                <strong>Error:</strong> {{ error }}
-            </div>
-        {% elif not found %}
-            <div class="not-found">
-                📭 No QSO found for callsign <strong>{{ search_callsign }}</strong> in log of <strong>{{ owner_callsign }}</strong>
-            </div>
-        {% else %}
-            <div class="success">
-                ✅ QSO found for callsign <strong>{{ search_callsign }}</strong> in log of <strong>{{ owner_callsign }}</strong>
-            </div>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ total_qso }}</div>
+                        <div class="stat-label">Total QSO</div>
+                    </div>
+                </div>
 
-            {% if results %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>My Callsign</th>
-                            {% for band in all_bands %}
-                                <th>
-                                    {% if band|startswith:"SAT:" %}
-                                        SAT<br><small>{{ band|slice:"4:" }}</small>
-                                    {% else %}
-                                        {{ band }}
-                                    {% endif %}
-                                </th>
-                            {% endfor %}
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in results %}
-                            <tr>
-                                <td><strong>{{ result.my_callsign }}</strong></td>
-                                {% for band_data in result.bands_data %}
-                                    <td>
-                                        {% for mode in band_data.modes %}
-                                            <span class="mode-badge {{ mode }}">{{ mode }}</span>
-                                        {% endfor %}
-                                    </td>
+                <div class="qso-info">
+                    {% if results %}
+                        <div class="qso-count">Confirmed QSO: {{ results|length }}</div>
+                        <table class="qso-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Call</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Band</th>
+                                    <th>Mode</th>
+                                    <th>RST</th>
+                                    <th>Prop.</th>
+                                    <th>Satellite</th>
+                                    <th>My Call</th>
+                                    <th>Gridsq</th>
+                                    <th>LoTW</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for qso in results %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td class="their-call">{{ qso.callsign|upper }}</td>
+                                        <td>{{ qso.date }}</td>
+                                        <td>{{ qso.time|slice:":2" }}:xx</td>
+                                        <td>{{ qso.band }}</td>
+                                        <td>{{ qso.mode|upper }}</td>
+                                        <td>{{ qso.rst_sent }}/{{ qso.rst_rcvd }}</td>
+                                        <td>{{ qso.prop_mode }}</td>
+                                        <td>{{ qso.sat_name }}</td>
+                                        <td>{{ qso.my_callsign|upper }}</td>
+                                        <td>{{ qso.my_gridsquare }}</td>
+                                        <td>
+                                            {% if qso.lotw == 'Y' %}
+                                                <span class="lotw-yes">✓</span>
+                                            {% else %}
+                                                <span class="lotw-no">✗</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
                                 {% endfor %}
-                                <td><strong>{{ result.total }}</strong></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                {% if last_upload %}
-                <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #666;">
-                    Last Upload: {% if last_upload == 'N/A' %}Not uploaded yet{% else %}{{ last_upload }}{% endif %}
+                            </tbody>
+                        </table>
+                    {% endif %}
                 </div>
-                {% endif %}
-            {% endif %}
-        {% endif %}
 
-        <div class="back-link">
-            <button onclick="history.back()">← Back to previous page</button>
+                <div class="card-footer">
+                    <div class="qsl-badge">Thank you for all QSOs!</div>
+                    <div class="thank-you">Last upload: {{ last_upload }}</div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </body>
