@@ -355,10 +355,10 @@ def public_qso_search_html(request):
             all_user_qsos = QSO.objects.filter(user=user)
             total_qso = all_user_qsos.count()
             
-            # Последнее обновление (created_at)
-            last_qso = all_user_qsos.order_by('-created_at').first()
+            # Последнее обновление (created_at) - только для QSO без подтверждения LoTW
+            last_qso = all_user_qsos.exclude(lotw='y').order_by('-created_at').first()
             if last_qso and last_qso.created_at:
-                last_upload = last_qso.created_at.strftime('%Y-%m-%d')
+                last_upload = last_qso.created_at.strftime('%d-%m-%Y')
             else:
                 last_upload = 'N/A'
             

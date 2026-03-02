@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyd
+*.pyo
+
+# Django
+*.log
+*.log.[0-9]*
+local_settings.py
+myproject/settings.py
+settings/*local*.py
+settings/*dev*.py
+db.sqlite3
+db.sqlite3-journal
+db.sqlite3-wal
+db.sqlite3-shm
+locale/
+
+# Виртуальные окружения
+.env
+.env.*
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pythonenv/
+
+# Статика и медиа
+staticfiles/  # собранная статика
+media/
+/staticfiles
+
+# Исходные статические файлы (не игнорируем!):
+# static/  ← УБЕРИТЕ ЭТОТ ПУНКТ, ЕСЛИ НУЖНО СОХРАНИТЬ ИСХОДНИКИ
+
+# БД и кэш
+/tmp/
+/cache/
+dump.rdb
+
+# IDE и ОС
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.iml
+.editorconfig
+.fleet/
+*~
+*.bak
+
+# Фронтенд (если есть)
+node_modules/
+dist/
+build/
+*.map
+
+# Прочее
+*.so
+*.manifest
+*.spec
+*.mo
+*.pot
+*.swp
+.*.un~

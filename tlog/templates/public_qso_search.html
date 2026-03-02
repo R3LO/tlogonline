@@ -126,20 +126,14 @@
         <h1>QSO Search Results</h1>
 
         {# Статистика по базе tlog_qso #}
-        {% if last_upload %}
         <div class="stats-container" style="margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
             <div class="stats-row" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
                 <div class="stat-item" style="text-align: center;">
                     <div style="font-size: 24px; font-weight: bold; color: #0066cc;">{{ total_qso }}</div>
                     <div style="font-size: 12px; color: #666;">Total QSO</div>
                 </div>
-                <div class="stat-item" style="text-align: center;">
-                    <div style="font-size: 24px; font-weight: bold; color: #0066cc;">{% if last_upload == 'N/A' %}Not uploaded yet{% else %}{{ last_upload }}{% endif %}</div>
-                    <div style="font-size: 12px; color: #666;">Last Upload</div>
-                </div>
             </div>
         </div>
-        {% endif %}
 
         {% if error %}
             <div class="error">
@@ -187,6 +181,12 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {% if last_upload %}
+                <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #666;">
+                    Last Upload: {% if last_upload == 'N/A' %}Not uploaded yet{% else %}{{ last_upload }}{% endif %}
+                </div>
+                {% endif %}
             {% endif %}
         {% endif %}
 
