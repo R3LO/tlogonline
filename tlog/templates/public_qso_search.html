@@ -20,7 +20,7 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             padding: 20px;
         }
 
@@ -84,6 +84,10 @@
 
         .qso-info {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 300px;
         }
 
         .qso-count {
@@ -97,6 +101,8 @@
 
         .qso-table {
             width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
             border-collapse: collapse;
             background: #fff;
             border-radius: 10px;
@@ -277,6 +283,7 @@
             {% elif not found %}
                 <div class="not-found-message">
                     📭 No QSO found for callsign <strong>{{ search_callsign|upper }}</strong> in log of <strong>{{ owner_callsign|upper }}</strong>
+                    <div style="margin-top: 10px; font-size: 12px; color: #666;">Last upload: {{ last_upload }}</div>
                 </div>
             {% else %}
                 <div class="search-info">
